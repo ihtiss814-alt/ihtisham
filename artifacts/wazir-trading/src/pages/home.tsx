@@ -538,183 +538,68 @@ function ShopByBodyTypeSection() {
   );
 }
 
-/* ── Shop By Budget ──────────────────────────────────────────── */
-const BUDGET_TIERS = [
-  { label: 'Under $1,000',   price: '$1,000',  tier: 'Entry Level',    icon: 'entry',   accent: '#94A3B8', maxPrice: 1000  },
-  { label: 'Under $2,000',   price: '$2,000',  tier: 'Budget Pick',    icon: 'budget',  accent: '#38BDF8', maxPrice: 2000  },
-  { label: 'Under $3,000',   price: '$3,000',  tier: 'Popular Range',  icon: 'popular', accent: '#4ADE80', maxPrice: 3000  },
-  { label: 'Under $4,000',   price: '$4,000',  tier: 'Mid Range',      icon: 'mid',     accent: '#FBBF24', maxPrice: 4000  },
-  { label: 'Under $5,000',   price: '$5,000',  tier: 'Premium Select', icon: 'premium', accent: '#FB923C', maxPrice: 5000  },
-  { label: '$5,000 & Above', price: '$5,000+', tier: 'Luxury Tier',    icon: 'luxury',  accent: '#E879F9', minPrice: 5000  },
+/* ── Shop By Price Range ─────────────────────────────────────── */
+const PRICE_RANGES = [
+  { label: '$500 – $1,500',    min: 500,  max: 1500  },
+  { label: '$1,500 – $2,000',  min: 1500, max: 2000  },
+  { label: '$2,000 – $2,500',  min: 2000, max: 2500  },
+  { label: '$2,500 – $3,000',  min: 2500, max: 3000  },
+  { label: '$3,000 – $3,500',  min: 3000, max: 3500  },
+  { label: '$3,500 – $4,000',  min: 3500, max: 4000  },
+  { label: '$4,000 – $4,500',  min: 4000, max: 4500  },
+  { label: '$4,500 – $5,000',  min: 4500, max: 5000  },
+  { label: '$5,000 – $6,000',  min: 5000, max: 6000  },
+  { label: '$6,000 – $7,000',  min: 6000, max: 7000  },
+  { label: '$7,000 – $8,000',  min: 7000, max: 8000  },
+  { label: '$8,000 – $9,000',  min: 8000, max: 9000  },
+  { label: '$9,000 – $10,000', min: 9000, max: 10000 },
 ] as const;
 
-function BudgetIcon({ icon, color: c }: { icon: string; color: string }) {
-  const s = { stroke: c, strokeWidth: '1.8', strokeLinecap: 'round' as const, strokeLinejoin: 'round' as const, fill: 'none' };
-  const vb = '0 0 32 32';
-  const sz = { width: 28, height: 28 };
-
-  switch (icon) {
-    case 'entry':
-      // Stacked coins — three layered ellipses with side walls
-      return <svg viewBox={vb} {...sz}>
-        <path {...s} d="M6 10v5M26 10v5"/>
-        <ellipse cx="16" cy="10" rx="10" ry="4" {...s}/>
-        <path {...s} d="M6 15v4M26 15v4"/>
-        <ellipse cx="16" cy="15" rx="10" ry="4" {...s}/>
-        <path {...s} d="M6 19v4M26 19v4"/>
-        <ellipse cx="16" cy="19" rx="10" ry="4" {...s}/>
-        <ellipse cx="16" cy="23" rx="10" ry="4" {...s}/>
-      </svg>;
-
-    case 'budget':
-      // Wallet with card slot
-      return <svg viewBox={vb} {...sz}>
-        <rect x="4" y="8" width="24" height="17" rx="2.5" {...s}/>
-        <path {...s} d="M4 13h24"/>
-        <rect x="18" y="16" width="7" height="5" rx="1.5" {...s}/>
-        <circle cx="21.5" cy="18.5" r="1" fill={c}/>
-      </svg>;
-
-    case 'popular':
-      // Bar chart trending upward
-      return <svg viewBox={vb} {...sz}>
-        <rect x="3"  y="20" width="5" height="8" rx="1.5" {...s}/>
-        <rect x="10" y="14" width="5" height="14" rx="1.5" {...s}/>
-        <rect x="17" y="9"  width="5" height="19" rx="1.5" {...s}/>
-        <path {...s} d="M24 4l4-3M28 1v6M28 1h-6"/>
-        <circle cx="26" cy="3" r="1.5" fill={c}/>
-      </svg>;
-
-    case 'mid':
-      // Shield with checkmark
-      return <svg viewBox={vb} {...sz}>
-        <path {...s} d="M16 3L4 8v8c0 6.5 5.5 10.5 12 13 6.5-2.5 12-6.5 12-13V8L16 3z"/>
-        <path {...s} d="M11 16l3.5 3.5L21 13"/>
-      </svg>;
-
-    case 'premium':
-      // 5-point star
-      return <svg viewBox={vb} {...sz}>
-        <polygon
-          points="16,3 19.6,11.5 29,12.4 22.2,18.5 24.4,28 16,23.1 7.6,28 9.8,18.5 3,12.4 12.4,11.5"
-          {...s}
-        />
-      </svg>;
-
-    case 'luxury':
-      // Crown with jewel dots
-      return <svg viewBox={vb} {...sz}>
-        <path {...s} d="M4 23L7 10l5 6.5 4-9 4 9 5-6.5 3 13Z"/>
-        <path {...s} d="M4 23h24"/>
-        <circle cx="7"  cy="10" r="1.8" fill={c}/>
-        <circle cx="16" cy="7"  r="1.8" fill={c}/>
-        <circle cx="25" cy="10" r="1.8" fill={c}/>
-      </svg>;
-
-    default:
-      return <svg viewBox={vb} {...sz}><circle cx="16" cy="16" r="10" {...s}/></svg>;
-  }
-}
-
 function ShopByBudgetSection() {
-  const [, navigate] = useLocation();
-  const track = [...BUDGET_TIERS, ...BUDGET_TIERS];
-
   return (
-    <section className="py-16 overflow-hidden" style={{ background: '#0A0A0A' }}>
-      <style>{`
-        @keyframes budget-scroll {
-          0%   { transform: translateX(0); }
-          100% { transform: translateX(-50%); }
-        }
-        .budget-track {
-          animation: budget-scroll 30s linear infinite;
-          will-change: transform;
-        }
-        .budget-track:hover {
-          animation-play-state: paused;
-        }
-      `}</style>
+    <section className="py-16" style={{ background: '#0A0A0A' }}>
+      <div className="container mx-auto px-4 md:px-8">
 
-      {/* Heading */}
-      <div className="text-center mb-12 px-4">
-        <p className="text-[10px] tracking-[0.28em] uppercase font-bold text-[#C8102E] mb-2">
-          FOB Japan
-        </p>
-        <h2 className="text-2xl md:text-3xl font-serif font-bold text-white">
-          Shop by Budget
-        </h2>
-        <p className="text-white/35 text-sm mt-2 tracking-wide">
-          All prices are Free-On-Board Japan — export-ready
-        </p>
-      </div>
-
-      {/* Scrolling row */}
-      <div className="relative w-full">
-        {/* Left fade */}
-        <div className="absolute left-0 top-0 bottom-0 w-16 z-10 pointer-events-none"
-          style={{ background: 'linear-gradient(to right, #0A0A0A, transparent)' }} />
-        {/* Right fade */}
-        <div className="absolute right-0 top-0 bottom-0 w-16 z-10 pointer-events-none"
-          style={{ background: 'linear-gradient(to left, #0A0A0A, transparent)' }} />
-
-        <div className="flex budget-track gap-4 px-4" style={{ width: 'max-content' }}>
-          {track.map(({ label, price, tier, icon, accent, maxPrice, minPrice }, i) => {
-            const handleClick = () => {
-              const qs = maxPrice ? `maxPrice=${maxPrice}` : `minPrice=${minPrice}`;
-              navigate(`/cars?${qs}`);
-            };
-
-            return (
-              <button
-                key={`${tier}-${i}`}
-                onClick={handleClick}
-                className="group flex-shrink-0 flex flex-col items-center gap-4 w-[152px] py-8 px-4 rounded-2xl cursor-pointer"
-                style={{
-                  background: '#111111',
-                  border: `1px solid ${accent}28`,
-                  boxShadow: `0 2px 16px ${accent}0a`,
-                  transition: 'border 0.2s, box-shadow 0.2s, transform 0.2s',
-                }}
-                onMouseEnter={e => {
-                  const el = e.currentTarget;
-                  el.style.border    = `1px solid ${accent}70`;
-                  el.style.boxShadow = `0 8px 32px ${accent}22, inset 0 0 24px ${accent}09`;
-                  el.style.transform = 'translateY(-4px)';
-                }}
-                onMouseLeave={e => {
-                  const el = e.currentTarget;
-                  el.style.border    = `1px solid ${accent}28`;
-                  el.style.boxShadow = `0 2px 16px ${accent}0a`;
-                  el.style.transform = 'translateY(0)';
-                }}
-              >
-                {/* Icon ring */}
-                <div
-                  className="w-14 h-14 rounded-full flex items-center justify-center flex-shrink-0"
-                  style={{ background: `${accent}15`, border: `1px solid ${accent}30` }}
-                >
-                  <BudgetIcon icon={icon} color={accent} />
-                </div>
-
-                {/* Price — hero text */}
-                <div className="text-center">
-                  <div className="text-[10px] tracking-[0.18em] uppercase font-semibold text-white/30 mb-0.5">
-                    {price.endsWith('+') ? 'Starting from' : 'Under'}
-                  </div>
-                  <div className="text-2xl font-extrabold leading-none tracking-tight" style={{ color: accent }}>
-                    {price}
-                  </div>
-                </div>
-
-                {/* Tier label */}
-                <div className="text-[11px] font-bold tracking-[0.14em] uppercase text-white/50 group-hover:text-white/80 transition-colors text-center">
-                  {tier}
-                </div>
-              </button>
-            );
-          })}
+        {/* Heading */}
+        <div className="mb-10">
+          <p className="text-[10px] tracking-[0.28em] uppercase font-bold text-[#C8102E] mb-2">
+            FOB Japan
+          </p>
+          <h2 className="text-2xl md:text-3xl font-serif font-bold text-white">
+            Shop by Price Range
+          </h2>
+          <p className="text-white/35 text-sm mt-2">
+            All prices are Free-On-Board Japan — export-ready
+          </p>
         </div>
+
+        {/* Range list — two columns on md+ */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-1">
+          {PRICE_RANGES.map(({ label, min, max }) => (
+            <Link
+              key={label}
+              href={`/cars?minPrice=${min}&maxPrice=${max}`}
+              className="group flex items-center justify-between py-3.5 border-b border-white/8 hover:border-[#C8102E]/40 transition-colors duration-150"
+            >
+              <div className="flex items-center gap-3">
+                {/* Dot */}
+                <span
+                  className="w-1.5 h-1.5 rounded-full flex-shrink-0 transition-colors duration-150"
+                  style={{ background: '#C8102E33' }}
+                />
+                <span className="text-white/60 group-hover:text-white text-[15px] font-medium tracking-wide transition-colors duration-150">
+                  {label}
+                </span>
+              </div>
+              <span className="text-white/20 group-hover:text-[#C8102E] transition-colors duration-150 translate-x-0 group-hover:translate-x-1 inline-block">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M5 12h14M12 5l7 7-7 7"/>
+                </svg>
+              </span>
+            </Link>
+          ))}
+        </div>
+
       </div>
     </section>
   );
@@ -722,43 +607,105 @@ function ShopByBudgetSection() {
 
 /* ── Featured Collection ─────────────────────────────────────── */
 // PKR/USD rate — update this constant when the rate changes
-const PKR_PER_USD = 280;
+const PKR_PER_USD = 278;
 
-const COLLECTION_TABS = [
-  { id: 'all',      label: 'Japan Stock',        filter: (_: import('@/components/CarCard').Car) => true },
-  { id: 'arrivals', label: 'New Arrivals',        filter: (c: import('@/components/CarCard').Car) => !!c.is_new_arrival },
-  { id: 'clearance',label: 'Clearance',           filter: (c: import('@/components/CarCard').Car) => (c.collection ?? '').toLowerCase().includes('clear') || c.fob_price_usd < 2000 },
-  { id: 'hybrid',   label: 'Hybrid Collection',   filter: (c: import('@/components/CarCard').Car) => (c.fuel_type ?? '').toLowerCase().includes('hybrid') },
-  { id: 'suv',      label: 'SUV Collection',      filter: (c: import('@/components/CarCard').Car) => ['suv','4wd','crossover'].some(k => (c.body_type ?? '').toLowerCase().includes(k)) },
-  { id: 'budget',   label: 'Budget Picks',        filter: (c: import('@/components/CarCard').Car) => c.fob_price_usd < 3000 },
-];
+type FcCar = {
+  id: string;
+  ref_number: string;
+  make: string;
+  model: string;
+  variant?: string;
+  year: number;
+  engine_cc?: number;
+  fob_price_usd: number;
+  is_featured?: boolean;
+  is_new_arrival?: boolean;
+  fuel_type?: string;
+  body_type?: string;
+  status?: string;
+  [key: string]: unknown;
+};
+
+const FC_TABS = [
+  { id: 'arrivals', label: 'New Arrivals' },
+  { id: 'featured', label: 'Featured'     },
+  { id: 'hybrid',   label: 'Hybrid'       },
+  { id: 'suv',      label: 'SUV'          },
+  { id: 'budget',   label: 'Budget'       },
+] as const;
+
+type FcTabId = typeof FC_TABS[number]['id'];
+
+async function fetchFcCars(tab: FcTabId): Promise<FcCar[]> {
+  let q = supabase.from('cars').select('*');
+  if (tab === 'arrivals') {
+    q = q.order('created_at', { ascending: false }).limit(10);
+  } else if (tab === 'featured') {
+    q = q.eq('is_featured', true).limit(10);
+  } else if (tab === 'hybrid') {
+    q = q.ilike('fuel_type', '%hybrid%').limit(10);
+  } else if (tab === 'suv') {
+    q = q.ilike('body_type', '%suv%').limit(10);
+  } else if (tab === 'budget') {
+    q = q.lt('fob_price_usd', 2000).order('fob_price_usd', { ascending: true }).limit(10);
+  }
+  const { data } = await q;
+  return (data ?? []) as FcCar[];
+}
+
+async function fetchCarImages(ids: string[]): Promise<Record<string, string>> {
+  if (!ids.length) return {};
+  const { data } = await supabase
+    .from('car_images')
+    .select('*')
+    .in('car_id', ids);
+  if (!data) return {};
+  // Build map: car_id → first image URL found
+  const map: Record<string, string> = {};
+  for (const row of data as Record<string, unknown>[]) {
+    const cid = String(row.car_id ?? '');
+    if (!cid || map[cid]) continue; // keep first (lowest position)
+    const url = String(row.image_url ?? row.url ?? row.src ?? '');
+    if (url) map[cid] = url;
+  }
+  return map;
+}
 
 function FeaturedCollectionSection() {
-  type Car = import('@/components/CarCard').Car;
   const [, navigate] = useLocation();
-  const [cars, setCars]       = React.useState<Car[]>([]);
-  const [loading, setLoading] = React.useState(true);
-  const [activeTab, setActiveTab] = React.useState('all');
-  const [imgErrors, setImgErrors] = React.useState<Record<string, boolean>>({});
 
-  const waNumber  = import.meta.env.VITE_WHATSAPP_NUMBER || '818089227375';
-  const cloudName = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME || 'txb1wiw1';
+  const [activeTab, setActiveTab] = React.useState<FcTabId>('arrivals');
+  const [cars, setCars]           = React.useState<FcCar[]>([]);
+  const [imgMap, setImgMap]       = React.useState<Record<string, string>>({});
+  const [loading, setLoading]     = React.useState(true);
+  // simple tab cache to avoid re-fetching
+  const cache = React.useRef<Partial<Record<FcTabId, { cars: FcCar[]; imgs: Record<string, string> }>>>({});
 
-  React.useEffect(() => {
-    supabase
-      .from('cars')
-      .select('*')
-      .eq('is_featured', true)
-      .eq('status', 'available')
-      .limit(10)
-      .then(({ data }) => {
-        if (data) setCars(data as Car[]);
-        setLoading(false);
-      });
+  const waNumber = import.meta.env.VITE_WHATSAPP_NUMBER || '818089227375';
+
+  const loadTab = React.useCallback(async (tab: FcTabId) => {
+    if (cache.current[tab]) {
+      const hit = cache.current[tab]!;
+      setCars(hit.cars);
+      setImgMap(hit.imgs);
+      setLoading(false);
+      return;
+    }
+    setLoading(true);
+    const fetched = await fetchFcCars(tab);
+    const ids = fetched.map(c => c.id);
+    const imgs = await fetchCarImages(ids);
+    cache.current[tab] = { cars: fetched, imgs };
+    setCars(fetched);
+    setImgMap(imgs);
+    setLoading(false);
   }, []);
 
-  const tabFilter = COLLECTION_TABS.find(t => t.id === activeTab)?.filter ?? (() => true);
-  const displayed = cars.filter(tabFilter as (c: Car) => boolean);
+  React.useEffect(() => { loadTab(activeTab); }, [activeTab, loadTab]);
+
+  const handleTab = (id: FcTabId) => {
+    setActiveTab(id);
+  };
 
   return (
     <section className="py-14 bg-white border-b border-gray-100">
@@ -790,11 +737,8 @@ function FeaturedCollectionSection() {
 
         {/* ── Promo Banners ── */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-8">
-          {/* Banner 1 */}
-          <div
-            className="flex items-center gap-4 px-5 py-4 rounded-xl"
-            style={{ background: 'linear-gradient(135deg, #C8102E 0%, #9B0D23 100%)' }}
-          >
+          <div className="flex items-center gap-4 px-5 py-4 rounded-xl"
+            style={{ background: 'linear-gradient(135deg, #C8102E 0%, #9B0D23 100%)' }}>
             <div className="w-10 h-10 rounded-full bg-white/15 flex items-center justify-center flex-shrink-0">
               <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>
@@ -805,11 +749,8 @@ function FeaturedCollectionSection() {
               <div className="text-white/70 text-xs mt-0.5">Instant quotes and Expert advice</div>
             </div>
           </div>
-          {/* Banner 2 */}
-          <div
-            className="flex items-center gap-4 px-5 py-4 rounded-xl"
-            style={{ background: 'linear-gradient(135deg, #1E293B 0%, #0F172A 100%)' }}
-          >
+          <div className="flex items-center gap-4 px-5 py-4 rounded-xl"
+            style={{ background: 'linear-gradient(135deg, #1E293B 0%, #0F172A 100%)' }}>
             <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center flex-shrink-0">
               <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#FBBF24" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"/>
@@ -825,12 +766,12 @@ function FeaturedCollectionSection() {
           </div>
         </div>
 
-        {/* ── Collection Filter Tabs ── */}
+        {/* ── Filter Tabs ── */}
         <div className="flex gap-2 flex-wrap mb-6">
-          {COLLECTION_TABS.map(tab => (
+          {FC_TABS.map(tab => (
             <button
               key={tab.id}
-              onClick={() => setActiveTab(tab.id)}
+              onClick={() => handleTab(tab.id)}
               className="px-4 py-1.5 rounded-full text-[12px] font-semibold tracking-wide transition-all duration-200 cursor-pointer border"
               style={activeTab === tab.id
                 ? { background: '#C8102E', color: '#fff', borderColor: '#C8102E', boxShadow: '0 2px 10px rgba(200,16,46,0.28)' }
@@ -844,67 +785,74 @@ function FeaturedCollectionSection() {
 
         {/* ── Cards Row ── */}
         {loading ? (
-          /* Skeleton */
           <div className="flex gap-4 overflow-hidden">
             {[1,2,3,4].map(i => (
-              <div key={i} className="flex-shrink-0 w-[260px] rounded-xl bg-gray-100 animate-pulse" style={{ height: 380 }}/>
+              <div key={i} className="flex-shrink-0 w-[260px] rounded-xl bg-gray-100 animate-pulse" style={{ height: 390 }}/>
             ))}
           </div>
-        ) : displayed.length === 0 ? (
-          /* Empty state */
+        ) : cars.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-20 border-2 border-dashed border-gray-200 rounded-2xl">
             <svg width="48" height="48" viewBox="0 0 48 48" fill="none" className="mb-4 text-gray-300">
               <circle cx="24" cy="24" r="22" stroke="currentColor" strokeWidth="2"/>
               <path d="M14 30l4-8 6 4 5-7 5 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-              <circle cx="24" cy="18" r="3" fill="currentColor"/>
             </svg>
-            <h3 className="font-serif font-bold text-lg text-gray-600 mb-1">Featured cars coming soon</h3>
+            <h3 className="font-serif font-bold text-lg text-gray-600 mb-1">No cars in this category yet</h3>
             <p className="text-gray-400 text-sm text-center max-w-xs">
-              We're curating our premium collection — check back shortly or{' '}
+              Check back shortly or{' '}
               <Link href="/cars" className="text-[#C8102E] font-medium hover:underline">browse all stock</Link>.
             </p>
           </div>
         ) : (
-          <div className="flex gap-4 overflow-x-auto pb-3" style={{ scrollbarWidth: 'thin', scrollbarColor: '#E2E8F0 transparent' }}>
-            {displayed.map(car => {
-              const imgUrl = `https://res.cloudinary.com/${cloudName}/image/upload/cars/${car.ref_number.toLowerCase()}-1`;
-              const pkrPrice = Math.round(car.fob_price_usd * PKR_PER_USD).toLocaleString('en-PK');
-              const waMsg  = encodeURIComponent(`Hi Wazir Trading, I'm interested in the ${car.year} ${car.make} ${car.model} (Ref: ${car.ref_number}). Please share details and availability.`);
+          <div className="flex gap-4 overflow-x-auto pb-3"
+            style={{ scrollbarWidth: 'thin', scrollbarColor: '#E2E8F0 transparent' }}>
+
+            {cars.map(car => {
+              const primaryImg = imgMap[car.id] ?? null;
+              const pkrPrice   = Math.round(car.fob_price_usd * PKR_PER_USD).toLocaleString('en-PK');
+              const waMsg      = encodeURIComponent(
+                `Hi Wazir Trading, I'm interested in the ${car.year} ${car.make} ${car.model}${car.variant ? ' ' + car.variant : ''} (Ref: ${car.ref_number}). Please share details and availability.`
+              );
               const waLink = `https://wa.me/${waNumber}?text=${waMsg}`;
 
               return (
-                <div
-                  key={car.id}
-                  className="flex-shrink-0 w-[258px] bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm hover:shadow-lg hover:border-[#C8102E]/30 transition-all duration-250 group"
-                >
-                  {/* Image */}
+                <div key={car.id}
+                  className="flex-shrink-0 w-[258px] bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm hover:shadow-lg hover:border-[#C8102E]/30 transition-all duration-200 group">
+
+                  {/* ── Image ── */}
                   <div className="relative bg-gray-100 overflow-hidden" style={{ aspectRatio: '4/3' }}>
+                    {/* Year badge */}
                     <span className="absolute top-2.5 left-2.5 z-10 bg-black/70 text-white text-[10px] font-bold px-2 py-0.5 rounded-md backdrop-blur-sm tracking-wider">
                       {car.year}
                     </span>
-                    <span className="absolute top-2.5 right-2.5 z-10 text-white text-[10px] font-bold px-2 py-0.5 rounded-md backdrop-blur-sm tracking-wider"
-                      style={{ background: 'rgba(200,16,46,0.88)' }}>
-                      {car.engine_cc} cc
-                    </span>
-                    {imgErrors[car.id] ? (
-                      <div className="w-full h-full flex items-center justify-center bg-gray-100 text-gray-300">
-                        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-                          <rect x="2" y="7" width="20" height="13" rx="2"/>
-                          <path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2"/>
-                          <circle cx="12" cy="13" r="2"/>
-                        </svg>
-                      </div>
-                    ) : (
+                    {/* Engine CC badge */}
+                    {car.engine_cc && (
+                      <span className="absolute top-2.5 right-2.5 z-10 text-white text-[10px] font-bold px-2 py-0.5 rounded-md backdrop-blur-sm tracking-wider"
+                        style={{ background: 'rgba(200,16,46,0.88)' }}>
+                        {car.engine_cc} cc
+                      </span>
+                    )}
+                    {primaryImg ? (
                       <img
-                        src={imgUrl}
+                        src={primaryImg}
                         alt={`${car.make} ${car.model}`}
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                        onError={() => setImgErrors(prev => ({ ...prev, [car.id]: true }))}
+                        onError={e => {
+                          (e.currentTarget as HTMLImageElement).style.display = 'none';
+                        }}
                       />
+                    ) : (
+                      /* Placeholder when no image in car_images */
+                      <div className="w-full h-full flex items-center justify-center text-gray-300">
+                        <svg width="42" height="42" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.2">
+                          <rect x="1" y="3" width="22" height="16" rx="2"/>
+                          <path d="M1 9h22M7 3v6"/>
+                          <circle cx="12" cy="17" r="2"/>
+                        </svg>
+                      </div>
                     )}
                   </div>
 
-                  {/* Content */}
+                  {/* ── Content ── */}
                   <div className="p-4 flex flex-col gap-3">
                     {/* Make + Model + Ref */}
                     <div>
@@ -914,7 +862,7 @@ function FeaturedCollectionSection() {
                       <p className="text-[10px] font-mono text-gray-400 mt-0.5 tracking-wider">{car.ref_number}</p>
                     </div>
 
-                    {/* Price block */}
+                    {/* Price */}
                     <div className="border-t border-gray-100 pt-2.5">
                       <p className="text-[9px] uppercase tracking-[0.2em] text-gray-400 font-semibold mb-0.5">FOB Price (Japan)</p>
                       <p className="text-[22px] font-extrabold text-gray-900 leading-none tracking-tight">
@@ -973,6 +921,7 @@ function FeaturedCollectionSection() {
             </div>
           </div>
         )}
+
       </div>
     </section>
   );
