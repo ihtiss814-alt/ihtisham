@@ -12,12 +12,12 @@ export default function Footer() {
           {/* Brand */}
           <div className="space-y-6">
             <div>
-              <h3 className="font-serif text-2xl font-bold tracking-tight text-white mb-1">
-                WAZIR TRADING <span className="text-primary text-sm tracking-normal">LLC</span>
-              </h3>
-              <p className="text-xs uppercase tracking-widest text-muted-foreground">
-                Japanese Automotive Exports
-              </p>
+              <img
+                src="/logo.png"
+                alt="Wazir Trading LLC"
+                className="h-[90px] w-auto"
+                loading="eager"
+              />
             </div>
             <p className="text-sm text-secondary-foreground/70 leading-relaxed max-w-sm">
               Premium Japanese used vehicles exported globally. We bridge the gap between Japanese auto auctions and the world with integrity and excellence.

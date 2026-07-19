@@ -90,39 +90,14 @@ export default function Navbar() {
             <div className="flex items-center justify-between h-[78px]">
 
               {/* ── Logo ──────────────────────────── */}
-              <Link href="/" className="flex items-center gap-3.5 group flex-shrink-0" data-testid="link-logo">
-
-                {/* Emblem */}
-                <div className="relative w-[46px] h-[46px] flex-shrink-0">
-                  {/* Outer ring */}
-                  <svg viewBox="0 0 46 46" className="absolute inset-0 w-full h-full" fill="none">
-                    <circle cx="23" cy="23" r="21.5" stroke="#0F1E3C" strokeWidth="1" />
-                    <circle cx="23" cy="23" r="17" stroke="#C9A84C" strokeWidth="0.75" />
-                    {/* Tiny tick marks at N/S/E/W */}
-                    <line x1="23" y1="1.5" x2="23" y2="5" stroke="#C9A84C" strokeWidth="1" strokeLinecap="round" />
-                    <line x1="23" y1="41" x2="23" y2="44.5" stroke="#C9A84C" strokeWidth="1" strokeLinecap="round" />
-                    <line x1="1.5" y1="23" x2="5" y2="23" stroke="#C9A84C" strokeWidth="1" strokeLinecap="round" />
-                    <line x1="41" y1="23" x2="44.5" y2="23" stroke="#C9A84C" strokeWidth="1" strokeLinecap="round" />
-                  </svg>
-                  <span className="absolute inset-0 flex items-center justify-center font-serif text-[20px] font-bold text-[#0F1E3C] leading-none select-none">
-                    W
-                  </span>
-                </div>
-
-                {/* Wordmark */}
-                <div className="flex flex-col leading-none">
-                  <div className="flex items-baseline gap-1.5">
-                    <span className="font-serif text-[16px] font-semibold tracking-[0.14em] uppercase text-[#0F1E3C] group-hover:text-[#B8943A] transition-colors duration-300">
-                      Wazir Trading
-                    </span>
-                    <span className="text-[10px] tracking-[0.12em] font-medium text-[#C9A84C] uppercase mt-0.5">
-                      LLC
-                    </span>
-                  </div>
-                  <span className="text-[9.5px] tracking-[0.28em] uppercase text-[#9B8E7E] font-light mt-[3px]">
-                    Japanese Automotive Exports
-                  </span>
-                </div>
+              <Link href="/" className="flex items-center flex-shrink-0" data-testid="link-logo">
+                <img
+                  src="/logo.png"
+                  alt="Wazir Trading LLC"
+                  className="h-[62px] w-auto"
+                  style={{ mixBlendMode: 'multiply' }}
+                  loading="eager"
+                />
               </Link>
 
               {/* ── Desktop nav links ─────────────── */}
@@ -254,15 +229,14 @@ export default function Navbar() {
             >
               {/* Drawer header */}
               <div className="flex items-center justify-between px-6 h-[78px] border-b border-[#F0EBE3]">
-                <div className="flex items-center gap-2.5">
-                  {/* Mini emblem */}
-                  <div className="w-8 h-8 rounded-full border border-[#0F1E3C] flex items-center justify-center">
-                    <span className="font-serif text-[14px] font-bold text-[#0F1E3C]">W</span>
-                  </div>
-                  <div className="flex flex-col leading-none">
-                    <span className="font-serif text-[13px] font-semibold tracking-widest uppercase text-[#0F1E3C]">Wazir Trading</span>
-                    <span className="text-[8.5px] tracking-[0.22em] uppercase text-[#C9A84C] mt-0.5">Japanese Exports</span>
-                  </div>
+                <div className="flex items-center">
+                  <img
+                    src="/logo.png"
+                    alt="Wazir Trading LLC"
+                    className="h-[52px] w-auto"
+                    style={{ mixBlendMode: 'multiply' }}
+                    loading="eager"
+                  />
                 </div>
                 <button
                   onClick={() => setMobileOpen(false)}
