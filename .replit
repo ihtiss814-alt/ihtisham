@@ -1,4 +1,4 @@
-modules = ["nodejs-24"]
+modules = ["nodejs-20", "web", "bash"]
 
 [deployment]
 router = "application"
@@ -29,3 +29,6 @@ VITE_CLOUDINARY_CLOUD_NAME = "txb1wiw1"
 VITE_SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFwaHhqYmxiYWZ5eG9iYWZqbW90Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQ0MzAwNDYsImV4cCI6MjEwMDAwNjA0Nn0.TYmXInro72FHAf3E0pGm0QbZfwk7hNQ26RiA53ytjfY"
 VITE_SUPABASE_URL = "https://aphxjblbafyxobafjmot.supabase.co"
 VITE_WHATSAPP_NUMBER = "818089227375"
+
+[nix]
+channel = "stable-25_05"
