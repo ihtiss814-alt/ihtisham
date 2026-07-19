@@ -1,8 +1,15 @@
 import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'wouter';
-import { Menu, X, ChevronRight, AlertTriangle, Clock, Car, Zap } from 'lucide-react';
+import { Menu, X, ChevronRight, AlertTriangle, Clock, Car, Mail, Phone } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { supabase } from '@/lib/supabase';
+
+// ─── Brand tokens ────────────────────────────────────────────────
+// Primary:   #C8102E  (crimson — extracted from logo shield)
+// Dark:      #1A0A0A  (near-black, warm)
+// Mid:       #6B7280  (slate-500)
+// Surface:   #FFFFFF
+// Divider:   #E5E7EB  (gray-200)
 
 const NAV_LINKS = [
   { label: 'Home',         href: '/' },
@@ -17,13 +24,15 @@ function useJapanTime() {
   useEffect(() => {
     const tick = () => {
       const now = new Date();
-      setTime(now.toLocaleTimeString('en-GB', {
-        timeZone: 'Asia/Tokyo',
-        hour: '2-digit',
-        minute: '2-digit',
-        second: '2-digit',
-        hour12: false,
-      }));
+      setTime(
+        now.toLocaleTimeString('en-GB', {
+          timeZone: 'Asia/Tokyo',
+          hour: '2-digit',
+          minute: '2-digit',
+          second: '2-digit',
+          hour12: false,
+        })
+      );
     };
     tick();
     const id = setInterval(tick, 1000);
@@ -39,9 +48,7 @@ function useStockCount() {
       .from('cars')
       .select('id', { count: 'exact', head: true })
       .eq('status', 'available')
-      .then(({ count: c }) => {
-        if (c !== null) setCount(c);
-      });
+      .then(({ count: c }) => { if (c !== null) setCount(c); });
   }, []);
   return count;
 }
@@ -54,13 +61,13 @@ export default function Navbar() {
   const stockCount                  = useStockCount();
 
   const waNumber  = import.meta.env.VITE_WHATSAPP_NUMBER || '818089227375';
-  const waMessage = encodeURIComponent('Hello, I found your website and I am interested in purchasing a Japanese used car.');
+  const waMessage = encodeURIComponent('Hello, I am interested in purchasing a Japanese used car from Wazir Trading LLC.');
   const waLink    = `https://wa.me/${waNumber}?text=${waMessage}`;
 
   useEffect(() => {
-    const handler = () => setScrolled(window.scrollY > 30);
-    window.addEventListener('scroll', handler, { passive: true });
-    return () => window.removeEventListener('scroll', handler);
+    const onScroll = () => setScrolled(window.scrollY > 20);
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
   }, []);
 
   useEffect(() => { setMobileOpen(false); }, [location]);
@@ -75,31 +82,37 @@ export default function Navbar() {
   return (
     <>
       <header
-        className={`fixed top-0 inset-x-0 z-50 transition-all duration-300 ${scrolled ? 'shadow-[0_4px_24px_rgba(220,20,60,0.12),0_2px_8px_rgba(0,0,0,0.08)]' : ''}`}
+        className="fixed top-0 inset-x-0 z-50 transition-shadow duration-300"
+        style={{ boxShadow: scrolled ? '0 2px 16px rgba(0,0,0,0.10)' : 'none' }}
         data-testid="site-header"
       >
 
-        {/* ── Bar 1: Fraud Warning ──────────────────────── */}
-        <div style={{ background: 'linear-gradient(90deg, #B20000 0%, #CC0000 40%, #E50000 60%, #B20000 100%)' }}>
-          <div className="max-w-7xl mx-auto px-3 md:px-8 py-2 flex items-center justify-center gap-2 flex-wrap">
-            <AlertTriangle size={12} className="text-yellow-300 flex-shrink-0" />
-            <p className="text-center text-[10.5px] md:text-[11px] leading-snug text-white font-medium tracking-wide">
-              <span className="text-yellow-300 font-bold mr-1">⚠ FRAUD WARNING:</span>
-              Wazir Trading LLC will{' '}
-              <span className="font-bold text-yellow-200 underline underline-offset-2">NEVER</span>{' '}
-              request payment to a personal bank account.{' '}
-              <span className="font-semibold text-yellow-200">Official bank is in Japan only.</span>
-              {' '}Verify before transferring —{' '}
+        {/* ── BAR 1: Fraud Warning ──────────────────────────────────── */}
+        <div className="bg-[#7F1D1D]">
+          <div className="max-w-7xl mx-auto px-4 md:px-8 py-[7px] flex items-center justify-center gap-3 flex-wrap">
+            <div className="flex items-center gap-1.5 flex-shrink-0">
+              <AlertTriangle size={11} className="text-amber-300" />
+              <span className="text-amber-300 text-[10.5px] font-bold tracking-[0.18em] uppercase">
+                Fraud Warning
+              </span>
+            </div>
+            <span className="hidden sm:block h-3 w-px bg-white/20" />
+            <p className="text-center text-[10.5px] leading-snug text-white/85 font-normal tracking-wide">
+              We will{' '}
+              <strong className="text-white font-semibold">never</strong>{' '}
+              request payment to a personal account —{' '}
+              <span className="text-white/90 font-medium">official bank is in Japan only.</span>
+              {' '}Verify all details:{' '}
               <a
                 href="tel:+818089227375"
-                className="text-yellow-300 underline underline-offset-2 hover:text-white transition-colors font-bold whitespace-nowrap"
+                className="text-amber-300 hover:text-amber-200 font-semibold transition-colors whitespace-nowrap"
               >
                 +81 80-8922-7375
               </a>
-              {' '}·{' '}
+              <span className="text-white/40 mx-1.5">·</span>
               <a
                 href="mailto:wazirtrading-pc@outlook.jp"
-                className="text-yellow-300 underline underline-offset-2 hover:text-white transition-colors font-bold whitespace-nowrap"
+                className="text-amber-300 hover:text-amber-200 font-semibold transition-colors whitespace-nowrap"
               >
                 wazirtrading-pc@outlook.jp
               </a>
@@ -107,214 +120,142 @@ export default function Navbar() {
           </div>
         </div>
 
-        {/* ── Bar 2: Info Bar (light neon) ─────────────── */}
-        <div
-          style={{
-            background: 'linear-gradient(90deg, #F0F6FF 0%, #EAF2FF 30%, #F5F0FF 60%, #FFF0F3 100%)',
-            borderBottom: '1px solid rgba(59,130,246,0.15)',
-          }}
-        >
-          <div className="max-w-7xl mx-auto px-4 md:px-8 h-9 flex items-center justify-between gap-4">
+        {/* ── BAR 2: Info strip ─────────────────────────────────────── */}
+        <div className="bg-[#F9F9F9] border-b border-gray-200">
+          <div className="max-w-7xl mx-auto px-4 md:px-8 h-8 flex items-center justify-between">
 
             {/* Left — tagline */}
-            <div className="hidden sm:flex items-center gap-1.5">
-              <Zap size={11} className="text-[#E5000A] flex-shrink-0" fill="currentColor" />
-              <span
-                className="text-[10px] tracking-[0.22em] uppercase font-bold whitespace-nowrap"
-                style={{
-                  background: 'linear-gradient(90deg, #C8000A, #0048D4)',
-                  WebkitBackgroundClip: 'text',
-                  WebkitTextFillColor: 'transparent',
-                  backgroundClip: 'text',
-                }}
-              >
-                The Cars Exporting Expert
-              </span>
-            </div>
+            <span className="hidden md:block text-[10px] tracking-[0.24em] uppercase font-semibold text-[#C8102E]">
+              The Cars Exporting Expert
+            </span>
 
-            {/* Center — live JST clock */}
-            <div className="flex items-center gap-1.5 mx-auto sm:mx-0">
-              <Clock size={10} className="text-[#0048D4] flex-shrink-0" />
-              <span className="text-[10px] tracking-[0.14em] uppercase text-slate-500 font-medium">
-                Japan (JST)
+            {/* Center — JST clock */}
+            <div className="flex items-center gap-1.5">
+              <Clock size={10} className="text-gray-400 flex-shrink-0" />
+              <span className="text-[10px] uppercase tracking-[0.14em] text-gray-400 font-medium">
+                Japan
               </span>
-              <span
-                className="text-[10.5px] font-mono font-bold tabular-nums ml-0.5 min-w-[58px]"
-                style={{ color: '#0048D4' }}
-              >
+              <span className="text-[10.5px] font-mono font-bold text-gray-700 tabular-nums min-w-[58px]">
                 {japanTime || '--:--:--'}
               </span>
             </div>
 
             {/* Right — stock + rate */}
-            <div className="hidden sm:flex items-center gap-3 text-[10px] tracking-[0.1em] uppercase">
-              <div className="flex items-center gap-1.5">
-                <Car size={10} className="text-[#E5000A]" />
-                <span className="text-slate-500">
+            <div className="flex items-center gap-3 text-[10px] tracking-[0.1em] uppercase text-gray-400">
+              <div className="hidden sm:flex items-center gap-1.5">
+                <Car size={10} className="text-[#C8102E]" />
+                <span>
                   In Stock:{' '}
-                  <span
-                    className="font-bold"
-                    style={{ color: '#E5000A' }}
-                  >
+                  <strong className="text-[#C8102E] font-bold">
                     {stockCount !== null ? stockCount : '—'}
-                  </span>
+                  </strong>
                 </span>
               </div>
-              <span className="h-3 w-px bg-slate-300" />
-              <span className="text-slate-500">
-                $1 ={' '}
-                <span className="font-bold" style={{ color: '#0048D4' }}>¥162</span>
+              <span className="hidden sm:block h-3 w-px bg-gray-300" />
+              <span>
+                $1 = <strong className="text-gray-700 font-semibold">¥162</strong>
               </span>
             </div>
           </div>
         </div>
 
-        {/* ── Neon accent divider ───────────────────────── */}
-        <div
-          style={{
-            height: '2px',
-            background: 'linear-gradient(90deg, transparent 0%, #0048D4 15%, #7B00E0 35%, #E5000A 50%, #FF6600 65%, #0048D4 85%, transparent 100%)',
-            boxShadow: '0 0 8px rgba(0,72,212,0.4), 0 0 16px rgba(229,0,10,0.3)',
-          }}
-        />
+        {/* ── Brand-red accent rule ──────────────────────────────────── */}
+        <div className="h-[3px] bg-[#C8102E]" />
 
-        {/* ── Main navigation bar (light gradient) ─────── */}
-        <div
-          style={{
-            background: 'linear-gradient(135deg, #FFFFFF 0%, #F8FBFF 30%, #F5F0FF 65%, #FFF5F5 100%)',
-            backdropFilter: 'blur(12px)',
-            borderBottom: scrolled ? '1px solid rgba(0,72,212,0.12)' : '1px solid rgba(0,0,0,0.04)',
-            boxShadow: scrolled
-              ? '0 4px 20px rgba(0,72,212,0.08), 0 1px 0 rgba(229,0,10,0.06)'
-              : 'none',
-          }}
-        >
+        {/* ── MAIN NAV ──────────────────────────────────────────────── */}
+        <div className="bg-white border-b border-gray-100">
           <div className="max-w-7xl mx-auto px-4 md:px-8">
-            <div className="flex items-center justify-between h-[72px]">
+            <div className="flex items-center justify-between h-[68px]">
 
-              {/* ── Logo ──────────────────────────────────── */}
-              <Link href="/" className="flex items-center flex-shrink-0 group" data-testid="link-logo">
+              {/* Logo */}
+              <Link href="/" className="flex-shrink-0 group" data-testid="link-logo">
                 <img
                   src="/logo.png"
                   alt="Wazir Trading LLC"
-                  className="h-[56px] md:h-[62px] w-auto transition-all duration-300 group-hover:scale-[1.03]"
+                  className="h-[54px] md:h-[60px] w-auto transition-opacity duration-200 group-hover:opacity-85"
                   style={{ mixBlendMode: 'multiply' }}
                   loading="eager"
                 />
               </Link>
 
-              {/* ── Desktop nav links ──────────────────────── */}
-              <nav className="hidden lg:flex items-center gap-0.5" aria-label="Main navigation">
+              {/* Desktop nav */}
+              <nav className="hidden lg:flex items-center" aria-label="Main navigation">
                 {NAV_LINKS.map((link) => {
                   const active = isActive(link.href);
                   return (
                     <Link
                       key={link.href}
                       href={link.href}
-                      className="relative px-4 py-2 group"
+                      className="relative px-4 py-1 group"
                       data-testid={`nav-${link.label.toLowerCase().replace(/\s+/g, '-')}`}
                     >
                       <span
-                        className={`text-[11px] tracking-[0.2em] uppercase font-bold transition-all duration-200 ${
-                          active ? '' : 'text-slate-600 group-hover:text-slate-900'
+                        className={`block text-[11px] tracking-[0.2em] uppercase font-semibold transition-colors duration-150 ${
+                          active
+                            ? 'text-[#C8102E]'
+                            : 'text-gray-600 group-hover:text-gray-900'
                         }`}
-                        style={active ? {
-                          background: 'linear-gradient(90deg, #E5000A, #0048D4)',
-                          WebkitBackgroundClip: 'text',
-                          WebkitTextFillColor: 'transparent',
-                          backgroundClip: 'text',
-                        } : {}}
                       >
                         {link.label}
                       </span>
-
-                      {/* Neon underline */}
+                      {/* Underline indicator */}
                       <span
-                        className={`absolute bottom-0 left-1/2 -translate-x-1/2 h-[2px] transition-all duration-300 ease-out rounded-full ${
-                          active ? 'w-8 opacity-100' : 'w-0 opacity-0 group-hover:w-6 group-hover:opacity-70'
+                        className={`absolute -bottom-px left-3 right-3 h-[2px] rounded-full bg-[#C8102E] transition-all duration-200 origin-left ${
+                          active ? 'scale-x-100 opacity-100' : 'scale-x-0 opacity-0 group-hover:scale-x-100 group-hover:opacity-40'
                         }`}
-                        style={{
-                          background: 'linear-gradient(90deg, #E5000A, #7B00E0, #0048D4)',
-                          boxShadow: active ? '0 0 6px rgba(229,0,10,0.5)' : 'none',
-                        }}
                       />
                     </Link>
                   );
                 })}
               </nav>
 
-              {/* ── CTA buttons ───────────────────────────── */}
+              {/* Desktop CTAs */}
               <div className="hidden lg:flex items-center gap-2.5">
 
-                {/* View Inventory — neon red */}
+                {/* View Inventory — crimson filled */}
                 <Link
                   href="/cars"
-                  className="relative group flex items-center gap-1.5 px-5 py-2.5 rounded-sm overflow-hidden transition-all duration-200"
-                  style={{
-                    background: 'linear-gradient(135deg, #E5000A 0%, #CC0000 100%)',
-                    boxShadow: '0 2px 12px rgba(229,0,10,0.35), 0 0 0 1px rgba(229,0,10,0.2)',
-                  }}
+                  className="group flex items-center gap-1.5 px-5 py-2.5 bg-[#C8102E] hover:bg-[#A50D25] text-white text-[10.5px] tracking-[0.18em] uppercase font-bold transition-colors duration-150 rounded-[2px]"
                   data-testid="nav-browse-btn"
                 >
-                  <span
-                    className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-                    style={{ background: 'linear-gradient(135deg, #FF1A24 0%, #E5000A 100%)' }}
-                  />
-                  <span className="text-[10.5px] tracking-[0.2em] uppercase font-bold text-white relative z-10">
-                    View Inventory
-                  </span>
-                  <ChevronRight size={11} strokeWidth={2.5} className="text-white/80 relative z-10" />
+                  View Inventory
+                  <ChevronRight size={11} strokeWidth={2.5} className="opacity-75 group-hover:translate-x-0.5 transition-transform duration-150" />
                 </Link>
 
-                {/* WhatsApp CTA — neon green→blue */}
+                {/* WhatsApp — outlined */}
                 <a
                   href={waLink}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="relative group flex items-center gap-2 px-5 py-2.5 rounded-sm overflow-hidden transition-all duration-300"
-                  style={{
-                    background: 'linear-gradient(135deg, #00A651 0%, #007A3D 100%)',
-                    boxShadow: '0 2px 12px rgba(0,166,81,0.35), 0 0 0 1px rgba(0,166,81,0.2)',
-                  }}
+                  className="group flex items-center gap-2 px-5 py-2.5 border border-gray-300 hover:border-[#25D366] text-gray-700 hover:text-gray-900 text-[10.5px] tracking-[0.18em] uppercase font-semibold transition-all duration-150 rounded-[2px] hover:bg-[#F0FDF4]"
                   data-testid="nav-whatsapp-btn"
                 >
-                  <span
-                    className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-                    style={{ background: 'linear-gradient(135deg, #00C461 0%, #009A4D 100%)' }}
-                  />
-                  <span className="relative flex-shrink-0">
-                    <span className="absolute inset-0 rounded-full bg-white animate-ping opacity-50" style={{ width: 7, height: 7 }} />
-                    <span className="relative block w-[7px] h-[7px] rounded-full bg-white" />
+                  <span className="relative flex-shrink-0 w-2 h-2">
+                    <span className="absolute inset-0 rounded-full bg-[#25D366] animate-ping opacity-60" />
+                    <span className="relative block w-2 h-2 rounded-full bg-[#25D366]" />
                   </span>
-                  <WhatsAppIcon className="text-white relative z-10" size={13} />
-                  <span className="text-[10.5px] tracking-[0.18em] uppercase font-bold text-white relative z-10">
-                    WhatsApp
-                  </span>
+                  <WhatsAppIcon size={13} className="text-[#25D366]" />
+                  <span>WhatsApp</span>
                 </a>
               </div>
 
-              {/* ── Mobile hamburger ──────────────────────── */}
+              {/* Mobile hamburger */}
               <button
                 onClick={() => setMobileOpen((v) => !v)}
-                className="lg:hidden w-9 h-9 flex items-center justify-center rounded-sm transition-all duration-200"
-                style={{
-                  background: 'linear-gradient(135deg, #E5000A, #CC0000)',
-                  boxShadow: '0 2px 8px rgba(229,0,10,0.3)',
-                }}
+                className="lg:hidden w-10 h-10 flex items-center justify-center rounded-[2px] text-gray-700 border border-gray-200 hover:border-gray-400 hover:bg-gray-50 transition-all duration-150"
                 aria-label="Toggle menu"
                 data-testid="btn-mobile-menu"
               >
                 <AnimatePresence mode="wait" initial={false}>
-                  <motion.div
+                  <motion.span
                     key={mobileOpen ? 'x' : 'menu'}
-                    initial={{ opacity: 0, scale: 0.7 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    exit={{ opacity: 0, scale: 0.7 }}
+                    initial={{ opacity: 0, rotate: -90 }}
+                    animate={{ opacity: 1, rotate: 0 }}
+                    exit={{ opacity: 0, rotate: 90 }}
                     transition={{ duration: 0.12 }}
-                    className="text-white"
                   >
-                    {mobileOpen ? <X size={17} /> : <Menu size={17} />}
-                  </motion.div>
+                    {mobileOpen ? <X size={18} /> : <Menu size={18} />}
+                  </motion.span>
                 </AnimatePresence>
               </button>
             </div>
@@ -322,155 +263,141 @@ export default function Navbar() {
         </div>
       </header>
 
-      {/* ── Mobile full-screen drawer ─────────────────── */}
+      {/* ── Mobile drawer ──────────────────────────────────────────── */}
       <AnimatePresence>
         {mobileOpen && (
           <>
-            {/* Backdrop */}
             <motion.div
-              className="fixed inset-0 z-40 bg-black/40 backdrop-blur-[3px]"
+              className="fixed inset-0 z-40 bg-black/40 backdrop-blur-sm"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              transition={{ duration: 0.2 }}
+              transition={{ duration: 0.18 }}
               onClick={() => setMobileOpen(false)}
             />
 
-            {/* Drawer */}
             <motion.div
-              className="fixed top-0 right-0 bottom-0 z-50 w-[min(340px,90vw)] flex flex-col bg-white"
-              style={{
-                boxShadow: '-8px 0 40px rgba(229,0,10,0.15), -2px 0 0 rgba(0,72,212,0.1)',
-              }}
+              className="fixed top-0 right-0 bottom-0 z-50 w-[min(320px,88vw)] bg-white flex flex-col"
+              style={{ boxShadow: '-4px 0 32px rgba(0,0,0,0.12)' }}
               initial={{ x: '100%' }}
               animate={{ x: 0 }}
               exit={{ x: '100%' }}
-              transition={{ type: 'spring', stiffness: 320, damping: 32 }}
+              transition={{ type: 'spring', stiffness: 340, damping: 36 }}
             >
-              {/* Neon top bar in drawer */}
-              <div
-                style={{
-                  height: '3px',
-                  background: 'linear-gradient(90deg, #E5000A, #7B00E0, #0048D4, #00A651)',
-                }}
-              />
+              {/* Crimson top rule */}
+              <div className="h-[3px] bg-[#C8102E] flex-shrink-0" />
 
               {/* Drawer header */}
-              <div className="flex items-center justify-between px-5 h-[68px] border-b border-slate-100">
+              <div className="flex items-center justify-between px-5 h-[64px] border-b border-gray-100 flex-shrink-0">
                 <Link href="/" onClick={() => setMobileOpen(false)}>
                   <img
                     src="/logo.png"
                     alt="Wazir Trading LLC"
-                    className="h-[50px] w-auto"
+                    className="h-[48px] w-auto"
                     style={{ mixBlendMode: 'multiply' }}
                     loading="eager"
                   />
                 </Link>
                 <button
                   onClick={() => setMobileOpen(false)}
-                  className="w-8 h-8 flex items-center justify-center rounded-sm text-slate-500 hover:text-white transition-all duration-200 hover:bg-[#E5000A]"
+                  className="w-8 h-8 flex items-center justify-center rounded text-gray-500 hover:bg-gray-100 transition-colors"
                 >
-                  <X size={15} />
+                  <X size={16} />
                 </button>
               </div>
 
-              {/* Fraud warning mini-banner in drawer */}
-              <div className="mx-4 mt-3 rounded-sm px-3 py-2 flex items-start gap-2 border-l-4 border-[#E5000A]"
-                style={{ background: 'linear-gradient(90deg, #FFF0F0, #FFF8F8)' }}>
-                <AlertTriangle size={11} className="text-[#E5000A] flex-shrink-0 mt-0.5" />
-                <p className="text-[9.5px] text-slate-600 leading-relaxed">
-                  <span className="text-[#E5000A] font-bold">Fraud Warning:</span>{' '}
-                  Never pay to personal accounts. Bank in Japan only.{' '}
-                  <a href="tel:+818089227375" className="text-[#0048D4] underline font-semibold">+81 80-8922-7375</a>
-                </p>
+              {/* Fraud alert in drawer */}
+              <div className="mx-4 mt-4 flex-shrink-0 bg-red-50 border border-red-100 rounded-[2px] px-3 py-2.5 flex gap-2">
+                <AlertTriangle size={12} className="text-[#C8102E] flex-shrink-0 mt-0.5" />
+                <div className="text-[10px] text-gray-600 leading-relaxed">
+                  <span className="font-bold text-[#C8102E]">Fraud Warning — </span>
+                  never pay to personal accounts. Bank in Japan only.{' '}
+                  <a href="tel:+818089227375" className="font-semibold text-[#C8102E] underline underline-offset-2">
+                    +81 80-8922-7375
+                  </a>
+                </div>
               </div>
 
               {/* Nav links */}
-              <nav className="flex-1 overflow-y-auto py-4 px-4 mt-2">
+              <nav className="flex-1 overflow-y-auto px-4 pt-3 pb-2">
                 {NAV_LINKS.map((link, i) => {
                   const active = isActive(link.href);
                   return (
                     <motion.div
                       key={link.href}
-                      initial={{ opacity: 0, x: 20 }}
+                      initial={{ opacity: 0, x: 16 }}
                       animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: i * 0.045 + 0.08 }}
+                      transition={{ delay: i * 0.04 + 0.06, duration: 0.2 }}
                     >
                       <Link
                         href={link.href}
                         onClick={() => setMobileOpen(false)}
-                        className={`flex items-center justify-between w-full px-4 py-3.5 mb-1 rounded-sm transition-all duration-200 ${
+                        className={`flex items-center justify-between w-full px-4 py-3.5 mb-px rounded-[2px] transition-all duration-150 ${
                           active
-                            ? 'border-l-4 border-[#E5000A]'
-                            : 'border border-transparent hover:bg-slate-50 text-slate-600 hover:text-slate-900'
+                            ? 'bg-red-50 text-[#C8102E] border-l-[3px] border-[#C8102E] pl-3.5'
+                            : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900 border-l-[3px] border-transparent'
                         }`}
-                        style={active ? {
-                          background: 'linear-gradient(90deg, #FFF0F0, #F0F6FF)',
-                          borderColor: '#E5000A',
-                        } : {}}
                         data-testid={`mobile-nav-${link.label.toLowerCase().replace(/\s+/g, '-')}`}
                       >
-                        <span
-                          className="text-[11px] tracking-[0.22em] uppercase font-bold"
-                          style={active ? {
-                            background: 'linear-gradient(90deg, #E5000A, #0048D4)',
-                            WebkitBackgroundClip: 'text',
-                            WebkitTextFillColor: 'transparent',
-                            backgroundClip: 'text',
-                          } : {}}
-                        >
+                        <span className="text-[11px] tracking-[0.2em] uppercase font-semibold">
                           {link.label}
                         </span>
-                        {active
-                          ? <span className="w-2 h-2 rounded-full bg-[#E5000A]" style={{ boxShadow: '0 0 6px rgba(229,0,10,0.7)' }} />
-                          : <ChevronRight size={13} className="text-slate-300" />
-                        }
+                        <ChevronRight
+                          size={14}
+                          className={active ? 'text-[#C8102E]' : 'text-gray-300'}
+                        />
                       </Link>
                     </motion.div>
                   );
                 })}
               </nav>
 
-              {/* Live info strip in drawer */}
-              <div
-                className="mx-4 mb-3 px-3 py-2 rounded-sm flex items-center justify-between text-[9.5px] tracking-wide"
-                style={{ background: 'linear-gradient(90deg, #F0F6FF, #F5F0FF)', border: '1px solid rgba(0,72,212,0.12)' }}
-              >
-                <span className="text-slate-500">JST <span className="font-mono font-bold text-[#0048D4]">{japanTime || '--:--:--'}</span></span>
-                <span className="h-3 w-px bg-slate-200" />
-                <span className="text-slate-500">Stock: <span className="font-bold text-[#E5000A]">{stockCount !== null ? stockCount : '—'}</span></span>
-                <span className="h-3 w-px bg-slate-200" />
-                <span className="text-slate-500">$1 = <span className="font-bold text-[#7B00E0]">¥162</span></span>
+              {/* Live data strip */}
+              <div className="mx-4 mb-3 flex-shrink-0 bg-gray-50 border border-gray-200 rounded-[2px] px-4 py-2.5 flex items-center justify-between text-[10px] text-gray-500 tracking-wide uppercase">
+                <div className="flex items-center gap-1.5">
+                  <Clock size={9} className="text-gray-400" />
+                  <span className="font-mono font-bold text-gray-700">{japanTime || '--:--:--'}</span>
+                  <span className="text-gray-300">JST</span>
+                </div>
+                <span className="h-3 w-px bg-gray-200" />
+                <div>
+                  Stock:{' '}
+                  <strong className="text-[#C8102E]">{stockCount !== null ? stockCount : '—'}</strong>
+                </div>
+                <span className="h-3 w-px bg-gray-200" />
+                <div>
+                  $1 = <strong className="text-gray-700">¥162</strong>
+                </div>
               </div>
 
-              {/* Drawer footer CTAs */}
-              <div className="px-4 pb-8 pt-2 border-t border-slate-100 space-y-2.5">
+              {/* CTA buttons */}
+              <div className="px-4 pb-8 pt-1 border-t border-gray-100 space-y-2.5 flex-shrink-0">
                 <Link
                   href="/cars"
                   onClick={() => setMobileOpen(false)}
-                  className="flex items-center justify-center gap-2 w-full py-3 text-[10.5px] tracking-[0.22em] uppercase font-bold text-white rounded-sm transition-all"
-                  style={{
-                    background: 'linear-gradient(135deg, #E5000A, #CC0000)',
-                    boxShadow: '0 2px 10px rgba(229,0,10,0.4)',
-                  }}
+                  className="flex items-center justify-center gap-2 w-full py-3 bg-[#C8102E] hover:bg-[#A50D25] text-white text-[10.5px] tracking-[0.2em] uppercase font-bold rounded-[2px] transition-colors duration-150"
                 >
                   View Inventory
+                  <ChevronRight size={12} strokeWidth={2.5} />
                 </Link>
                 <a
                   href={waLink}
                   target="_blank"
                   rel="noopener noreferrer"
                   onClick={() => setMobileOpen(false)}
-                  className="flex items-center justify-center gap-2 w-full py-3.5 text-[10.5px] tracking-[0.22em] uppercase font-bold text-white rounded-sm transition-all"
-                  style={{
-                    background: 'linear-gradient(135deg, #00A651, #007A3D)',
-                    boxShadow: '0 2px 10px rgba(0,166,81,0.4)',
-                  }}
+                  className="flex items-center justify-center gap-2 w-full py-3 bg-[#25D366] hover:bg-[#1DAA57] text-white text-[10.5px] tracking-[0.2em] uppercase font-bold rounded-[2px] transition-colors duration-150"
                   data-testid="mobile-whatsapp-btn"
                 >
-                  <WhatsAppIcon className="text-white" size={14} />
-                  Contact via WhatsApp
+                  <WhatsAppIcon size={14} className="text-white" />
+                  WhatsApp Us
                 </a>
+
+                {/* Contact links */}
+                <div className="flex items-center justify-center gap-4 pt-1">
+                  <a href="mailto:info@wazirtrading.com" className="flex items-center gap-1 text-[10px] text-gray-400 hover:text-gray-600 transition-colors">
+                    <Mail size={10} /> info@wazirtrading.com
+                  </a>
+                </div>
               </div>
             </motion.div>
           </>
