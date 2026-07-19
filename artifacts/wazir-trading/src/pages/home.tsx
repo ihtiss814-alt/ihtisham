@@ -48,26 +48,26 @@ import CarCard, { Car } from '@/components/CarCard';
 
 /* ── Destination Countries Section ──────────────────────────── */
 const DESTINATIONS = [
-  { name: 'Pakistan',         flag: '🇵🇰' },
-  { name: 'UAE',              flag: '🇦🇪' },
-  { name: 'UK',               flag: '🇬🇧' },
-  { name: 'Guyana',           flag: '🇬🇾' },
-  { name: 'Jamaica',          flag: '🇯🇲' },
-  { name: 'Trinidad',         flag: '🇹🇹' },
-  { name: 'Barbados',         flag: '🇧🇧' },
-  { name: 'Kenya',            flag: '🇰🇪' },
-  { name: 'Tanzania',         flag: '🇹🇿' },
-  { name: 'Ghana',            flag: '🇬🇭' },
-  { name: 'Nigeria',          flag: '🇳🇬' },
-  { name: 'Uganda',           flag: '🇺🇬' },
-  { name: 'Russia',           flag: '🇷🇺' },
-  { name: 'New Zealand',      flag: '🇳🇿' },
-  { name: 'Papua New Guinea', flag: '🇵🇬' },
-  { name: 'Germany',          flag: '🇩🇪' },
-  { name: 'Georgia',          flag: '🇬🇪' },
-  { name: 'South Africa',     flag: '🇿🇦' },
-  { name: 'Australia',        flag: '🇦🇺' },
-  { name: 'Canada',           flag: '🇨🇦' },
+  { name: 'Pakistan',         code: 'pk' },
+  { name: 'UAE',              code: 'ae' },
+  { name: 'United Kingdom',   code: 'gb' },
+  { name: 'Guyana',           code: 'gy' },
+  { name: 'Jamaica',          code: 'jm' },
+  { name: 'Trinidad',         code: 'tt' },
+  { name: 'Barbados',         code: 'bb' },
+  { name: 'Kenya',            code: 'ke' },
+  { name: 'Tanzania',         code: 'tz' },
+  { name: 'Ghana',            code: 'gh' },
+  { name: 'Nigeria',          code: 'ng' },
+  { name: 'Uganda',           code: 'ug' },
+  { name: 'Russia',           code: 'ru' },
+  { name: 'New Zealand',      code: 'nz' },
+  { name: 'Papua New Guinea', code: 'pg' },
+  { name: 'Germany',          code: 'de' },
+  { name: 'Georgia',          code: 'ge' },
+  { name: 'South Africa',     code: 'za' },
+  { name: 'Australia',        code: 'au' },
+  { name: 'Canada',           code: 'ca' },
 ];
 
 function DestinationCountriesSection() {
@@ -83,11 +83,24 @@ function DestinationCountriesSection() {
           100% { transform: translateX(-50%); }
         }
         .marquee-track {
-          animation: marquee-scroll 32s linear infinite;
+          animation: marquee-scroll 36s linear infinite;
           will-change: transform;
         }
         .marquee-track:hover {
           animation-play-state: paused;
+        }
+        .dest-flag {
+          display: block;
+          width: 72px;
+          height: 48px;
+          object-fit: cover;
+          border-radius: 4px;
+          box-shadow: 0 2px 8px rgba(0,0,0,0.45);
+          transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        .dest-card:hover .dest-flag {
+          transform: scale(1.06);
+          box-shadow: 0 4px 16px rgba(200,16,46,0.35);
         }
       `}</style>
 
@@ -104,24 +117,37 @@ function DestinationCountriesSection() {
       {/* Scrolling track */}
       <div className="relative w-full">
         {/* Left fade */}
-        <div className="absolute left-0 top-0 bottom-0 w-16 z-10 pointer-events-none"
-          style={{ background: 'linear-gradient(to right, #0A0A0A, transparent)' }} />
+        <div className="absolute left-0 top-0 bottom-0 w-20 z-10 pointer-events-none"
+          style={{ background: 'linear-gradient(to right, #0A0A0A 30%, transparent)' }} />
         {/* Right fade */}
-        <div className="absolute right-0 top-0 bottom-0 w-16 z-10 pointer-events-none"
-          style={{ background: 'linear-gradient(to left, #0A0A0A, transparent)' }} />
+        <div className="absolute right-0 top-0 bottom-0 w-20 z-10 pointer-events-none"
+          style={{ background: 'linear-gradient(to left, #0A0A0A 30%, transparent)' }} />
 
         <div className="flex marquee-track gap-4 px-4" style={{ width: 'max-content' }}>
-          {track.map(({ name, flag }, i) => (
+          {track.map(({ name, code }, i) => (
             <button
-              key={`${name}-${i}`}
+              key={`${code}-${i}`}
               onClick={() => navigate(`/cars?destination=${encodeURIComponent(name)}`)}
-              className="group flex-shrink-0 flex flex-col items-center justify-center gap-2 w-28 py-5 px-3 rounded-[6px] border border-white/10 bg-white/5 hover:bg-[#C8102E] hover:border-[#C8102E] transition-all duration-200 cursor-pointer"
+              className="dest-card group flex-shrink-0 flex flex-col items-center gap-3 w-[108px] py-5 px-3 rounded-[8px] border border-white/10 bg-white/5 hover:bg-white/10 hover:border-[#C8102E]/60 transition-all duration-200 cursor-pointer"
             >
-              <span className="text-4xl leading-none select-none">{flag}</span>
-              <span className="text-[11px] font-bold text-white tracking-wide text-center leading-tight">
+              {/* Real country flag from flagcdn.com */}
+              <div className="overflow-hidden rounded-[4px] flex-shrink-0"
+                style={{ width: 72, height: 48, boxShadow: '0 2px 8px rgba(0,0,0,0.5)' }}>
+                <img
+                  src={`https://flagcdn.com/w80/${code}.png`}
+                  srcSet={`https://flagcdn.com/w160/${code}.png 2x`}
+                  alt={`${name} flag`}
+                  className="dest-flag"
+                  loading="lazy"
+                  width={72}
+                  height={48}
+                />
+              </div>
+
+              <span className="text-[11px] font-bold text-white/90 tracking-wide text-center leading-tight">
                 {name}
               </span>
-              <span className="text-[9px] tracking-[0.18em] uppercase text-white/40 group-hover:text-white/70 font-semibold transition-colors">
+              <span className="text-[9px] tracking-[0.2em] uppercase text-[#C8102E]/60 group-hover:text-[#C8102E] font-bold transition-colors">
                 STOCK
               </span>
             </button>
