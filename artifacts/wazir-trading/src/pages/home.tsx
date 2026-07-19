@@ -1,7 +1,40 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Link } from 'wouter';
+import { Link, useLocation } from 'wouter';
 import { motion, useInView } from 'framer-motion';
-import { ArrowRight, CheckCircle2, ShieldCheck, Ship, Globe, Award } from 'lucide-react';
+import { ArrowRight, CheckCircle2, ShieldCheck, Ship, Globe, Award, Search } from 'lucide-react';
+
+/* ── Search bar component ────────────────────────────────────── */
+function SearchBar() {
+  const [query, setQuery] = useState('');
+  const [, navigate] = useLocation();
+
+  const submit = () => {
+    const q = query.trim();
+    if (q) navigate(`/cars?q=${encodeURIComponent(q)}`);
+    else navigate('/cars');
+  };
+
+  return (
+    <div className="relative flex items-center w-full shadow-[0_4px_24px_rgba(0,0,0,0.10)] rounded-[4px] overflow-hidden border border-gray-200 focus-within:border-[#C8102E] focus-within:shadow-[0_4px_28px_rgba(200,16,46,0.15)] transition-all duration-200">
+      <Search size={18} className="absolute left-4 text-gray-400 flex-shrink-0 pointer-events-none" />
+      <input
+        type="text"
+        value={query}
+        onChange={e => setQuery(e.target.value)}
+        onKeyDown={e => e.key === 'Enter' && submit()}
+        placeholder="Search by make, model, or reference number…"
+        className="flex-1 h-14 pl-11 pr-4 text-[15px] text-gray-800 placeholder:text-gray-400 bg-white outline-none"
+      />
+      <button
+        onClick={submit}
+        className="h-14 px-7 bg-[#C8102E] hover:bg-[#A50D25] text-white text-[12px] font-bold tracking-[0.18em] uppercase transition-colors duration-150 flex items-center gap-2 flex-shrink-0"
+      >
+        <Search size={14} />
+        Search
+      </button>
+    </div>
+  );
+}
 
 function WhatsAppIcon({ size = 16, className = '' }: { size?: number; className?: string }) {
   return (
@@ -249,6 +282,33 @@ export default function HomePage() {
 
         {/* Bottom fade into page */}
         <div className="absolute bottom-0 inset-x-0 h-24 bg-gradient-to-t from-background to-transparent z-10 pointer-events-none" />
+      </section>
+
+      {/* ── SEARCH SECTION ────────────────────────────────────────── */}
+      <section className="bg-white py-10 border-b border-gray-100 shadow-sm">
+        <div className="max-w-4xl mx-auto px-4 md:px-8">
+
+          {/* Search bar */}
+          <SearchBar />
+
+          {/* Quick filters */}
+          <div className="flex flex-wrap justify-center gap-2.5 mt-5">
+            {[
+              { label: 'Under $2,000',   href: '/cars?maxPrice=2000' },
+              { label: 'SUV & 4WD',      href: '/cars?body=SUV' },
+              { label: 'Right Hand Drive', href: '/cars?steering=Right' },
+            ].map(({ label, href }) => (
+              <Link
+                key={label}
+                href={href}
+                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full border border-gray-200 text-[12px] font-semibold text-gray-600 hover:border-[#C8102E] hover:text-[#C8102E] hover:bg-red-50 transition-all duration-150"
+              >
+                <span className="w-1.5 h-1.5 rounded-full bg-[#C8102E] opacity-60" />
+                {label}
+              </Link>
+            ))}
+          </div>
+        </div>
       </section>
 
       {/* Featured Cars Section */}

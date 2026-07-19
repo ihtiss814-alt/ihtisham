@@ -4,18 +4,37 @@ import { supabase } from '@/lib/supabase';
 import CarCard, { Car } from '@/components/CarCard';
 import { Search, SlidersHorizontal, X } from 'lucide-react';
 
+function getParam(key: string) {
+  return new URLSearchParams(window.location.search).get(key) ?? '';
+}
+
 export default function CarsPage() {
   const [cars, setCars] = useState<Car[]>([]);
   const [loading, setLoading] = useState(true);
-  
-  // Filter States
-  const [showFilters, setShowFilters] = useState(false);
-  const [makeFilter, setMakeFilter] = useState('');
-  const [bodyFilter, setBodyFilter] = useState('');
-  const [fuelFilter, setFuelFilter] = useState('');
+
+  // Filter States — seeded from URL params on mount
+  const [showFilters, setShowFilters]   = useState(false);
+  const [searchQuery, setSearchQuery]   = useState(() => getParam('q'));
+  const [makeFilter, setMakeFilter]     = useState('');
+  const [bodyFilter, setBodyFilter]     = useState(() => getParam('body'));
+  const [fuelFilter, setFuelFilter]     = useState('');
+  const [maxPrice, setMaxPrice]         = useState(() => getParam('maxPrice'));
+  const [steeringFilter, setSteeringFilter] = useState(() => getParam('steering'));
+
+  // Sync URL → state whenever URL changes (e.g. back/forward)
+  useEffect(() => {
+    const sync = () => {
+      setSearchQuery(getParam('q'));
+      setBodyFilter(getParam('body'));
+      setMaxPrice(getParam('maxPrice'));
+      setSteeringFilter(getParam('steering'));
+    };
+    window.addEventListener('popstate', sync);
+    return () => window.removeEventListener('popstate', sync);
+  }, []);
 
   // Extract unique filter options
-  const makes = Array.from(new Set(cars.map(c => c.make))).sort();
+  const makes     = Array.from(new Set(cars.map(c => c.make))).sort();
   const bodyTypes = Array.from(new Set(cars.map(c => c.body_type))).sort();
   const fuelTypes = Array.from(new Set(cars.map(c => c.fuel_type))).sort();
 
@@ -40,11 +59,40 @@ export default function CarsPage() {
   }, []);
 
   const filteredCars = cars.filter(car => {
+    // Text search across make, model, variant
+    if (searchQuery) {
+      const q = searchQuery.toLowerCase();
+      const haystack = `${car.make} ${car.model} ${car.variant ?? ''}`.toLowerCase();
+      if (!haystack.includes(q)) return false;
+    }
     if (makeFilter && car.make !== makeFilter) return false;
-    if (bodyFilter && car.body_type !== bodyFilter) return false;
+    // Body filter: "SUV" matches SUV, 4WD, Wagon etc.
+    if (bodyFilter) {
+      const b = bodyFilter.toLowerCase();
+      const bt = (car.body_type ?? '').toLowerCase();
+      if (b === 'suv') {
+        if (!bt.includes('suv') && !bt.includes('4wd') && !bt.includes('wagon') && !bt.includes('crossover')) return false;
+      } else {
+        if (!bt.includes(b)) return false;
+      }
+    }
     if (fuelFilter && car.fuel_type !== fuelFilter) return false;
+    if (maxPrice && car.fob_price_usd > Number(maxPrice)) return false;
+    if (steeringFilter && !(car.steering ?? '').toLowerCase().includes(steeringFilter.toLowerCase())) return false;
     return true;
   });
+
+  const clearAll = () => {
+    setSearchQuery('');
+    setMakeFilter('');
+    setBodyFilter('');
+    setFuelFilter('');
+    setMaxPrice('');
+    setSteeringFilter('');
+    window.history.replaceState({}, '', '/cars');
+  };
+
+  const activeCount = [searchQuery, makeFilter, bodyFilter, fuelFilter, maxPrice, steeringFilter].filter(Boolean).length;
 
   return (
     <div className="min-h-screen bg-background pt-[130px] pb-16">
@@ -109,15 +157,11 @@ export default function CarsPage() {
                 </select>
               </div>
 
-              <button 
-                onClick={() => {
-                  setMakeFilter('');
-                  setBodyFilter('');
-                  setFuelFilter('');
-                }}
+              <button
+                onClick={clearAll}
                 className="w-full py-2 border border-border text-sm font-medium hover:bg-muted transition-colors mt-4"
               >
-                Reset Filters
+                Reset Filters {activeCount > 0 && `(${activeCount})`}
               </button>
             </div>
           </div>
