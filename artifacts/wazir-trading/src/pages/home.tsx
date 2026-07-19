@@ -720,6 +720,264 @@ function ShopByBudgetSection() {
   );
 }
 
+/* ── Featured Collection ─────────────────────────────────────── */
+// PKR/USD rate — update this constant when the rate changes
+const PKR_PER_USD = 280;
+
+const COLLECTION_TABS = [
+  { id: 'all',      label: 'Japan Stock',        filter: (_: import('@/components/CarCard').Car) => true },
+  { id: 'arrivals', label: 'New Arrivals',        filter: (c: import('@/components/CarCard').Car) => !!c.is_new_arrival },
+  { id: 'clearance',label: 'Clearance',           filter: (c: import('@/components/CarCard').Car) => (c.collection ?? '').toLowerCase().includes('clear') || c.fob_price_usd < 2000 },
+  { id: 'hybrid',   label: 'Hybrid Collection',   filter: (c: import('@/components/CarCard').Car) => (c.fuel_type ?? '').toLowerCase().includes('hybrid') },
+  { id: 'suv',      label: 'SUV Collection',      filter: (c: import('@/components/CarCard').Car) => ['suv','4wd','crossover'].some(k => (c.body_type ?? '').toLowerCase().includes(k)) },
+  { id: 'budget',   label: 'Budget Picks',        filter: (c: import('@/components/CarCard').Car) => c.fob_price_usd < 3000 },
+];
+
+function FeaturedCollectionSection() {
+  type Car = import('@/components/CarCard').Car;
+  const [, navigate] = useLocation();
+  const [cars, setCars]       = React.useState<Car[]>([]);
+  const [loading, setLoading] = React.useState(true);
+  const [activeTab, setActiveTab] = React.useState('all');
+  const [imgErrors, setImgErrors] = React.useState<Record<string, boolean>>({});
+
+  const waNumber  = import.meta.env.VITE_WHATSAPP_NUMBER || '818089227375';
+  const cloudName = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME || 'txb1wiw1';
+
+  React.useEffect(() => {
+    supabase
+      .from('cars')
+      .select('*')
+      .eq('is_featured', true)
+      .eq('status', 'available')
+      .limit(10)
+      .then(({ data }) => {
+        if (data) setCars(data as Car[]);
+        setLoading(false);
+      });
+  }, []);
+
+  const tabFilter = COLLECTION_TABS.find(t => t.id === activeTab)?.filter ?? (() => true);
+  const displayed = cars.filter(tabFilter as (c: Car) => boolean);
+
+  return (
+    <section className="py-14 bg-white border-b border-gray-100">
+      <div className="container mx-auto px-4 md:px-8">
+
+        {/* ── Header ── */}
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-6">
+          <div>
+            <p className="text-[10px] tracking-[0.28em] uppercase font-bold text-[#C8102E] mb-2">
+              Handpicked for You
+            </p>
+            <h2 className="text-2xl md:text-3xl font-serif font-bold text-gray-900 mb-3">
+              Featured Collection
+            </h2>
+            <div className="flex items-center flex-wrap gap-2">
+              <span className="text-gray-400 text-sm mr-1">Premium vehicles from Japan</span>
+              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-700 text-[11px] font-semibold">
+                ✓ Quality Guaranteed
+              </span>
+              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-blue-50 border border-blue-200 text-blue-700 text-[11px] font-semibold">
+                ✓ Best Price
+              </span>
+            </div>
+          </div>
+          <Link href="/cars" className="hidden md:flex items-center gap-1.5 text-sm font-semibold text-[#C8102E] hover:text-[#A50D25] transition-colors flex-shrink-0">
+            View All Inventory <ArrowRight size={15}/>
+          </Link>
+        </div>
+
+        {/* ── Promo Banners ── */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-8">
+          {/* Banner 1 */}
+          <div
+            className="flex items-center gap-4 px-5 py-4 rounded-xl"
+            style={{ background: 'linear-gradient(135deg, #C8102E 0%, #9B0D23 100%)' }}
+          >
+            <div className="w-10 h-10 rounded-full bg-white/15 flex items-center justify-center flex-shrink-0">
+              <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>
+              </svg>
+            </div>
+            <div>
+              <div className="font-bold text-white text-sm leading-tight">Best Deals Available</div>
+              <div className="text-white/70 text-xs mt-0.5">Instant quotes and Expert advice</div>
+            </div>
+          </div>
+          {/* Banner 2 */}
+          <div
+            className="flex items-center gap-4 px-5 py-4 rounded-xl"
+            style={{ background: 'linear-gradient(135deg, #1E293B 0%, #0F172A 100%)' }}
+          >
+            <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center flex-shrink-0">
+              <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#FBBF24" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"/>
+                <line x1="7" y1="7" x2="7.01" y2="7"/>
+              </svg>
+            </div>
+            <div>
+              <div className="font-bold text-white text-sm leading-tight">
+                <span style={{ color: '#FBBF24' }}>20% Bulk Discount</span>
+              </div>
+              <div className="text-white/55 text-xs mt-0.5">Buy 5 or more vehicles for wholesale pricing</div>
+            </div>
+          </div>
+        </div>
+
+        {/* ── Collection Filter Tabs ── */}
+        <div className="flex gap-2 flex-wrap mb-6">
+          {COLLECTION_TABS.map(tab => (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id)}
+              className="px-4 py-1.5 rounded-full text-[12px] font-semibold tracking-wide transition-all duration-200 cursor-pointer border"
+              style={activeTab === tab.id
+                ? { background: '#C8102E', color: '#fff', borderColor: '#C8102E', boxShadow: '0 2px 10px rgba(200,16,46,0.28)' }
+                : { background: '#F8FAFC', color: '#64748B', borderColor: '#E2E8F0' }
+              }
+            >
+              {tab.label}
+            </button>
+          ))}
+        </div>
+
+        {/* ── Cards Row ── */}
+        {loading ? (
+          /* Skeleton */
+          <div className="flex gap-4 overflow-hidden">
+            {[1,2,3,4].map(i => (
+              <div key={i} className="flex-shrink-0 w-[260px] rounded-xl bg-gray-100 animate-pulse" style={{ height: 380 }}/>
+            ))}
+          </div>
+        ) : displayed.length === 0 ? (
+          /* Empty state */
+          <div className="flex flex-col items-center justify-center py-20 border-2 border-dashed border-gray-200 rounded-2xl">
+            <svg width="48" height="48" viewBox="0 0 48 48" fill="none" className="mb-4 text-gray-300">
+              <circle cx="24" cy="24" r="22" stroke="currentColor" strokeWidth="2"/>
+              <path d="M14 30l4-8 6 4 5-7 5 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              <circle cx="24" cy="18" r="3" fill="currentColor"/>
+            </svg>
+            <h3 className="font-serif font-bold text-lg text-gray-600 mb-1">Featured cars coming soon</h3>
+            <p className="text-gray-400 text-sm text-center max-w-xs">
+              We're curating our premium collection — check back shortly or{' '}
+              <Link href="/cars" className="text-[#C8102E] font-medium hover:underline">browse all stock</Link>.
+            </p>
+          </div>
+        ) : (
+          <div className="flex gap-4 overflow-x-auto pb-3" style={{ scrollbarWidth: 'thin', scrollbarColor: '#E2E8F0 transparent' }}>
+            {displayed.map(car => {
+              const imgUrl = `https://res.cloudinary.com/${cloudName}/image/upload/cars/${car.ref_number.toLowerCase()}-1`;
+              const pkrPrice = Math.round(car.fob_price_usd * PKR_PER_USD).toLocaleString('en-PK');
+              const waMsg  = encodeURIComponent(`Hi Wazir Trading, I'm interested in the ${car.year} ${car.make} ${car.model} (Ref: ${car.ref_number}). Please share details and availability.`);
+              const waLink = `https://wa.me/${waNumber}?text=${waMsg}`;
+
+              return (
+                <div
+                  key={car.id}
+                  className="flex-shrink-0 w-[258px] bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm hover:shadow-lg hover:border-[#C8102E]/30 transition-all duration-250 group"
+                >
+                  {/* Image */}
+                  <div className="relative bg-gray-100 overflow-hidden" style={{ aspectRatio: '4/3' }}>
+                    <span className="absolute top-2.5 left-2.5 z-10 bg-black/70 text-white text-[10px] font-bold px-2 py-0.5 rounded-md backdrop-blur-sm tracking-wider">
+                      {car.year}
+                    </span>
+                    <span className="absolute top-2.5 right-2.5 z-10 text-white text-[10px] font-bold px-2 py-0.5 rounded-md backdrop-blur-sm tracking-wider"
+                      style={{ background: 'rgba(200,16,46,0.88)' }}>
+                      {car.engine_cc} cc
+                    </span>
+                    {imgErrors[car.id] ? (
+                      <div className="w-full h-full flex items-center justify-center bg-gray-100 text-gray-300">
+                        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                          <rect x="2" y="7" width="20" height="13" rx="2"/>
+                          <path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2"/>
+                          <circle cx="12" cy="13" r="2"/>
+                        </svg>
+                      </div>
+                    ) : (
+                      <img
+                        src={imgUrl}
+                        alt={`${car.make} ${car.model}`}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                        onError={() => setImgErrors(prev => ({ ...prev, [car.id]: true }))}
+                      />
+                    )}
+                  </div>
+
+                  {/* Content */}
+                  <div className="p-4 flex flex-col gap-3">
+                    {/* Make + Model + Ref */}
+                    <div>
+                      <h3 className="font-bold text-gray-900 text-[13px] leading-snug line-clamp-1">
+                        {car.make} {car.model}{car.variant ? ` ${car.variant}` : ''}
+                      </h3>
+                      <p className="text-[10px] font-mono text-gray-400 mt-0.5 tracking-wider">{car.ref_number}</p>
+                    </div>
+
+                    {/* Price block */}
+                    <div className="border-t border-gray-100 pt-2.5">
+                      <p className="text-[9px] uppercase tracking-[0.2em] text-gray-400 font-semibold mb-0.5">FOB Price (Japan)</p>
+                      <p className="text-[22px] font-extrabold text-gray-900 leading-none tracking-tight">
+                        ${car.fob_price_usd.toLocaleString()}
+                      </p>
+                      <p className="text-[11px] font-semibold mt-1" style={{ color: '#C8102E' }}>
+                        ≈ PKR {pkrPrice}
+                      </p>
+                    </div>
+
+                    {/* Action buttons */}
+                    <div className="flex gap-2 pt-1">
+                      <button
+                        onClick={() => navigate(`/cars/${car.ref_number}`)}
+                        className="flex-1 py-2 text-[11px] font-bold rounded-lg text-white transition-colors"
+                        style={{ background: '#C8102E' }}
+                        onMouseEnter={e => (e.currentTarget.style.background = '#A50D25')}
+                        onMouseLeave={e => (e.currentTarget.style.background = '#C8102E')}
+                      >
+                        Inquire Now
+                      </button>
+                      <a
+                        href={waLink}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="w-9 h-9 flex-shrink-0 flex items-center justify-center rounded-lg transition-colors"
+                        style={{ background: '#25D366' }}
+                        onMouseEnter={e => ((e.currentTarget as HTMLAnchorElement).style.background = '#128C7E')}
+                        onMouseLeave={e => ((e.currentTarget as HTMLAnchorElement).style.background = '#25D366')}
+                        aria-label="WhatsApp"
+                      >
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="white">
+                          <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+                        </svg>
+                      </a>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+
+            {/* See More tile */}
+            <div className="flex-shrink-0 w-[160px] flex items-center justify-center px-2">
+              <Link
+                href="/cars"
+                className="flex flex-col items-center gap-3 p-6 rounded-xl border-2 border-dashed border-[#C8102E]/25 text-[#C8102E] hover:border-[#C8102E]/60 hover:bg-[#C8102E]/5 transition-all duration-200 text-center w-full"
+              >
+                <div className="w-12 h-12 rounded-full bg-[#C8102E]/10 flex items-center justify-center">
+                  <ArrowRight size={20}/>
+                </div>
+                <div>
+                  <div className="font-bold text-sm">See More</div>
+                  <div className="text-[10px] text-[#C8102E]/55 mt-0.5">Full inventory</div>
+                </div>
+              </Link>
+            </div>
+          </div>
+        )}
+      </div>
+    </section>
+  );
+}
+
 /* ── Animated count-up hook ──────────────────────────────────── */
 function useCountUp(target: number, duration = 1800) {
   const [value, setValue] = useState(0);
@@ -996,6 +1254,9 @@ export default function HomePage() {
 
       {/* ── SHOP BY BUDGET ────────────────────────────────────────── */}
       <ShopByBudgetSection />
+
+      {/* ── FEATURED COLLECTION ───────────────────────────────────── */}
+      <FeaturedCollectionSection />
 
       {/* Featured Cars Section */}
       <section className="py-24 bg-background">
