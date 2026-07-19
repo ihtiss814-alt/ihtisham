@@ -165,14 +165,14 @@ export default function Navbar() {
         {/* ── MAIN NAV ──────────────────────────────────────────────── */}
         <div className="bg-white border-b border-gray-100">
           <div className="max-w-7xl mx-auto px-4 md:px-8">
-            <div className="flex items-center justify-between h-[68px]">
+            <div className="flex items-center justify-between h-[80px]">
 
               {/* Logo */}
               <Link href="/" className="flex-shrink-0 group" data-testid="link-logo">
                 <img
                   src="/logo.png"
                   alt="Wazir Trading LLC"
-                  className="h-[54px] md:h-[60px] w-auto transition-opacity duration-200 group-hover:opacity-85"
+                  className="h-[64px] md:h-[72px] w-auto transition-opacity duration-200 group-hover:opacity-85"
                   style={{ mixBlendMode: 'multiply' }}
                   loading="eager"
                 />
