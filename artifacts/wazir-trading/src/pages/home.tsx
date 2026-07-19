@@ -158,6 +158,173 @@ function DestinationCountriesSection() {
   );
 }
 
+/* ── Shop By Make Section ────────────────────────────────────── */
+const BRANDS = [
+  { name: 'Toyota',     slug: 'toyota',     accent: '#EB0A1E' },
+  { name: 'Nissan',     slug: 'nissan',     accent: '#C3002F' },
+  { name: 'Honda',      slug: 'honda',      accent: '#CC0000' },
+  { name: 'Mazda',      slug: 'mazda',      accent: '#1E3A8A' },
+  { name: 'Mitsubishi', slug: 'mitsubishi', accent: '#E60012' },
+  { name: 'Suzuki',     slug: 'suzuki',     accent: '#1B5CCC' },
+  { name: 'Daihatsu',   slug: 'daihatsu',   accent: '#005BAC' },
+  { name: 'Subaru',     slug: 'subaru',     accent: '#0033A1' },
+  { name: 'Lexus',      slug: 'lexus',      accent: '#1A1A1A' },
+  { name: 'Isuzu',      slug: 'isuzu',      accent: '#D40000' },
+  { name: 'Audi',       slug: 'audi',       accent: '#BB0A14' },
+  { name: 'BMW',        slug: 'bmw',        accent: '#0066B1' },
+  { name: 'Mercedes',   slug: 'mercedes',   accent: '#666666' },
+  { name: 'Volkswagen', slug: 'volkswagen', accent: '#001E50' },
+  { name: 'Land Rover', slug: 'landrover',  accent: '#005A2B' },
+];
+
+function BrandLogo({ slug, name, accent }: { slug: string; name: string; accent: string }) {
+  const [failed, setFailed] = React.useState(false);
+  const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+  const src = `${base}/logos/${slug}.svg`;
+  const initials = name.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase();
+
+  if (failed) {
+    return (
+      <div
+        className="flex items-center justify-center w-full h-full rounded-[6px] font-black text-lg tracking-tight text-white select-none"
+        style={{ background: accent }}
+      >
+        {initials}
+      </div>
+    );
+  }
+
+  return (
+    <img
+      src={src}
+      alt={`${name} logo`}
+      onError={() => setFailed(true)}
+      className="w-full h-full object-contain p-1"
+      loading="lazy"
+      style={{
+        // Tint monochrome Simple Icons SVGs to brand accent colour
+        filter: `brightness(0) saturate(100%) ${accentToFilter(accent)}`,
+      }}
+    />
+  );
+}
+
+/**
+ * Converts a hex colour to the nearest CSS filter chain so a black SVG
+ * can be tinted to that colour via `brightness(0) saturate(100%) <filter>`.
+ * Values are pre-computed per brand accent to avoid runtime math.
+ */
+function accentToFilter(hex: string): string {
+  const map: Record<string, string> = {
+    '#EB0A1E': 'invert(15%) sepia(99%) saturate(5000%) hue-rotate(349deg) brightness(95%)',   // Toyota red
+    '#C3002F': 'invert(10%) sepia(95%) saturate(4000%) hue-rotate(340deg) brightness(90%)',   // Nissan red
+    '#CC0000': 'invert(12%) sepia(100%) saturate(5000%) hue-rotate(350deg) brightness(92%)',  // Honda red
+    '#1E3A8A': 'invert(16%) sepia(80%) saturate(1500%) hue-rotate(210deg) brightness(85%)',   // Mazda blue
+    '#E60012': 'invert(12%) sepia(99%) saturate(6000%) hue-rotate(348deg) brightness(95%)',   // Mitsubishi red
+    '#1B5CCC': 'invert(28%) sepia(74%) saturate(900%) hue-rotate(200deg) brightness(90%)',    // Suzuki blue
+    '#005BAC': 'invert(22%) sepia(90%) saturate(700%) hue-rotate(200deg) brightness(85%)',    // Daihatsu blue
+    '#0033A1': 'invert(18%) sepia(80%) saturate(1200%) hue-rotate(215deg) brightness(80%)',   // Subaru blue
+    '#1A1A1A': 'invert(0%) brightness(15%)',                                                    // Lexus near-black
+    '#D40000': 'invert(12%) sepia(100%) saturate(5500%) hue-rotate(350deg) brightness(90%)',  // Isuzu red
+    '#BB0A14': 'invert(13%) sepia(98%) saturate(3500%) hue-rotate(348deg) brightness(88%)',   // Audi red
+    '#0066B1': 'invert(24%) sepia(88%) saturate(700%) hue-rotate(195deg) brightness(90%)',    // BMW blue
+    '#666666': 'invert(40%) brightness(60%)',                                                   // Mercedes grey
+    '#001E50': 'invert(8%) sepia(80%) saturate(2000%) hue-rotate(220deg) brightness(70%)',    // VW navy
+    '#005A2B': 'invert(18%) sepia(80%) saturate(700%) hue-rotate(130deg) brightness(75%)',    // Land Rover green
+  };
+  return map[hex] ?? 'invert(20%)';
+}
+
+function ShopByMakeSection() {
+  const [, navigate] = useLocation();
+  const [makeCounts, setMakeCounts] = React.useState<Record<string, number>>({});
+
+  React.useEffect(() => {
+    supabase
+      .from('cars')
+      .select('make')
+      .eq('status', 'available')
+      .then(({ data }) => {
+        if (!data) return;
+        const counts: Record<string, number> = {};
+        for (const row of data) {
+          if (row.make) counts[row.make] = (counts[row.make] ?? 0) + 1;
+        }
+        setMakeCounts(counts);
+      });
+  }, []);
+
+  // Duplicate for seamless loop
+  const track = [...BRANDS, ...BRANDS];
+
+  return (
+    <section className="bg-white border-b border-gray-100 py-12 overflow-hidden">
+      <style>{`
+        @keyframes brand-scroll {
+          0%   { transform: translateX(0); }
+          100% { transform: translateX(-50%); }
+        }
+        .brand-track {
+          animation: brand-scroll 40s linear infinite;
+          will-change: transform;
+        }
+        .brand-track:hover {
+          animation-play-state: paused;
+        }
+      `}</style>
+
+      {/* Heading */}
+      <div className="text-center mb-8 px-4">
+        <p className="text-[10px] tracking-[0.28em] uppercase font-bold text-[#C8102E] mb-2">
+          Browse By Brand
+        </p>
+        <h2 className="text-2xl md:text-3xl font-serif font-bold text-gray-900">
+          Shop By Make
+        </h2>
+      </div>
+
+      {/* Scrolling row */}
+      <div className="relative w-full">
+        {/* Left fade */}
+        <div className="absolute left-0 top-0 bottom-0 w-16 z-10 pointer-events-none"
+          style={{ background: 'linear-gradient(to right, white, transparent)' }} />
+        {/* Right fade */}
+        <div className="absolute right-0 top-0 bottom-0 w-16 z-10 pointer-events-none"
+          style={{ background: 'linear-gradient(to left, white, transparent)' }} />
+
+        <div className="flex brand-track gap-4 px-4" style={{ width: 'max-content' }}>
+          {track.map(({ name, slug, accent }, i) => {
+            const count = makeCounts[name] ?? 0;
+            return (
+              <button
+                key={`${name}-${i}`}
+                onClick={() => navigate(`/cars?make=${encodeURIComponent(name)}`)}
+                className="group flex-shrink-0 flex flex-col items-center gap-3 w-[120px] py-5 px-3 rounded-[8px] border border-gray-200 bg-white hover:border-[#C8102E] hover:shadow-[0_4px_20px_rgba(200,16,46,0.12)] transition-all duration-200 cursor-pointer"
+              >
+                {/* Logo box */}
+                <div className="w-14 h-14 flex items-center justify-center rounded-[6px] overflow-hidden bg-gray-50 flex-shrink-0 border border-gray-100">
+                  <BrandLogo slug={slug} name={name} accent={accent} />
+                </div>
+
+                {/* Brand name */}
+                <span className="text-[12px] font-bold text-gray-800 group-hover:text-[#C8102E] tracking-wide text-center leading-tight transition-colors">
+                  {name}
+                </span>
+
+                {/* Live car count */}
+                <span className="text-[10px] font-semibold tracking-[0.12em] uppercase"
+                  style={{ color: count > 0 ? '#C8102E' : '#9CA3AF' }}>
+                  {count > 0 ? `${count} car${count !== 1 ? 's' : ''}` : 'On Request'}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+      </div>
+    </section>
+  );
+}
+
 /* ── Animated count-up hook ──────────────────────────────────── */
 function useCountUp(target: number, duration = 1800) {
   const [value, setValue] = useState(0);
@@ -425,6 +592,9 @@ export default function HomePage() {
 
       {/* ── DESTINATION COUNTRIES ─────────────────────────────────── */}
       <DestinationCountriesSection />
+
+      {/* ── SHOP BY MAKE ──────────────────────────────────────────── */}
+      <ShopByMakeSection />
 
       {/* Featured Cars Section */}
       <section className="py-24 bg-background">
