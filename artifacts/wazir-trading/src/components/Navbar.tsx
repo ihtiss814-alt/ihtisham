@@ -118,17 +118,18 @@ export default function Navbar() {
 
         {/* ── BAR 2: Info strip ─────────────────────────────────────── */}
         <div className="bg-[#F9F9F9] border-b border-gray-200">
-          <div className="max-w-7xl mx-auto px-4 md:px-8 h-8 flex items-center justify-between">
 
+          {/* ── Desktop (md+): three-column layout ── */}
+          <div className="hidden md:flex max-w-7xl mx-auto px-8 h-8 items-center justify-between">
             {/* Left — tagline */}
-            <span className="hidden md:block text-[10px] tracking-[0.24em] uppercase font-semibold text-[#C8102E]">
+            <span className="text-[10px] tracking-[0.24em] uppercase font-semibold text-[#C8102E] whitespace-nowrap">
               The Cars Exporting Expert
             </span>
 
-            {/* Center — JST clock */}
+            {/* Center — full JST */}
             <div className="flex items-center gap-1.5">
               <Clock size={10} className="text-gray-400 flex-shrink-0" />
-              <span className="text-[10px] tracking-[0.12em] text-gray-400 font-medium whitespace-nowrap">
+              <span className="text-[10px] tracking-[0.1em] text-gray-400 font-medium whitespace-nowrap">
                 Japan Standard Time
               </span>
               <span className="text-[10.5px] font-semibold text-gray-700 tabular-nums whitespace-nowrap">
@@ -137,8 +138,8 @@ export default function Navbar() {
             </div>
 
             {/* Right — stock + rate */}
-            <div className="flex items-center gap-3 text-[10px] tracking-[0.1em] uppercase text-gray-400">
-              <div className="hidden sm:flex items-center gap-1.5">
+            <div className="flex items-center gap-3 text-[10px] tracking-[0.1em] uppercase text-gray-400 whitespace-nowrap">
+              <div className="flex items-center gap-1.5">
                 <Car size={10} className="text-[#C8102E]" />
                 <span>
                   In Stock:{' '}
@@ -147,12 +148,42 @@ export default function Navbar() {
                   </strong>
                 </span>
               </div>
-              <span className="hidden sm:block h-3 w-px bg-gray-300" />
-              <span>
-                $1 = <strong className="text-gray-700 font-semibold">¥162</strong>
-              </span>
+              <span className="h-3 w-px bg-gray-300" />
+              <span>$1 = <strong className="text-gray-700 font-semibold">¥162</strong></span>
             </div>
           </div>
+
+          {/* ── Mobile (< md): single compact row ── */}
+          <div className="flex md:hidden max-w-7xl mx-auto px-4 h-8 items-center justify-between gap-2">
+            {/* JST abbreviated */}
+            <div className="flex items-center gap-1 min-w-0">
+              <Clock size={9} className="text-gray-400 flex-shrink-0" />
+              <span className="text-[9.5px] font-medium text-gray-400 whitespace-nowrap">JST</span>
+              <span className="text-[9.5px] font-bold text-gray-700 tabular-nums truncate">
+                {japanTime || '--'}
+              </span>
+            </div>
+
+            {/* Divider */}
+            <span className="h-3 w-px bg-gray-300 flex-shrink-0" />
+
+            {/* Stock */}
+            <div className="flex items-center gap-1 flex-shrink-0">
+              <Car size={9} className="text-[#C8102E]" />
+              <span className="text-[9.5px] text-gray-400 uppercase tracking-wide">
+                Stock: <strong className="text-[#C8102E]">{stockCount !== null ? stockCount : '—'}</strong>
+              </span>
+            </div>
+
+            {/* Divider */}
+            <span className="h-3 w-px bg-gray-300 flex-shrink-0" />
+
+            {/* Rate */}
+            <span className="text-[9.5px] text-gray-400 whitespace-nowrap flex-shrink-0">
+              $1 = <strong className="text-gray-700">¥162</strong>
+            </span>
+          </div>
+
         </div>
 
         {/* ── Brand-red accent rule ──────────────────────────────────── */}
