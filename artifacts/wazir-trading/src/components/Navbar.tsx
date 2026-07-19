@@ -20,25 +20,21 @@ const NAV_LINKS = [
 ];
 
 function useJapanTime() {
-  const [time, setTime] = useState('');
+  const [display, setDisplay] = useState('');
   useEffect(() => {
     const tick = () => {
       const now = new Date();
-      setTime(
-        now.toLocaleTimeString('en-GB', {
-          timeZone: 'Asia/Tokyo',
-          hour: '2-digit',
-          minute: '2-digit',
-          second: '2-digit',
-          hour12: false,
-        })
-      );
+      const weekday = now.toLocaleDateString('en-US', { timeZone: 'Asia/Tokyo', weekday: 'short' });
+      const month   = now.toLocaleDateString('en-US', { timeZone: 'Asia/Tokyo', month: '2-digit' });
+      const day     = now.toLocaleDateString('en-US', { timeZone: 'Asia/Tokyo', day: '2-digit' });
+      const time    = now.toLocaleTimeString('en-US', { timeZone: 'Asia/Tokyo', hour: '2-digit', minute: '2-digit', hour12: true });
+      setDisplay(`${weekday}, ${month}/${day}, ${time}`);
     };
     tick();
     const id = setInterval(tick, 1000);
     return () => clearInterval(id);
   }, []);
-  return time;
+  return display;
 }
 
 function useStockCount() {
@@ -132,11 +128,11 @@ export default function Navbar() {
             {/* Center — JST clock */}
             <div className="flex items-center gap-1.5">
               <Clock size={10} className="text-gray-400 flex-shrink-0" />
-              <span className="text-[10px] uppercase tracking-[0.14em] text-gray-400 font-medium">
-                Japan
+              <span className="text-[10px] tracking-[0.12em] text-gray-400 font-medium whitespace-nowrap">
+                Japan Standard Time
               </span>
-              <span className="text-[10.5px] font-mono font-bold text-gray-700 tabular-nums min-w-[58px]">
-                {japanTime || '--:--:--'}
+              <span className="text-[10.5px] font-semibold text-gray-700 tabular-nums whitespace-nowrap">
+                {japanTime || '--'}
               </span>
             </div>
 
