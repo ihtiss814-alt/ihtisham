@@ -538,6 +538,171 @@ function ShopByBodyTypeSection() {
   );
 }
 
+/* ── Shop By Budget ──────────────────────────────────────────── */
+const BUDGET_TIERS = [
+  { label: 'Under $1,000',   price: '$1,000',  tier: 'Entry Level',    icon: 'entry',   accent: '#94A3B8', maxPrice: 1000  },
+  { label: 'Under $2,000',   price: '$2,000',  tier: 'Budget Pick',    icon: 'budget',  accent: '#38BDF8', maxPrice: 2000  },
+  { label: 'Under $3,000',   price: '$3,000',  tier: 'Popular Range',  icon: 'popular', accent: '#4ADE80', maxPrice: 3000  },
+  { label: 'Under $4,000',   price: '$4,000',  tier: 'Mid Range',      icon: 'mid',     accent: '#FBBF24', maxPrice: 4000  },
+  { label: 'Under $5,000',   price: '$5,000',  tier: 'Premium Select', icon: 'premium', accent: '#FB923C', maxPrice: 5000  },
+  { label: '$5,000 & Above', price: '$5,000+', tier: 'Luxury Tier',    icon: 'luxury',  accent: '#E879F9', minPrice: 5000  },
+] as const;
+
+function BudgetIcon({ icon, color: c }: { icon: string; color: string }) {
+  const s = { stroke: c, strokeWidth: '1.8', strokeLinecap: 'round' as const, strokeLinejoin: 'round' as const, fill: 'none' };
+  const vb = '0 0 32 32';
+  const sz = { width: 28, height: 28 };
+
+  switch (icon) {
+    case 'entry':
+      // Stacked coins — three layered ellipses with side walls
+      return <svg viewBox={vb} {...sz}>
+        <path {...s} d="M6 10v5M26 10v5"/>
+        <ellipse cx="16" cy="10" rx="10" ry="4" {...s}/>
+        <path {...s} d="M6 15v4M26 15v4"/>
+        <ellipse cx="16" cy="15" rx="10" ry="4" {...s}/>
+        <path {...s} d="M6 19v4M26 19v4"/>
+        <ellipse cx="16" cy="19" rx="10" ry="4" {...s}/>
+        <ellipse cx="16" cy="23" rx="10" ry="4" {...s}/>
+      </svg>;
+
+    case 'budget':
+      // Wallet with card slot
+      return <svg viewBox={vb} {...sz}>
+        <rect x="4" y="8" width="24" height="17" rx="2.5" {...s}/>
+        <path {...s} d="M4 13h24"/>
+        <rect x="18" y="16" width="7" height="5" rx="1.5" {...s}/>
+        <circle cx="21.5" cy="18.5" r="1" fill={c}/>
+      </svg>;
+
+    case 'popular':
+      // Bar chart trending upward
+      return <svg viewBox={vb} {...sz}>
+        <rect x="3"  y="20" width="5" height="8" rx="1.5" {...s}/>
+        <rect x="10" y="14" width="5" height="14" rx="1.5" {...s}/>
+        <rect x="17" y="9"  width="5" height="19" rx="1.5" {...s}/>
+        <path {...s} d="M24 4l4-3M28 1v6M28 1h-6"/>
+        <circle cx="26" cy="3" r="1.5" fill={c}/>
+      </svg>;
+
+    case 'mid':
+      // Shield with checkmark
+      return <svg viewBox={vb} {...sz}>
+        <path {...s} d="M16 3L4 8v8c0 6.5 5.5 10.5 12 13 6.5-2.5 12-6.5 12-13V8L16 3z"/>
+        <path {...s} d="M11 16l3.5 3.5L21 13"/>
+      </svg>;
+
+    case 'premium':
+      // 5-point star
+      return <svg viewBox={vb} {...sz}>
+        <polygon
+          points="16,3 19.6,11.5 29,12.4 22.2,18.5 24.4,28 16,23.1 7.6,28 9.8,18.5 3,12.4 12.4,11.5"
+          {...s}
+        />
+      </svg>;
+
+    case 'luxury':
+      // Crown with jewel dots
+      return <svg viewBox={vb} {...sz}>
+        <path {...s} d="M4 23L7 10l5 6.5 4-9 4 9 5-6.5 3 13Z"/>
+        <path {...s} d="M4 23h24"/>
+        <circle cx="7"  cy="10" r="1.8" fill={c}/>
+        <circle cx="16" cy="7"  r="1.8" fill={c}/>
+        <circle cx="25" cy="10" r="1.8" fill={c}/>
+      </svg>;
+
+    default:
+      return <svg viewBox={vb} {...sz}><circle cx="16" cy="16" r="10" {...s}/></svg>;
+  }
+}
+
+function ShopByBudgetSection() {
+  const [, navigate] = useLocation();
+
+  return (
+    <section className="py-16" style={{ background: '#0A0A0A' }}>
+
+      {/* Heading */}
+      <div className="text-center mb-12 px-4">
+        <p className="text-[10px] tracking-[0.28em] uppercase font-bold text-[#C8102E] mb-2">
+          FOB Japan
+        </p>
+        <h2 className="text-2xl md:text-3xl font-serif font-bold text-white">
+          Shop by Budget
+        </h2>
+        <p className="text-white/35 text-sm mt-2 tracking-wide">
+          All prices are Free-On-Board Japan — export-ready
+        </p>
+      </div>
+
+      {/* Cards row — horizontal scroll on mobile, centered on desktop */}
+      <div className="px-6 overflow-x-auto pb-3">
+        <div className="flex gap-4 w-max lg:w-full lg:justify-center mx-auto">
+          {BUDGET_TIERS.map(({ label, price, tier, icon, accent, maxPrice, minPrice }) => {
+            const handleClick = () => {
+              const qs = 'maxPrice' in { maxPrice, minPrice } && maxPrice
+                ? `maxPrice=${maxPrice}`
+                : `minPrice=${minPrice}`;
+              navigate(`/cars?${qs}`);
+            };
+
+            return (
+              <button
+                key={tier}
+                onClick={handleClick}
+                className="group flex-shrink-0 flex flex-col items-center gap-4 w-[152px] py-8 px-4 rounded-2xl cursor-pointer transition-transform duration-200"
+                style={{
+                  background: '#111111',
+                  border: `1px solid ${accent}28`,
+                  boxShadow: `0 2px 16px ${accent}0a`,
+                }}
+                onMouseEnter={e => {
+                  const el = e.currentTarget;
+                  el.style.border     = `1px solid ${accent}70`;
+                  el.style.boxShadow  = `0 8px 32px ${accent}22, inset 0 0 24px ${accent}09`;
+                  el.style.transform  = 'translateY(-4px)';
+                }}
+                onMouseLeave={e => {
+                  const el = e.currentTarget;
+                  el.style.border     = `1px solid ${accent}28`;
+                  el.style.boxShadow  = `0 2px 16px ${accent}0a`;
+                  el.style.transform  = 'translateY(0)';
+                }}
+              >
+                {/* Icon ring */}
+                <div
+                  className="w-14 h-14 rounded-full flex items-center justify-center flex-shrink-0"
+                  style={{ background: `${accent}15`, border: `1px solid ${accent}30` }}
+                >
+                  <BudgetIcon icon={icon} color={accent} />
+                </div>
+
+                {/* Price — hero text */}
+                <div className="text-center">
+                  <div className="text-[10px] tracking-[0.18em] uppercase font-semibold text-white/30 mb-0.5">
+                    {price.endsWith('+') ? 'Starting from' : 'Under'}
+                  </div>
+                  <div
+                    className="text-2xl font-extrabold leading-none tracking-tight"
+                    style={{ color: accent }}
+                  >
+                    {price}
+                  </div>
+                </div>
+
+                {/* Tier label */}
+                <div className="text-[11px] font-bold tracking-[0.14em] uppercase text-white/50 group-hover:text-white/80 transition-colors text-center">
+                  {tier}
+                </div>
+              </button>
+            );
+          })}
+        </div>
+      </div>
+    </section>
+  );
+}
+
 /* ── Animated count-up hook ──────────────────────────────────── */
 function useCountUp(target: number, duration = 1800) {
   const [value, setValue] = useState(0);
@@ -811,6 +976,9 @@ export default function HomePage() {
 
       {/* ── SHOP BY BODY TYPE ─────────────────────────────────────── */}
       <ShopByBodyTypeSection />
+
+      {/* ── SHOP BY BUDGET ────────────────────────────────────────── */}
+      <ShopByBudgetSection />
 
       {/* Featured Cars Section */}
       <section className="py-24 bg-background">

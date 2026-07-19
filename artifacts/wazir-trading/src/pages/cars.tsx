@@ -19,6 +19,7 @@ export default function CarsPage() {
   const [bodyFilter, setBodyFilter]     = useState(() => getParam('body'));
   const [fuelFilter, setFuelFilter]     = useState('');
   const [maxPrice, setMaxPrice]         = useState(() => getParam('maxPrice'));
+  const [minPrice, setMinPrice]         = useState(() => getParam('minPrice'));
   const [steeringFilter, setSteeringFilter] = useState(() => getParam('steering'));
   const [destinationFilter, setDestinationFilter] = useState(() => getParam('destination'));
 
@@ -28,6 +29,7 @@ export default function CarsPage() {
       setSearchQuery(getParam('q'));
       setBodyFilter(getParam('body'));
       setMaxPrice(getParam('maxPrice'));
+      setMinPrice(getParam('minPrice'));
       setSteeringFilter(getParam('steering'));
       setDestinationFilter(getParam('destination'));
     };
@@ -80,6 +82,7 @@ export default function CarsPage() {
     }
     if (fuelFilter && car.fuel_type !== fuelFilter) return false;
     if (maxPrice && car.fob_price_usd > Number(maxPrice)) return false;
+    if (minPrice && car.fob_price_usd < Number(minPrice)) return false;
     if (steeringFilter && !(car.steering ?? '').toLowerCase().includes(steeringFilter.toLowerCase())) return false;
     return true;
   });
@@ -90,12 +93,13 @@ export default function CarsPage() {
     setBodyFilter('');
     setFuelFilter('');
     setMaxPrice('');
+    setMinPrice('');
     setSteeringFilter('');
     setDestinationFilter('');
     window.history.replaceState({}, '', '/cars');
   };
 
-  const activeCount = [searchQuery, makeFilter, bodyFilter, fuelFilter, maxPrice, steeringFilter, destinationFilter].filter(Boolean).length;
+  const activeCount = [searchQuery, makeFilter, bodyFilter, fuelFilter, maxPrice, minPrice, steeringFilter, destinationFilter].filter(Boolean).length;
 
   return (
     <div className="min-h-screen bg-background pt-[130px] pb-16">
@@ -104,14 +108,26 @@ export default function CarsPage() {
         <div className="container mx-auto px-4 md:px-8">
           <h1 className="text-4xl md:text-5xl font-serif font-bold mb-4">Japanese Stock</h1>
           <p className="text-white/70 max-w-2xl text-lg">Browse our current inventory of premium Japanese used vehicles available for global export.</p>
-          {destinationFilter && (
-            <div className="mt-5 inline-flex items-center gap-3 px-4 py-2 rounded-full bg-white/10 border border-white/20 text-sm font-semibold">
-              <span>Shipping to: <span className="text-[#F87171]">{destinationFilter}</span></span>
-              <button
-                onClick={() => { setDestinationFilter(''); window.history.replaceState({}, '', '/cars'); }}
-                className="text-white/50 hover:text-white transition-colors text-lg leading-none"
-                aria-label="Clear destination"
-              >×</button>
+          {(destinationFilter || maxPrice || minPrice) && (
+            <div className="mt-5 flex flex-wrap gap-2">
+              {destinationFilter && (
+                <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 border border-white/20 text-sm font-semibold">
+                  Shipping to: <span className="text-[#F87171]">{destinationFilter}</span>
+                  <button onClick={() => { setDestinationFilter(''); window.history.replaceState({}, '', '/cars'); }} className="text-white/50 hover:text-white transition-colors text-lg leading-none" aria-label="Clear destination">×</button>
+                </span>
+              )}
+              {maxPrice && (
+                <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 border border-white/20 text-sm font-semibold">
+                  Budget: <span className="text-[#F87171]">Under ${Number(maxPrice).toLocaleString()}</span>
+                  <button onClick={() => { setMaxPrice(''); window.history.replaceState({}, '', '/cars'); }} className="text-white/50 hover:text-white transition-colors text-lg leading-none" aria-label="Clear max price">×</button>
+                </span>
+              )}
+              {minPrice && (
+                <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 border border-white/20 text-sm font-semibold">
+                  Budget: <span className="text-[#F87171]">${Number(minPrice).toLocaleString()} & Above</span>
+                  <button onClick={() => { setMinPrice(''); window.history.replaceState({}, '', '/cars'); }} className="text-white/50 hover:text-white transition-colors text-lg leading-none" aria-label="Clear min price">×</button>
+                </span>
+              )}
             </div>
           )}
         </div>
