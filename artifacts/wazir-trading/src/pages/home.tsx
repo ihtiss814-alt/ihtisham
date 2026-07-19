@@ -46,6 +46,92 @@ function WhatsAppIcon({ size = 16, className = '' }: { size?: number; className?
 import { supabase } from '@/lib/supabase';
 import CarCard, { Car } from '@/components/CarCard';
 
+/* ── Destination Countries Section ──────────────────────────── */
+const DESTINATIONS = [
+  { name: 'Pakistan',         flag: '🇵🇰' },
+  { name: 'UAE',              flag: '🇦🇪' },
+  { name: 'UK',               flag: '🇬🇧' },
+  { name: 'Guyana',           flag: '🇬🇾' },
+  { name: 'Jamaica',          flag: '🇯🇲' },
+  { name: 'Trinidad',         flag: '🇹🇹' },
+  { name: 'Barbados',         flag: '🇧🇧' },
+  { name: 'Kenya',            flag: '🇰🇪' },
+  { name: 'Tanzania',         flag: '🇹🇿' },
+  { name: 'Ghana',            flag: '🇬🇭' },
+  { name: 'Nigeria',          flag: '🇳🇬' },
+  { name: 'Uganda',           flag: '🇺🇬' },
+  { name: 'Russia',           flag: '🇷🇺' },
+  { name: 'New Zealand',      flag: '🇳🇿' },
+  { name: 'Papua New Guinea', flag: '🇵🇬' },
+  { name: 'Germany',          flag: '🇩🇪' },
+  { name: 'Georgia',          flag: '🇬🇪' },
+  { name: 'South Africa',     flag: '🇿🇦' },
+  { name: 'Australia',        flag: '🇦🇺' },
+  { name: 'Canada',           flag: '🇨🇦' },
+];
+
+function DestinationCountriesSection() {
+  const [, navigate] = useLocation();
+  // Duplicate list so the marquee loops seamlessly
+  const track = [...DESTINATIONS, ...DESTINATIONS];
+
+  return (
+    <section className="bg-[#0A0A0A] py-12 overflow-hidden">
+      <style>{`
+        @keyframes marquee-scroll {
+          0%   { transform: translateX(0); }
+          100% { transform: translateX(-50%); }
+        }
+        .marquee-track {
+          animation: marquee-scroll 32s linear infinite;
+          will-change: transform;
+        }
+        .marquee-track:hover {
+          animation-play-state: paused;
+        }
+      `}</style>
+
+      {/* Section heading */}
+      <div className="text-center mb-8 px-4">
+        <p className="text-[10px] tracking-[0.28em] uppercase font-bold text-[#C8102E] mb-2">
+          We Ship To
+        </p>
+        <h2 className="text-2xl md:text-3xl font-serif font-bold text-white">
+          Select Your Destination Country
+        </h2>
+      </div>
+
+      {/* Scrolling track */}
+      <div className="relative w-full">
+        {/* Left fade */}
+        <div className="absolute left-0 top-0 bottom-0 w-16 z-10 pointer-events-none"
+          style={{ background: 'linear-gradient(to right, #0A0A0A, transparent)' }} />
+        {/* Right fade */}
+        <div className="absolute right-0 top-0 bottom-0 w-16 z-10 pointer-events-none"
+          style={{ background: 'linear-gradient(to left, #0A0A0A, transparent)' }} />
+
+        <div className="flex marquee-track gap-4 px-4" style={{ width: 'max-content' }}>
+          {track.map(({ name, flag }, i) => (
+            <button
+              key={`${name}-${i}`}
+              onClick={() => navigate(`/cars?destination=${encodeURIComponent(name)}`)}
+              className="group flex-shrink-0 flex flex-col items-center justify-center gap-2 w-28 py-5 px-3 rounded-[6px] border border-white/10 bg-white/5 hover:bg-[#C8102E] hover:border-[#C8102E] transition-all duration-200 cursor-pointer"
+            >
+              <span className="text-4xl leading-none select-none">{flag}</span>
+              <span className="text-[11px] font-bold text-white tracking-wide text-center leading-tight">
+                {name}
+              </span>
+              <span className="text-[9px] tracking-[0.18em] uppercase text-white/40 group-hover:text-white/70 font-semibold transition-colors">
+                STOCK
+              </span>
+            </button>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
 /* ── Animated count-up hook ──────────────────────────────────── */
 function useCountUp(target: number, duration = 1800) {
   const [value, setValue] = useState(0);
@@ -310,6 +396,9 @@ export default function HomePage() {
           </div>
         </div>
       </section>
+
+      {/* ── DESTINATION COUNTRIES ─────────────────────────────────── */}
+      <DestinationCountriesSection />
 
       {/* Featured Cars Section */}
       <section className="py-24 bg-background">

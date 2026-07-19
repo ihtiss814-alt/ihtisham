@@ -20,6 +20,7 @@ export default function CarsPage() {
   const [fuelFilter, setFuelFilter]     = useState('');
   const [maxPrice, setMaxPrice]         = useState(() => getParam('maxPrice'));
   const [steeringFilter, setSteeringFilter] = useState(() => getParam('steering'));
+  const [destinationFilter, setDestinationFilter] = useState(() => getParam('destination'));
 
   // Sync URL → state whenever URL changes (e.g. back/forward)
   useEffect(() => {
@@ -28,6 +29,7 @@ export default function CarsPage() {
       setBodyFilter(getParam('body'));
       setMaxPrice(getParam('maxPrice'));
       setSteeringFilter(getParam('steering'));
+      setDestinationFilter(getParam('destination'));
     };
     window.addEventListener('popstate', sync);
     return () => window.removeEventListener('popstate', sync);
@@ -89,10 +91,11 @@ export default function CarsPage() {
     setFuelFilter('');
     setMaxPrice('');
     setSteeringFilter('');
+    setDestinationFilter('');
     window.history.replaceState({}, '', '/cars');
   };
 
-  const activeCount = [searchQuery, makeFilter, bodyFilter, fuelFilter, maxPrice, steeringFilter].filter(Boolean).length;
+  const activeCount = [searchQuery, makeFilter, bodyFilter, fuelFilter, maxPrice, steeringFilter, destinationFilter].filter(Boolean).length;
 
   return (
     <div className="min-h-screen bg-background pt-[130px] pb-16">
@@ -101,6 +104,16 @@ export default function CarsPage() {
         <div className="container mx-auto px-4 md:px-8">
           <h1 className="text-4xl md:text-5xl font-serif font-bold mb-4">Japanese Stock</h1>
           <p className="text-white/70 max-w-2xl text-lg">Browse our current inventory of premium Japanese used vehicles available for global export.</p>
+          {destinationFilter && (
+            <div className="mt-5 inline-flex items-center gap-3 px-4 py-2 rounded-full bg-white/10 border border-white/20 text-sm font-semibold">
+              <span>Shipping to: <span className="text-[#F87171]">{destinationFilter}</span></span>
+              <button
+                onClick={() => { setDestinationFilter(''); window.history.replaceState({}, '', '/cars'); }}
+                className="text-white/50 hover:text-white transition-colors text-lg leading-none"
+                aria-label="Clear destination"
+              >×</button>
+            </div>
+          )}
         </div>
       </div>
 
