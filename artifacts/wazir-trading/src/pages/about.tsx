@@ -4,7 +4,7 @@ import { motion } from 'framer-motion';
 
 export default function AboutPage() {
   return (
-    <div className="min-h-screen bg-background pt-20">
+    <div className="min-h-screen bg-background pt-[130px]">
       {/* Hero Section */}
       <section className="bg-secondary text-white py-24 relative overflow-hidden">
         <div className="absolute inset-0 z-0 opacity-20 mix-blend-overlay">

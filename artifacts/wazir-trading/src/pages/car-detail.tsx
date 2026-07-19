@@ -74,13 +74,13 @@ export default function CarDetailPage() {
   };
 
   if (loading) {
-    return <div className="min-h-screen pt-24 bg-background flex items-center justify-center">
+    return <div className="min-h-screen pt-[130px] bg-background flex items-center justify-center">
       <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full"></div>
     </div>;
   }
 
   if (!car) {
-    return <div className="min-h-screen pt-32 pb-16 bg-background text-center">
+    return <div className="min-h-screen pt-[130px] pb-16 bg-background text-center">
       <h1 className="text-3xl font-serif mb-4">Vehicle Not Found</h1>
       <p className="mb-8">The vehicle you are looking for does not exist or has been removed.</p>
       <Link href="/cars" className="text-primary hover:underline">Return to Inventory</Link>
@@ -95,7 +95,7 @@ export default function CarDetailPage() {
   const waLink = `https://wa.me/${waNumber}?text=${waMessage}`;
 
   return (
-    <div className="min-h-screen bg-background pt-24 pb-20">
+    <div className="min-h-screen bg-background pt-[130px] pb-20">
       <div className="container mx-auto px-4 md:px-8">
         {/* Breadcrumb */}
         <div className="mb-6 flex items-center text-sm text-muted-foreground">

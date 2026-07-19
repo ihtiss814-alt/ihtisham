@@ -47,7 +47,7 @@ export default function CarsPage() {
   });
 
   return (
-    <div className="min-h-screen bg-background pt-24 pb-16">
+    <div className="min-h-screen bg-background pt-[130px] pb-16">
       {/* Page Header */}
       <div className="bg-secondary text-white py-16 mb-10">
         <div className="container mx-auto px-4 md:px-8">
