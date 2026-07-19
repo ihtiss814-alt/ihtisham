@@ -618,9 +618,23 @@ function BudgetIcon({ icon, color: c }: { icon: string; color: string }) {
 
 function ShopByBudgetSection() {
   const [, navigate] = useLocation();
+  const track = [...BUDGET_TIERS, ...BUDGET_TIERS];
 
   return (
-    <section className="py-16" style={{ background: '#0A0A0A' }}>
+    <section className="py-16 overflow-hidden" style={{ background: '#0A0A0A' }}>
+      <style>{`
+        @keyframes budget-scroll {
+          0%   { transform: translateX(0); }
+          100% { transform: translateX(-50%); }
+        }
+        .budget-track {
+          animation: budget-scroll 30s linear infinite;
+          will-change: transform;
+        }
+        .budget-track:hover {
+          animation-play-state: paused;
+        }
+      `}</style>
 
       {/* Heading */}
       <div className="text-center mb-12 px-4">
@@ -635,38 +649,44 @@ function ShopByBudgetSection() {
         </p>
       </div>
 
-      {/* Cards row — horizontal scroll on mobile, centered on desktop */}
-      <div className="px-6 overflow-x-auto pb-3">
-        <div className="flex gap-4 w-max lg:w-full lg:justify-center mx-auto">
-          {BUDGET_TIERS.map(({ label, price, tier, icon, accent, maxPrice, minPrice }) => {
+      {/* Scrolling row */}
+      <div className="relative w-full">
+        {/* Left fade */}
+        <div className="absolute left-0 top-0 bottom-0 w-16 z-10 pointer-events-none"
+          style={{ background: 'linear-gradient(to right, #0A0A0A, transparent)' }} />
+        {/* Right fade */}
+        <div className="absolute right-0 top-0 bottom-0 w-16 z-10 pointer-events-none"
+          style={{ background: 'linear-gradient(to left, #0A0A0A, transparent)' }} />
+
+        <div className="flex budget-track gap-4 px-4" style={{ width: 'max-content' }}>
+          {track.map(({ label, price, tier, icon, accent, maxPrice, minPrice }, i) => {
             const handleClick = () => {
-              const qs = 'maxPrice' in { maxPrice, minPrice } && maxPrice
-                ? `maxPrice=${maxPrice}`
-                : `minPrice=${minPrice}`;
+              const qs = maxPrice ? `maxPrice=${maxPrice}` : `minPrice=${minPrice}`;
               navigate(`/cars?${qs}`);
             };
 
             return (
               <button
-                key={tier}
+                key={`${tier}-${i}`}
                 onClick={handleClick}
-                className="group flex-shrink-0 flex flex-col items-center gap-4 w-[152px] py-8 px-4 rounded-2xl cursor-pointer transition-transform duration-200"
+                className="group flex-shrink-0 flex flex-col items-center gap-4 w-[152px] py-8 px-4 rounded-2xl cursor-pointer"
                 style={{
                   background: '#111111',
                   border: `1px solid ${accent}28`,
                   boxShadow: `0 2px 16px ${accent}0a`,
+                  transition: 'border 0.2s, box-shadow 0.2s, transform 0.2s',
                 }}
                 onMouseEnter={e => {
                   const el = e.currentTarget;
-                  el.style.border     = `1px solid ${accent}70`;
-                  el.style.boxShadow  = `0 8px 32px ${accent}22, inset 0 0 24px ${accent}09`;
-                  el.style.transform  = 'translateY(-4px)';
+                  el.style.border    = `1px solid ${accent}70`;
+                  el.style.boxShadow = `0 8px 32px ${accent}22, inset 0 0 24px ${accent}09`;
+                  el.style.transform = 'translateY(-4px)';
                 }}
                 onMouseLeave={e => {
                   const el = e.currentTarget;
-                  el.style.border     = `1px solid ${accent}28`;
-                  el.style.boxShadow  = `0 2px 16px ${accent}0a`;
-                  el.style.transform  = 'translateY(0)';
+                  el.style.border    = `1px solid ${accent}28`;
+                  el.style.boxShadow = `0 2px 16px ${accent}0a`;
+                  el.style.transform = 'translateY(0)';
                 }}
               >
                 {/* Icon ring */}
@@ -682,10 +702,7 @@ function ShopByBudgetSection() {
                   <div className="text-[10px] tracking-[0.18em] uppercase font-semibold text-white/30 mb-0.5">
                     {price.endsWith('+') ? 'Starting from' : 'Under'}
                   </div>
-                  <div
-                    className="text-2xl font-extrabold leading-none tracking-tight"
-                    style={{ color: accent }}
-                  >
+                  <div className="text-2xl font-extrabold leading-none tracking-tight" style={{ color: accent }}>
                     {price}
                   </div>
                 </div>
