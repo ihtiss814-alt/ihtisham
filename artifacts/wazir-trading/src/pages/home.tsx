@@ -325,6 +325,219 @@ function ShopByMakeSection() {
   );
 }
 
+/* ── Shop By Body Type ───────────────────────────────────────── */
+const BODY_TYPES = [
+  { name: 'Sedan',         accent: '#3B82F6', bg: '#EFF6FF' },
+  { name: 'Hatchback',     accent: '#10B981', bg: '#ECFDF5' },
+  { name: 'SUV',           accent: '#F97316', bg: '#FFF7ED' },
+  { name: 'Station Wagon', accent: '#8B5CF6', bg: '#F5F3FF' },
+  { name: 'Van',           accent: '#06B6D4', bg: '#ECFEFF' },
+  { name: 'Mini Van',      accent: '#F59E0B', bg: '#FFFBEB' },
+  { name: 'Truck',         accent: '#EF4444', bg: '#FEF2F2' },
+  { name: 'Bus',           accent: '#6366F1', bg: '#EEF2FF' },
+  { name: 'MPV',           accent: '#EC4899', bg: '#FDF2F8' },
+  { name: 'Pickup Truck',  accent: '#84CC16', bg: '#F7FEE7' },
+  { name: 'Coupe',         accent: '#14B8A6', bg: '#F0FDFA' },
+  { name: 'Convertible',   accent: '#F43F5E', bg: '#FFF1F2' },
+];
+
+// All silhouettes share viewBox="0 0 120 52", profile facing right.
+// Wheel centres: left cx=25 cy=44 r=8, right at cx/cy per-car.
+function CarSilhouette({ type, color: c }: { type: string; color: string }) {
+  const vb = '0 0 120 52';
+  const w  = { fill: c };
+  const mkWheels = (lx: number, rx: number, cy = 44) => (
+    <>
+      <circle cx={lx} cy={cy} r={8}   fill="#fff" stroke={c} strokeWidth="1.5"/>
+      <circle cx={lx} cy={cy} r={3}   fill={c}/>
+      <circle cx={rx} cy={cy} r={8}   fill="#fff" stroke={c} strokeWidth="1.5"/>
+      <circle cx={rx} cy={cy} r={3}   fill={c}/>
+    </>
+  );
+
+  switch (type) {
+    /* 3-box notchback — distinct trunk step at rear */
+    case 'Sedan':
+      return <svg viewBox={vb} width={84} height={36} aria-label="Sedan">
+        <path {...w} d="M 8,36 L 8,30 L 20,30 Q 26,20 36,14 L 76,14 L 84,20 L 86,30 L 112,30 L 112,36 Z"/>
+        {mkWheels(25, 95)}
+      </svg>;
+
+    /* 2-box — rear hatch sweeps steeply straight to bumper */
+    case 'Hatchback':
+      return <svg viewBox={vb} width={84} height={36} aria-label="Hatchback">
+        <path {...w} d="M 12,36 L 12,30 L 24,30 Q 28,20 36,14 L 76,14 Q 82,26 84,36 Z"/>
+        {mkWheels(26, 72)}
+      </svg>;
+
+    /* Tall, boxy, high ground clearance */
+    case 'SUV':
+      return <svg viewBox={vb} width={84} height={36} aria-label="SUV">
+        <path {...w} d="M 6,38 L 6,22 L 18,22 Q 24,10 34,9 L 82,9 Q 92,10 96,22 L 114,22 L 114,38 Z"/>
+        {mkWheels(25, 95, 46)}
+      </svg>;
+
+    /* Long flat roof extending straight to the tailgate */
+    case 'Station Wagon':
+      return <svg viewBox={vb} width={84} height={36} aria-label="Station Wagon">
+        <path {...w} d="M 6,36 L 6,30 L 18,30 Q 24,20 32,14 L 92,14 L 92,30 L 114,30 L 114,36 Z"/>
+        {mkWheels(23, 97)}
+      </svg>;
+
+    /* Tall flat-sided box van */
+    case 'Van':
+      return <svg viewBox={vb} width={84} height={36} aria-label="Van">
+        <path {...w} d="M 8,38 L 8,8 Q 8,6 12,6 L 108,6 Q 112,6 112,8 L 112,38 Z"/>
+        {mkWheels(25, 95, 46)}
+      </svg>;
+
+    /* Rounded people-carrier profile */
+    case 'Mini Van':
+      return <svg viewBox={vb} width={84} height={36} aria-label="Mini Van">
+        <path {...w} d="M 10,36 L 10,28 Q 14,13 26,12 L 88,12 Q 100,13 102,28 L 112,28 L 112,36 Z"/>
+        {mkWheels(27, 93)}
+      </svg>;
+
+    /* Cab-over rigid truck — tall flat-nose cab + low flat bed */
+    case 'Truck':
+      return <svg viewBox={vb} width={84} height={36} aria-label="Truck">
+        <path {...w} d="M 6,36 L 6,10 L 52,10 L 52,28 L 114,28 L 114,36 Z"/>
+        {mkWheels(25, 95)}
+      </svg>;
+
+    /* Long tall rectangular bus */
+    case 'Bus':
+      return <svg viewBox={vb} width={84} height={36} aria-label="Bus">
+        <path {...w} d="M 2,38 Q 2,6 10,6 L 110,6 Q 118,6 118,10 L 118,38 Z"/>
+        {mkWheels(20, 100, 46)}
+      </svg>;
+
+    /* Multi-Purpose Vehicle — taller & aerodynamic, curved nose */
+    case 'MPV':
+      return <svg viewBox={vb} width={84} height={36} aria-label="MPV">
+        <path {...w} d="M 8,36 L 8,26 Q 16,12 30,11 L 82,11 Q 96,12 102,24 L 106,30 L 112,30 L 112,36 Z"/>
+        {mkWheels(26, 94)}
+      </svg>;
+
+    /* Pickup — shaped cab + open flatbed (no lid) */
+    case 'Pickup Truck':
+      return <svg viewBox={vb} width={84} height={36} aria-label="Pickup Truck">
+        <path {...w} d="M 8,36 L 8,26 Q 12,14 22,13 L 58,13 Q 64,18 66,26 L 66,36 Z"/>
+        <path {...w} d="M 68,28 L 68,36 L 112,36 L 112,28 Z"/>
+        {mkWheels(25, 98)}
+      </svg>;
+
+    /* Sporty fastback — long hood, low sweeping roofline */
+    case 'Coupe':
+      return <svg viewBox={vb} width={84} height={36} aria-label="Coupe">
+        <path {...w} d="M 6,36 L 6,30 L 12,30 Q 20,22 30,16 L 72,16 Q 84,22 94,30 L 114,30 L 114,36 Z"/>
+        {mkWheels(25, 95)}
+      </svg>;
+
+    /* Convertible — open top, visible windshield post & door sill */
+    case 'Convertible':
+      return <svg viewBox={vb} width={84} height={36} aria-label="Convertible">
+        {/* lower body / sill */}
+        <path {...w} d="M 6,36 L 6,30 L 114,30 L 114,36 Z"/>
+        {/* windshield post + header line (open top) */}
+        <path {...w} d="M 22,30 Q 26,22 34,18 L 40,18 L 40,30 Z"/>
+        {/* rear deck + post */}
+        <path {...w} d="M 80,30 L 80,18 L 86,18 Q 94,22 96,30 Z"/>
+        {/* bumpers */}
+        <rect {...w} x={6}   y={30} width={10} height={4} rx={1}/>
+        <rect {...w} x={104} y={30} width={10} height={4} rx={1}/>
+        {mkWheels(25, 95)}
+      </svg>;
+
+    default:
+      return <svg viewBox={vb} width={84} height={36}>
+        <rect fill={c} x="8" y="18" width="104" height="18" rx="3"/>
+        {mkWheels(25, 95)}
+      </svg>;
+  }
+}
+
+function ShopByBodyTypeSection() {
+  const [, navigate] = useLocation();
+  const track = [...BODY_TYPES, ...BODY_TYPES];
+
+  return (
+    <section className="bg-gray-50 border-b border-gray-100 py-12 overflow-hidden">
+      <style>{`
+        @keyframes body-scroll {
+          0%   { transform: translateX(0); }
+          100% { transform: translateX(-50%); }
+        }
+        .body-track {
+          animation: body-scroll 45s linear infinite;
+          will-change: transform;
+        }
+        .body-track:hover {
+          animation-play-state: paused;
+        }
+      `}</style>
+
+      {/* Heading */}
+      <div className="text-center mb-8 px-4">
+        <p className="text-[10px] tracking-[0.28em] uppercase font-bold text-[#C8102E] mb-2">
+          Browse By Style
+        </p>
+        <h2 className="text-2xl md:text-3xl font-serif font-bold text-gray-900">
+          Shop by Vehicle Body Type
+        </h2>
+      </div>
+
+      {/* Scrolling row */}
+      <div className="relative w-full">
+        {/* Left fade */}
+        <div className="absolute left-0 top-0 bottom-0 w-16 z-10 pointer-events-none"
+          style={{ background: 'linear-gradient(to right, #f9fafb, transparent)' }} />
+        {/* Right fade */}
+        <div className="absolute right-0 top-0 bottom-0 w-16 z-10 pointer-events-none"
+          style={{ background: 'linear-gradient(to left, #f9fafb, transparent)' }} />
+
+        <div className="flex body-track gap-4 px-4" style={{ width: 'max-content' }}>
+          {track.map(({ name, accent, bg }, i) => (
+            <button
+              key={`${name}-${i}`}
+              onClick={() => navigate(`/cars?body=${encodeURIComponent(name)}`)}
+              className="group flex-shrink-0 flex flex-col items-center gap-3 w-[138px] py-5 px-3 rounded-[10px] bg-white transition-all duration-200 cursor-pointer"
+              style={{
+                border: `1.5px solid ${accent}33`,
+                boxShadow: `0 2px 8px ${accent}0d`,
+              }}
+              onMouseEnter={e => {
+                (e.currentTarget as HTMLButtonElement).style.border = `1.5px solid ${accent}`;
+                (e.currentTarget as HTMLButtonElement).style.boxShadow = `0 6px 20px ${accent}30`;
+              }}
+              onMouseLeave={e => {
+                (e.currentTarget as HTMLButtonElement).style.border = `1.5px solid ${accent}33`;
+                (e.currentTarget as HTMLButtonElement).style.boxShadow = `0 2px 8px ${accent}0d`;
+              }}
+            >
+              {/* Icon box */}
+              <div
+                className="w-full h-[64px] flex items-center justify-center rounded-[6px]"
+                style={{ backgroundColor: bg }}
+              >
+                <CarSilhouette type={name} color={accent} />
+              </div>
+
+              {/* Body type name */}
+              <span
+                className="text-[12px] font-bold tracking-wide text-center leading-tight"
+                style={{ color: accent }}
+              >
+                {name}
+              </span>
+            </button>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
 /* ── Animated count-up hook ──────────────────────────────────── */
 function useCountUp(target: number, duration = 1800) {
   const [value, setValue] = useState(0);
@@ -595,6 +808,9 @@ export default function HomePage() {
 
       {/* ── SHOP BY MAKE ──────────────────────────────────────────── */}
       <ShopByMakeSection />
+
+      {/* ── SHOP BY BODY TYPE ─────────────────────────────────────── */}
+      <ShopByBodyTypeSection />
 
       {/* Featured Cars Section */}
       <section className="py-24 bg-background">
