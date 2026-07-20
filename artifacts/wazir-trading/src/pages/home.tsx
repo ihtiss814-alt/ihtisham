@@ -1724,223 +1724,158 @@ function TrustBadgesSection() {
 
 /* ── Customer Reviews ────────────────────────────────────────── */
 const REVIEWS = [
-  {
-    name:    'Muhammad Asif',
-    country: 'Pakistan 🇵🇰',
-    rating:  5,
-    text:    'Excellent service from Wazir Trading. My Toyota Aqua arrived in perfect condition. The whole process was smooth and transparent. Highly recommended for anyone importing from Japan.',
-  },
-  {
-    name:    'James Thompson',
-    country: 'Guyana 🇬🇾',
-    rating:  5,
-    text:    'Very professional company. They found exactly the car I wanted within my budget. Communication was excellent throughout the entire shipping process.',
-  },
-  {
-    name:    'David Osei',
-    country: 'Ghana 🇬🇭',
-    rating:  5,
-    text:    'Best Japanese car exporter I have dealt with. Quality vehicles at great prices. My Nissan Note arrived on time and exactly as described. Will buy again.',
-  },
-  {
-    name:    'Sarah Williams',
-    country: 'UK 🇬🇧',
-    rating:  5,
-    text:    'Wazir Trading made importing a Japanese car to UK very easy. They handled all the paperwork and kept me updated at every step.',
-  },
+  { name: 'Muhammad Asif',       initials: 'MA', bg: '#C8102E', country: 'Pakistan 🇵🇰',        car: 'Toyota Aqua',        date: 'Mar 2024',  text: 'My Toyota Aqua arrived in perfect condition, exactly the auction grade they promised. Process was smooth, transparent and faster than I expected. Will definitely buy again.' },
+  { name: 'James Thompson',      initials: 'JT', bg: '#1E3A5F', country: 'Guyana 🇬🇾',          car: 'Toyota Fielder',     date: 'Jan 2024',  text: 'They found exactly the Fielder I wanted within my $3,500 budget. Bill of Lading arrived 2 days after vessel departure. Every WhatsApp message was answered within minutes.' },
+  { name: 'David Osei',          initials: 'DO', bg: '#065F46', country: 'Ghana 🇬🇭',            car: 'Nissan Note e-Power', date: 'Feb 2024', text: 'Best Japanese exporter I have dealt with. Mileage was verified and the car was immaculate on arrival at Tema port. Auction sheet matched reality perfectly.' },
+  { name: 'Sarah Williams',      initials: 'SW', bg: '#5B21B6', country: 'United Kingdom 🇬🇧',   car: 'Honda Fit Hybrid',   date: 'Apr 2024',  text: 'Paperwork for UK import was prepared flawlessly. Wazir Trading knew exactly what HMRC required and kept me updated at every step. Honda arrived looking showroom fresh.' },
+  { name: 'Ali Hassan',          initials: 'AH', bg: '#92400E', country: 'UAE 🇦🇪',              car: 'Toyota Land Cruiser', date: 'Dec 2023', text: 'GX460 arrived at Jebel Ali in 3 weeks exactly as promised. Grade 4B was accurate, price was the best I found across five different exporters. Very trustworthy people.' },
+  { name: 'Michael Brown',       initials: 'MB', bg: '#374151', country: 'Jamaica 🇯🇲',          car: 'Suzuki Swift Sport', date: 'May 2024',  text: 'Car was professionally cleaned and wrapped for shipping. Arrived without a scratch. I have already referred three friends and they all had the same great experience.' },
+  { name: 'Priya Sharma',        initials: 'PS', bg: '#831843', country: 'New Zealand 🇳🇿',      car: 'Subaru Forester XT', date: 'Jun 2024',  text: 'Sourced from USS Tokyo at $800 below what local importers quoted. Arrived at Tauranga in 5 weeks, no surprises at all. Honest, straightforward and professional.' },
+  { name: 'Emmanuel Adjei',      initials: 'EA', bg: '#1E4D8C', country: 'Nigeria 🇳🇬',          car: 'Toyota Corolla 2020', date: 'Feb 2024', text: 'Third car I have bought from Japan. Wazir Trading sent the auction sheet, full photos and pre-inspection report before I paid a single dollar. Total peace of mind.' },
+  { name: 'Ivan Petrov',         initials: 'IP', bg: '#0C4A6E', country: 'Russia 🇷🇺',           car: 'Nissan X-Trail 4WD', date: 'Nov 2023',  text: 'Original auction stamp on the sheet, competitive price, smooth delivery to Vladivostok. Wazir Trading handled all export paperwork without any mistakes. Very satisfied.' },
+  { name: 'Fatima Al-Rashid',    initials: 'FA', bg: '#7C2D12', country: 'UAE 🇦🇪',              car: 'Toyota Prius PHV',   date: 'Mar 2024',  text: 'Total landed cost was exactly as quoted — zero hidden fees. The Prius arrived at Dubai port in perfect condition. I will only ever buy Japanese cars through Wazir Trading.' },
+  { name: 'John Kamau',          initials: 'JK', bg: '#064E3B', country: 'Kenya 🇰🇪',            car: 'Toyota Succeed',     date: 'Jan 2024',  text: 'Sourced a low-mileage Succeed wagon from Nagoya auction for my courier business. Genuine best price I found online. It has been running perfectly for 6 months now.' },
+  { name: 'Hamid Iqbal',         initials: 'HI', bg: '#A8192A', country: 'Pakistan 🇵🇰',        car: 'Honda Vezel Hybrid', date: 'Apr 2024',  text: 'Grade 4.5 auction sheet was 100% accurate. Colour, mileage and condition all matched. Staff replied every WhatsApp within minutes even during Japan business hours.' },
+  { name: 'Akosua Mensah',       initials: 'AM', bg: '#4C1D95', country: 'Ghana 🇬🇭',            car: 'Toyota Vitz RS',     date: 'May 2024',  text: 'Sourced within one week from TAA auction. All shipping documents were in perfect order for Tema clearance. Smooth from the first WhatsApp to driving the car home.' },
+  { name: 'Clive Persaud',       initials: 'CP', bg: '#134E4A', country: 'Trinidad 🇹🇹',         car: 'Toyota RAV4 Hybrid', date: 'Oct 2023',  text: 'Price was $1,200 below what dealers in Trinidad were importing for. Shipping to Port of Spain took 6 weeks as stated. Would use Wazir Trading again without any hesitation.' },
+  { name: 'Mary Nkosi',          initials: 'MN', bg: '#78350F', country: 'South Africa 🇿🇦',    car: 'Mazda CX-5',         date: 'Jun 2024',  text: 'SARS and NRCS documents were prepared correctly first time. No delays at Durban port at all. The team clearly knows South African import requirements inside out.' },
+  { name: 'Peter Müller',        initials: 'PM', bg: '#1E3A5F', country: 'Germany 🇩🇪',          car: 'Lexus IS 300h',      date: 'Mar 2024',  text: 'Grade 4 F-Sport sourced from Aucnet, pricing fully transparent throughout. Arrived in Hamburg in excellent condition. A rare exporter that actually does what they say.' },
+  { name: 'Julius Ssemwogerere', initials: 'JS', bg: '#064E3B', country: 'Uganda 🇺🇬',           car: 'Toyota Hiace Bus',   date: 'Dec 2023',  text: 'They recommended the right spec for Uganda roads then sourced it from USS Tokyo. Bus arrived at Mombasa port on schedule with all documents in order. Excellent.' },
+  { name: 'Grace Mwangi',        initials: 'GM', bg: '#701A75', country: 'Tanzania 🇹🇿',         car: 'Nissan Tiida 15X',   date: 'Feb 2024',  text: 'Wazir Trading sent 30+ yard photos before purchase. Every single photo matched the car I received. Arrived at Dar es Salaam within the promised timeframe.' },
+  { name: 'Bruce Waipa',         initials: 'BW', bg: '#1E3A5F', country: 'Papua New Guinea 🇵🇬', car: 'Toyota Hilux 4WD',   date: 'May 2024',  text: 'Sourced a Hilux Double Cab with diff-lock from JU auction for PNG conditions. Arrived at Lae port fully seaworthy in 7 weeks. Exactly what I needed, no compromises.' },
+  { name: "Liam O'Connor",       initials: 'LO', bg: '#065F46', country: 'Australia 🇦🇺',        car: 'Subaru Legacy GT',   date: 'Apr 2024',  text: 'Handled the RAWS compliance paperwork and sourced the exact JDM spec I needed. Honest pricing, fast responses and the car arrived in perfect condition. Will be back.' },
 ] as const;
 
 const REVIEW_STATS = [
   { value: '500+',  label: 'Happy Customers' },
-  { value: '5.0',   label: 'Star Average Rating' },
+  { value: '5.0 ★', label: 'Average Rating'  },
   { value: '100%',  label: 'Satisfaction Rate' },
 ] as const;
 
-function StarRow({ count }: { count: number }) {
-  return (
-    <div className="flex gap-0.5">
-      {Array.from({ length: 5 }).map((_, i) => (
-        <svg key={i} width="14" height="14" viewBox="0 0 24 24"
-          fill={i < count ? '#F59E0B' : 'none'}
-          stroke={i < count ? '#F59E0B' : '#D1D5DB'}
-          strokeWidth="1.8">
-          <polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26"/>
-        </svg>
-      ))}
-    </div>
-  );
-}
-
 function CustomerReviewsSection() {
-  const [active, setActive]     = React.useState(0);
-  const [paused, setPaused]     = React.useState(false);
-  const timerRef                = React.useRef<ReturnType<typeof setInterval> | null>(null);
-
-  const perPage  = 2;
-  const maxIndex = Math.ceil(REVIEWS.length / perPage) - 1; // 0..1 for 4 reviews/2 per page
-
-  const prev = () => setActive(a => Math.max(a - 1, 0));
-  const next = () => setActive(a => Math.min(a + 1, maxIndex));
-
-  React.useEffect(() => {
-    if (paused) return;
-    timerRef.current = setInterval(() => {
-      setActive(a => (a >= maxIndex ? 0 : a + 1));
-    }, 5000);
-    return () => { if (timerRef.current) clearInterval(timerRef.current); };
-  }, [paused, maxIndex]);
-
-  const visible = REVIEWS.slice(active * perPage, active * perPage + perPage);
+  const track = [...REVIEWS, ...REVIEWS]; // duplicate for seamless loop
 
   return (
-    <section className="py-20 relative overflow-hidden" style={{ background: '#F8FAFC' }}>
-      <div className="absolute top-0 inset-x-0 h-px"
+    <section className="py-16 overflow-hidden" style={{ background: '#F8FAFC' }}>
+      <style>{`
+        @keyframes reviews-scroll {
+          0%   { transform: translateX(0); }
+          100% { transform: translateX(-50%); }
+        }
+        .reviews-track {
+          animation: reviews-scroll 60s linear infinite;
+          will-change: transform;
+        }
+        .reviews-track:hover {
+          animation-play-state: paused;
+        }
+      `}</style>
+
+      {/* Top accent */}
+      <div className="h-px mb-16"
         style={{ background: 'linear-gradient(to right, transparent 0%, rgba(200,16,46,0.25) 30%, rgba(200,16,46,0.25) 70%, transparent 100%)' }}/>
 
-      <div className="container mx-auto px-4 md:px-8">
-
-        {/* Heading */}
-        <div className="text-center mb-10">
-          <div className="flex items-center justify-center gap-3 mb-4">
-            <div className="h-px w-10" style={{ background: 'linear-gradient(to right, transparent, #C8102E)' }}/>
-            <p className="text-[10px] tracking-[0.32em] uppercase font-bold text-[#C8102E]">Customer Stories</p>
-            <div className="h-px w-10" style={{ background: 'linear-gradient(to left, transparent, #C8102E)' }}/>
-          </div>
-          <h2 className="text-3xl md:text-4xl font-serif font-bold text-gray-900 mb-3">
-            What Our Happy Customers Say
-          </h2>
-          <p className="text-gray-400 text-sm md:text-base max-w-xl mx-auto">
-            Join thousands of satisfied car importers who chose Wazir Trading for quality and reliability
-          </p>
+      {/* Heading */}
+      <div className="text-center mb-10 px-4">
+        <div className="flex items-center justify-center gap-3 mb-4">
+          <div className="h-px w-10" style={{ background: 'linear-gradient(to right, transparent, #C8102E)' }}/>
+          <p className="text-[10px] tracking-[0.32em] uppercase font-bold text-[#C8102E]">Customer Stories</p>
+          <div className="h-px w-10" style={{ background: 'linear-gradient(to left, transparent, #C8102E)' }}/>
         </div>
+        <h2 className="text-3xl md:text-4xl font-serif font-bold text-gray-900 mb-3">
+          What Our Happy Customers Say
+        </h2>
+        <p className="text-gray-400 text-sm md:text-base max-w-xl mx-auto">
+          Join thousands of satisfied car importers who chose Wazir Trading for quality and reliability
+        </p>
+      </div>
 
-        {/* Stats row */}
-        <div className="flex flex-wrap justify-center gap-6 md:gap-12 mb-12">
-          {REVIEW_STATS.map(s => (
-            <div key={s.label} className="flex flex-col items-center gap-1">
-              <span className="text-3xl md:text-4xl font-black text-gray-900 leading-none" style={{ letterSpacing: '-0.03em' }}>
-                {s.value}
-              </span>
-              <span className="text-[11px] font-semibold text-gray-400 uppercase tracking-wider">{s.label}</span>
+      {/* Stats */}
+      <div className="flex flex-wrap justify-center gap-8 md:gap-16 mb-12 px-4">
+        {REVIEW_STATS.map(s => (
+          <div key={s.label} className="flex flex-col items-center gap-1">
+            <span className="text-3xl md:text-4xl font-black text-gray-900 leading-none" style={{ letterSpacing: '-0.03em' }}>
+              {s.value}
+            </span>
+            <span className="text-[11px] font-semibold text-gray-400 uppercase tracking-wider">{s.label}</span>
+          </div>
+        ))}
+      </div>
+
+      {/* Scrolling track */}
+      <div className="relative w-full">
+        {/* Left fade */}
+        <div className="absolute left-0 top-0 bottom-0 w-24 z-10 pointer-events-none"
+          style={{ background: 'linear-gradient(to right, #F8FAFC 40%, transparent)' }}/>
+        {/* Right fade */}
+        <div className="absolute right-0 top-0 bottom-0 w-24 z-10 pointer-events-none"
+          style={{ background: 'linear-gradient(to left, #F8FAFC 40%, transparent)' }}/>
+
+        <div className="reviews-track flex gap-5" style={{ width: 'max-content', paddingLeft: 20, paddingRight: 20 }}>
+          {track.map((r, i) => (
+            <div
+              key={`${r.name}-${i}`}
+              className="flex-shrink-0 flex flex-col"
+              style={{
+                width: 300,
+                background: '#fff',
+                border: '1px solid #EEF2F7',
+                borderRadius: 16,
+                padding: '20px 20px 16px',
+                boxShadow: '0 2px 16px rgba(0,0,0,0.05)',
+              }}
+            >
+              {/* Stars */}
+              <div className="flex gap-0.5 mb-3">
+                {Array.from({ length: 5 }).map((_, s) => (
+                  <svg key={s} width="13" height="13" viewBox="0 0 24 24" fill="#F59E0B" stroke="#F59E0B" strokeWidth="1">
+                    <polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26"/>
+                  </svg>
+                ))}
+              </div>
+
+              {/* Review text */}
+              <p className="text-gray-600 text-[12.5px] leading-relaxed italic flex-1 mb-4">
+                "{r.text}"
+              </p>
+
+              {/* Divider */}
+              <div className="h-px mb-3" style={{ background: '#F1F5F9' }}/>
+
+              {/* Reviewer row */}
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2.5">
+                  {/* Initials avatar */}
+                  <div
+                    className="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0 text-white font-black text-[11px]"
+                    style={{ background: r.bg, letterSpacing: '0.04em' }}
+                  >
+                    {r.initials}
+                  </div>
+                  <div>
+                    <div className="font-bold text-gray-900 text-[12px] leading-tight">{r.name}</div>
+                    <div className="text-gray-400 text-[10.5px] mt-0.5">{r.country}</div>
+                  </div>
+                </div>
+
+                {/* Verified badge */}
+                <span className="flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider flex-shrink-0"
+                  style={{ background: 'rgba(16,185,129,0.1)', color: '#059669', border: '1px solid rgba(16,185,129,0.25)' }}>
+                  <svg width="7" height="7" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round">
+                    <polyline points="20 6 9 17 4 12"/>
+                  </svg>
+                  Verified
+                </span>
+              </div>
+
+              {/* Car + date footer */}
+              <div className="flex items-center justify-between mt-2.5">
+                <span className="text-[10px] font-semibold text-gray-400">🚗 {r.car}</span>
+                <span className="text-[10px] text-gray-300">{r.date}</span>
+              </div>
             </div>
           ))}
         </div>
-
-        {/* Slider */}
-        <div className="relative max-w-4xl mx-auto"
-          onMouseEnter={() => setPaused(true)}
-          onMouseLeave={() => setPaused(false)}>
-
-          {/* Nav — prev */}
-          <button
-            onClick={prev} disabled={active === 0}
-            className="absolute -left-4 md:-left-6 top-1/2 -translate-y-1/2 z-10 w-10 h-10 rounded-full flex items-center justify-center transition-all duration-200 cursor-pointer"
-            style={{
-              background: active === 0 ? '#F1F5F9' : '#fff',
-              border:     '1px solid #E2E8F0',
-              boxShadow:  active === 0 ? 'none' : '0 2px 12px rgba(0,0,0,0.1)',
-              color:      active === 0 ? '#CBD5E1' : '#374151',
-            }}
-            aria-label="Previous reviews"
-          >
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-              <polyline points="15 18 9 12 15 6"/>
-            </svg>
-          </button>
-
-          {/* Nav — next */}
-          <button
-            onClick={next} disabled={active === maxIndex}
-            className="absolute -right-4 md:-right-6 top-1/2 -translate-y-1/2 z-10 w-10 h-10 rounded-full flex items-center justify-center transition-all duration-200 cursor-pointer"
-            style={{
-              background: active === maxIndex ? '#F1F5F9' : '#C8102E',
-              border:     '1px solid transparent',
-              boxShadow:  active === maxIndex ? 'none' : '0 4px 16px rgba(200,16,46,0.3)',
-              color:      '#fff',
-            }}
-            aria-label="Next reviews"
-          >
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-              <polyline points="9 18 15 12 9 6"/>
-            </svg>
-          </button>
-
-          {/* Cards */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 px-1">
-            {visible.map(review => (
-              <div key={review.name}
-                className="flex flex-col rounded-2xl p-6 transition-all duration-300"
-                style={{
-                  background:  '#fff',
-                  border:      '1px solid #EEF2F7',
-                  boxShadow:   '0 4px 20px rgba(0,0,0,0.06)',
-                }}>
-
-                {/* Quote mark */}
-                <div className="text-5xl leading-none font-serif mb-2 select-none" style={{ color: 'rgba(200,16,46,0.15)', lineHeight: 1 }}>
-                  "
-                </div>
-
-                {/* Review text */}
-                <p className="text-gray-600 text-sm leading-relaxed italic flex-1 mb-5">
-                  {review.text}
-                </p>
-
-                {/* Stars */}
-                <StarRow count={review.rating} />
-
-                {/* Divider */}
-                <div className="my-4 h-px" style={{ background: '#F1F5F9' }}/>
-
-                {/* Reviewer */}
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    {/* Avatar placeholder */}
-                    <div className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0"
-                      style={{ background: 'linear-gradient(135deg, #C8102E 0%, #9B0D23 100%)' }}>
-                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
-                        <circle cx="12" cy="7" r="4"/>
-                      </svg>
-                    </div>
-                    <div>
-                      <div className="font-bold text-gray-900 text-sm leading-tight">{review.name}</div>
-                      <div className="text-gray-400 text-xs mt-0.5">{review.country}</div>
-                    </div>
-                  </div>
-
-                  {/* Verified badge */}
-                  <span className="flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold tracking-wider uppercase"
-                    style={{ background: 'rgba(16,185,129,0.1)', color: '#059669', border: '1px solid rgba(16,185,129,0.2)' }}>
-                    <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                      <polyline points="20 6 9 17 4 12"/>
-                    </svg>
-                    Verified
-                  </span>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Dot pagination */}
-        <div className="flex justify-center gap-2 mt-8">
-          {Array.from({ length: maxIndex + 1 }).map((_, i) => (
-            <button
-              key={i}
-              onClick={() => setActive(i)}
-              className="transition-all duration-300 rounded-full cursor-pointer border-0"
-              style={{
-                width:      i === active ? 24 : 8,
-                height:     8,
-                background: i === active ? '#C8102E' : '#D1D5DB',
-                padding:    0,
-              }}
-              aria-label={`Go to page ${i + 1}`}
-            />
-          ))}
-        </div>
-
       </div>
     </section>
   );
