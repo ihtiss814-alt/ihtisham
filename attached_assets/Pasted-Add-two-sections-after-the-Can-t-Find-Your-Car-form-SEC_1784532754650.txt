@@ -1,0 +1,93 @@
+Add two sections after the Can't Find Your Car form:
+
+SECTION 1 - Trust Badges:
+Title: "Why Thousands of Global Buyers Choose Wazir Trading"
+
+Show 4 trust items in a horizontal row:
+
+Item 1:
+Icon: Certificate/badge icon
+Title: JUMVEA Member
+Description: Approved Japan Exporter Code
+
+Item 2:
+Icon: Shield icon
+Title: Japan Car Trust
+Description: Genuine Odometer Guarantee
+
+Item 3:
+Icon: Lock icon
+Title: Secure Wire Transfer
+Description: Official Japan Bank Account Only
+
+Item 4:
+Icon: Package/box icon
+Title: 100% Insured Delivery
+Description: Full Marine Transit Coverage
+
+Each item has icon on top, bold title below, 
+and description text below title.
+Separate each item with a vertical divider line.
+
+SECTION 2 - Customer Reviews:
+Title: "What Our Happy Customers Say"
+Subtitle: "Join thousands of satisfied car importers 
+who chose Wazir Trading for quality and reliability"
+
+Show 3 stats in a row:
+- 500+ Happy Customers
+- 5.0 Star Average Rating  
+- 100% Satisfaction Rate
+
+Below stats show review cards in a horizontal 
+slider showing 2 cards at a time with 
+left and right navigation arrows.
+
+Each review card shows:
+- Customer profile photo placeholder 
+  (circle with person icon)
+- Customer name in bold
+- Country with flag emoji below name
+- Star rating (5 stars visual)
+- Review text in italic
+- "VERIFIED PURCHASE" badge at bottom
+
+Add these hardcoded reviews for now:
+
+Review 1:
+Name: Muhammad Asif
+Country: Pakistan 🇵🇰
+Rating: 5/5
+Text: "Excellent service from Wazir Trading. 
+My Toyota Aqua arrived in perfect condition. 
+The whole process was smooth and transparent. 
+Highly recommended for anyone importing from Japan."
+
+Review 2:
+Name: James Thompson
+Country: Guyana 🇬🇾
+Rating: 5/5
+Text: "Very professional company. They found 
+exactly the car I wanted within my budget. 
+Communication was excellent throughout the 
+entire shipping process."
+
+Review 3:
+Name: David Osei
+Country: Ghana 🇬🇭
+Rating: 5/5
+Text: "Best Japanese car exporter I have dealt 
+with. Quality vehicles at great prices. 
+My Nissan Note arrived on time and exactly 
+as described. Will buy again."
+
+Review 4:
+Name: Sarah Williams
+Country: UK 🇬🇧
+Rating: 5/5
+Text: "Wazir Trading made importing a Japanese 
+car to UK very easy. They handled all the 
+paperwork and kept me updated at every step."
+
+Show dot pagination below reviews.
+Auto rotate reviews every 5 seconds.
