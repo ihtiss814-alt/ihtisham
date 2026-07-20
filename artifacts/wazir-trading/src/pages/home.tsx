@@ -555,52 +555,117 @@ const PRICE_RANGES = [
   { label: '$9,000 – $10,000', min: 9000, max: 10000 },
 ] as const;
 
+function PriceRangeCard({ label, min, max }: { label: string; min: number; max: number }) {
+  const [hov, setHov] = React.useState(false);
+  return (
+    <Link
+      href={`/cars?minPrice=${min}&maxPrice=${max}`}
+      onMouseEnter={() => setHov(true)}
+      onMouseLeave={() => setHov(false)}
+      style={{
+        display:        'flex',
+        flexDirection:  'column',
+        alignItems:     'center',
+        justifyContent: 'center',
+        gap:            '10px',
+        width:          '172px',
+        padding:        '20px 14px',
+        borderRadius:   '14px',
+        background:     hov ? '#1C0608' : '#161616',
+        border:         `1px solid ${hov ? 'rgba(200,16,46,0.55)' : 'rgba(255,255,255,0.07)'}`,
+        boxShadow:      hov
+          ? '0 12px 40px rgba(200,16,46,0.22), inset 0 1px 0 rgba(200,16,46,0.15)'
+          : '0 2px 12px rgba(0,0,0,0.35)',
+        transform:      hov ? 'translateY(-4px) scale(1.02)' : 'translateY(0) scale(1)',
+        transition:     'all 0.22s cubic-bezier(0.34, 1.56, 0.64, 1)',
+        cursor:         'pointer',
+        textDecoration: 'none',
+      }}
+    >
+      {/* Dollar circle */}
+      <div style={{
+        width: 34, height: 34, borderRadius: '50%',
+        background: hov ? 'rgba(200,16,46,0.2)' : 'rgba(255,255,255,0.05)',
+        border: `1px solid ${hov ? 'rgba(200,16,46,0.4)' : 'rgba(255,255,255,0.09)'}`,
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        transition: 'all 0.22s',
+        flexShrink: 0,
+      }}>
+        <span style={{ color: hov ? '#C8102E' : '#555', fontSize: 15, fontWeight: 800, lineHeight: 1 }}>$</span>
+      </div>
+
+      {/* Range label */}
+      <span style={{
+        color:      hov ? '#fff' : 'rgba(255,255,255,0.6)',
+        fontSize:   13,
+        fontWeight: 600,
+        textAlign:  'center',
+        lineHeight: 1.35,
+        letterSpacing: '0.01em',
+        transition: 'color 0.2s',
+      }}>
+        {label}
+      </span>
+
+      {/* Browse CTA */}
+      <div style={{
+        display:    'flex',
+        alignItems: 'center',
+        gap:        4,
+        fontSize:   9,
+        fontWeight: 700,
+        letterSpacing: '0.12em',
+        textTransform: 'uppercase',
+        color: hov ? '#C8102E' : 'rgba(255,255,255,0.18)',
+        transition: 'color 0.2s',
+      }}>
+        Browse
+        <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.8" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M5 12h14M12 5l7 7-7 7"/>
+        </svg>
+      </div>
+    </Link>
+  );
+}
+
 function ShopByBudgetSection() {
   return (
-    <section className="py-16" style={{ background: '#0A0A0A' }}>
-      <div className="container mx-auto px-4 md:px-8">
+    <section className="py-20 relative overflow-hidden" style={{ background: '#0D0D0D' }}>
+      {/* Ambient radial glow */}
+      <div className="absolute inset-0 pointer-events-none" style={{
+        background: 'radial-gradient(ellipse 70% 50% at 50% 50%, rgba(200,16,46,0.07) 0%, transparent 70%)',
+      }}/>
+      {/* Top edge line */}
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-40 h-px"
+        style={{ background: 'linear-gradient(to right, transparent, rgba(200,16,46,0.5), transparent)' }}/>
 
-        {/* Heading */}
-        <div className="mb-10">
-          <p className="text-[10px] tracking-[0.28em] uppercase font-bold text-[#C8102E] mb-2">
-            FOB Japan
-          </p>
-          <h2 className="text-2xl md:text-3xl font-serif font-bold text-white">
-            Shop by Price Range
-          </h2>
-          <p className="text-white/35 text-sm mt-2">
-            All prices are Free-On-Board Japan — export-ready
-          </p>
+      {/* Centered heading */}
+      <div className="text-center mb-14 px-4 relative z-10">
+        <div className="flex items-center justify-center gap-3 mb-4">
+          <div className="h-px w-10" style={{ background: 'linear-gradient(to right, transparent, rgba(200,16,46,0.6))' }}/>
+          <p className="text-[10px] tracking-[0.32em] uppercase font-bold text-[#C8102E]">FOB Japan</p>
+          <div className="h-px w-10" style={{ background: 'linear-gradient(to left, transparent, rgba(200,16,46,0.6))' }}/>
         </div>
+        <h2 className="text-3xl md:text-4xl font-serif font-bold text-white mb-3">
+          Shop by Price Range
+        </h2>
+        <p className="text-white/35 text-sm">
+          All prices are Free-On-Board Japan — export-ready
+        </p>
+      </div>
 
-        {/* Range list — two columns on md+ */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-1">
+      {/* Price-range card grid — centered with flex-wrap */}
+      <div className="relative z-10 flex justify-center px-4">
+        <div className="flex flex-wrap justify-center gap-3" style={{ maxWidth: 1100 }}>
           {PRICE_RANGES.map(({ label, min, max }) => (
-            <Link
-              key={label}
-              href={`/cars?minPrice=${min}&maxPrice=${max}`}
-              className="group flex items-center justify-between py-3.5 border-b border-white/8 hover:border-[#C8102E]/40 transition-colors duration-150"
-            >
-              <div className="flex items-center gap-3">
-                {/* Dot */}
-                <span
-                  className="w-1.5 h-1.5 rounded-full flex-shrink-0 transition-colors duration-150"
-                  style={{ background: '#C8102E33' }}
-                />
-                <span className="text-white/60 group-hover:text-white text-[15px] font-medium tracking-wide transition-colors duration-150">
-                  {label}
-                </span>
-              </div>
-              <span className="text-white/20 group-hover:text-[#C8102E] transition-colors duration-150 translate-x-0 group-hover:translate-x-1 inline-block">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M5 12h14M12 5l7 7-7 7"/>
-                </svg>
-              </span>
-            </Link>
+            <PriceRangeCard key={label} label={label} min={min} max={max} />
           ))}
         </div>
-
       </div>
+
+      {/* Bottom edge line */}
+      <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-40 h-px"
+        style={{ background: 'linear-gradient(to right, transparent, rgba(200,16,46,0.3), transparent)' }}/>
     </section>
   );
 }
@@ -671,6 +736,167 @@ async function fetchCarImages(ids: string[]): Promise<Record<string, string>> {
   return map;
 }
 
+function FcCarCard({ car, imgMap, waNumber, navigate }: {
+  car: FcCar;
+  imgMap: Record<string, string>;
+  waNumber: string;
+  navigate: (to: string) => void;
+}) {
+  const [hov, setHov] = React.useState(false);
+  const primaryImg = imgMap[car.id] ?? null;
+  const pkrPrice   = Math.round(car.fob_price_usd * PKR_PER_USD).toLocaleString('en-PK');
+  const waMsg      = encodeURIComponent(
+    `Hi Wazir Trading, I'm interested in the ${car.year} ${car.make} ${car.model}${car.variant ? ' ' + car.variant : ''} (Ref: ${car.ref_number}). Please share details and availability.`
+  );
+  const waLink = `https://wa.me/${waNumber}?text=${waMsg}`;
+
+  return (
+    <div
+      onMouseEnter={() => setHov(true)}
+      onMouseLeave={() => setHov(false)}
+      style={{
+        flexShrink:   0,
+        width:        '272px',
+        borderRadius: '16px',
+        overflow:     'hidden',
+        background:   '#fff',
+        border:       `1px solid ${hov ? 'rgba(200,16,46,0.28)' : '#E8ECF0'}`,
+        boxShadow:    hov
+          ? '0 16px 48px rgba(0,0,0,0.14), 0 4px 16px rgba(200,16,46,0.08)'
+          : '0 2px 12px rgba(0,0,0,0.06)',
+        transform:    hov ? 'translateY(-4px)' : 'translateY(0)',
+        transition:   'all 0.28s cubic-bezier(0.34, 1.56, 0.64, 1)',
+        cursor:       'default',
+      }}
+    >
+      {/* Image */}
+      <div style={{ position: 'relative', aspectRatio: '16/10', background: '#F3F4F6', overflow: 'hidden' }}>
+        {/* Gradient overlay at bottom */}
+        <div style={{
+          position: 'absolute', inset: 0, zIndex: 1,
+          background: 'linear-gradient(to top, rgba(0,0,0,0.45) 0%, transparent 55%)',
+        }}/>
+
+        {/* Year badge */}
+        <span style={{
+          position: 'absolute', top: 10, left: 10, zIndex: 2,
+          background: 'rgba(0,0,0,0.72)', backdropFilter: 'blur(6px)',
+          color: '#fff', fontSize: 10, fontWeight: 700,
+          padding: '3px 8px', borderRadius: 6, letterSpacing: '0.06em',
+        }}>
+          {car.year}
+        </span>
+
+        {/* CC badge */}
+        {car.engine_cc && (
+          <span style={{
+            position: 'absolute', top: 10, right: 10, zIndex: 2,
+            background: 'rgba(200,16,46,0.88)', backdropFilter: 'blur(6px)',
+            color: '#fff', fontSize: 10, fontWeight: 700,
+            padding: '3px 8px', borderRadius: 6, letterSpacing: '0.06em',
+          }}>
+            {car.engine_cc} cc
+          </span>
+        )}
+
+        {/* Ref number over image bottom */}
+        <span style={{
+          position: 'absolute', bottom: 8, left: 10, zIndex: 2,
+          color: 'rgba(255,255,255,0.65)', fontSize: 9, fontFamily: 'monospace',
+          letterSpacing: '0.1em', fontWeight: 600,
+        }}>
+          {car.ref_number}
+        </span>
+
+        {primaryImg ? (
+          <img
+            src={primaryImg}
+            alt={`${car.make} ${car.model}`}
+            style={{
+              width: '100%', height: '100%', objectFit: 'cover',
+              transform: hov ? 'scale(1.06)' : 'scale(1)',
+              transition: 'transform 0.6s ease',
+            }}
+            onError={e => { (e.currentTarget as HTMLImageElement).style.display = 'none'; }}
+          />
+        ) : (
+          <div style={{
+            width: '100%', height: '100%',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            background: 'linear-gradient(135deg, #F8FAFC 0%, #EEF2F7 100%)',
+          }}>
+            <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="#CBD5E1" strokeWidth="1.2">
+              <rect x="1" y="3" width="22" height="16" rx="2.5"/>
+              <path d="M1 9h22M7 3v6"/>
+              <circle cx="12" cy="17" r="2"/>
+            </svg>
+          </div>
+        )}
+      </div>
+
+      {/* Content */}
+      <div style={{ padding: '14px 16px', display: 'flex', flexDirection: 'column', gap: 10 }}>
+        {/* Make + Model */}
+        <div>
+          <h3 style={{
+            fontWeight: 700, color: '#111827', fontSize: 13.5,
+            lineHeight: 1.3, margin: 0,
+            overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis',
+          }}>
+            {car.make} {car.model}{car.variant ? ` ${car.variant}` : ''}
+          </h3>
+        </div>
+
+        {/* Price block */}
+        <div style={{ borderTop: '1px solid #F1F5F9', paddingTop: 10 }}>
+          <div style={{ fontSize: 9, letterSpacing: '0.2em', textTransform: 'uppercase', color: '#94A3B8', fontWeight: 700, marginBottom: 2 }}>
+            FOB Price · Japan
+          </div>
+          <div style={{ fontSize: 22, fontWeight: 900, color: '#0F172A', lineHeight: 1, letterSpacing: '-0.02em' }}>
+            ${car.fob_price_usd.toLocaleString()}
+          </div>
+          <div style={{ fontSize: 11, fontWeight: 600, color: '#C8102E', marginTop: 3 }}>
+            ≈ PKR {pkrPrice}
+          </div>
+        </div>
+
+        {/* Buttons */}
+        <div style={{ display: 'flex', gap: 8, paddingTop: 2 }}>
+          <button
+            onClick={() => navigate(`/cars/${car.ref_number}`)}
+            style={{
+              flex: 1, padding: '8px 0', borderRadius: 9,
+              background: hov ? '#A50D25' : '#C8102E',
+              color: '#fff', fontSize: 11, fontWeight: 700,
+              border: 'none', cursor: 'pointer', transition: 'background 0.2s',
+              letterSpacing: '0.03em',
+            }}
+          >
+            Inquire Now
+          </button>
+          <a
+            href={waLink}
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="WhatsApp"
+            style={{
+              width: 36, height: 36, flexShrink: 0, borderRadius: 9,
+              background: '#25D366', display: 'flex', alignItems: 'center', justifyContent: 'center',
+              textDecoration: 'none', transition: 'background 0.2s',
+            }}
+            onMouseEnter={e => ((e.currentTarget as HTMLAnchorElement).style.background = '#128C7E')}
+            onMouseLeave={e => ((e.currentTarget as HTMLAnchorElement).style.background = '#25D366')}
+          >
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="white">
+              <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+            </svg>
+          </a>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function FeaturedCollectionSection() {
   const [, navigate] = useLocation();
 
@@ -678,7 +904,6 @@ function FeaturedCollectionSection() {
   const [cars, setCars]           = React.useState<FcCar[]>([]);
   const [imgMap, setImgMap]       = React.useState<Record<string, string>>({});
   const [loading, setLoading]     = React.useState(true);
-  // simple tab cache to avoid re-fetching
   const cache = React.useRef<Partial<Record<FcTabId, { cars: FcCar[]; imgs: Record<string, string> }>>>({});
 
   const waNumber = import.meta.env.VITE_WHATSAPP_NUMBER || '818089227375';
@@ -693,8 +918,8 @@ function FeaturedCollectionSection() {
     }
     setLoading(true);
     const fetched = await fetchFcCars(tab);
-    const ids = fetched.map(c => c.id);
-    const imgs = await fetchCarImages(ids);
+    const ids     = fetched.map(c => c.id);
+    const imgs    = await fetchCarImages(ids);
     cache.current[tab] = { cars: fetched, imgs };
     setCars(fetched);
     setImgMap(imgs);
@@ -703,56 +928,75 @@ function FeaturedCollectionSection() {
 
   React.useEffect(() => { loadTab(activeTab); }, [activeTab, loadTab]);
 
-  const handleTab = (id: FcTabId) => {
-    setActiveTab(id);
-  };
+  // Duplicate for seamless marquee loop
+  const track = cars.length > 0 ? [...cars, ...cars] : [];
+  const animDuration = Math.max(cars.length * 5, 24);
 
   return (
-    <section className="py-14 bg-white border-b border-gray-100">
-      <div className="container mx-auto px-4 md:px-8">
+    <section className="py-16 relative overflow-hidden" style={{ background: '#FAFBFC' }}>
+      <style>{`
+        @keyframes fc-scroll {
+          0%   { transform: translateX(0); }
+          100% { transform: translateX(-50%); }
+        }
+        .fc-track {
+          animation: fc-scroll var(--fc-dur, 30s) linear infinite;
+          will-change: transform;
+        }
+        .fc-track:hover { animation-play-state: paused; }
+      `}</style>
 
-        {/* ── Header ── */}
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-6">
-          <div>
-            <p className="text-[10px] tracking-[0.28em] uppercase font-bold text-[#C8102E] mb-2">
-              Handpicked for You
-            </p>
-            <h2 className="text-2xl md:text-3xl font-serif font-bold text-gray-900 mb-3">
-              Featured Collection
-            </h2>
-            <div className="flex items-center flex-wrap gap-2">
-              <span className="text-gray-400 text-sm mr-1">Premium vehicles from Japan</span>
-              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-700 text-[11px] font-semibold">
-                ✓ Quality Guaranteed
-              </span>
-              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-blue-50 border border-blue-200 text-blue-700 text-[11px] font-semibold">
-                ✓ Best Price
-              </span>
-            </div>
-          </div>
-          <Link href="/cars" className="hidden md:flex items-center gap-1.5 text-sm font-semibold text-[#C8102E] hover:text-[#A50D25] transition-colors flex-shrink-0">
-            View All Inventory <ArrowRight size={15}/>
-          </Link>
+      {/* Subtle top border accent */}
+      <div className="absolute top-0 inset-x-0 h-px"
+        style={{ background: 'linear-gradient(to right, transparent 0%, rgba(200,16,46,0.3) 30%, rgba(200,16,46,0.3) 70%, transparent 100%)' }}/>
+
+      {/* ── Centered header ── */}
+      <div className="text-center px-4 mb-10">
+        <div className="flex items-center justify-center gap-3 mb-4">
+          <div className="h-px w-10" style={{ background: 'linear-gradient(to right, transparent, #C8102E)' }}/>
+          <p className="text-[10px] tracking-[0.32em] uppercase font-bold text-[#C8102E]">Handpicked for You</p>
+          <div className="h-px w-10" style={{ background: 'linear-gradient(to left, transparent, #C8102E)' }}/>
         </div>
+        <h2 className="text-3xl md:text-4xl font-serif font-bold text-gray-900 mb-3">
+          Featured Collection
+        </h2>
+        <p className="text-gray-400 text-sm mb-4">Premium vehicles sourced directly from Japan</p>
+        {/* Trust badges */}
+        <div className="flex items-center justify-center flex-wrap gap-2">
+          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-700 text-[11px] font-semibold">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+            Quality Guaranteed
+          </span>
+          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-50 border border-blue-200 text-blue-700 text-[11px] font-semibold">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+            Best Price
+          </span>
+          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-50 border border-amber-200 text-amber-700 text-[11px] font-semibold">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+            Export Ready
+          </span>
+        </div>
+      </div>
 
-        {/* ── Promo Banners ── */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-8">
-          <div className="flex items-center gap-4 px-5 py-4 rounded-xl"
-            style={{ background: 'linear-gradient(135deg, #C8102E 0%, #9B0D23 100%)' }}>
-            <div className="w-10 h-10 rounded-full bg-white/15 flex items-center justify-center flex-shrink-0">
-              <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+      {/* ── Promo Banners (centered, max-width) ── */}
+      <div className="px-4 mb-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-w-3xl mx-auto">
+          <div className="flex items-center gap-4 px-5 py-4 rounded-2xl"
+            style={{ background: 'linear-gradient(135deg, #C8102E 0%, #8B0A1E 100%)', boxShadow: '0 8px 32px rgba(200,16,46,0.2)' }}>
+            <div className="w-10 h-10 rounded-xl bg-white/15 flex items-center justify-center flex-shrink-0">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>
               </svg>
             </div>
             <div>
               <div className="font-bold text-white text-sm leading-tight">Best Deals Available</div>
-              <div className="text-white/70 text-xs mt-0.5">Instant quotes and Expert advice</div>
+              <div className="text-white/65 text-xs mt-0.5">Instant quotes · Expert advice</div>
             </div>
           </div>
-          <div className="flex items-center gap-4 px-5 py-4 rounded-xl"
-            style={{ background: 'linear-gradient(135deg, #1E293B 0%, #0F172A 100%)' }}>
-            <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center flex-shrink-0">
-              <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#FBBF24" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+          <div className="flex items-center gap-4 px-5 py-4 rounded-2xl"
+            style={{ background: 'linear-gradient(135deg, #1E293B 0%, #0F172A 100%)', boxShadow: '0 8px 32px rgba(0,0,0,0.2)' }}>
+            <div className="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center flex-shrink-0">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#FBBF24" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"/>
                 <line x1="7" y1="7" x2="7.01" y2="7"/>
               </svg>
@@ -761,166 +1005,267 @@ function FeaturedCollectionSection() {
               <div className="font-bold text-white text-sm leading-tight">
                 <span style={{ color: '#FBBF24' }}>20% Bulk Discount</span>
               </div>
-              <div className="text-white/55 text-xs mt-0.5">Buy 5 or more vehicles for wholesale pricing</div>
+              <div className="text-white/50 text-xs mt-0.5">Buy 5+ vehicles · Wholesale pricing</div>
             </div>
           </div>
         </div>
+      </div>
 
-        {/* ── Filter Tabs ── */}
-        <div className="flex gap-2 flex-wrap mb-6">
-          {FC_TABS.map(tab => (
-            <button
-              key={tab.id}
-              onClick={() => handleTab(tab.id)}
-              className="px-4 py-1.5 rounded-full text-[12px] font-semibold tracking-wide transition-all duration-200 cursor-pointer border"
-              style={activeTab === tab.id
-                ? { background: '#C8102E', color: '#fff', borderColor: '#C8102E', boxShadow: '0 2px 10px rgba(200,16,46,0.28)' }
-                : { background: '#F8FAFC', color: '#64748B', borderColor: '#E2E8F0' }
-              }
+      {/* ── Filter Tabs (centered) ── */}
+      <div className="flex justify-center gap-2 flex-wrap px-4 mb-8">
+        {FC_TABS.map(tab => (
+          <button
+            key={tab.id}
+            onClick={() => setActiveTab(tab.id)}
+            className="cursor-pointer transition-all duration-200"
+            style={activeTab === tab.id ? {
+              padding: '7px 20px', borderRadius: 999,
+              background: '#C8102E', color: '#fff',
+              border: '1px solid #C8102E',
+              fontSize: 12, fontWeight: 700, letterSpacing: '0.04em',
+              boxShadow: '0 4px 16px rgba(200,16,46,0.35)',
+            } : {
+              padding: '7px 20px', borderRadius: 999,
+              background: '#fff', color: '#64748B',
+              border: '1px solid #E2E8F0',
+              fontSize: 12, fontWeight: 600, letterSpacing: '0.04em',
+              boxShadow: '0 1px 4px rgba(0,0,0,0.06)',
+            }}
+          >
+            {tab.label}
+          </button>
+        ))}
+      </div>
+
+      {/* ── Scrolling card track ── */}
+      {loading ? (
+        /* Skeleton row */
+        <div className="flex gap-5 px-6 overflow-hidden justify-center">
+          {[1,2,3,4].map(i => (
+            <div key={i} className="flex-shrink-0 w-[272px] rounded-2xl bg-gray-100 animate-pulse" style={{ height: 380 }}/>
+          ))}
+        </div>
+      ) : cars.length === 0 ? (
+        /* Empty state */
+        <div className="mx-auto max-w-sm flex flex-col items-center py-16 text-center">
+          <div className="w-16 h-16 rounded-full bg-gray-100 flex items-center justify-center mb-4">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#CBD5E1" strokeWidth="1.5">
+              <rect x="1" y="3" width="22" height="16" rx="2.5"/>
+              <path d="M1 9h22M7 3v6"/>
+              <circle cx="12" cy="17" r="2"/>
+            </svg>
+          </div>
+          <h3 className="font-serif font-bold text-lg text-gray-700 mb-1">No cars in this category</h3>
+          <p className="text-gray-400 text-sm">
+            Check back soon or{' '}
+            <Link href="/cars" className="text-[#C8102E] font-medium hover:underline">browse all stock</Link>.
+          </p>
+        </div>
+      ) : (
+        <div className="relative">
+          {/* Left fade */}
+          <div className="absolute left-0 top-0 bottom-0 w-20 z-10 pointer-events-none"
+            style={{ background: 'linear-gradient(to right, #FAFBFC, transparent)' }}/>
+          {/* Right fade */}
+          <div className="absolute right-0 top-0 bottom-0 w-20 z-10 pointer-events-none"
+            style={{ background: 'linear-gradient(to left, #FAFBFC, transparent)' }}/>
+
+          {/* Marquee track — key forces animation restart on tab change */}
+          <div key={activeTab} className="overflow-hidden">
+            <div
+              className="fc-track flex gap-5 py-3 px-4"
+              style={{ width: 'max-content', '--fc-dur': `${animDuration}s` } as React.CSSProperties}
             >
-              {tab.label}
-            </button>
+              {track.map((car, i) => (
+                <FcCarCard
+                  key={`${car.id}-${i}`}
+                  car={car}
+                  imgMap={imgMap}
+                  waNumber={waNumber}
+                  navigate={navigate}
+                />
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── See More button (centered below scroll) ── */}
+      {!loading && cars.length > 0 && (
+        <div className="flex justify-center mt-8">
+          <Link
+            href="/cars"
+            className="inline-flex items-center gap-2 px-7 py-3 rounded-full font-bold text-sm transition-all duration-200 hover:shadow-lg"
+            style={{
+              background: 'linear-gradient(135deg, #C8102E 0%, #9B0D23 100%)',
+              color: '#fff',
+              boxShadow: '0 4px 20px rgba(200,16,46,0.3)',
+              letterSpacing: '0.03em',
+            }}
+          >
+            See More Cars
+            <ArrowRight size={15}/>
+          </Link>
+        </div>
+      )}
+    </section>
+  );
+}
+
+/* ── Animated count-up hook ──────────────────────────────────── */
+/* ── How To Buy ──────────────────────────────────────────────── */
+const HOW_TO_BUY_STEPS = [
+  {
+    number: '01',
+    title: 'Select and Estimate',
+    description: 'Browse our stock and choose your vehicle. Use our Total Price Calculator to estimate the full C&F cost to your destination port.',
+    icon: (
+      <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+        <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+      </svg>
+    ),
+  },
+  {
+    number: '02',
+    title: 'Get Proforma Invoice',
+    description: 'Place an inquiry or click Inquire Now to reserve the car. We send you an official proforma invoice with our Japan bank account details.',
+    icon: (
+      <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/>
+      </svg>
+    ),
+  },
+  {
+    number: '03',
+    title: 'Telegraphic Transfer',
+    description: 'Wire your payment directly to our official Wazir Trading bank account in Japan only. Upload your bank payment receipt to confirm.',
+    icon: (
+      <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+        <line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+      </svg>
+    ),
+  },
+  {
+    number: '04',
+    title: 'Customs and Port Pickup',
+    description: 'We arrange immediate vessel shipment from Yokohama port and send you the original Bill of Lading to clear your car at destination port.',
+    icon: (
+      <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M18 16.98h-5.99c-1.1 0-1.95.94-2.48 1.9A4 4 0 0 1 2 17c.01-.7.2-1.4.57-2"/><path d="m6 17-3.13-3.13A4 4 0 0 1 2 12.82V11a2 2 0 0 1 2-2h7"/><path d="M10 9h12v3.79a2 2 0 0 1-.59 1.42L19 17.42V17a2 2 0 0 0-2-2h-1"/><path d="M14 9V5a2 2 0 0 0-2-2h-1"/>
+      </svg>
+    ),
+  },
+] as const;
+
+function HowToBuySection() {
+  return (
+    <section className="py-20 relative overflow-hidden" style={{ background: '#fff' }}>
+      {/* Subtle background grid */}
+      <div className="absolute inset-0 pointer-events-none opacity-[0.025]"
+        style={{ backgroundImage: 'linear-gradient(#C8102E 1px, transparent 1px), linear-gradient(90deg, #C8102E 1px, transparent 1px)', backgroundSize: '48px 48px' }}/>
+
+      <div className="container mx-auto px-4 md:px-8 relative z-10">
+
+        {/* ── Centered heading ── */}
+        <div className="text-center mb-14">
+          <div className="flex items-center justify-center gap-3 mb-4">
+            <div className="h-px w-10" style={{ background: 'linear-gradient(to right, transparent, #C8102E)' }}/>
+            <p className="text-[10px] tracking-[0.32em] uppercase font-bold text-[#C8102E]">Simple Process</p>
+            <div className="h-px w-10" style={{ background: 'linear-gradient(to left, transparent, #C8102E)' }}/>
+          </div>
+          <h2 className="text-3xl md:text-4xl font-serif font-bold text-gray-900 mb-3">
+            How to Buy Japanese Cars<br className="hidden sm:block"/> from Wazir Trading
+          </h2>
+          <p className="text-gray-400 text-sm md:text-base max-w-lg mx-auto">
+            Follow these 4 simple steps to import your dream car directly from Japan
+          </p>
+        </div>
+
+        {/* ── Step cards ── */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
+          {HOW_TO_BUY_STEPS.map((step, idx) => (
+            <div key={step.number} className="relative flex flex-col">
+              {/* Connector line between cards (desktop only) */}
+              {idx < HOW_TO_BUY_STEPS.length - 1 && (
+                <div className="hidden lg:block absolute top-[38px] left-[calc(100%+1px)] w-6 z-10"
+                  style={{ height: 2, background: 'linear-gradient(to right, #C8102E40, #C8102E15)' }}/>
+              )}
+
+              <div
+                className="flex flex-col h-full rounded-2xl p-6 group transition-all duration-300 hover:-translate-y-1"
+                style={{
+                  background: '#FAFBFC',
+                  border: '1px solid #EEF2F7',
+                  boxShadow: '0 2px 12px rgba(0,0,0,0.05)',
+                }}
+                onMouseEnter={e => {
+                  (e.currentTarget as HTMLDivElement).style.borderColor = 'rgba(200,16,46,0.3)';
+                  (e.currentTarget as HTMLDivElement).style.boxShadow   = '0 12px 40px rgba(200,16,46,0.1), 0 2px 12px rgba(0,0,0,0.06)';
+                }}
+                onMouseLeave={e => {
+                  (e.currentTarget as HTMLDivElement).style.borderColor = '#EEF2F7';
+                  (e.currentTarget as HTMLDivElement).style.boxShadow   = '0 2px 12px rgba(0,0,0,0.05)';
+                }}
+              >
+                {/* Step number + icon row */}
+                <div className="flex items-start justify-between mb-5">
+                  {/* Large step number */}
+                  <span className="font-serif font-black leading-none select-none"
+                    style={{ fontSize: 52, color: '#F1F5F9', letterSpacing: '-0.04em', lineHeight: 1 }}>
+                    {step.number}
+                  </span>
+                  {/* Icon circle */}
+                  <div className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 transition-colors duration-300"
+                    style={{ background: 'rgba(200,16,46,0.08)', color: '#C8102E' }}>
+                    {step.icon}
+                  </div>
+                </div>
+
+                {/* Title */}
+                <h3 className="font-bold text-gray-900 text-base mb-2 leading-snug">
+                  {step.title}
+                </h3>
+
+                {/* Description */}
+                <p className="text-gray-500 text-sm leading-relaxed flex-1">
+                  {step.description}
+                </p>
+
+                {/* Bottom accent bar */}
+                <div className="mt-5 h-0.5 rounded-full w-8 transition-all duration-300 group-hover:w-full"
+                  style={{ background: 'linear-gradient(to right, #C8102E, #E8425A)' }}/>
+              </div>
+            </div>
           ))}
         </div>
 
-        {/* ── Cards Row ── */}
-        {loading ? (
-          <div className="flex gap-4 overflow-hidden">
-            {[1,2,3,4].map(i => (
-              <div key={i} className="flex-shrink-0 w-[260px] rounded-xl bg-gray-100 animate-pulse" style={{ height: 390 }}/>
-            ))}
-          </div>
-        ) : cars.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-20 border-2 border-dashed border-gray-200 rounded-2xl">
-            <svg width="48" height="48" viewBox="0 0 48 48" fill="none" className="mb-4 text-gray-300">
-              <circle cx="24" cy="24" r="22" stroke="currentColor" strokeWidth="2"/>
-              <path d="M14 30l4-8 6 4 5-7 5 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-            </svg>
-            <h3 className="font-serif font-bold text-lg text-gray-600 mb-1">No cars in this category yet</h3>
-            <p className="text-gray-400 text-sm text-center max-w-xs">
-              Check back shortly or{' '}
-              <Link href="/cars" className="text-[#C8102E] font-medium hover:underline">browse all stock</Link>.
+        {/* ── Warning note ── */}
+        <div className="max-w-2xl mx-auto mb-10">
+          <div className="flex gap-3 px-5 py-4 rounded-xl"
+            style={{ background: '#FFFBEB', border: '1px solid #FDE68A' }}>
+            <span className="text-lg flex-shrink-0 mt-0.5">⚠️</span>
+            <p className="text-amber-800 text-sm leading-relaxed">
+              <span className="font-bold">Always verify our Japan bank account details before making any payment.</span>
+              {' '}We never accept payments to personal accounts or agents outside Japan.
             </p>
           </div>
-        ) : (
-          <div className="flex gap-4 overflow-x-auto pb-3"
-            style={{ scrollbarWidth: 'thin', scrollbarColor: '#E2E8F0 transparent' }}>
+        </div>
 
-            {cars.map(car => {
-              const primaryImg = imgMap[car.id] ?? null;
-              const pkrPrice   = Math.round(car.fob_price_usd * PKR_PER_USD).toLocaleString('en-PK');
-              const waMsg      = encodeURIComponent(
-                `Hi Wazir Trading, I'm interested in the ${car.year} ${car.make} ${car.model}${car.variant ? ' ' + car.variant : ''} (Ref: ${car.ref_number}). Please share details and availability.`
-              );
-              const waLink = `https://wa.me/${waNumber}?text=${waMsg}`;
-
-              return (
-                <div key={car.id}
-                  className="flex-shrink-0 w-[258px] bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm hover:shadow-lg hover:border-[#C8102E]/30 transition-all duration-200 group">
-
-                  {/* ── Image ── */}
-                  <div className="relative bg-gray-100 overflow-hidden" style={{ aspectRatio: '4/3' }}>
-                    {/* Year badge */}
-                    <span className="absolute top-2.5 left-2.5 z-10 bg-black/70 text-white text-[10px] font-bold px-2 py-0.5 rounded-md backdrop-blur-sm tracking-wider">
-                      {car.year}
-                    </span>
-                    {/* Engine CC badge */}
-                    {car.engine_cc && (
-                      <span className="absolute top-2.5 right-2.5 z-10 text-white text-[10px] font-bold px-2 py-0.5 rounded-md backdrop-blur-sm tracking-wider"
-                        style={{ background: 'rgba(200,16,46,0.88)' }}>
-                        {car.engine_cc} cc
-                      </span>
-                    )}
-                    {primaryImg ? (
-                      <img
-                        src={primaryImg}
-                        alt={`${car.make} ${car.model}`}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                        onError={e => {
-                          (e.currentTarget as HTMLImageElement).style.display = 'none';
-                        }}
-                      />
-                    ) : (
-                      /* Placeholder when no image in car_images */
-                      <div className="w-full h-full flex items-center justify-center text-gray-300">
-                        <svg width="42" height="42" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.2">
-                          <rect x="1" y="3" width="22" height="16" rx="2"/>
-                          <path d="M1 9h22M7 3v6"/>
-                          <circle cx="12" cy="17" r="2"/>
-                        </svg>
-                      </div>
-                    )}
-                  </div>
-
-                  {/* ── Content ── */}
-                  <div className="p-4 flex flex-col gap-3">
-                    {/* Make + Model + Ref */}
-                    <div>
-                      <h3 className="font-bold text-gray-900 text-[13px] leading-snug line-clamp-1">
-                        {car.make} {car.model}{car.variant ? ` ${car.variant}` : ''}
-                      </h3>
-                      <p className="text-[10px] font-mono text-gray-400 mt-0.5 tracking-wider">{car.ref_number}</p>
-                    </div>
-
-                    {/* Price */}
-                    <div className="border-t border-gray-100 pt-2.5">
-                      <p className="text-[9px] uppercase tracking-[0.2em] text-gray-400 font-semibold mb-0.5">FOB Price (Japan)</p>
-                      <p className="text-[22px] font-extrabold text-gray-900 leading-none tracking-tight">
-                        ${car.fob_price_usd.toLocaleString()}
-                      </p>
-                      <p className="text-[11px] font-semibold mt-1" style={{ color: '#C8102E' }}>
-                        ≈ PKR {pkrPrice}
-                      </p>
-                    </div>
-
-                    {/* Action buttons */}
-                    <div className="flex gap-2 pt-1">
-                      <button
-                        onClick={() => navigate(`/cars/${car.ref_number}`)}
-                        className="flex-1 py-2 text-[11px] font-bold rounded-lg text-white transition-colors"
-                        style={{ background: '#C8102E' }}
-                        onMouseEnter={e => (e.currentTarget.style.background = '#A50D25')}
-                        onMouseLeave={e => (e.currentTarget.style.background = '#C8102E')}
-                      >
-                        Inquire Now
-                      </button>
-                      <a
-                        href={waLink}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="w-9 h-9 flex-shrink-0 flex items-center justify-center rounded-lg transition-colors"
-                        style={{ background: '#25D366' }}
-                        onMouseEnter={e => ((e.currentTarget as HTMLAnchorElement).style.background = '#128C7E')}
-                        onMouseLeave={e => ((e.currentTarget as HTMLAnchorElement).style.background = '#25D366')}
-                        aria-label="WhatsApp"
-                      >
-                        <svg width="15" height="15" viewBox="0 0 24 24" fill="white">
-                          <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
-                        </svg>
-                      </a>
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
-
-            {/* See More tile */}
-            <div className="flex-shrink-0 w-[160px] flex items-center justify-center px-2">
-              <Link
-                href="/cars"
-                className="flex flex-col items-center gap-3 p-6 rounded-xl border-2 border-dashed border-[#C8102E]/25 text-[#C8102E] hover:border-[#C8102E]/60 hover:bg-[#C8102E]/5 transition-all duration-200 text-center w-full"
-              >
-                <div className="w-12 h-12 rounded-full bg-[#C8102E]/10 flex items-center justify-center">
-                  <ArrowRight size={20}/>
-                </div>
-                <div>
-                  <div className="font-bold text-sm">See More</div>
-                  <div className="text-[10px] text-[#C8102E]/55 mt-0.5">Full inventory</div>
-                </div>
-              </Link>
-            </div>
-          </div>
-        )}
+        {/* ── CTA button ── */}
+        <div className="flex justify-center">
+          <Link
+            href="/cars"
+            className="inline-flex items-center gap-2 px-8 py-3.5 rounded-full font-bold text-sm text-white transition-all duration-200 hover:shadow-xl hover:-translate-y-0.5"
+            style={{
+              background:  'linear-gradient(135deg, #C8102E 0%, #9B0D23 100%)',
+              boxShadow:   '0 4px 20px rgba(200,16,46,0.35)',
+              letterSpacing: '0.03em',
+            }}
+          >
+            Browse Available Cars
+            <ArrowRight size={15}/>
+          </Link>
+        </div>
 
       </div>
     </section>
@@ -1206,6 +1551,9 @@ export default function HomePage() {
 
       {/* ── FEATURED COLLECTION ───────────────────────────────────── */}
       <FeaturedCollectionSection />
+
+      {/* ── HOW TO BUY ────────────────────────────────────────────── */}
+      <HowToBuySection />
 
       {/* Featured Cars Section */}
       <section className="py-24 bg-background">
