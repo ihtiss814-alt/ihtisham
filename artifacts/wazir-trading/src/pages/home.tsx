@@ -1946,6 +1946,249 @@ function CustomerReviewsSection() {
   );
 }
 
+/* ── Best Sellers ────────────────────────────────────────────── */
+function BestSellersSection() {
+  type Car = import('@/components/CarCard').Car;
+  const [, navigate] = useLocation();
+  const [cars, setCars]       = React.useState<Car[]>([]);
+  const [imgMap, setImgMap]   = React.useState<Record<string, string>>({});
+  const [loading, setLoading] = React.useState(true);
+  const [liked, setLiked]     = React.useState<Record<string, boolean>>({});
+
+  const waNumber = import.meta.env.VITE_WHATSAPP_NUMBER || '818089227375';
+
+  React.useEffect(() => {
+    supabase
+      .from('cars')
+      .select('*')
+      .order('created_at', { ascending: false })
+      .limit(12)
+      .then(async ({ data }) => {
+        if (!data) { setLoading(false); return; }
+        const ids = data.map((c: Car) => c.id);
+        const { data: imgs } = await supabase
+          .from('car_images')
+          .select('*')
+          .in('car_id', ids);
+        const map: Record<string, string> = {};
+        for (const row of (imgs ?? []) as Record<string, unknown>[]) {
+          const cid = String(row.car_id ?? '');
+          if (!cid || map[cid]) continue;
+          const url = String(row.image_url ?? row.url ?? row.src ?? '');
+          if (url) map[cid] = url;
+        }
+        setCars(data as Car[]);
+        setImgMap(map);
+        setLoading(false);
+      });
+  }, []);
+
+  const toggleLike = (id: string) =>
+    setLiked(prev => ({ ...prev, [id]: !prev[id] }));
+
+  return (
+    <section className="py-20 relative" style={{ background: '#fff' }}>
+      {/* Top accent line */}
+      <div className="absolute top-0 inset-x-0 h-px"
+        style={{ background: 'linear-gradient(to right, transparent 0%, rgba(200,16,46,0.3) 30%, rgba(200,16,46,0.3) 70%, transparent 100%)' }}/>
+
+      <div className="container mx-auto px-4 md:px-8">
+
+        {/* Heading */}
+        <div className="text-center mb-12">
+          <div className="flex items-center justify-center gap-3 mb-4">
+            <div className="h-px w-10" style={{ background: 'linear-gradient(to right, transparent, #C8102E)' }}/>
+            <p className="text-[10px] tracking-[0.32em] uppercase font-bold text-[#C8102E]">Top Picks</p>
+            <div className="h-px w-10" style={{ background: 'linear-gradient(to left, transparent, #C8102E)' }}/>
+          </div>
+          <h2 className="text-3xl md:text-4xl font-serif font-bold text-gray-900 mb-3">Best Sellers</h2>
+          <p className="text-gray-400 text-sm md:text-base">Our most popular vehicles exported worldwide</p>
+        </div>
+
+        {/* Grid */}
+        {loading ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+            {Array.from({ length: 8 }).map((_, i) => (
+              <div key={i} className="rounded-2xl bg-gray-100 animate-pulse" style={{ height: 380 }}/>
+            ))}
+          </div>
+        ) : cars.length === 0 ? (
+          <div className="text-center py-20 text-gray-400">No cars available right now.</div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+            {cars.map(car => {
+              const img       = imgMap[car.id] ?? null;
+              const pkrPrice  = Math.round(car.fob_price_usd * PKR_PER_USD).toLocaleString('en-PK');
+              const isSold    = car.status === 'sold';
+              const isNew     = !!car.is_new_arrival;
+              const isLiked   = !!liked[car.id];
+              const waMsg     = encodeURIComponent(
+                `Hi Wazir Trading, I'm interested in the ${car.year} ${car.make} ${car.model}` +
+                `${car.variant ? ' ' + car.variant : ''} (Ref: ${car.ref_number}). Please share details and availability.`
+              );
+              const waLink = `https://wa.me/${waNumber}?text=${waMsg}`;
+
+              return (
+                <div key={car.id}
+                  className="group flex flex-col rounded-2xl overflow-hidden bg-white transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
+                  style={{ border: '1px solid #EEF2F7', boxShadow: '0 2px 10px rgba(0,0,0,0.05)' }}>
+
+                  {/* ── Image area ── */}
+                  <div className="relative overflow-hidden bg-gray-100" style={{ aspectRatio: '4/3' }}>
+                    {img ? (
+                      <img src={img} alt={`${car.make} ${car.model}`}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                        onError={e => { (e.currentTarget as HTMLImageElement).style.display = 'none'; }}/>
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center"
+                        style={{ background: 'linear-gradient(135deg, #F8FAFC 0%, #EEF2F7 100%)' }}>
+                        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#CBD5E1" strokeWidth="1.2">
+                          <rect x="1" y="3" width="22" height="16" rx="2.5"/>
+                          <path d="M1 9h22M7 3v6"/><circle cx="12" cy="17" r="2"/>
+                        </svg>
+                      </div>
+                    )}
+
+                    {/* Sold overlay */}
+                    {isSold && (
+                      <div className="absolute inset-0 flex items-center justify-center"
+                        style={{ background: 'rgba(0,0,0,0.45)' }}>
+                        <span className="px-4 py-1.5 rounded-full text-xs font-black tracking-widest uppercase text-white"
+                          style={{ background: '#16A34A', letterSpacing: '0.18em' }}>Sold</span>
+                      </div>
+                    )}
+
+                    {/* New Arrival badge */}
+                    {isNew && !isSold && (
+                      <span className="absolute top-2.5 left-2.5 z-10 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider text-white"
+                        style={{ background: '#16A34A' }}>
+                        New Arrival
+                      </span>
+                    )}
+
+                    {/* Year badge (only if no New Arrival badge) */}
+                    {!isNew && (
+                      <span className="absolute top-2.5 left-2.5 z-10 bg-black/70 text-white text-[10px] font-bold px-2 py-0.5 rounded-md backdrop-blur-sm tracking-wider">
+                        {car.year}
+                      </span>
+                    )}
+
+                    {/* Year badge alongside New Arrival */}
+                    {isNew && (
+                      <span className="absolute top-2.5 left-[calc(theme(spacing.2)+4.5rem)] z-10 bg-black/70 text-white text-[10px] font-bold px-2 py-0.5 rounded-md backdrop-blur-sm tracking-wider hidden">
+                        {car.year}
+                      </span>
+                    )}
+
+                    {/* Engine CC badge */}
+                    {car.engine_cc && (
+                      <span className="absolute top-2.5 right-10 z-10 text-white text-[10px] font-bold px-2 py-0.5 rounded-md backdrop-blur-sm tracking-wider"
+                        style={{ background: 'rgba(200,16,46,0.88)' }}>
+                        {car.engine_cc} cc
+                      </span>
+                    )}
+
+                    {/* Heart / favourite */}
+                    <button
+                      onClick={() => toggleLike(car.id)}
+                      className="absolute top-2 right-2 z-10 w-7 h-7 rounded-full flex items-center justify-center transition-all duration-200 cursor-pointer border-0"
+                      style={{
+                        background: isLiked ? '#C8102E' : 'rgba(255,255,255,0.85)',
+                        backdropFilter: 'blur(4px)',
+                        boxShadow: '0 1px 6px rgba(0,0,0,0.15)',
+                      }}
+                      aria-label="Save to favourites"
+                    >
+                      <svg width="13" height="13" viewBox="0 0 24 24"
+                        fill={isLiked ? 'white' : 'none'}
+                        stroke={isLiked ? 'white' : '#9CA3AF'}
+                        strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+                      </svg>
+                    </button>
+                  </div>
+
+                  {/* ── Card body ── */}
+                  <div className="flex flex-col flex-1 p-4 gap-2.5">
+                    {/* Make + Model */}
+                    <div>
+                      <h3 className="font-bold text-gray-900 text-[13.5px] leading-snug line-clamp-1">
+                        {car.make} {car.model}{car.variant ? ` ${car.variant}` : ''}
+                      </h3>
+                      <p className="text-[10px] font-mono text-gray-400 mt-0.5 tracking-wider">{car.ref_number}</p>
+                    </div>
+
+                    {/* Price */}
+                    <div className="flex-1">
+                      <p className="text-[9px] uppercase tracking-[0.2em] text-gray-400 font-semibold">FOB Price · Japan</p>
+                      <p className="text-[20px] font-extrabold leading-tight tracking-tight" style={{ color: '#C8102E' }}>
+                        ${car.fob_price_usd.toLocaleString()}
+                      </p>
+                      <p className="text-[11px] font-semibold text-gray-500">≈ PKR {pkrPrice}</p>
+                    </div>
+
+                    {/* Buttons */}
+                    <div className="flex gap-2 pt-1">
+                      <button
+                        onClick={() => navigate(`/cars/${car.ref_number}`)}
+                        disabled={isSold}
+                        className="flex-1 py-2 text-[11px] font-bold rounded-lg text-white transition-colors cursor-pointer border-0"
+                        style={{ background: isSold ? '#9CA3AF' : '#C8102E' }}
+                        onMouseEnter={e => { if (!isSold) (e.currentTarget as HTMLButtonElement).style.background = '#A50D25'; }}
+                        onMouseLeave={e => { if (!isSold) (e.currentTarget as HTMLButtonElement).style.background = '#C8102E'; }}
+                      >
+                        {isSold ? 'Sold Out' : 'Inquire Now'}
+                      </button>
+                      <a href={waLink} target="_blank" rel="noopener noreferrer"
+                        aria-label="WhatsApp"
+                        className="w-9 h-9 flex-shrink-0 flex items-center justify-center rounded-lg transition-colors"
+                        style={{ background: '#25D366' }}
+                        onMouseEnter={e => ((e.currentTarget as HTMLAnchorElement).style.background = '#128C7E')}
+                        onMouseLeave={e => ((e.currentTarget as HTMLAnchorElement).style.background = '#25D366')}>
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="white">
+                          <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+                        </svg>
+                      </a>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+
+        {/* CTA */}
+        {!loading && cars.length > 0 && (
+          <div className="flex flex-col items-center mt-12 gap-3">
+            <Link
+              href="/cars"
+              className="inline-flex items-center gap-2 px-10 py-4 rounded-full font-bold text-white transition-all duration-200 hover:shadow-2xl hover:-translate-y-0.5"
+              style={{
+                background:    'linear-gradient(135deg, #C8102E 0%, #9B0D23 100%)',
+                boxShadow:     '0 6px 24px rgba(200,16,46,0.35)',
+                fontSize:      15,
+                letterSpacing: '0.03em',
+              }}
+            >
+              See More Cars
+              <ArrowRight size={16}/>
+            </Link>
+            <Link href="#cant-find"
+              className="text-sm text-gray-400 hover:text-[#C8102E] transition-colors"
+              onClick={e => {
+                e.preventDefault();
+                document.querySelector('[data-section="cant-find"]')?.scrollIntoView({ behavior: 'smooth' });
+              }}>
+              Can't find what you need? →
+            </Link>
+          </div>
+        )}
+
+      </div>
+    </section>
+  );
+}
+
 /* ── Animated count-up hook ──────────────────────────────────── */
 function useCountUp(target: number, duration = 1800) {
   const [value, setValue] = useState(0);
@@ -2237,6 +2480,9 @@ export default function HomePage() {
 
       {/* ── CUSTOMER REVIEWS ──────────────────────────────────────── */}
       <CustomerReviewsSection />
+
+      {/* ── BEST SELLERS ──────────────────────────────────────────── */}
+      <BestSellersSection />
 
       {/* Featured Cars Section */}
       <section className="py-24 bg-background">
