@@ -827,140 +827,136 @@ function TotalPriceCalculator() {
 }
 
 /* ─────────────────────────────────────────────────────────────── */
-/* CAR LISTING ROW                                                  */
+/* CAR LISTING CARD (mobile-first)                                  */
 /* ─────────────────────────────────────────────────────────────── */
 function CarRow({ car }: { car: DummyCar }) {
-  const [imgIdx, setImgIdx]     = useState(0);
-  const [favorited, setFavorited] = useState(false);
+  const [showFeatures, setShowFeatures] = useState(false);
   const waLink = `https://wa.me/${WA_NUMBER}?text=${encodeURIComponent(`I'm interested in ${car.make} ${car.model} ${car.variant} (Ref: ${car.ref})`)}`;
 
   const specs = [
-    { icon: <Gauge size={13} />,       label: 'Mileage',    value: car.mileage    },
-    { icon: <Calendar size={13} />,    label: 'Year',       value: String(car.year) },
-    { icon: <Zap size={13} />,         label: 'Engine',     value: car.engine     },
-    { icon: <Settings size={13} />,    label: 'Trans',      value: car.trans      },
-    { icon: <Navigation size={13} />,  label: 'Model Code', value: car.modelCode  },
-    { icon: <MapPin size={13} />,      label: 'Steering',   value: car.steering   },
-    { icon: <Fuel size={13} />,        label: 'Fuel',       value: car.fuel       },
-    { icon: <Users size={13} />,       label: 'Seats',      value: String(car.seats) },
-    { icon: <span className="text-[10px] font-bold">ENG</span>, label: 'Engine Code', value: 'B' },
-    { icon: <Palette size={13} />,     label: 'Color',      value: car.color      },
-    { icon: <Settings size={13} />,    label: 'Drive',      value: car.drive      },
-    { icon: <DoorOpen size={13} />,    label: 'Doors',      value: String(car.doors) },
+    { icon: <Gauge size={13} />,       label: 'Mileage',     value: car.mileage    },
+    { icon: <Calendar size={13} />,    label: 'Year',        value: String(car.year) },
+    { icon: <Zap size={13} />,         label: 'Engine',      value: car.engine     },
+    { icon: <Settings size={13} />,    label: 'Trans.',      value: car.trans      },
+    { icon: <Navigation size={13} />,  label: 'Model Code',  value: car.modelCode  },
+    { icon: <MapPin size={13} />,      label: 'Steering',    value: car.steering   },
+    { icon: <Fuel size={13} />,        label: 'Fuel',        value: car.fuel       },
+    { icon: <Users size={13} />,       label: 'Seats',       value: car.seats > 0 ? String(car.seats) : '-' },
+    { icon: <span className="text-[10px] font-bold text-gray-400">ENG</span>, label: 'Engine Code', value: '-' },
+    { icon: <Palette size={13} />,     label: 'Color',       value: car.color      },
+    { icon: <Settings size={13} />,    label: 'Drive',       value: car.drive      },
+    { icon: <DoorOpen size={13} />,    label: 'Doors',       value: String(car.doors) },
   ];
 
   return (
-    <div className="border border-gray-200 bg-white shadow-sm hover:shadow-md transition-shadow mb-4 overflow-hidden">
-      <div className="flex flex-col md:flex-row">
-        {/* LEFT — Image */}
-        <div className="relative md:w-[35%] bg-gray-100 flex-shrink-0" style={{ minHeight: 220 }}>
-          {/* Badge */}
-          {car.status === 'New Arrival' && (
-            <div className="absolute top-3 left-3 z-10 px-2 py-0.5 text-[10px] font-bold text-white uppercase tracking-wider rounded-sm"
-              style={{ background: '#16A34A' }}>
-              New Arrival
-            </div>
-          )}
-          {car.status === 'Clearance' && (
-            <div className="absolute top-3 left-3 z-10 px-2 py-0.5 text-[10px] font-bold text-white uppercase tracking-wider rounded-sm"
-              style={{ background: '#D97706' }}>
-              Clearance
-            </div>
-          )}
-          {/* Favorite */}
-          <button
-            onClick={() => setFavorited(f => !f)}
-            className="absolute top-3 right-3 z-10 w-7 h-7 rounded-full bg-white/90 flex items-center justify-center shadow-sm hover:scale-110 transition-transform"
-          >
-            <Heart size={14} fill={favorited ? RED : 'none'} stroke={favorited ? RED : '#6B7280'} />
-          </button>
-          {/* Image */}
-          <img
-            src={car.image}
-            alt={`${car.make} ${car.model}`}
-            className="w-full h-full object-cover"
-            style={{ minHeight: 220, maxHeight: 260 }}
-          />
-          {/* Arrows (decorative) */}
-          <button className="absolute left-2 top-1/2 -translate-y-1/2 w-6 h-6 rounded-full bg-black/40 flex items-center justify-center text-white hover:bg-black/60 transition-colors">
-            <ChevronLeft size={12} />
-          </button>
-          <button className="absolute right-2 top-1/2 -translate-y-1/2 w-6 h-6 rounded-full bg-black/40 flex items-center justify-center text-white hover:bg-black/60 transition-colors">
-            <ChevronRight size={12} />
-          </button>
-        </div>
+    <div className="bg-white border border-gray-200 shadow-sm mb-4 overflow-hidden">
+      {/* ── Title ── */}
+      <div className="px-4 pt-4 pb-2">
+        <h3 className="font-bold text-[15px] text-gray-900 leading-snug">
+          {car.make.toUpperCase()} {car.model.toUpperCase()} {car.variant.toUpperCase()}
+        </h3>
+      </div>
 
-        {/* RIGHT — Details */}
-        <div className="flex-1 flex flex-col p-4">
-          {/* Title row */}
-          <div className="flex items-start justify-between mb-3">
-            <h3 className="font-bold text-[17px] text-gray-900 leading-tight" style={{ fontFamily:"'Playfair Display',serif" }}>
-              {car.make.toUpperCase()} {car.model.toUpperCase()} {car.variant.toUpperCase()}
-            </h3>
-            <div className="flex items-center gap-1.5 flex-shrink-0 ml-3">
-              <span className="w-2 h-2 rounded-full" style={{ background: RED }} />
-              <span className="text-[11px] font-bold text-gray-600 tracking-wider">{car.country}</span>
+      {/* ── Image ── */}
+      <div className="relative w-full bg-gray-100" style={{ aspectRatio: '16/9' }}>
+        {car.status === 'New Arrival' && (
+          <div className="absolute top-3 left-3 z-10 px-2 py-0.5 text-[10px] font-bold text-white uppercase tracking-wider rounded-sm"
+            style={{ background: '#16A34A' }}>
+            New Arrival
+          </div>
+        )}
+        {car.status === 'Clearance' && (
+          <div className="absolute top-3 left-3 z-10 px-2 py-0.5 text-[10px] font-bold text-white uppercase tracking-wider"
+            style={{ background: '#D97706' }}>
+            CLEARANCE
+          </div>
+        )}
+        <img
+          src={car.image}
+          alt={`${car.make} ${car.model}`}
+          className="w-full h-full object-cover"
+        />
+        <button className="absolute left-2 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full bg-black/40 flex items-center justify-center text-white hover:bg-black/60 transition-colors">
+          <ChevronLeft size={14} />
+        </button>
+        <button className="absolute right-2 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full bg-black/40 flex items-center justify-center text-white hover:bg-black/60 transition-colors">
+          <ChevronRight size={14} />
+        </button>
+      </div>
+
+      {/* ── Ref + Country ── */}
+      <div className="px-4 pt-3 pb-1 flex items-center justify-between">
+        <span className="text-[12px] text-gray-500">Reference #{car.ref}</span>
+        <div className="flex items-center gap-1.5">
+          <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: RED }} />
+          <span className="text-[12px] font-bold text-gray-700 tracking-wider">{car.country}</span>
+        </div>
+      </div>
+
+      {/* ── Pricing ── */}
+      <div className="px-4 pt-1 pb-3">
+        <div className="text-[11px] text-gray-400 uppercase tracking-wider font-semibold mb-0.5">FOB PRICE</div>
+        <div className="text-[26px] font-black leading-none" style={{ color: RED }}>
+          ${car.fob.toLocaleString()}
+        </div>
+        <div className="text-[13px] font-semibold mt-1" style={{ color: '#374151' }}>
+          PKR {car.pkr.toLocaleString()}
+        </div>
+      </div>
+
+      {/* ── CTAs ── */}
+      <div className="px-4 pb-3 flex flex-col gap-2">
+        <a
+          href={waLink}
+          target="_blank" rel="noopener noreferrer"
+          className="flex items-center justify-center gap-2 w-full py-2.5 font-bold text-[13px] text-white rounded-sm transition-opacity hover:opacity-90"
+          style={{ background: '#25D366' }}
+        >
+          <MessageCircle size={15} />
+          Inquire Now
+        </a>
+        <button
+          className="flex items-center justify-center gap-2 w-full py-2.5 font-bold text-[13px] border rounded-sm transition-colors hover:bg-red-50"
+          style={{ borderColor: RED, color: RED }}
+        >
+          Offer your price
+        </button>
+      </div>
+
+      {/* ── Features toggle ── */}
+      <div className="border-t border-gray-100">
+        <button
+          onClick={() => setShowFeatures(v => !v)}
+          className="w-full flex items-center justify-between px-4 py-2.5 text-[12px] font-semibold text-gray-600 hover:bg-gray-50 transition-colors"
+        >
+          <div className="flex items-center gap-2">
+            <div className="w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0"
+              style={{ background: '#25D366' }}>
+              <WhatsAppIcon size={13} />
             </div>
           </div>
+          <span>{showFeatures ? 'Hide Features' : 'View Features'}</span>
+          {showFeatures
+            ? <ChevronUp size={14} className="text-gray-400" />
+            : <ChevronDown size={14} className="text-gray-400" />
+          }
+        </button>
 
-          {/* Specs grid */}
-          <div className="grid grid-cols-3 gap-x-4 gap-y-1.5 mb-3">
+        {showFeatures && (
+          <div className="border-t border-gray-100">
             {specs.map((s, i) => (
-              <div key={i} className="flex items-center gap-1.5 text-[12px] text-gray-600">
-                <span className="text-gray-400 flex-shrink-0">{s.icon}</span>
-                <span className="text-gray-400">{s.label}:</span>
-                <span className="font-semibold text-gray-800 truncate">{s.value}</span>
+              <div
+                key={i}
+                className="flex items-center px-4 py-2 text-[12px] border-b border-gray-50 last:border-b-0"
+                style={{ background: i % 2 === 0 ? '#fff' : '#fafafa' }}
+              >
+                <span className="text-gray-400 w-5 flex-shrink-0">{s.icon}</span>
+                <span className="text-gray-500 flex-1">{s.label}</span>
+                <span className="font-semibold text-gray-800 text-right">{s.value || '-'}</span>
               </div>
             ))}
           </div>
-
-          {/* Action bar */}
-          <div className="mt-auto pt-3 border-t border-gray-100 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-            {/* Left actions */}
-            <div className="flex flex-wrap items-center gap-2">
-              <span className="px-2.5 py-1 rounded-full bg-gray-100 text-gray-500 text-[11px] font-semibold">
-                Reference # {car.ref}
-              </span>
-              <a
-                href={waLink}
-                target="_blank" rel="noopener noreferrer"
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-sm text-white text-[11px] font-bold transition-opacity hover:opacity-90"
-                style={{ background: '#25D366' }}
-              >
-                <WhatsAppIcon size={13} />
-                WhatsApp
-              </a>
-              <a
-                href={`mailto:info@wazirtrading.com?subject=Inquiry: ${car.ref}`}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-sm text-white text-[11px] font-bold transition-opacity hover:opacity-90"
-                style={{ background: '#16A34A' }}
-              >
-                <Mail size={12} />
-                Inquire Now
-              </a>
-              <button
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-sm text-[11px] font-bold border transition-colors hover:bg-red-50"
-                style={{ borderColor: RED, color: RED }}
-              >
-                Offer Your Price
-              </button>
-            </div>
-
-            {/* Right — Pricing */}
-            <div className="text-right flex-shrink-0">
-              <div className="text-[10px] text-gray-400 uppercase tracking-wider font-semibold">FOB Price</div>
-              <div className="text-xl font-black leading-tight" style={{ color: RED }}>
-                ${car.fob.toLocaleString()}
-              </div>
-              <div className="text-[11px] font-semibold" style={{ color: '#0D9488' }}>
-                Est. C&F Karachi: ${car.cnf.toLocaleString()}
-              </div>
-              <div className="text-[11px] font-semibold" style={{ color: RED }}>
-                PKR {car.pkr.toLocaleString()}
-              </div>
-            </div>
-          </div>
-        </div>
+        )}
       </div>
     </div>
   );
