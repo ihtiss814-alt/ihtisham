@@ -1,11 +1,18 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Link, useLocation } from 'wouter';
 import {
   Search, ChevronDown, ChevronUp, ChevronLeft, ChevronRight,
-  Heart, Mail, MessageCircle, X, SlidersHorizontal, MapPin,
+  MessageCircle, X, SlidersHorizontal, MapPin,
   Gauge, Calendar, Zap, Settings, Users, Palette, DoorOpen,
-  Navigation, Fuel,
+  Navigation, Fuel, Loader2,
 } from 'lucide-react';
+import { supabase } from '@/lib/supabase';
+import type { Car } from '@/components/CarCard';
+
+/* ─────────────────────────────────────────────────────────────── */
+/* TYPES                                                            */
+/* ─────────────────────────────────────────────────────────────── */
+type CarWithImage = Car;
 
 /* ─────────────────────────────────────────────────────────────── */
 /* CONSTANTS                                                        */
@@ -13,31 +20,13 @@ import {
 const NAVY = '#0D1B3E';
 const RED  = '#C8102E';
 const WA_NUMBER = import.meta.env.VITE_WHATSAPP_NUMBER || '818089227375';
+const PAGE_SIZE = 10;
 
-const MAKES = [
-  { name: 'Toyota',          count: 19334 },
-  { name: 'Nissan',          count: 6516  },
-  { name: 'Honda',           count: 4187  },
-  { name: 'Mazda',           count: 2859  },
-  { name: 'Mitsubishi',      count: 877   },
-  { name: 'Subaru',          count: 970   },
-  { name: 'Suzuki',          count: 3212  },
-  { name: 'Daihatsu',        count: 1354  },
-  { name: 'Lexus',           count: 922   },
-  { name: 'Isuzu',           count: 299   },
-  { name: 'Audi',            count: 373   },
-  { name: 'BMW',             count: 765   },
-  { name: 'Mercedes',        count: 654   },
-  { name: 'Volkswagen',      count: 426   },
-  { name: 'Land Rover',      count: 96    },
-  { name: 'Hino',            count: 111   },
-  { name: 'Iseki',           count: 139   },
-  { name: 'John Deere',      count: 5     },
-  { name: 'Kubota',          count: 172   },
-  { name: 'Massey Ferguson', count: 1     },
-  { name: 'Mametora',        count: 1     },
-  { name: 'Shibaura',        count: 19    },
-  { name: 'Yanmar',          count: 109   },
+const MAKE_NAMES = [
+  'Toyota', 'Nissan', 'Honda', 'Mazda', 'Mitsubishi', 'Subaru',
+  'Suzuki', 'Daihatsu', 'Lexus', 'Isuzu', 'Audi', 'BMW',
+  'Mercedes', 'Volkswagen', 'Land Rover', 'Hino', 'Iseki',
+  'John Deere', 'Kubota', 'Massey Ferguson', 'Mametora', 'Shibaura', 'Yanmar',
 ];
 
 const PRICE_RANGES = [
@@ -61,52 +50,49 @@ const BODY_TYPE_ITEMS = [
   { name: 'Cooper',        accent: '#14B8A6', bg: '#F0FDFA' },
 ];
 const BODY_TYPES    = BODY_TYPE_ITEMS.map(b => b.name);
-const CATEGORIES    = ['Gasoline','Hybrid','Diesel','Light Oil'];
-const LOCATIONS     = ['Japan','Chile','UK','UAE','Thailand','China'];
-const YEAR_RANGES   = ['2021-2023','2018-2020','2015-2017','2012-2014','2009-2011','2006-2008','2003-2005','2000-2002'];
-const DRIVES        = ['2WD','4WD'];
-const TRANSMISSIONS = ['AT','MT','FAT','IAT','CVT','CAT','I5','DAT'];
-const ENGINE_SIZES  = ['660CC-1000CC','1000CC-1500CC','1500CC-1800CC','1800CC-2000CC','2000CC-2500CC','2500CC-3000CC','3000CC-3500CC'];
-const FUELS         = ['Diesel','Electric','Gasoline','Gasoline E Power','Gasoline Hybrid'];
-const MILEAGES      = ['50000KM-80000KM','80000KM-100000KM','100000KM-150000KM','150000KM-200000KM','200000KM-250000KM','250000KM-300000KM'];
+const CATEGORIES    = ['Gasoline', 'Hybrid', 'Diesel', 'Light Oil'];
+const LOCATIONS     = ['Japan', 'Chile', 'UK', 'UAE', 'Thailand', 'China'];
+const YEAR_RANGES   = ['2021-2023', '2018-2020', '2015-2017', '2012-2014', '2009-2011', '2006-2008', '2003-2005', '2000-2002'];
+const DRIVES        = ['2WD', '4WD'];
+const TRANSMISSIONS = ['AT', 'MT', 'FAT', 'IAT', 'CVT', 'CAT', 'I5', 'DAT'];
+const ENGINE_SIZES  = ['660CC-1000CC', '1000CC-1500CC', '1500CC-1800CC', '1800CC-2000CC', '2000CC-2500CC', '2500CC-3000CC', '3000CC-3500CC'];
+const FUELS         = ['Diesel', 'Electric', 'Gasoline', 'Gasoline E Power', 'Gasoline Hybrid'];
+const MILEAGES      = ['50000KM-80000KM', '80000KM-100000KM', '100000KM-150000KM', '150000KM-200000KM', '200000KM-250000KM', '250000KM-300000KM'];
 
-// Full brand data for auto-scroll carousel
 const MAKE_BRANDS = [
-  { name: 'Toyota',          count: 19334, slug: 'toyota',          accent: '#EB0A1E' },
-  { name: 'Nissan',          count: 6516,  slug: 'nissan',          accent: '#C3002F' },
-  { name: 'Honda',           count: 4187,  slug: 'honda',           accent: '#CC0000' },
-  { name: 'Mazda',           count: 2859,  slug: 'mazda',           accent: '#1E3A8A' },
-  { name: 'Mitsubishi',      count: 877,   slug: 'mitsubishi',      accent: '#E60012' },
-  { name: 'Subaru',          count: 970,   slug: 'subaru',          accent: '#0033A1' },
-  { name: 'Suzuki',          count: 3212,  slug: 'suzuki',          accent: '#1B5CCC' },
-  { name: 'Daihatsu',        count: 1354,  slug: 'daihatsu',        accent: '#005BAC' },
-  { name: 'Lexus',           count: 922,   slug: 'lexus',           accent: '#1A1A1A' },
-  { name: 'Isuzu',           count: 299,   slug: 'isuzu',           accent: '#D40000' },
-  { name: 'Audi',            count: 373,   slug: 'audi',            accent: '#BB0A14' },
-  { name: 'BMW',             count: 765,   slug: 'bmw',             accent: '#0066B1' },
-  { name: 'Mercedes',        count: 654,   slug: 'mercedes',        accent: '#666666' },
-  { name: 'Volkswagen',      count: 426,   slug: 'volkswagen',      accent: '#001E50' },
-  { name: 'Land Rover',      count: 96,    slug: 'landrover',       accent: '#005A2B' },
-  { name: 'Hino',            count: 111,   slug: 'hino',            accent: '#A31922' },
-  { name: 'Iseki',           count: 139,   slug: 'iseki',           accent: '#E05A00' },
-  { name: 'John Deere',      count: 5,     slug: 'john-deere',      accent: '#367C2B' },
-  { name: 'Kubota',          count: 172,   slug: 'kubota',          accent: '#D0231E' },
-  { name: 'Massey Ferguson', count: 1,     slug: 'massey-ferguson', accent: '#CC1011' },
-  { name: 'Mametora',        count: 1,     slug: 'mametora',        accent: '#555555' },
-  { name: 'Shibaura',        count: 19,    slug: 'shibaura',        accent: '#0047AB' },
-  { name: 'Yanmar',          count: 109,   slug: 'yanmar',          accent: '#C8102E' },
+  { name: 'Toyota',          slug: 'toyota',          accent: '#EB0A1E' },
+  { name: 'Nissan',          slug: 'nissan',          accent: '#C3002F' },
+  { name: 'Honda',           slug: 'honda',           accent: '#CC0000' },
+  { name: 'Mazda',           slug: 'mazda',           accent: '#1E3A8A' },
+  { name: 'Mitsubishi',      slug: 'mitsubishi',      accent: '#E60012' },
+  { name: 'Subaru',          slug: 'subaru',          accent: '#0033A1' },
+  { name: 'Suzuki',          slug: 'suzuki',          accent: '#1B5CCC' },
+  { name: 'Daihatsu',        slug: 'daihatsu',        accent: '#005BAC' },
+  { name: 'Lexus',           slug: 'lexus',           accent: '#1A1A1A' },
+  { name: 'Isuzu',           slug: 'isuzu',           accent: '#D40000' },
+  { name: 'Audi',            slug: 'audi',            accent: '#BB0A14' },
+  { name: 'BMW',             slug: 'bmw',             accent: '#0066B1' },
+  { name: 'Mercedes',        slug: 'mercedes',        accent: '#666666' },
+  { name: 'Volkswagen',      slug: 'volkswagen',      accent: '#001E50' },
+  { name: 'Land Rover',      slug: 'landrover',       accent: '#005A2B' },
+  { name: 'Hino',            slug: 'hino',            accent: '#A31922' },
+  { name: 'Iseki',           slug: 'iseki',           accent: '#E05A00' },
+  { name: 'John Deere',      slug: 'john-deere',      accent: '#367C2B' },
+  { name: 'Kubota',          slug: 'kubota',          accent: '#D0231E' },
+  { name: 'Massey Ferguson', slug: 'massey-ferguson', accent: '#CC1011' },
+  { name: 'Mametora',        slug: 'mametora',        accent: '#555555' },
+  { name: 'Shibaura',        slug: 'shibaura',        accent: '#0047AB' },
+  { name: 'Yanmar',          slug: 'yanmar',          accent: '#C8102E' },
 ];
 
-const COLLECTION_TABS = [
-  { label: 'New Arrivals',   count: 1247 },
-  { label: 'Clearance',      count: 382  },
-  { label: 'Third Party',    count: 94   },
-  { label: 'Machinery',      count: 211  },
-  { label: 'Thailand Stock', count: 88   },
-  { label: 'China Stock',    count: 143  },
-  { label: 'Engine Stock',   count: 57   },
-  { label: 'UAE Stock',      count: 76   },
-  { label: 'Taiwan Stock',   count: 31   },
+const COLLECTION_TABS: Array<{ label: string; key: string }> = [
+  { label: 'All Cars',    key: '' },
+  { label: 'New Arrivals',key: 'new_arrivals' },
+  { label: 'Clearance',   key: 'clearance' },
+  { label: 'Japan Stock', key: 'japan' },
+  { label: 'Hybrid',      key: 'hybrid' },
+  { label: 'SUV',         key: 'suv' },
+  { label: 'Budget',      key: 'budget' },
 ];
 
 const SORT_OPTIONS = [
@@ -114,75 +100,41 @@ const SORT_OPTIONS = [
   'Mileage Low to High', 'Year Newest', 'Year Oldest',
 ];
 
-/* ─────────────────────────────────────────────────────────────── */
-/* DUMMY CARS                                                       */
-/* ─────────────────────────────────────────────────────────────── */
-interface DummyCar {
-  ref: string; make: string; model: string; variant: string;
-  mileage: string; year: number; engine: string; trans: string;
-  modelCode: string; steering: string; fuel: string; seats: number;
-  color: string; drive: string; doors: number; fob: number;
-  cnf: number; pkr: number; status: 'New Arrival' | 'Clearance';
-  country: string; image: string;
-}
-
-const DUMMY_CARS: DummyCar[] = [
-  {
-    ref:'WTL-000001', make:'Toyota', model:'Yaris', variant:'2025 Z',
-    mileage:'8,000 KM', year:2025, engine:'1500CC', trans:'AT',
-    modelCode:'MXPA10', steering:'RHD', fuel:'Gasoline', seats:5,
-    color:'White', drive:'2WD', doors:5, fob:14200, cnf:17395,
-    pkr:3888132, status:'New Arrival', country:'JAPAN',
-    image:'https://images.unsplash.com/photo-1550355291-bbee04a92027?w=600&q=80',
-  },
-  {
-    ref:'WTL-000002', make:'Honda', model:'Fit', variant:'2020 Basic',
-    mileage:'40,000 KM', year:2020, engine:'1300CC', trans:'AT',
-    modelCode:'GR1', steering:'RHD', fuel:'Gasoline', seats:5,
-    color:'White', drive:'2WD', doors:5, fob:8150, cnf:10825,
-    pkr:2231569, status:'New Arrival', country:'JAPAN',
-    image:'https://images.unsplash.com/photo-1548111008-18acab6e7069?w=600&q=80',
-  },
-  {
-    ref:'WTL-000003', make:'Mazda', model:'Demio', variant:'2014 XD Touring',
-    mileage:'60,000 KM', year:2014, engine:'1500CC', trans:'AT',
-    modelCode:'DJ5FS', steering:'RHD', fuel:'Light Oil', seats:5,
-    color:'Red', drive:'2WD', doors:5, fob:4300, cnf:6920,
-    pkr:1177392, status:'New Arrival', country:'JAPAN',
-    image:'https://images.unsplash.com/photo-1592198084033-aade902d1aae?w=600&q=80',
-  },
-  {
-    ref:'WTL-000004', make:'Nissan', model:'Kix', variant:'2021 X',
-    mileage:'31,000 KM', year:2021, engine:'1200CC', trans:'AT',
-    modelCode:'P15', steering:'RHD', fuel:'Hybrid', seats:5,
-    color:'White', drive:'2WD', doors:5, fob:13950, cnf:14668,
-    pkr:3819679, status:'New Arrival', country:'JAPAN',
-    image:'https://images.unsplash.com/photo-1625231338679-5ad2763f5a9d?w=600&q=80',
-  },
-  {
-    ref:'WTL-000005', make:'Daihatsu', model:'Move', variant:'2012 Custom X',
-    mileage:'135,000 KM', year:2012, engine:'660CC', trans:'AT',
-    modelCode:'LA100S', steering:'RHD', fuel:'Gasoline', seats:4,
-    color:'White', drive:'2WD', doors:5, fob:2500, cnf:4640,
-    pkr:684397, status:'Clearance', country:'JAPAN',
-    image:'https://images.unsplash.com/photo-1561975258-f824d0acbdec?w=600&q=80',
-  },
-];
+const COUNTRY_PORTS: Record<string, string[]> = {
+  Pakistan:           ['Karachi', 'Gwadar'],
+  UAE:                ['Dubai', 'Abu Dhabi'],
+  UK:                 ['Southampton', 'Tilbury'],
+  Guyana:             ['Georgetown'],
+  Jamaica:            ['Kingston'],
+  Trinidad:           ['Port of Spain'],
+  Kenya:              ['Mombasa'],
+  Ghana:              ['Tema', 'Takoradi'],
+  Nigeria:            ['Lagos', 'Apapa'],
+  Russia:             ['Vladivostok', 'Moscow'],
+  'New Zealand':      ['Auckland', 'Wellington'],
+  'Papua New Guinea': ['Port Moresby'],
+  Germany:            ['Hamburg', 'Bremen'],
+  Tanzania:           ['Dar es Salaam'],
+  Uganda:             ['Kampala (via Mombasa)'],
+  'South Africa':     ['Durban', 'Cape Town'],
+  Australia:          ['Sydney', 'Melbourne', 'Brisbane'],
+};
+const DEST_COUNTRIES = Object.keys(COUNTRY_PORTS);
 
 const REVIEWS = [
-  { name:'Muhammad Asif', country:'Pakistan 🇵🇰', rating:5, text:'Excellent service from Wazir Trading. My Toyota Aqua arrived in perfect condition. The whole process was smooth and transparent. Highly recommended for anyone importing from Japan.' },
-  { name:'James Thompson', country:'Guyana 🇬🇾', rating:5, text:'Very professional company. They found exactly the car I wanted within my budget. Communication was excellent throughout the entire shipping process.' },
-  { name:'David Osei', country:'Ghana 🇬🇭', rating:5, text:'Best Japanese car exporter I have dealt with. Quality vehicles at great prices. My Nissan Note arrived on time and exactly as described. Will buy again.' },
-  { name:'Sarah Williams', country:'UK 🇬🇧', rating:5, text:'Wazir Trading made importing a Japanese car to UK very easy. They handled all the paperwork and kept me updated at every step.' },
+  { name: 'Muhammad Asif', country: 'Pakistan 🇵🇰', rating: 5, text: 'Excellent service from Wazir Trading. My Toyota Aqua arrived in perfect condition. The whole process was smooth and transparent. Highly recommended for anyone importing from Japan.' },
+  { name: 'James Thompson', country: 'Guyana 🇬🇾',   rating: 5, text: 'Very professional company. They found exactly the car I wanted within my budget. Communication was excellent throughout the entire shipping process.' },
+  { name: 'David Osei',     country: 'Ghana 🇬🇭',    rating: 5, text: 'Best Japanese car exporter I have dealt with. Quality vehicles at great prices. My Nissan Note arrived on time and exactly as described. Will buy again.' },
+  { name: 'Sarah Williams', country: 'UK 🇬🇧',       rating: 5, text: 'Wazir Trading made importing a Japanese car to UK very easy. They handled all the paperwork and kept me updated at every step.' },
 ];
 
 /* ─────────────────────────────────────────────────────────────── */
 /* SMALL HELPERS                                                    */
 /* ─────────────────────────────────────────────────────────────── */
-function WhatsAppIcon({ size=16 }: { size?: number }) {
+function WhatsAppIcon({ size = 16 }: { size?: number }) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor">
-      <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+      <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" />
     </svg>
   );
 }
@@ -195,16 +147,13 @@ function StarRow({ count }: { count: number }) {
           fill={i < count ? '#F59E0B' : 'none'}
           stroke={i < count ? '#F59E0B' : '#D1D5DB'}
           strokeWidth="1.8">
-          <polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26"/>
+          <polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26" />
         </svg>
       ))}
     </div>
   );
 }
 
-/* ─────────────────────────────────────────────────────────────── */
-/* CAR SILHOUETTE SVG (same as homepage)                            */
-/* ─────────────────────────────────────────────────────────────── */
 function CarSilhouette({ type, color: c }: { type: string; color: string }) {
   const vb = '0 0 160 72';
   const Wheel = (cx: number, cy: number, r = 11) => {
@@ -322,15 +271,9 @@ function AccordionSection({
         style={{ background: RED }}
       >
         {title}
-        {open
-          ? <ChevronUp size={14} className="flex-shrink-0" />
-          : <ChevronDown size={14} className="flex-shrink-0" />}
+        {open ? <ChevronUp size={14} className="flex-shrink-0" /> : <ChevronDown size={14} className="flex-shrink-0" />}
       </button>
-      {open && (
-        <div className="bg-white py-2">
-          {children}
-        </div>
-      )}
+      {open && <div className="bg-white py-2">{children}</div>}
     </div>
   );
 }
@@ -360,6 +303,7 @@ function FilterItem({
 /* SIDEBAR                                                          */
 /* ─────────────────────────────────────────────────────────────── */
 function Sidebar({
+  makeCounts,
   activeMake, setActiveMake, activePrice, setActivePrice,
   activeBody, setActiveBody, activeCategory, setActiveCategory,
   activeLocation, setActiveLocation, activeYear, setActiveYear,
@@ -367,25 +311,26 @@ function Sidebar({
   activeEngine, setActiveEngine, activeFuel, setActiveFuel,
   activeMileage, setActiveMileage,
 }: {
-  activeMake: string; setActiveMake: (v:string)=>void;
-  activePrice: string; setActivePrice: (v:string)=>void;
-  activeBody: string; setActiveBody: (v:string)=>void;
-  activeCategory: string; setActiveCategory: (v:string)=>void;
-  activeLocation: string; setActiveLocation: (v:string)=>void;
-  activeYear: string; setActiveYear: (v:string)=>void;
-  activeDrive: string; setActiveDrive: (v:string)=>void;
-  activeTrans: string; setActiveTrans: (v:string)=>void;
-  activeEngine: string; setActiveEngine: (v:string)=>void;
-  activeFuel: string; setActiveFuel: (v:string)=>void;
-  activeMileage: string; setActiveMileage: (v:string)=>void;
+  makeCounts: Record<string, number>;
+  activeMake: string;     setActiveMake: (v: string) => void;
+  activePrice: string;    setActivePrice: (v: string) => void;
+  activeBody: string;     setActiveBody: (v: string) => void;
+  activeCategory: string; setActiveCategory: (v: string) => void;
+  activeLocation: string; setActiveLocation: (v: string) => void;
+  activeYear: string;     setActiveYear: (v: string) => void;
+  activeDrive: string;    setActiveDrive: (v: string) => void;
+  activeTrans: string;    setActiveTrans: (v: string) => void;
+  activeEngine: string;   setActiveEngine: (v: string) => void;
+  activeFuel: string;     setActiveFuel: (v: string) => void;
+  activeMileage: string;  setActiveMileage: (v: string) => void;
 }) {
   return (
     <div className="border border-gray-200 overflow-hidden shadow-sm" style={{ width: 210, flexShrink: 0 }}>
       <AccordionSection title="Shop By Make" defaultOpen>
-        {MAKES.map(m => (
-          <FilterItem key={m.name} label={m.name} count={m.count}
-            active={activeMake === m.name}
-            onClick={() => setActiveMake(activeMake === m.name ? '' : m.name)} />
+        {MAKE_NAMES.map(name => (
+          <FilterItem key={name} label={name} count={makeCounts[name]}
+            active={activeMake === name}
+            onClick={() => setActiveMake(activeMake === name ? '' : name)} />
         ))}
       </AccordionSection>
 
@@ -473,92 +418,64 @@ function Sidebar({
 }
 
 /* ─────────────────────────────────────────────────────────────── */
-/* BRAND LOGO (real SVG with accent-color fallback)                 */
+/* BRAND LOGO                                                       */
 /* ─────────────────────────────────────────────────────────────── */
 function BrandLogo({ slug, name, accent }: { slug: string; name: string; accent: string }) {
   const [failed, setFailed] = React.useState(false);
   const base = import.meta.env.BASE_URL.replace(/\/$/, '');
   const src = `${base}/logos/${slug}.svg`;
   const initials = name.split(' ').map((w: string) => w[0]).join('').slice(0, 2).toUpperCase();
-
   if (failed) {
     return (
-      <div
-        className="flex items-center justify-center w-full h-full rounded-[6px] font-black text-base tracking-tight text-white select-none"
-        style={{ background: accent }}
-      >
+      <div className="flex items-center justify-center w-full h-full rounded-[6px] font-black text-base tracking-tight text-white select-none"
+        style={{ background: accent }}>
         {initials}
       </div>
     );
   }
   return (
-    <img
-      src={src}
-      alt={`${name} logo`}
-      onError={() => setFailed(true)}
-      className="w-full h-full object-contain p-1"
-      loading="lazy"
-    />
+    <img src={src} alt={`${name} logo`} onError={() => setFailed(true)}
+      className="w-full h-full object-contain p-1" loading="lazy" />
   );
 }
 
 /* ─────────────────────────────────────────────────────────────── */
-/* SHOP BY MAKE CAROUSEL — auto-scroll, real logos                  */
+/* SHOP BY MAKE CAROUSEL                                            */
 /* ─────────────────────────────────────────────────────────────── */
-function MakeCarousel({ setActiveMake }: { setActiveMake: (v:string)=>void }) {
-  // Duplicate track for seamless infinite loop
-  const track = [...MAKE_BRANDS, ...MAKE_BRANDS];
+function MakeCarousel({ setActiveMake, makeCounts }: {
+  setActiveMake: (v: string) => void;
+  makeCounts: Record<string, number>;
+}) {
+  const brandsWithCounts = MAKE_BRANDS.map(b => ({
+    ...b,
+    count: makeCounts[b.name] ?? 0,
+  }));
+  const track = [...brandsWithCounts, ...brandsWithCounts];
   return (
     <div className="mb-6 bg-white border border-gray-100 py-5 -mx-4 md:-mx-6 px-0 overflow-hidden">
       <style>{`
-        @keyframes make-scroll {
-          0%   { transform: translateX(0); }
-          100% { transform: translateX(-50%); }
-        }
-        .make-track {
-          animation: make-scroll 55s linear infinite;
-          will-change: transform;
-        }
+        @keyframes make-scroll { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
+        .make-track { animation: make-scroll 55s linear infinite; will-change: transform; }
         .make-track:hover { animation-play-state: paused; }
       `}</style>
-
-      {/* Heading */}
       <div className="px-4 md:px-6 mb-4">
-        <p className="text-[10px] tracking-[0.28em] uppercase font-bold mb-1" style={{ color: RED }}>
-          Browse By Brand
-        </p>
-        <h3 className="font-bold text-base text-gray-900" style={{ fontFamily: "'Playfair Display',serif" }}>
-          Shop By Make
-        </h3>
+        <p className="text-[10px] tracking-[0.28em] uppercase font-bold mb-1" style={{ color: RED }}>Browse By Brand</p>
+        <h3 className="font-bold text-base text-gray-900" style={{ fontFamily: "'Playfair Display',serif" }}>Shop By Make</h3>
       </div>
-
-      {/* Scrolling row */}
       <div className="relative w-full">
-        {/* Fade edges */}
         <div className="absolute left-0 top-0 bottom-0 w-8 z-10 pointer-events-none"
           style={{ background: 'linear-gradient(to right, white, transparent)' }} />
         <div className="absolute right-0 top-0 bottom-0 w-8 z-10 pointer-events-none"
           style={{ background: 'linear-gradient(to left, white, transparent)' }} />
-
         <div className="flex make-track gap-3 px-3" style={{ width: 'max-content' }}>
           {track.map(({ name, slug, accent, count }, i) => (
-            <button
-              key={`${name}-${i}`}
-              onClick={() => setActiveMake(name)}
-              className="group flex-shrink-0 flex flex-col items-center gap-2 w-[100px] py-3 px-2 border border-gray-200 bg-white hover:border-[#C8102E] hover:shadow-[0_4px_16px_rgba(200,16,46,0.12)] transition-all cursor-pointer rounded-sm"
-            >
-              {/* Logo box */}
+            <button key={`${name}-${i}`} onClick={() => setActiveMake(name)}
+              className="group flex-shrink-0 flex flex-col items-center gap-2 w-[100px] py-3 px-2 border border-gray-200 bg-white hover:border-[#C8102E] hover:shadow-[0_4px_16px_rgba(200,16,46,0.12)] transition-all cursor-pointer rounded-sm">
               <div className="w-12 h-12 flex items-center justify-center rounded-[6px] overflow-hidden bg-gray-50 border border-gray-100 flex-shrink-0">
                 <BrandLogo slug={slug} name={name} accent={accent} />
               </div>
-              {/* Name */}
-              <span className="text-[11px] font-bold text-gray-800 group-hover:text-[#C8102E] text-center leading-tight transition-colors">
-                {name}
-              </span>
-              {/* Count */}
-              <span className="text-[10px] font-semibold" style={{ color: RED }}>
-                {count.toLocaleString()}
-              </span>
+              <span className="text-[11px] font-bold text-gray-800 group-hover:text-[#C8102E] text-center leading-tight transition-colors">{name}</span>
+              <span className="text-[10px] font-semibold" style={{ color: RED }}>{count.toLocaleString()}</span>
             </button>
           ))}
         </div>
@@ -568,67 +485,38 @@ function MakeCarousel({ setActiveMake }: { setActiveMake: (v:string)=>void }) {
 }
 
 /* ─────────────────────────────────────────────────────────────── */
-/* SHOP BY BODY TYPE CAROUSEL — auto-scroll with SVG silhouettes   */
+/* SHOP BY BODY TYPE CAROUSEL                                       */
 /* ─────────────────────────────────────────────────────────────── */
-function BodyTypeCarousel({ setActiveBody }: { setActiveBody: (v:string)=>void }) {
+function BodyTypeCarousel({ setActiveBody }: { setActiveBody: (v: string) => void }) {
   const track = [...BODY_TYPE_ITEMS, ...BODY_TYPE_ITEMS];
   return (
     <div className="mb-6 bg-gray-50 border border-gray-100 py-5 -mx-4 md:-mx-6 px-0 overflow-hidden">
       <style>{`
-        @keyframes body-scroll {
-          0%   { transform: translateX(0); }
-          100% { transform: translateX(-50%); }
-        }
-        .body-track {
-          animation: body-scroll 40s linear infinite;
-          will-change: transform;
-        }
+        @keyframes body-scroll { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
+        .body-track { animation: body-scroll 40s linear infinite; will-change: transform; }
         .body-track:hover { animation-play-state: paused; }
       `}</style>
-
-      {/* Heading */}
       <div className="px-4 md:px-6 mb-4">
-        <p className="text-[10px] tracking-[0.28em] uppercase font-bold mb-1" style={{ color: RED }}>
-          Browse By Style
-        </p>
-        <h3 className="font-bold text-base text-gray-900" style={{ fontFamily: "'Playfair Display',serif" }}>
-          Shop By Body Type
-        </h3>
+        <p className="text-[10px] tracking-[0.28em] uppercase font-bold mb-1" style={{ color: RED }}>Browse By Style</p>
+        <h3 className="font-bold text-base text-gray-900" style={{ fontFamily: "'Playfair Display',serif" }}>Shop By Body Type</h3>
       </div>
-
-      {/* Scrolling row */}
       <div className="relative w-full">
         <div className="absolute left-0 top-0 bottom-0 w-8 z-10 pointer-events-none"
           style={{ background: 'linear-gradient(to right, #f9fafb, transparent)' }} />
         <div className="absolute right-0 top-0 bottom-0 w-8 z-10 pointer-events-none"
           style={{ background: 'linear-gradient(to left, #f9fafb, transparent)' }} />
-
         <div className="flex body-track gap-3 px-3" style={{ width: 'max-content' }}>
           {track.map(({ name, accent, bg }, i) => (
-            <button
-              key={`${name}-${i}`}
-              onClick={() => setActiveBody(name)}
+            <button key={`${name}-${i}`} onClick={() => setActiveBody(name)}
               className="group flex-shrink-0 flex flex-col items-center gap-2 w-[140px] py-4 px-3 bg-white transition-all duration-200 cursor-pointer rounded-[8px]"
               style={{ border: `1.5px solid ${accent}33`, boxShadow: `0 2px 8px ${accent}0d` }}
-              onMouseEnter={e => {
-                (e.currentTarget as HTMLButtonElement).style.border = `1.5px solid ${accent}`;
-                (e.currentTarget as HTMLButtonElement).style.boxShadow = `0 6px 20px ${accent}30`;
-              }}
-              onMouseLeave={e => {
-                (e.currentTarget as HTMLButtonElement).style.border = `1.5px solid ${accent}33`;
-                (e.currentTarget as HTMLButtonElement).style.boxShadow = `0 2px 8px ${accent}0d`;
-              }}
+              onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.border = `1.5px solid ${accent}`; (e.currentTarget as HTMLButtonElement).style.boxShadow = `0 6px 20px ${accent}30`; }}
+              onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.border = `1.5px solid ${accent}33`; (e.currentTarget as HTMLButtonElement).style.boxShadow = `0 2px 8px ${accent}0d`; }}
             >
-              {/* Icon box */}
-              <div className="w-full h-[64px] flex items-center justify-center rounded-[6px]"
-                style={{ backgroundColor: bg }}>
+              <div className="w-full h-[64px] flex items-center justify-center rounded-[6px]" style={{ backgroundColor: bg }}>
                 <CarSilhouette type={name} color={accent} />
               </div>
-              {/* Name */}
-              <span className="text-[11px] font-bold tracking-wide text-center leading-tight"
-                style={{ color: accent }}>
-                {name}
-              </span>
+              <span className="text-[11px] font-bold tracking-wide text-center leading-tight" style={{ color: accent }}>{name}</span>
             </button>
           ))}
         </div>
@@ -638,40 +526,16 @@ function BodyTypeCarousel({ setActiveBody }: { setActiveBody: (v:string)=>void }
 }
 
 /* ─────────────────────────────────────────────────────────────── */
-/* TOTAL PRICE CALCULATOR                                           */
+/* TOTAL PRICE CALCULATOR (Supabase-connected)                      */
 /* ─────────────────────────────────────────────────────────────── */
-const COUNTRY_PORTS: Record<string, string[]> = {
-  Pakistan:         ['Karachi', 'Gwadar'],
-  UAE:              ['Dubai', 'Abu Dhabi'],
-  UK:               ['Southampton', 'Tilbury'],
-  Guyana:           ['Georgetown'],
-  Jamaica:          ['Kingston'],
-  Trinidad:         ['Port of Spain'],
-  Kenya:            ['Mombasa'],
-  Ghana:            ['Tema', 'Takoradi'],
-  Nigeria:          ['Lagos', 'Apapa'],
-  Russia:           ['Vladivostok', 'Moscow'],
-  'New Zealand':    ['Auckland', 'Wellington'],
-  'Papua New Guinea': ['Port Moresby'],
-  Germany:          ['Hamburg', 'Bremen'],
-  Tanzania:         ['Dar es Salaam'],
-  Uganda:           ['Kampala (via Mombasa)'],
-  'South Africa':   ['Durban', 'Cape Town'],
-  Australia:        ['Sydney', 'Melbourne', 'Brisbane'],
-};
-const DEST_COUNTRIES = Object.keys(COUNTRY_PORTS);
-const CURRENCIES = ['USD', 'PKR', 'EUR', 'GBP', 'AED'];
-const CURRENCY_RATES: Record<string,number> = { USD:1, PKR:278, EUR:0.92, GBP:0.79, AED:3.67 };
-
 function TotalPriceCalculator() {
-  const [country, setCountry]     = useState('Pakistan');
-  const [port, setPort]           = useState('Karachi');
-  const [shipment, setShipment]   = useState('RORO');
-  const [freight, setFreight]     = useState('Prepaid');
-  const [currency, setCurrency]   = useState('USD');
+  const [country, setCountry]       = useState('Pakistan');
+  const [port, setPort]             = useState('Karachi');
+  const [fob, setFob]               = useState('');
   const [inspection, setInspection] = useState('Yes');
-  const [insurance, setInsurance] = useState('Yes');
-  const [result, setResult]       = useState<{usd:number; local:number} | null>(null);
+  const [insurance, setInsurance]   = useState('Yes');
+  const [result, setResult]         = useState<{ usd: number; pkr: number } | null>(null);
+  const [calcLoading, setCalcLoading] = useState(false);
 
   const ports = COUNTRY_PORTS[country] || [];
 
@@ -681,145 +545,102 @@ function TotalPriceCalculator() {
     setPort(ps[0] || '');
   };
 
-  const calculate = () => {
-    // Simple mock calculation
-    const base = 10000;
-    const freight_cost = shipment === 'RORO' ? 1200 : 1800;
-    const ins_cost = insurance === 'Yes' ? 250 : 0;
-    const insp_cost = inspection === 'Yes' ? 150 : 0;
-    const total_usd = base + freight_cost + ins_cost + insp_cost;
-    const rate = CURRENCY_RATES[currency] || 1;
-    setResult({ usd: total_usd, local: Math.round(total_usd * rate) });
+  const calculate = async () => {
+    setCalcLoading(true);
+    setResult(null);
+    try {
+      const [rateRes, fxRes] = await Promise.all([
+        supabase.from('shipping_rates').select('freight_usd, inspection_fee, insurance_rate')
+          .eq('country', country).eq('port', port).limit(1).maybeSingle(),
+        supabase.from('exchange_rates').select('rate').eq('currency', 'PKR').limit(1).maybeSingle(),
+      ]);
+
+      const fobPrice   = parseFloat(fob) || 0;
+      const freightUSD = rateRes.data?.freight_usd    ?? (country === 'Pakistan' ? 1200 : 1500);
+      const inspFee    = inspection === 'Yes' ? (rateRes.data?.inspection_fee ?? 150)  : 0;
+      const insRate    = insurance  === 'Yes' ? (rateRes.data?.insurance_rate  ?? 0.025) : 0;
+      const totalUSD   = fobPrice + freightUSD + inspFee + (fobPrice * insRate);
+      const pkrRate    = fxRes.data?.rate ?? 278;
+
+      setResult({ usd: totalUSD, pkr: Math.round(totalUSD * pkrRate) });
+    } catch {
+      // Fallback to basic calculation
+      const fobPrice = parseFloat(fob) || 0;
+      const totalUSD = fobPrice + 1200 + (inspection === 'Yes' ? 150 : 0) + (insurance === 'Yes' ? fobPrice * 0.025 : 0);
+      setResult({ usd: totalUSD, pkr: Math.round(totalUSD * 278) });
+    } finally {
+      setCalcLoading(false);
+    }
   };
 
   return (
     <div className="mb-6 rounded-sm overflow-hidden shadow-md" style={{ background: NAVY }}>
       <div className="px-6 pt-5 pb-3 border-b border-white/10">
-        <h3 className="text-white font-bold text-lg" style={{ fontFamily:"'Playfair Display',serif" }}>
-          Total Price Calculator
-        </h3>
-        <p className="text-white/60 text-[12px] mt-1">
-          Estimate the price of the vehicles based on your destination.
-        </p>
-        <p className="text-white/40 text-[11px] mt-0.5">
-          In some cases the total price cannot be estimated.
-        </p>
+        <h3 className="text-white font-bold text-lg" style={{ fontFamily: "'Playfair Display',serif" }}>Total Price Calculator</h3>
+        <p className="text-white/60 text-[12px] mt-1">Estimate the landed cost based on your destination.</p>
       </div>
-
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-6">
-        {/* Left */}
         <div className="space-y-4">
           <div>
+            <label className="text-white/70 text-[11px] font-semibold uppercase tracking-wide block mb-1">FOB Price (USD)</label>
+            <input type="number" value={fob} onChange={e => setFob(e.target.value)} placeholder="e.g. 8500"
+              className="w-full bg-white/10 border border-white/20 text-white text-sm px-3 py-2 outline-none focus:border-[#C8102E] rounded-sm placeholder:text-white/30" />
+          </div>
+          <div>
             <label className="text-white/70 text-[11px] font-semibold uppercase tracking-wide block mb-1">Destination Country</label>
-            <select
-              value={country}
-              onChange={e => handleCountryChange(e.target.value)}
-              className="w-full bg-white/10 border border-white/20 text-white text-sm px-3 py-2 outline-none focus:border-[#C8102E] rounded-sm"
-            >
+            <select value={country} onChange={e => handleCountryChange(e.target.value)}
+              className="w-full bg-white/10 border border-white/20 text-white text-sm px-3 py-2 outline-none focus:border-[#C8102E] rounded-sm">
               {DEST_COUNTRIES.map(c => <option key={c} value={c} className="bg-[#0D1B3E] text-white">{c}</option>)}
             </select>
           </div>
-
           <div>
             <label className="text-white/70 text-[11px] font-semibold uppercase tracking-wide block mb-1">Port</label>
-            <select
-              value={port}
-              onChange={e => setPort(e.target.value)}
-              className="w-full bg-white/10 border border-white/20 text-white text-sm px-3 py-2 outline-none focus:border-[#C8102E] rounded-sm"
-            >
+            <select value={port} onChange={e => setPort(e.target.value)}
+              className="w-full bg-white/10 border border-white/20 text-white text-sm px-3 py-2 outline-none focus:border-[#C8102E] rounded-sm">
               {ports.map(p => <option key={p} value={p} className="bg-[#0D1B3E] text-white">{p}</option>)}
             </select>
           </div>
-
-          <div>
-            <label className="text-white/70 text-[11px] font-semibold uppercase tracking-wide block mb-1">Shipment</label>
-            <select
-              value={shipment}
-              onChange={e => setShipment(e.target.value)}
-              className="w-full bg-white/10 border border-white/20 text-white text-sm px-3 py-2 outline-none focus:border-[#C8102E] rounded-sm"
-            >
-              <option className="bg-[#0D1B3E] text-white">RORO</option>
-              <option className="bg-[#0D1B3E] text-white">Container</option>
-            </select>
-          </div>
-
-          <div>
-            <label className="text-white/70 text-[11px] font-semibold uppercase tracking-wide block mb-2">Freight</label>
-            <div className="flex gap-4">
-              {['Prepaid','Collect'].map(o => (
-                <label key={o} className="flex items-center gap-2 cursor-pointer">
-                  <input type="radio" name="freight" value={o} checked={freight===o}
-                    onChange={() => setFreight(o)}
-                    className="accent-[#C8102E]" />
-                  <span className="text-white/80 text-sm">{o}</span>
-                </label>
-              ))}
-            </div>
-          </div>
         </div>
-
-        {/* Right */}
         <div className="space-y-4">
-          <div>
-            <label className="text-white/70 text-[11px] font-semibold uppercase tracking-wide block mb-1">Currency</label>
-            <select
-              value={currency}
-              onChange={e => setCurrency(e.target.value)}
-              className="w-full bg-white/10 border border-white/20 text-white text-sm px-3 py-2 outline-none focus:border-[#C8102E] rounded-sm"
-            >
-              {CURRENCIES.map(c => <option key={c} className="bg-[#0D1B3E] text-white">{c}</option>)}
-            </select>
-          </div>
-
           <div>
             <label className="text-white/70 text-[11px] font-semibold uppercase tracking-wide block mb-2">Inspection</label>
             <div className="flex gap-4">
-              {['Yes','No'].map(o => (
+              {['Yes', 'No'].map(o => (
                 <label key={o} className="flex items-center gap-2 cursor-pointer">
-                  <input type="radio" name="inspection" value={o} checked={inspection===o}
-                    onChange={() => setInspection(o)}
-                    className="accent-[#C8102E]" />
+                  <input type="radio" name="calc-inspection" value={o} checked={inspection === o}
+                    onChange={() => setInspection(o)} className="accent-[#C8102E]" />
                   <span className="text-white/80 text-sm">{o}</span>
                 </label>
               ))}
             </div>
           </div>
-
           <div>
             <label className="text-white/70 text-[11px] font-semibold uppercase tracking-wide block mb-2">Insurance</label>
             <div className="flex gap-4">
-              {['Yes','No'].map(o => (
+              {['Yes', 'No'].map(o => (
                 <label key={o} className="flex items-center gap-2 cursor-pointer">
-                  <input type="radio" name="insurance" value={o} checked={insurance===o}
-                    onChange={() => setInsurance(o)}
-                    className="accent-[#C8102E]" />
+                  <input type="radio" name="calc-insurance" value={o} checked={insurance === o}
+                    onChange={() => setInsurance(o)} className="accent-[#C8102E]" />
                   <span className="text-white/80 text-sm">{o}</span>
                 </label>
               ))}
             </div>
           </div>
-
           {result && (
-            <div className="mt-2 p-4 rounded-sm border border-white/10" style={{ background:'rgba(255,255,255,0.05)' }}>
-              <div className="text-[11px] text-white/50 uppercase tracking-wider mb-1">Total Price</div>
-              <div className="text-2xl font-black" style={{ color: RED }}>
-                ${result.usd.toLocaleString()}
-              </div>
-              <div className="text-sm font-semibold mt-1" style={{ color: '#D4AF37' }}>
-                {currency} {result.local.toLocaleString()}
-              </div>
+            <div className="p-4 rounded-sm border border-white/10" style={{ background: 'rgba(255,255,255,0.05)' }}>
+              <div className="text-[11px] text-white/50 uppercase tracking-wider mb-1">Estimated Total</div>
+              <div className="text-2xl font-black" style={{ color: RED }}>${result.usd.toLocaleString(undefined, { maximumFractionDigits: 0 })}</div>
+              <div className="text-sm font-semibold mt-1" style={{ color: '#D4AF37' }}>PKR {result.pkr.toLocaleString()}</div>
+              <p className="text-white/30 text-[10px] mt-2">* Estimate only. Customs duties and local taxes not included.</p>
             </div>
           )}
         </div>
       </div>
-
       <div className="px-6 pb-6">
-        <button
-          onClick={calculate}
-          className="w-full py-3 font-bold text-sm tracking-[0.1em] uppercase text-white rounded-sm transition-all hover:opacity-90"
-          style={{ background: RED }}
-        >
-          Calculate
+        <button onClick={calculate} disabled={calcLoading}
+          className="w-full py-3 font-bold text-sm tracking-[0.1em] uppercase text-white rounded-sm transition-all hover:opacity-90 disabled:opacity-60 flex items-center justify-center gap-2"
+          style={{ background: RED }}>
+          {calcLoading ? <><Loader2 size={16} className="animate-spin" /> Calculating...</> : 'Calculate Total Price'}
         </button>
       </div>
     </div>
@@ -827,108 +648,119 @@ function TotalPriceCalculator() {
 }
 
 /* ─────────────────────────────────────────────────────────────── */
-/* CAR LISTING CARD (mobile-first)                                  */
+/* CAR LISTING CARD                                                 */
 /* ─────────────────────────────────────────────────────────────── */
-function CarRow({ car }: { car: DummyCar }) {
+function CarRow({ car, pkrRate }: { car: CarWithImage; pkrRate: number }) {
   const [showFeatures, setShowFeatures] = useState(false);
-  const waLink = `https://wa.me/${WA_NUMBER}?text=${encodeURIComponent(`I'm interested in ${car.make} ${car.model} ${car.variant} (Ref: ${car.ref})`)}`;
+  const cloudName = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME || 'txb1wiw1';
+  const primaryImage = `https://res.cloudinary.com/${cloudName}/image/upload/cars/${car.ref_number?.toLowerCase()}-1`;
+
+  const pkrPrice = Math.round(car.fob_price_usd * pkrRate);
+  const isNewArrival = car.is_new_arrival;
+  const isClearance  = car.collection?.toLowerCase() === 'clearance';
+
+  const waInquireMsg = encodeURIComponent(
+    `Hi, I am interested in ${car.make} ${car.model} ${car.year}\nReference: ${car.ref_number}\nPlease share more details.`
+  );
+  const waInquireLink = `https://wa.me/${WA_NUMBER}?text=${waInquireMsg}`;
+
+  const handleOfferPrice = () => {
+    const amount = window.prompt(`Enter your offer price in USD for ${car.make} ${car.model} ${car.year}:`);
+    if (!amount) return;
+    const msg = encodeURIComponent(
+      `Hi, I would like to offer $${amount} for ${car.make} ${car.model} ${car.year} Ref: ${car.ref_number}`
+    );
+    window.open(`https://wa.me/${WA_NUMBER}?text=${msg}`, '_blank');
+  };
 
   const specs = [
-    { icon: <Gauge size={13} />,       label: 'Mileage',     value: car.mileage    },
-    { icon: <Calendar size={13} />,    label: 'Year',        value: String(car.year) },
-    { icon: <Zap size={13} />,         label: 'Engine',      value: car.engine     },
-    { icon: <Settings size={13} />,    label: 'Trans.',      value: car.trans      },
-    { icon: <Navigation size={13} />,  label: 'Model Code',  value: car.modelCode  },
-    { icon: <MapPin size={13} />,      label: 'Steering',    value: car.steering   },
-    { icon: <Fuel size={13} />,        label: 'Fuel',        value: car.fuel       },
-    { icon: <Users size={13} />,       label: 'Seats',       value: car.seats > 0 ? String(car.seats) : '-' },
-    { icon: <span className="text-[10px] font-bold text-gray-400">ENG</span>, label: 'Engine Code', value: '-' },
-    { icon: <Palette size={13} />,     label: 'Color',       value: car.color      },
-    { icon: <Settings size={13} />,    label: 'Drive',       value: car.drive      },
-    { icon: <DoorOpen size={13} />,    label: 'Doors',       value: String(car.doors) },
+    { icon: <Gauge size={13} />,    label: 'Mileage',      value: `${car.mileage_km.toLocaleString()} KM` },
+    { icon: <Calendar size={13} />, label: 'Year',          value: String(car.year) },
+    { icon: <Zap size={13} />,      label: 'Engine',        value: `${car.engine_cc} CC` },
+    { icon: <Settings size={13} />, label: 'Trans.',         value: car.transmission },
+    { icon: <Navigation size={13} />,label:'Body Type',     value: car.body_type || '-' },
+    { icon: <MapPin size={13} />,   label: 'Steering',       value: car.steering },
+    { icon: <Fuel size={13} />,     label: 'Fuel',           value: car.fuel_type },
+    { icon: <Users size={13} />,    label: 'Seats',          value: car.seats > 0 ? String(car.seats) : '-' },
+    { icon: <span className="text-[10px] font-bold text-gray-400">LOC</span>, label: 'Location', value: car.stock_location || '-' },
+    { icon: <Palette size={13} />,  label: 'Color',          value: car.color },
+    { icon: <Settings size={13} />, label: 'Drive',          value: car.drive },
+    { icon: <DoorOpen size={13} />, label: 'Doors',          value: String(car.doors) },
   ];
 
   return (
     <div className="bg-white border border-gray-200 shadow-sm mb-4 overflow-hidden">
-      {/* ── Title ── */}
-      <div className="px-4 pt-4 pb-2">
-        <h3 className="font-bold text-[15px] text-gray-900 leading-snug">
-          {car.make.toUpperCase()} {car.model.toUpperCase()} {car.variant.toUpperCase()}
-        </h3>
-      </div>
+      {/* Title */}
+      <Link href={`/cars/${car.ref_number}`}>
+        <div className="px-4 pt-4 pb-2 cursor-pointer hover:text-[#C8102E] transition-colors">
+          <h3 className="font-bold text-[15px] text-gray-900 leading-snug">
+            {car.make.toUpperCase()} {car.model.toUpperCase()} {car.variant ? car.variant.toUpperCase() : ''}
+          </h3>
+        </div>
+      </Link>
 
-      {/* ── Image ── */}
-      <div className="relative w-full bg-gray-100" style={{ aspectRatio: '16/9' }}>
-        {car.status === 'New Arrival' && (
-          <div className="absolute top-3 left-3 z-10 px-2 py-0.5 text-[10px] font-bold text-white uppercase tracking-wider rounded-sm"
-            style={{ background: '#16A34A' }}>
-            New Arrival
-          </div>
-        )}
-        {car.status === 'Clearance' && (
-          <div className="absolute top-3 left-3 z-10 px-2 py-0.5 text-[10px] font-bold text-white uppercase tracking-wider"
-            style={{ background: '#D97706' }}>
-            CLEARANCE
-          </div>
-        )}
-        <img
-          src={car.image}
-          alt={`${car.make} ${car.model}`}
-          className="w-full h-full object-cover"
-        />
-        <button className="absolute left-2 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full bg-black/40 flex items-center justify-center text-white hover:bg-black/60 transition-colors">
-          <ChevronLeft size={14} />
-        </button>
-        <button className="absolute right-2 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full bg-black/40 flex items-center justify-center text-white hover:bg-black/60 transition-colors">
-          <ChevronRight size={14} />
-        </button>
-      </div>
+      {/* Image */}
+      <Link href={`/cars/${car.ref_number}`}>
+        <div className="relative w-full bg-gray-100 cursor-pointer" style={{ aspectRatio: '16/9' }}>
+          {isNewArrival && (
+            <div className="absolute top-3 left-3 z-10 px-2 py-0.5 text-[10px] font-bold text-white uppercase tracking-wider rounded-sm"
+              style={{ background: '#16A34A' }}>New Arrival</div>
+          )}
+          {isClearance && (
+            <div className="absolute top-3 left-3 z-10 px-2 py-0.5 text-[10px] font-bold text-white uppercase tracking-wider"
+              style={{ background: '#D97706' }}>CLEARANCE</div>
+          )}
+          <img src={primaryImage} alt={`${car.make} ${car.model}`}
+            className="w-full h-full object-cover"
+            onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} />
+        </div>
+      </Link>
 
-      {/* ── Ref + Country ── */}
+      {/* Ref + Location */}
       <div className="px-4 pt-3 pb-1 flex items-center justify-between">
-        <span className="text-[12px] text-gray-500">Reference #{car.ref}</span>
+        <span className="text-[12px] text-gray-500">Reference #{car.ref_number}</span>
         <div className="flex items-center gap-1.5">
           <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: RED }} />
-          <span className="text-[12px] font-bold text-gray-700 tracking-wider">{car.country}</span>
+          <span className="text-[12px] font-bold text-gray-700 tracking-wider">{car.stock_location?.toUpperCase()}</span>
         </div>
       </div>
 
-      {/* ── Pricing ── */}
+      {/* Pricing */}
       <div className="px-4 pt-1 pb-3">
         <div className="text-[11px] text-gray-400 uppercase tracking-wider font-semibold mb-0.5">FOB PRICE</div>
         <div className="text-[26px] font-black leading-none" style={{ color: RED }}>
-          ${car.fob.toLocaleString()}
+          ${car.fob_price_usd.toLocaleString()}
         </div>
-        <div className="text-[13px] font-semibold mt-1" style={{ color: '#374151' }}>
-          PKR {car.pkr.toLocaleString()}
-        </div>
+        {pkrRate > 0 && (
+          <div className="text-[13px] font-semibold mt-1" style={{ color: '#374151' }}>
+            PKR {pkrPrice.toLocaleString()}
+          </div>
+        )}
       </div>
 
-      {/* ── CTAs ── */}
+      {/* CTAs */}
       <div className="px-4 pb-3 flex flex-col gap-2">
-        <a
-          href={waLink}
-          target="_blank" rel="noopener noreferrer"
+        <Link href={`/cars/${car.ref_number}`}
           className="flex items-center justify-center gap-2 w-full py-2.5 font-bold text-[13px] text-white rounded-sm transition-opacity hover:opacity-90"
-          style={{ background: '#25D366' }}
-        >
-          <MessageCircle size={15} />
+          style={{ background: NAVY }}>
           Inquire Now
+        </Link>
+        <a href={waInquireLink} target="_blank" rel="noopener noreferrer"
+          className="flex items-center justify-center gap-2 w-full py-2.5 font-bold text-[13px] text-white rounded-sm transition-opacity hover:opacity-90"
+          style={{ background: '#25D366' }}>
+          <WhatsAppIcon size={15} /> WhatsApp
         </a>
-        <button
+        <button onClick={handleOfferPrice}
           className="flex items-center justify-center gap-2 w-full py-2.5 font-bold text-[13px] border rounded-sm transition-colors hover:bg-red-50"
-          style={{ borderColor: RED, color: RED }}
-        >
-          Offer your price
+          style={{ borderColor: RED, color: RED }}>
+          Offer Your Price
         </button>
       </div>
 
-      {/* ── Features toggle ── */}
+      {/* Features toggle */}
       <div className="border-t border-gray-100">
-        <button
-          onClick={() => setShowFeatures(v => !v)}
-          className="w-full flex items-center justify-between px-4 py-2.5 text-[12px] font-semibold text-gray-600 hover:bg-gray-50 transition-colors"
-        >
+        <button onClick={() => setShowFeatures(v => !v)}
+          className="w-full flex items-center justify-between px-4 py-2.5 text-[12px] font-semibold text-gray-600 hover:bg-gray-50 transition-colors">
           <div className="flex items-center gap-2">
             <div className="w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0"
               style={{ background: '#25D366' }}>
@@ -936,20 +768,13 @@ function CarRow({ car }: { car: DummyCar }) {
             </div>
           </div>
           <span>{showFeatures ? 'Hide Features' : 'View Features'}</span>
-          {showFeatures
-            ? <ChevronUp size={14} className="text-gray-400" />
-            : <ChevronDown size={14} className="text-gray-400" />
-          }
+          {showFeatures ? <ChevronUp size={14} className="text-gray-400" /> : <ChevronDown size={14} className="text-gray-400" />}
         </button>
-
         {showFeatures && (
           <div className="border-t border-gray-100">
             {specs.map((s, i) => (
-              <div
-                key={i}
-                className="flex items-center px-4 py-2 text-[12px] border-b border-gray-50 last:border-b-0"
-                style={{ background: i % 2 === 0 ? '#fff' : '#fafafa' }}
-              >
+              <div key={i} className="flex items-center px-4 py-2 text-[12px] border-b border-gray-50 last:border-b-0"
+                style={{ background: i % 2 === 0 ? '#fff' : '#fafafa' }}>
                 <span className="text-gray-400 w-5 flex-shrink-0">{s.icon}</span>
                 <span className="text-gray-500 flex-1">{s.label}</span>
                 <span className="font-semibold text-gray-800 text-right">{s.value || '-'}</span>
@@ -963,45 +788,44 @@ function CarRow({ car }: { car: DummyCar }) {
 }
 
 /* ─────────────────────────────────────────────────────────────── */
-/* PAGINATION                                                       */
+/* PAGINATION (controlled)                                          */
 /* ─────────────────────────────────────────────────────────────── */
-function Pagination() {
-  const [page, setPage] = useState(1);
-  const total = 4536;
-  const pages = [1,2,3,4,5];
+function Pagination({ page, total, onPage }: {
+  page: number;
+  total: number;
+  onPage: (p: number) => void;
+}) {
+  const totalPages = Math.ceil(total / PAGE_SIZE);
+  if (totalPages <= 1) return null;
+
+  const pageNums: number[] = [];
+  const start = Math.max(1, page - 2);
+  const end = Math.min(totalPages, page + 2);
+  for (let i = start; i <= end; i++) pageNums.push(i);
+
   return (
     <div className="flex items-center justify-center gap-1 my-6">
-      <button
-        onClick={() => setPage(p => Math.max(1, p-1))}
-        disabled={page === 1}
-        className="w-8 h-8 flex items-center justify-center border border-gray-200 text-gray-500 disabled:opacity-40 hover:border-[#C8102E] hover:text-[#C8102E] transition-colors rounded-sm"
-      >
+      <button onClick={() => onPage(Math.max(1, page - 1))} disabled={page === 1}
+        className="w-8 h-8 flex items-center justify-center border border-gray-200 text-gray-500 disabled:opacity-40 hover:border-[#C8102E] hover:text-[#C8102E] transition-colors rounded-sm">
         <ChevronLeft size={14} />
       </button>
-      {pages.map(p => (
-        <button
-          key={p}
-          onClick={() => setPage(p)}
+      {start > 1 && <>
+        <button onClick={() => onPage(1)} className="w-8 h-8 flex items-center justify-center border border-gray-200 text-[13px] font-semibold rounded-sm hover:border-[#C8102E] hover:text-[#C8102E] transition-colors">1</button>
+        {start > 2 && <span className="px-1 text-gray-400 text-sm">…</span>}
+      </>}
+      {pageNums.map(p => (
+        <button key={p} onClick={() => onPage(p)}
           className="w-8 h-8 flex items-center justify-center border text-[13px] font-semibold rounded-sm transition-colors"
-          style={page===p
-            ? { background: RED, borderColor: RED, color: '#fff' }
-            : { borderColor: '#E5E7EB', color: '#374151' }}
-        >
+          style={page === p ? { background: RED, borderColor: RED, color: '#fff' } : { borderColor: '#E5E7EB', color: '#374151' }}>
           {p}
         </button>
       ))}
-      <span className="px-1 text-gray-400 text-sm">…</span>
-      <button
-        onClick={() => setPage(total)}
-        className="w-12 h-8 flex items-center justify-center border border-gray-200 text-[13px] font-semibold text-gray-700 hover:border-[#C8102E] hover:text-[#C8102E] transition-colors rounded-sm"
-      >
-        {total}
-      </button>
-      <button
-        onClick={() => setPage(p => Math.min(total, p+1))}
-        disabled={page === total}
-        className="w-8 h-8 flex items-center justify-center border border-gray-200 text-gray-500 disabled:opacity-40 hover:border-[#C8102E] hover:text-[#C8102E] transition-colors rounded-sm"
-      >
+      {end < totalPages && <>
+        {end < totalPages - 1 && <span className="px-1 text-gray-400 text-sm">…</span>}
+        <button onClick={() => onPage(totalPages)} className="w-8 h-8 flex items-center justify-center border border-gray-200 text-[13px] font-semibold text-gray-700 hover:border-[#C8102E] hover:text-[#C8102E] transition-colors rounded-sm">{totalPages}</button>
+      </>}
+      <button onClick={() => onPage(Math.min(totalPages, page + 1))} disabled={page === totalPages}
+        className="w-8 h-8 flex items-center justify-center border border-gray-200 text-gray-500 disabled:opacity-40 hover:border-[#C8102E] hover:text-[#C8102E] transition-colors rounded-sm">
         <ChevronRight size={14} />
       </button>
     </div>
@@ -1009,22 +833,21 @@ function Pagination() {
 }
 
 /* ─────────────────────────────────────────────────────────────── */
-/* REVIEWS SECTION (compact)                                        */
+/* REVIEWS SECTION                                                  */
 /* ─────────────────────────────────────────────────────────────── */
 function ReviewsSection() {
   const [active, setActive] = useState(0);
   const perPage = 2;
   const maxIndex = Math.ceil(REVIEWS.length / perPage) - 1;
   const visible = REVIEWS.slice(active * perPage, active * perPage + perPage);
-
   return (
     <section className="py-12 border-t border-gray-100" style={{ background: '#F8FAFC' }}>
       <div className="text-center mb-8">
-        <h2 className="text-2xl font-bold text-gray-900 mb-3" style={{ fontFamily:"'Playfair Display',serif" }}>
+        <h2 className="text-2xl font-bold text-gray-900 mb-3" style={{ fontFamily: "'Playfair Display',serif" }}>
           What Our Happy Customers Say
         </h2>
         <div className="flex flex-wrap justify-center gap-8 mb-4">
-          {[['500+','Customers'],['5.0','Star'],['100%','Satisfaction']].map(([v,l]) => (
+          {[['500+', 'Customers'], ['5.0', 'Star'], ['100%', 'Satisfaction']].map(([v, l]) => (
             <div key={l} className="text-center">
               <div className="text-2xl font-black text-gray-900">{v}</div>
               <div className="text-[11px] font-semibold text-gray-400 uppercase tracking-wider">{l}</div>
@@ -1032,26 +855,19 @@ function ReviewsSection() {
           ))}
         </div>
       </div>
-
       <div className="relative max-w-4xl mx-auto px-8">
-        <button
-          onClick={() => setActive(a => Math.max(a-1, 0))}
-          disabled={active === 0}
-          className="absolute -left-1 top-1/2 -translate-y-1/2 z-10 w-9 h-9 rounded-full border border-gray-200 flex items-center justify-center bg-white shadow-sm disabled:opacity-40 hover:border-[#C8102E] hover:text-[#C8102E] transition-all"
-        >
+        <button onClick={() => setActive(a => Math.max(a - 1, 0))} disabled={active === 0}
+          className="absolute -left-1 top-1/2 -translate-y-1/2 z-10 w-9 h-9 rounded-full border border-gray-200 flex items-center justify-center bg-white shadow-sm disabled:opacity-40 hover:border-[#C8102E] hover:text-[#C8102E] transition-all">
           <ChevronLeft size={16} />
         </button>
-
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           {visible.map(r => (
             <div key={r.name} className="bg-white border border-gray-100 rounded-xl p-5 shadow-sm">
-              <div className="text-4xl leading-none font-serif mb-2" style={{ color:'rgba(200,16,46,0.12)' }}>"</div>
+              <div className="text-4xl leading-none font-serif mb-2" style={{ color: 'rgba(200,16,46,0.12)' }}>"</div>
               <p className="text-gray-600 text-sm leading-relaxed mb-4">{r.text}</p>
               <div className="flex items-center gap-3">
                 <div className="w-9 h-9 rounded-full flex items-center justify-center font-bold text-white text-sm flex-shrink-0"
-                  style={{ background: RED }}>
-                  {r.name[0]}
-                </div>
+                  style={{ background: RED }}>{r.name[0]}</div>
                 <div>
                   <div className="font-bold text-gray-900 text-sm">{r.name}</div>
                   <div className="text-[11px] text-gray-400">{r.country}</div>
@@ -1061,26 +877,17 @@ function ReviewsSection() {
             </div>
           ))}
         </div>
-
-        <button
-          onClick={() => setActive(a => Math.min(a+1, maxIndex))}
-          disabled={active === maxIndex}
+        <button onClick={() => setActive(a => Math.min(a + 1, maxIndex))} disabled={active === maxIndex}
           className="absolute -right-1 top-1/2 -translate-y-1/2 z-10 w-9 h-9 rounded-full flex items-center justify-center text-white shadow-sm disabled:opacity-40 transition-all"
-          style={{ background: RED }}
-        >
+          style={{ background: RED }}>
           <ChevronRight size={16} />
         </button>
       </div>
-
-      {/* Dots */}
       <div className="flex justify-center gap-2 mt-5">
-        {Array.from({ length: maxIndex+1 }).map((_, i) => (
-          <button
-            key={i}
-            onClick={() => setActive(i)}
+        {Array.from({ length: maxIndex + 1 }).map((_, i) => (
+          <button key={i} onClick={() => setActive(i)}
             className="w-2 h-2 rounded-full transition-all"
-            style={{ background: active===i ? RED : '#CBD5E1' }}
-          />
+            style={{ background: active === i ? RED : '#CBD5E1' }} />
         ))}
       </div>
     </section>
@@ -1125,12 +932,105 @@ function parseYearRange(range: string): [number, number] | null {
   return [Number(m[1]), Number(m[2])];
 }
 
-function parseMileageNum(s: string): number {
-  return Number(s.replace(/[^0-9]/g, '')) || 0;
-}
+/* ─────────────────────────────────────────────────────────────── */
+/* SUPABASE QUERY BUILDER                                           */
+/* ─────────────────────────────────────────────────────────────── */
+type Filters = {
+  q: string; make: string; price: string; body: string; category: string;
+  location: string; year: string; drive: string; trans: string; engine: string;
+  fuel: string; mileage: string; steering: string;
+  advMake: string; advModel: string; advBody: string; advFuel: string; advDrive: string;
+  advTrans: string; advYearFrom: string; advYearTo: string; advMinPrice: string; advMaxPrice: string;
+  advColor: string; advLocation: string; advMinMil: string; advMaxMil: string;
+  advMinEng: string; advMaxEng: string;
+};
 
-function parseEngineNum(s: string): number {
-  return Number(s.replace(/[^0-9]/g, '')) || 0;
+function applyFiltersToQuery(query: any, filters: Filters, activeTab: string, sortBy: string): any {
+  // Full-text search
+  if (filters.q) {
+    const q = filters.q.replace(/'/g, "''");
+    query = query.or(`make.ilike.%${q}%,model.ilike.%${q}%,ref_number.ilike.%${q}%,variant.ilike.%${q}%`);
+  }
+
+  // Sidebar filters
+  if (filters.make)     query = query.ilike('make', filters.make);
+  if (filters.body)     query = query.eq('body_type', filters.body);
+  if (filters.location) query = query.eq('stock_location', filters.location);
+  if (filters.drive)    query = query.eq('drive', filters.drive);
+  if (filters.trans)    query = query.eq('transmission', filters.trans);
+  if (filters.steering) query = query.eq('steering', filters.steering);
+
+  const fuelFilter = filters.fuel || filters.category;
+  if (fuelFilter)       query = query.eq('fuel_type', fuelFilter);
+
+  if (filters.price) {
+    const pr = parsePriceRange(filters.price);
+    if (pr) query = query.gte('fob_price_usd', pr[0]).lte('fob_price_usd', pr[1]);
+  }
+  if (filters.year) {
+    const yr = parseYearRange(filters.year);
+    if (yr) query = query.gte('year', yr[0]).lte('year', yr[1]);
+  }
+  if (filters.engine) {
+    const er = parseEngineRange(filters.engine);
+    if (er) query = query.gte('engine_cc', er[0]).lte('engine_cc', er[1]);
+  }
+  if (filters.mileage) {
+    const mr = parseMileageRange(filters.mileage);
+    if (mr) query = query.gte('mileage_km', mr[0]).lte('mileage_km', mr[1]);
+  }
+
+  // Advanced filters
+  if (filters.advMake)     query = query.ilike('make', filters.advMake);
+  if (filters.advModel)    query = query.ilike('model', filters.advModel);
+  if (filters.advBody)     query = query.eq('body_type', filters.advBody);
+  if (filters.advFuel)     query = query.eq('fuel_type', filters.advFuel);
+  if (filters.advDrive)    query = query.eq('drive', filters.advDrive);
+  if (filters.advTrans)    query = query.eq('transmission', filters.advTrans);
+  if (filters.advColor)    query = query.ilike('color', filters.advColor);
+  if (filters.advLocation) query = query.eq('stock_location', filters.advLocation);
+  if (filters.advYearFrom) query = query.gte('year', parseInt(filters.advYearFrom));
+  if (filters.advYearTo)   query = query.lte('year', parseInt(filters.advYearTo));
+  if (filters.advMinPrice) query = query.gte('fob_price_usd', parseFloat(filters.advMinPrice));
+  if (filters.advMaxPrice) query = query.lte('fob_price_usd', parseFloat(filters.advMaxPrice));
+  if (filters.advMinMil) {
+    const mr = parseMileageRange(filters.advMinMil);
+    if (mr) query = query.gte('mileage_km', mr[0]);
+  }
+  if (filters.advMaxMil) {
+    const mr = parseMileageRange(filters.advMaxMil);
+    if (mr) query = query.lte('mileage_km', mr[1]);
+  }
+  if (filters.advMinEng) {
+    const er = parseEngineRange(filters.advMinEng);
+    if (er) query = query.gte('engine_cc', er[0]);
+  }
+  if (filters.advMaxEng) {
+    const er = parseEngineRange(filters.advMaxEng);
+    if (er) query = query.lte('engine_cc', er[1]);
+  }
+
+  // Collection tab
+  switch (activeTab) {
+    case 'new_arrivals': query = query.eq('is_new_arrival', true); break;
+    case 'clearance':    query = query.eq('collection', 'clearance'); break;
+    case 'japan':        query = query.eq('stock_location', 'Japan'); break;
+    case 'hybrid':       query = query.eq('fuel_type', 'Hybrid'); break;
+    case 'suv':          query = query.eq('body_type', 'SUV'); break;
+    case 'budget':       query = query.lt('fob_price_usd', 2000); break;
+  }
+
+  // Sorting
+  switch (sortBy) {
+    case 'Price Low to High':   query = query.order('fob_price_usd', { ascending: true }); break;
+    case 'Price High to Low':   query = query.order('fob_price_usd', { ascending: false }); break;
+    case 'Mileage Low to High': query = query.order('mileage_km', { ascending: true }); break;
+    case 'Year Newest':         query = query.order('year', { ascending: false }); break;
+    case 'Year Oldest':         query = query.order('year', { ascending: true }); break;
+    default:                    query = query.order('created_at', { ascending: false }); break;
+  }
+
+  return query;
 }
 
 /* ─────────────────────────────────────────────────────────────── */
@@ -1139,93 +1039,229 @@ function parseEngineNum(s: string): number {
 export default function CarsPage() {
   const [, navigate] = useLocation();
 
-  // ── Read URL params helper ──
-  const readFiltersFromUrl = () => {
+  // ── Read URL params ──
+  const readFiltersFromUrl = useCallback((): Filters => {
     const p = getParams();
     return {
-      q:          p.get('q')          || '',
-      make:       p.get('make')       || '',
-      price:      p.get('price')      || '',
-      body:       p.get('body')       || '',
-      category:   p.get('category')   || '',
-      location:   p.get('location')   || '',
-      year:       p.get('year')       || '',
-      drive:      p.get('drive')      || '',
-      trans:      p.get('trans')      || '',
-      engine:     p.get('engine')     || '',
-      fuel:       p.get('fuel')       || '',
-      mileage:    p.get('mileage')    || '',
-      steering:   p.get('steering')   || '',
-      // committed advanced filter values
-      advMake:    p.get('advMake')    || '',
-      advBody:    p.get('advBody')    || '',
-      advFuel:    p.get('advFuel')    || '',
-      advDrive:   p.get('advDrive')   || '',
-      advTrans:   p.get('advTrans')   || '',
-      advYearFrom:p.get('advYearFrom')|| '',
-      advYearTo:  p.get('advYearTo')  || '',
-      advMinPrice:p.get('advMinPrice')|| '',
-      advMaxPrice:p.get('advMaxPrice')|| '',
+      q:           p.get('q')           || '',
+      make:        p.get('make')        || '',
+      price:       p.get('price')       || '',
+      body:        p.get('body')        || '',
+      category:    p.get('category')    || '',
+      location:    p.get('location')    || '',
+      year:        p.get('year')        || '',
+      drive:       p.get('drive')       || '',
+      trans:       p.get('trans')       || '',
+      engine:      p.get('engine')      || '',
+      fuel:        p.get('fuel')        || '',
+      mileage:     p.get('mileage')     || '',
+      steering:    p.get('steering')    || '',
+      advMake:     p.get('advMake')     || '',
+      advModel:    p.get('advModel')    || '',
+      advBody:     p.get('advBody')     || '',
+      advFuel:     p.get('advFuel')     || '',
+      advDrive:    p.get('advDrive')    || '',
+      advTrans:    p.get('advTrans')    || '',
+      advYearFrom: p.get('advYearFrom') || '',
+      advYearTo:   p.get('advYearTo')   || '',
+      advMinPrice: p.get('advMinPrice') || '',
+      advMaxPrice: p.get('advMaxPrice') || '',
+      advColor:    p.get('advColor')    || '',
+      advLocation: p.get('advLocation') || '',
+      advMinMil:   p.get('advMinMil')   || '',
+      advMaxMil:   p.get('advMaxMil')   || '',
+      advMinEng:   p.get('advMinEng')   || '',
+      advMaxEng:   p.get('advMaxEng')   || '',
     };
-  };
-
-  const [filters, setFilters] = useState(readFiltersFromUrl);
-
-  // ── Sync from URL on back/forward ──
-  useEffect(() => {
-    const sync = () => setFilters(readFiltersFromUrl());
-    window.addEventListener('popstate', sync);
-    return () => window.removeEventListener('popstate', sync);
   }, []);
 
-  // ── Write a filter change to state + URL ──
+  // ── Core state ──
+  const [filters, setFilters]           = useState(readFiltersFromUrl);
+  const [cars, setCars]                 = useState<CarWithImage[]>([]);
+  const [totalCount, setTotalCount]     = useState(0);
+  const [loading, setLoading]           = useState(true);
+  const [page, setPage]                 = useState(() => parseInt(getParams().get('page') || '1'));
+  const [sortBy, setSortBy]             = useState('Newest First');
+  const [activeTab, setActiveTab]       = useState('');
+  const [makeCounts, setMakeCounts]     = useState<Record<string, number>>({});
+  const [tabCounts, setTabCounts]       = useState<Record<string, number>>({});
+  const [pkrRate, setPkrRate]           = useState(0);
+  const [showMobileFilter, setShowMobileFilter] = useState(false);
+
+  // ── Search input state ──
+  const [searchInput, setSearchInput] = useState(filters.q);
+
+  // ── Advanced filter draft state ──
+  const [advMake,      setAdvMake]      = useState(filters.advMake);
+  const [advModel,     setAdvModel]     = useState(filters.advModel);
+  const [advModelCode, setAdvModelCode] = useState('');
+  const [advSteering,  setAdvSteering]  = useState(filters.steering);
+  const [advBodyType,  setAdvBodyType]  = useState(filters.advBody);
+  const [advFuel,      setAdvFuel]      = useState(filters.advFuel);
+  const [advDrive,     setAdvDrive]     = useState(filters.advDrive);
+  const [advTrans,     setAdvTrans]     = useState(filters.advTrans);
+  const [advColor,     setAdvColor]     = useState(filters.advColor);
+  const [advLocation,  setAdvLocation]  = useState(filters.advLocation);
+  const [advYearFrom,  setAdvYearFrom]  = useState(filters.advYearFrom);
+  const [advYearTo,    setAdvYearTo]    = useState(filters.advYearTo);
+  const [advMinPrice,  setAdvMinPrice]  = useState(filters.advMinPrice);
+  const [advMaxPrice,  setAdvMaxPrice]  = useState(filters.advMaxPrice);
+  const [advMinMil,    setAdvMinMil]    = useState(filters.advMinMil);
+  const [advMaxMil,    setAdvMaxMil]    = useState(filters.advMaxMil);
+  const [advMinEng,    setAdvMinEng]    = useState(filters.advMinEng);
+  const [advMaxEng,    setAdvMaxEng]    = useState(filters.advMaxEng);
+  const [availableModels, setAvailableModels] = useState<string[]>([]);
+
+  // ── Sync URL on back/forward ──
+  useEffect(() => {
+    const sync = () => {
+      setFilters(readFiltersFromUrl());
+      setPage(parseInt(getParams().get('page') || '1'));
+    };
+    window.addEventListener('popstate', sync);
+    return () => window.removeEventListener('popstate', sync);
+  }, [readFiltersFromUrl]);
+
+  // ── Fetch cars ──
+  const fetchCars = useCallback(async (currentFilters: Filters, currentTab: string, currentSort: string, currentPage: number) => {
+    setLoading(true);
+    try {
+      let query = supabase
+        .from('cars')
+        .select('*', { count: 'exact' });
+
+      query = applyFiltersToQuery(query, currentFilters, currentTab, currentSort);
+
+      const from = (currentPage - 1) * PAGE_SIZE;
+      const to = from + PAGE_SIZE - 1;
+      query = query.range(from, to);
+
+      const { data, count, error } = await query;
+      if (error) throw error;
+      setCars((data as CarWithImage[]) || []);
+      setTotalCount(count || 0);
+    } catch (err) {
+      console.error('Failed to fetch cars:', err);
+      setCars([]);
+      setTotalCount(0);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  // ── Fetch make counts (parallel HEAD queries) ──
+  const fetchMakeCounts = useCallback(async () => {
+    try {
+      const results = await Promise.all(
+        MAKE_NAMES.map(name =>
+          supabase.from('cars').select('*', { count: 'exact', head: true }).eq('make', name)
+            .then(({ count }) => ({ name, count: count || 0 }))
+        )
+      );
+      const counts: Record<string, number> = {};
+      results.forEach(({ name, count }) => { counts[name] = count; });
+      setMakeCounts(counts);
+    } catch (err) {
+      console.error('Failed to fetch make counts:', err);
+    }
+  }, []);
+
+  // ── Fetch tab counts ──
+  const fetchTabCounts = useCallback(async () => {
+    try {
+      const tabConfigs = [
+        { key: 'new_arrivals', apply: (q: any) => q.eq('is_new_arrival', true) },
+        { key: 'clearance',    apply: (q: any) => q.eq('collection', 'clearance') },
+        { key: 'japan',        apply: (q: any) => q.eq('stock_location', 'Japan') },
+        { key: 'hybrid',       apply: (q: any) => q.eq('fuel_type', 'Hybrid') },
+        { key: 'suv',          apply: (q: any) => q.eq('body_type', 'SUV') },
+        { key: 'budget',       apply: (q: any) => q.lt('fob_price_usd', 2000) },
+      ];
+      const results = await Promise.all(
+        tabConfigs.map(({ key, apply }) =>
+          apply(supabase.from('cars').select('*', { count: 'exact', head: true }))
+            .then(({ count }: any) => ({ key, count: count || 0 }))
+        )
+      );
+      const counts: Record<string, number> = {};
+      results.forEach(({ key, count }: any) => { counts[key] = count; });
+      setTabCounts(counts);
+    } catch (err) {
+      console.error('Failed to fetch tab counts:', err);
+    }
+  }, []);
+
+  // ── Fetch PKR exchange rate ──
+  const fetchPKRRate = useCallback(async () => {
+    try {
+      const { data } = await supabase.from('exchange_rates').select('rate').eq('currency', 'PKR').limit(1).maybeSingle();
+      if (data?.rate) setPkrRate(data.rate);
+    } catch { /* use 0 = don't show PKR */ }
+  }, []);
+
+  // ── Fetch models for advanced filter ──
+  useEffect(() => {
+    if (!advMake) { setAvailableModels([]); return; }
+    supabase.from('cars').select('model').eq('make', advMake).limit(500)
+      .then(({ data }) => {
+        const models = [...new Set((data || []).map((r: any) => r.model).filter(Boolean))].sort() as string[];
+        setAvailableModels(models);
+      });
+  }, [advMake]);
+
+  // ── Initial data load ──
+  useEffect(() => {
+    fetchMakeCounts();
+    fetchTabCounts();
+    fetchPKRRate();
+  }, [fetchMakeCounts, fetchTabCounts, fetchPKRRate]);
+
+  // ── Re-fetch cars when filters/page/sort/tab change ──
+  useEffect(() => {
+    fetchCars(filters, activeTab, sortBy, page);
+  }, [filters, activeTab, sortBy, page, fetchCars]);
+
+  // ── Write a filter change to state + URL (resets page to 1) ──
   const setFilter = (key: string, value: string) => {
     setParam(key, value);
+    setParam('page', '1');
+    setPage(1);
     setFilters(prev => ({ ...prev, [key]: value }));
   };
 
-  // ── Main area local state ──
-  const [searchInput, setSearchInput]       = useState(filters.q);
-  const [sortBy, setSortBy]                 = useState('Newest First');
-  const [activeTab, setActiveTab]           = useState('New Arrivals');
-  const [showMobileFilter, setShowMobileFilter] = useState(false);
+  const handlePageChange = (p: number) => {
+    setParam('page', String(p));
+    setPage(p);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
 
-  // ── Advanced filter draft state (committed on Search) ──
-  const [advMake,     setAdvMake]     = useState(filters.advMake);
-  const [advModel,    setAdvModel]    = useState('');
-  const [advModelCode,setAdvModelCode]= useState('');
-  const [advSteering, setAdvSteering] = useState(filters.steering);
-  const [advBodyType, setAdvBodyType] = useState(filters.advBody);
-  const [advFuel,     setAdvFuel]     = useState(filters.advFuel);
-  const [advDrive,    setAdvDrive]    = useState(filters.advDrive);
-  const [advTrans,    setAdvTrans]    = useState(filters.advTrans);
-  const [advColor,    setAdvColor]    = useState('');
-  const [advLocation, setAdvLocation] = useState('');
-  const [advYearFrom, setAdvYearFrom] = useState(filters.advYearFrom);
-  const [advYearTo,   setAdvYearTo]   = useState(filters.advYearTo);
-  const [advMinPrice, setAdvMinPrice] = useState(filters.advMinPrice);
-  const [advMaxPrice, setAdvMaxPrice] = useState(filters.advMaxPrice);
-  const [advMinMil,   setAdvMinMil]   = useState('');
-  const [advMaxMil,   setAdvMaxMil]   = useState('');
-  const [advMinEng,   setAdvMinEng]   = useState('');
-  const [advMaxEng,   setAdvMaxEng]   = useState('');
+  const handleTabChange = (tabKey: string) => {
+    setActiveTab(tabKey);
+    setPage(1);
+    setParam('page', '1');
+  };
+
+  const handleSortChange = (sort: string) => {
+    setSortBy(sort);
+    setPage(1);
+    setParam('page', '1');
+  };
 
   // ── Commit advanced filter to URL ──
   const commitAdvanced = () => {
     const p = getParams();
-    const set = (k:string, v:string) => { if (v) p.set(k, v); else p.delete(k); };
-    set('advMake',    advMake);
-    set('advBody',    advBodyType);
-    set('advFuel',    advFuel);
-    set('advDrive',   advDrive);
-    set('advTrans',   advTrans);
-    set('advYearFrom',advYearFrom);
-    set('advYearTo',  advYearTo);
-    set('advMinPrice',advMinPrice);
-    set('advMaxPrice',advMaxPrice);
-    set('steering',   advSteering);
+    const set = (k: string, v: string) => { if (v) p.set(k, v); else p.delete(k); };
+    set('advMake', advMake); set('advModel', advModel); set('advBody', advBodyType);
+    set('advFuel', advFuel); set('advDrive', advDrive); set('advTrans', advTrans);
+    set('advYearFrom', advYearFrom); set('advYearTo', advYearTo);
+    set('advMinPrice', advMinPrice); set('advMaxPrice', advMaxPrice);
+    set('steering', advSteering); set('advColor', advColor);
+    set('advLocation', advLocation); set('advMinMil', advMinMil);
+    set('advMaxMil', advMaxMil); set('advMinEng', advMinEng); set('advMaxEng', advMaxEng);
+    p.set('page', '1');
     const qs = p.toString();
     window.history.replaceState({}, '', qs ? `?${qs}` : window.location.pathname);
+    setPage(1);
     setFilters(readFiltersFromUrl());
   };
 
@@ -1235,164 +1271,72 @@ export default function CarsPage() {
     setAdvColor(''); setAdvLocation(''); setAdvYearFrom(''); setAdvYearTo('');
     setAdvMinPrice(''); setAdvMaxPrice(''); setAdvMinMil(''); setAdvMaxMil('');
     setAdvMinEng(''); setAdvMaxEng('');
-    // Also clear from URL
-    ['advMake','advBody','advFuel','advDrive','advTrans','advYearFrom','advYearTo','advMinPrice','advMaxPrice','steering']
+    ['advMake', 'advModel', 'advBody', 'advFuel', 'advDrive', 'advTrans',
+     'advYearFrom', 'advYearTo', 'advMinPrice', 'advMaxPrice', 'steering',
+     'advColor', 'advLocation', 'advMinMil', 'advMaxMil', 'advMinEng', 'advMaxEng']
       .forEach(k => setParam(k, ''));
+    setParam('page', '1');
+    setPage(1);
     setFilters(readFiltersFromUrl());
   };
 
-  // ── Run search (main bar) ──
-  const runSearch = () => {
-    setFilter('q', searchInput.trim());
-  };
-
-  // ── Filter DUMMY_CARS ──
-  const visibleCars = DUMMY_CARS.filter(car => {
-    // Text search
-    if (filters.q) {
-      const q = filters.q.toLowerCase();
-      const hay = `${car.make} ${car.model} ${car.variant} ${car.ref}`.toLowerCase();
-      if (!hay.includes(q)) return false;
-    }
-    // Sidebar: make
-    if (filters.make && car.make.toLowerCase() !== filters.make.toLowerCase()) return false;
-    // Sidebar: price range
-    if (filters.price) {
-      const pr = parsePriceRange(filters.price);
-      if (pr && (car.fob < pr[0] || car.fob > pr[1])) return false;
-    }
-    // Sidebar: body type (approximate via model name matching)
-    if (filters.body) {
-      const b = filters.body.toLowerCase();
-      const modelLower = car.model.toLowerCase();
-      // rough match — real data would have body_type field
-      if (b === 'suv' && !['kix','rav4','cr-v','cx-5','forester','outlander'].some(s => modelLower.includes(s))) return false;
-      if (b === 'sedan' && !['yaris','corolla','civic','demio'].some(s => modelLower.includes(s))) return false;
-      if (b === 'hatchback' && !['fit','move','demio','vitz'].some(s => modelLower.includes(s))) return false;
-    }
-    // Sidebar: fuel/category
-    if (filters.fuel && car.fuel.toLowerCase() !== filters.fuel.toLowerCase()) return false;
-    if (filters.category && car.fuel.toLowerCase() !== filters.category.toLowerCase()) return false;
-    // Sidebar: year range
-    if (filters.year) {
-      const yr = parseYearRange(filters.year);
-      if (yr && (car.year < yr[0] || car.year > yr[1])) return false;
-    }
-    // Sidebar: drive
-    if (filters.drive && car.drive !== filters.drive) return false;
-    // Sidebar: transmission
-    if (filters.trans && car.trans !== filters.trans) return false;
-    // Sidebar: mileage range
-    if (filters.mileage) {
-      const mr = parseMileageRange(filters.mileage);
-      const km = parseMileageNum(car.mileage);
-      if (mr && (km < mr[0] || km > mr[1])) return false;
-    }
-    // Sidebar: engine
-    if (filters.engine) {
-      const er = parseEngineRange(filters.engine);
-      const cc = parseEngineNum(car.engine);
-      if (er && (cc < er[0] || cc > er[1])) return false;
-    }
-    // Advanced: make
-    if (filters.advMake && car.make.toLowerCase() !== filters.advMake.toLowerCase()) return false;
-    // Advanced: body type
-    if (filters.advBody) {
-      const b = filters.advBody.toLowerCase();
-      if (b === 'suv' && !['kix','rav4','cr-v','cx-5'].some(s => car.model.toLowerCase().includes(s))) return false;
-    }
-    // Advanced: fuel
-    if (filters.advFuel && car.fuel.toLowerCase() !== filters.advFuel.toLowerCase()) return false;
-    // Advanced: drive
-    if (filters.advDrive && car.drive !== filters.advDrive) return false;
-    // Advanced: transmission
-    if (filters.advTrans && car.trans !== filters.advTrans) return false;
-    // Advanced: year from/to
-    if (filters.advYearFrom && car.year < Number(filters.advYearFrom)) return false;
-    if (filters.advYearTo   && car.year > Number(filters.advYearTo))   return false;
-    // Advanced: price
-    if (filters.advMinPrice && car.fob < Number(filters.advMinPrice)) return false;
-    if (filters.advMaxPrice && car.fob > Number(filters.advMaxPrice)) return false;
-    // Steering
-    if (filters.steering && car.steering !== filters.steering) return false;
-    // Collection tab
-    if (activeTab === 'New Arrivals' && car.status !== 'New Arrival') return false;
-    if (activeTab === 'Clearance'    && car.status !== 'Clearance')   return false;
-    return true;
-  });
-
-  // ── Sort cars ──
-  const sortedCars = [...visibleCars].sort((a, b) => {
-    if (sortBy === 'Price Low to High')    return a.fob - b.fob;
-    if (sortBy === 'Price High to Low')    return b.fob - a.fob;
-    if (sortBy === 'Mileage Low to High')  return parseMileageNum(a.mileage) - parseMileageNum(b.mileage);
-    if (sortBy === 'Year Newest')          return b.year - a.year;
-    if (sortBy === 'Year Oldest')          return a.year - b.year;
-    return 0; // Newest First — keep insertion order
-  });
+  const runSearch = () => setFilter('q', searchInput.trim());
 
   // ── Active filter count ──
   const filterCount = Object.values(filters).filter(Boolean).length;
 
+  // ── Active filter chips ──
+  const activeChips = Object.entries({
+    q:           filters.q && `Search: "${filters.q}"`,
+    make:        filters.make,
+    price:       filters.price,
+    body:        filters.body,
+    fuel:        filters.fuel,
+    category:    filters.category,
+    year:        filters.year,
+    drive:       filters.drive,
+    trans:       filters.trans,
+    mileage:     filters.mileage,
+    engine:      filters.engine,
+    location:    filters.location,
+    advMake:     filters.advMake && `Make: ${filters.advMake}`,
+    advModel:    filters.advModel && `Model: ${filters.advModel}`,
+    advYearFrom: filters.advYearFrom && `Year ≥ ${filters.advYearFrom}`,
+    advYearTo:   filters.advYearTo   && `Year ≤ ${filters.advYearTo}`,
+    advMinPrice: filters.advMinPrice && `Min $${Number(filters.advMinPrice).toLocaleString()}`,
+    advMaxPrice: filters.advMaxPrice && `Max $${Number(filters.advMaxPrice).toLocaleString()}`,
+    advColor:    filters.advColor && `Color: ${filters.advColor}`,
+  }).filter(([, v]) => !!v) as [string, string][];
+
   // ── Sidebar props ──
   const sidebarProps = {
-    activeMake:     filters.make,
-    setActiveMake:  (v:string) => setFilter('make', v),
-    activePrice:    filters.price,
-    setActivePrice: (v:string) => setFilter('price', v),
-    activeBody:     filters.body,
-    setActiveBody:  (v:string) => setFilter('body', v),
-    activeCategory: filters.category,
-    setActiveCategory: (v:string) => setFilter('category', v),
-    activeLocation: filters.location,
-    setActiveLocation: (v:string) => setFilter('location', v),
-    activeYear:     filters.year,
-    setActiveYear:  (v:string) => setFilter('year', v),
-    activeDrive:    filters.drive,
-    setActiveDrive: (v:string) => setFilter('drive', v),
-    activeTrans:    filters.trans,
-    setActiveTrans: (v:string) => setFilter('trans', v),
-    activeEngine:   filters.engine,
-    setActiveEngine:(v:string) => setFilter('engine', v),
-    activeFuel:     filters.fuel,
-    setActiveFuel:  (v:string) => setFilter('fuel', v),
-    activeMileage:  filters.mileage,
-    setActiveMileage:(v:string) => setFilter('mileage', v),
+    makeCounts,
+    activeMake:       filters.make,      setActiveMake:       (v: string) => setFilter('make', v),
+    activePrice:      filters.price,     setActivePrice:      (v: string) => setFilter('price', v),
+    activeBody:       filters.body,      setActiveBody:       (v: string) => setFilter('body', v),
+    activeCategory:   filters.category,  setActiveCategory:   (v: string) => setFilter('category', v),
+    activeLocation:   filters.location,  setActiveLocation:   (v: string) => setFilter('location', v),
+    activeYear:       filters.year,      setActiveYear:       (v: string) => setFilter('year', v),
+    activeDrive:      filters.drive,     setActiveDrive:      (v: string) => setFilter('drive', v),
+    activeTrans:      filters.trans,     setActiveTrans:      (v: string) => setFilter('trans', v),
+    activeEngine:     filters.engine,    setActiveEngine:     (v: string) => setFilter('engine', v),
+    activeFuel:       filters.fuel,      setActiveFuel:       (v: string) => setFilter('fuel', v),
+    activeMileage:    filters.mileage,   setActiveMileage:    (v: string) => setFilter('mileage', v),
   };
 
-  /* ── Select helper for advanced panel ── */
-  const Sel = ({
-    value, onChange, placeholder, options,
-  }: { value:string; onChange:(v:string)=>void; placeholder:string; options:string[] }) => (
-    <select
-      value={value}
-      onChange={e => onChange(e.target.value)}
+  /* Select helper for advanced panel */
+  const Sel = ({ value, onChange, placeholder, options }: {
+    value: string; onChange: (v: string) => void; placeholder: string; options: string[];
+  }) => (
+    <select value={value} onChange={e => onChange(e.target.value)}
       className="w-full text-white text-[12px] px-3 py-2 outline-none border border-white/20 focus:border-[#C8102E] rounded-sm"
-      style={{ background:'rgba(255,255,255,0.1)' }}
-    >
+      style={{ background: 'rgba(255,255,255,0.1)' }}>
       <option value="" className="bg-[#0D1B3E]">{placeholder}</option>
       {options.map(o => <option key={o} value={o} className="bg-[#0D1B3E]">{o}</option>)}
     </select>
   );
 
-  // ── Active filter chips ──
-  const activeChips = Object.entries({
-    q: filters.q && `Search: "${filters.q}"`,
-    make: filters.make,
-    price: filters.price,
-    body: filters.body,
-    fuel: filters.fuel,
-    year: filters.year,
-    drive: filters.drive,
-    trans: filters.trans,
-    mileage: filters.mileage,
-    engine: filters.engine,
-    advMake: filters.advMake && `Make: ${filters.advMake}`,
-    advYearFrom: filters.advYearFrom && `Year ≥ ${filters.advYearFrom}`,
-    advYearTo: filters.advYearTo && `Year ≤ ${filters.advYearTo}`,
-    advMinPrice: filters.advMinPrice && `Min ${Number(filters.advMinPrice).toLocaleString()}`,
-    advMaxPrice: filters.advMaxPrice && `Max ${Number(filters.advMaxPrice).toLocaleString()}`,
-  }).filter(([,v]) => !!v) as [string, string][];
+  const totalDisplay = totalCount.toLocaleString();
 
   return (
     <div className="min-h-screen bg-gray-50 pt-[80px]">
@@ -1401,52 +1345,34 @@ export default function CarsPage() {
       <div className="w-full py-8 px-4" style={{ background: NAVY }}>
         <div className="max-w-4xl mx-auto text-center">
           <p className="text-[10px] tracking-[0.3em] uppercase font-bold mb-2" style={{ color: '#D4AF37' }}>
-            45,354 Vehicles In Stock
+            {totalCount > 0 ? `${totalDisplay} Vehicles In Stock` : 'Searching Inventory…'}
           </p>
           <h1 className="text-2xl md:text-3xl font-bold text-white mb-1" style={{ fontFamily: "'Playfair Display',serif" }}>
             Find Your Perfect Vehicle
           </h1>
           <p className="text-white/60 text-sm mb-5">Quality Japanese imports — exported worldwide</p>
-
-          {/* Main Search Bar */}
           <div className="flex shadow-xl overflow-hidden rounded-sm max-w-2xl mx-auto">
             <div className="relative flex-1">
               <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
-              <input
-                type="text"
-                value={searchInput}
+              <input type="text" value={searchInput}
                 onChange={e => setSearchInput(e.target.value)}
                 onKeyDown={e => e.key === 'Enter' && runSearch()}
                 placeholder="Search make, model, or reference #"
                 className="w-full h-13 pl-10 pr-4 text-sm text-gray-800 placeholder:text-gray-400 outline-none bg-white"
-                style={{ height: 52 }}
-              />
+                style={{ height: 52 }} />
             </div>
-            <button
-              onClick={runSearch}
+            <button onClick={runSearch}
               className="h-[52px] px-6 text-white text-[13px] font-bold tracking-[0.1em] uppercase flex items-center gap-2 flex-shrink-0 hover:opacity-90 transition-opacity"
-              style={{ background: RED }}
-            >
-              <Search size={14} />
-              Search
+              style={{ background: RED }}>
+              <Search size={14} /> Search
             </button>
           </div>
-
-          {/* Quick stat pills */}
           <div className="flex flex-wrap justify-center gap-3 mt-5">
-            {[
-              { label: 'Toyota', count: '19,289' },
-              { label: 'Nissan', count: '6,513' },
-              { label: 'Honda', count: '4,187' },
-              { label: 'Mazda', count: '2,859' },
-            ].map(({ label, count }) => (
-              <button
-                key={label}
-                onClick={() => setFilter('make', label)}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[12px] font-semibold border border-white/20 text-white/80 hover:border-white hover:text-white hover:bg-white/10 transition-all"
-              >
+            {['Toyota', 'Nissan', 'Honda', 'Mazda'].map(label => (
+              <button key={label} onClick={() => setFilter('make', label)}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[12px] font-semibold border border-white/20 text-white/80 hover:border-white hover:text-white hover:bg-white/10 transition-all">
                 {label}
-                <span className="text-white/50 text-[10px]">{count}</span>
+                {makeCounts[label] ? <span className="text-white/50 text-[10px]">{makeCounts[label].toLocaleString()}</span> : null}
               </button>
             ))}
           </div>
@@ -1460,9 +1386,7 @@ export default function CarsPage() {
           <div className="relative bg-white rounded-t-2xl max-h-[85vh] overflow-y-auto z-10">
             <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200 sticky top-0 bg-white z-10">
               <span className="font-bold text-gray-900">Filters</span>
-              <button onClick={() => setShowMobileFilter(false)}>
-                <X size={20} className="text-gray-500" />
-              </button>
+              <button onClick={() => setShowMobileFilter(false)}><X size={20} className="text-gray-500" /></button>
             </div>
             <Sidebar {...sidebarProps} />
           </div>
@@ -1474,7 +1398,7 @@ export default function CarsPage() {
         <div className="hidden md:block sticky top-[80px] self-start overflow-y-auto max-h-[calc(100vh-80px)] border-r border-gray-200 bg-white shadow-sm" style={{ minWidth: 220, width: 220 }}>
           <div className="px-3 py-3 border-b border-gray-100" style={{ background: NAVY }}>
             <p className="text-white text-[11px] font-bold tracking-[0.15em] uppercase">Filter Vehicles</p>
-            <p className="text-white/50 text-[10px] mt-0.5">45,354 cars in stock</p>
+            <p className="text-white/50 text-[10px] mt-0.5">{totalDisplay} cars in stock</p>
           </div>
           <Sidebar {...sidebarProps} />
         </div>
@@ -1486,29 +1410,22 @@ export default function CarsPage() {
           {activeChips.length > 0 && (
             <div className="flex flex-wrap gap-2 mb-3">
               {activeChips.map(([key, label]) => (
-                <span
-                  key={key}
+                <span key={key}
                   className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold border"
-                  style={{ borderColor: RED, color: RED, background: 'rgba(200,16,46,0.06)' }}
-                >
+                  style={{ borderColor: RED, color: RED, background: 'rgba(200,16,46,0.06)' }}>
                   {label}
-                  <button
-                    onClick={() => setFilter(key, '')}
-                    className="hover:opacity-70 transition-opacity leading-none"
-                    aria-label={`Remove ${key} filter`}
-                  >
+                  <button onClick={() => setFilter(key, '')}
+                    className="hover:opacity-70 transition-opacity leading-none" aria-label={`Remove ${key} filter`}>
                     <X size={10} />
                   </button>
                 </span>
               ))}
-              <button
-                onClick={() => {
-                  window.history.replaceState({}, '', window.location.pathname);
-                  setFilters(readFiltersFromUrl());
-                  setSearchInput('');
-                }}
-                className="text-[11px] font-semibold text-gray-400 hover:text-gray-700 underline transition-colors"
-              >
+              <button onClick={() => {
+                window.history.replaceState({}, '', window.location.pathname);
+                setFilters(readFiltersFromUrl());
+                setSearchInput('');
+                setPage(1);
+              }} className="text-[11px] font-semibold text-gray-400 hover:text-gray-700 underline transition-colors">
                 Clear all
               </button>
             </div>
@@ -1517,23 +1434,18 @@ export default function CarsPage() {
           {/* QUICK CHIPS */}
           <div className="flex flex-wrap gap-2 mb-4">
             {[
-              { label:'Under $2,000',    action:() => setFilter('price', '$500 - $1500') },
-              { label:'SUV & 4WD',       action:() => setFilter('body', 'SUV') },
-              { label:'Right Hand Drive',action:() => setFilter('steering', 'RHD') },
+              { label: 'Under $2,000',    action: () => setFilter('price', '$500 - $1500') },
+              { label: 'SUV & 4WD',       action: () => setFilter('body', 'SUV') },
+              { label: 'Right Hand Drive', action: () => setFilter('steering', 'RHD') },
             ].map(({ label, action }) => (
-              <button
-                key={label}
-                onClick={action}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-gray-200 text-[12px] font-semibold text-gray-600 hover:border-[#C8102E] hover:text-[#C8102E] hover:bg-red-50 transition-all"
-              >
-                <span className="w-1.5 h-1.5 rounded-full opacity-60" style={{ background:RED }} />
+              <button key={label} onClick={action}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-gray-200 text-[12px] font-semibold text-gray-600 hover:border-[#C8102E] hover:text-[#C8102E] hover:bg-red-50 transition-all">
+                <span className="w-1.5 h-1.5 rounded-full opacity-60" style={{ background: RED }} />
                 {label}
               </button>
             ))}
-            <button
-              onClick={() => setShowMobileFilter(true)}
-              className="md:hidden inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-gray-200 text-[12px] font-semibold text-gray-600 hover:border-[#C8102E] hover:text-[#C8102E] transition-all"
-            >
+            <button onClick={() => setShowMobileFilter(true)}
+              className="md:hidden inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-gray-200 text-[12px] font-semibold text-gray-600 hover:border-[#C8102E] hover:text-[#C8102E] transition-all">
               <SlidersHorizontal size={12} />
               Filters {filterCount > 0 && `(${filterCount})`}
             </button>
@@ -1543,41 +1455,37 @@ export default function CarsPage() {
           <div className="mb-5 rounded-sm overflow-hidden shadow-sm" style={{ background: NAVY }}>
             <div className="p-4">
               <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2 mb-2">
-                <Sel value={advMake}      onChange={setAdvMake}      placeholder="Make"       options={MAKES.map(m=>m.name)} />
-                <Sel value={advModel}     onChange={setAdvModel}     placeholder="Model"      options={[]} />
-                <Sel value={advModelCode} onChange={setAdvModelCode} placeholder="Model Code" options={[]} />
-                <Sel value={advSteering}  onChange={setAdvSteering}  placeholder="Steering"   options={['RHD','LHD']} />
-                <Sel value={advBodyType}  onChange={setAdvBodyType}  placeholder="Body Type"  options={BODY_TYPES} />
-                <Sel value={advFuel}      onChange={setAdvFuel}      placeholder="Fuel"       options={FUELS} />
+                <Sel value={advMake}       onChange={v => { setAdvMake(v); setAdvModel(''); }} placeholder="Make"       options={MAKE_NAMES} />
+                <Sel value={advModel}      onChange={setAdvModel}      placeholder="Model"      options={availableModels} />
+                <Sel value={advModelCode}  onChange={setAdvModelCode}  placeholder="Model Code" options={[]} />
+                <Sel value={advSteering}   onChange={setAdvSteering}   placeholder="Steering"   options={['RHD', 'LHD']} />
+                <Sel value={advBodyType}   onChange={setAdvBodyType}   placeholder="Body Type"  options={BODY_TYPES} />
+                <Sel value={advFuel}       onChange={setAdvFuel}       placeholder="Fuel"       options={FUELS} />
               </div>
               <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2 mb-2">
                 <Sel value={advDrive}    onChange={setAdvDrive}    placeholder="Drive"        options={DRIVES} />
                 <Sel value={advTrans}    onChange={setAdvTrans}    placeholder="Transmission" options={TRANSMISSIONS} />
-                <Sel value={advColor}    onChange={setAdvColor}    placeholder="Color"        options={['White','Black','Silver','Red','Blue','Grey']} />
+                <Sel value={advColor}    onChange={setAdvColor}    placeholder="Color"        options={['White', 'Black', 'Silver', 'Red', 'Blue', 'Grey', 'Brown', 'Gold']} />
                 <Sel value={advLocation} onChange={setAdvLocation} placeholder="Location"     options={LOCATIONS} />
-                <Sel value={advYearFrom} onChange={setAdvYearFrom} placeholder="Year From"    options={Array.from({length:24},(_,i)=>`${2025-i}`)} />
-                <Sel value={advYearTo}   onChange={setAdvYearTo}   placeholder="Year To"      options={Array.from({length:24},(_,i)=>`${2025-i}`)} />
+                <Sel value={advYearFrom} onChange={setAdvYearFrom} placeholder="Year From"    options={Array.from({ length: 26 }, (_, i) => `${2025 - i}`)} />
+                <Sel value={advYearTo}   onChange={setAdvYearTo}   placeholder="Year To"      options={Array.from({ length: 26 }, (_, i) => `${2025 - i}`)} />
               </div>
               <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2">
-                <Sel value={advMinPrice} onChange={setAdvMinPrice} placeholder="Min Price ($)"   options={['1000','2000','3000','5000','8000','10000','15000','20000']} />
-                <Sel value={advMaxPrice} onChange={setAdvMaxPrice} placeholder="Max Price ($)"   options={['3000','5000','8000','10000','15000','20000','30000','50000']} />
-                <Sel value={advMinMil}   onChange={setAdvMinMil}   placeholder="Min Mileage"  options={MILEAGES} />
-                <Sel value={advMaxMil}   onChange={setAdvMaxMil}   placeholder="Max Mileage"  options={MILEAGES} />
-                <Sel value={advMinEng}   onChange={setAdvMinEng}   placeholder="Min Engine"   options={ENGINE_SIZES} />
-                <Sel value={advMaxEng}   onChange={setAdvMaxEng}   placeholder="Max Engine"   options={ENGINE_SIZES} />
+                <Sel value={advMinPrice} onChange={setAdvMinPrice} placeholder="Min Price ($)"  options={['1000', '2000', '3000', '5000', '8000', '10000', '15000', '20000']} />
+                <Sel value={advMaxPrice} onChange={setAdvMaxPrice} placeholder="Max Price ($)"  options={['3000', '5000', '8000', '10000', '15000', '20000', '30000', '50000']} />
+                <Sel value={advMinMil}   onChange={setAdvMinMil}   placeholder="Min Mileage"    options={MILEAGES} />
+                <Sel value={advMaxMil}   onChange={setAdvMaxMil}   placeholder="Max Mileage"    options={MILEAGES} />
+                <Sel value={advMinEng}   onChange={setAdvMinEng}   placeholder="Min Engine"     options={ENGINE_SIZES} />
+                <Sel value={advMaxEng}   onChange={setAdvMaxEng}   placeholder="Max Engine"     options={ENGINE_SIZES} />
               </div>
               <div className="flex gap-3 mt-3 justify-end">
-                <button
-                  onClick={resetAdv}
-                  className="px-5 py-2 text-white/70 border border-white/20 text-[12px] font-semibold rounded-sm hover:border-white/50 hover:text-white transition-all"
-                >
+                <button onClick={resetAdv}
+                  className="px-5 py-2 text-white/70 border border-white/20 text-[12px] font-semibold rounded-sm hover:border-white/50 hover:text-white transition-all">
                   Reset
                 </button>
-                <button
-                  onClick={commitAdvanced}
+                <button onClick={commitAdvanced}
                   className="px-7 py-2 text-white text-[12px] font-bold uppercase tracking-[0.1em] rounded-sm hover:opacity-90 transition-opacity"
-                  style={{ background: RED }}
-                >
+                  style={{ background: RED }}>
                   Search
                 </button>
               </div>
@@ -1585,7 +1493,7 @@ export default function CarsPage() {
           </div>
 
           {/* SHOP BY MAKE CAROUSEL */}
-          <MakeCarousel setActiveMake={(v) => setFilter('make', v)} />
+          <MakeCarousel setActiveMake={(v) => setFilter('make', v)} makeCounts={makeCounts} />
 
           {/* SHOP BY BODY TYPE CAROUSEL */}
           <BodyTypeCarousel setActiveBody={(v) => setFilter('body', v)} />
@@ -1596,23 +1504,20 @@ export default function CarsPage() {
           {/* COLLECTION TABS */}
           <div className="flex flex-wrap gap-2 mb-5">
             {COLLECTION_TABS.map(t => (
-              <button
-                key={t.label}
-                onClick={() => setActiveTab(t.label)}
+              <button key={t.key} onClick={() => handleTabChange(t.key)}
                 className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-[12px] font-semibold transition-all"
-                style={activeTab === t.label
+                style={activeTab === t.key
                   ? { background: NAVY, color: '#fff', border: `1px solid ${NAVY}` }
-                  : { background: '#fff', color: '#374151', border: '1px solid #E5E7EB' }}
-              >
+                  : { background: '#fff', color: '#374151', border: '1px solid #E5E7EB' }}>
                 {t.label}
-                <span
-                  className="text-[10px] font-bold px-1.5 py-0.5 rounded-full"
-                  style={activeTab === t.label
-                    ? { background:'rgba(255,255,255,0.2)', color:'#fff' }
-                    : { background:'#F3F4F6', color:'#6B7280' }}
-                >
-                  {t.count.toLocaleString()}
-                </span>
+                {t.key && tabCounts[t.key] !== undefined && (
+                  <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full"
+                    style={activeTab === t.key
+                      ? { background: 'rgba(255,255,255,0.2)', color: '#fff' }
+                      : { background: '#F3F4F6', color: '#6B7280' }}>
+                    {tabCounts[t.key].toLocaleString()}
+                  </span>
+                )}
               </button>
             ))}
           </div>
@@ -1620,64 +1525,70 @@ export default function CarsPage() {
           {/* STOCK LIST HEADER */}
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
             <div>
-              <h2 className="font-bold text-lg text-gray-900" style={{ fontFamily:"'Playfair Display',serif" }}>
+              <h2 className="font-bold text-lg text-gray-900" style={{ fontFamily: "'Playfair Display',serif" }}>
                 Stock List
-                <span className="inline-block ml-2 h-0.5 w-8 align-middle" style={{ background:RED }} />
+                <span className="inline-block ml-2 h-0.5 w-8 align-middle" style={{ background: RED }} />
               </h2>
             </div>
             <div className="flex items-center gap-3">
               <span className="text-gray-500 text-sm font-semibold">
-                {sortedCars.length > 0 ? `${sortedCars.length} of 45,354 Cars` : '45,354 Cars'}
+                {loading ? 'Loading…' : `${totalDisplay} Cars`}
               </span>
-              <select
-                value={sortBy}
-                onChange={e => setSortBy(e.target.value)}
-                className="border border-gray-200 bg-white text-[12px] text-gray-700 px-3 py-1.5 rounded-sm outline-none focus:border-[#C8102E] cursor-pointer"
-              >
+              <select value={sortBy} onChange={e => handleSortChange(e.target.value)}
+                className="border border-gray-200 bg-white text-[12px] text-gray-700 px-3 py-1.5 rounded-sm outline-none focus:border-[#C8102E] cursor-pointer">
                 {SORT_OPTIONS.map(o => <option key={o}>{o}</option>)}
               </select>
             </div>
           </div>
 
           {/* TOP PAGINATION */}
-          <Pagination />
+          <Pagination page={page} total={totalCount} onPage={handlePageChange} />
 
           {/* CAR ROWS */}
-          {sortedCars.length > 0 ? (
-            sortedCars.map(car => <CarRow key={car.ref} car={car} />)
+          {loading ? (
+            <div className="flex items-center justify-center py-20">
+              <Loader2 size={36} className="animate-spin text-gray-300" />
+            </div>
+          ) : cars.length > 0 ? (
+            cars.map(car => <CarRow key={car.id} car={car} pkrRate={pkrRate} />)
           ) : (
             <div className="border border-gray-200 bg-white p-12 text-center mb-4">
               <Search size={40} className="mx-auto text-gray-300 mb-4" />
-              <h3 className="font-bold text-gray-900 text-lg mb-2" style={{ fontFamily:"'Playfair Display',serif" }}>
-                No vehicles found
+              <h3 className="font-bold text-gray-900 text-lg mb-2" style={{ fontFamily: "'Playfair Display',serif" }}>
+                No cars found matching your criteria
               </h3>
               <p className="text-gray-500 text-sm mb-5">
-                No demo cars match your current filters. Connect to live Supabase data to see full inventory.
+                Please try different filters or contact us on WhatsApp.
               </p>
-              <button
-                onClick={() => {
+              <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                <button onClick={() => {
                   window.history.replaceState({}, '', window.location.pathname);
                   setFilters(readFiltersFromUrl());
                   setSearchInput('');
-                  setActiveTab('New Arrivals');
-                }}
-                className="px-6 py-2.5 text-white text-sm font-bold rounded-sm hover:opacity-90 transition-opacity"
-                style={{ background: RED }}
-              >
-                Clear All Filters
-              </button>
+                  setActiveTab('');
+                  setPage(1);
+                }} className="px-6 py-2.5 text-white text-sm font-bold rounded-sm hover:opacity-90 transition-opacity"
+                  style={{ background: RED }}>
+                  Clear All Filters
+                </button>
+                <a href={`https://wa.me/${WA_NUMBER}?text=${encodeURIComponent("Hi, I'm looking for a vehicle but couldn't find it in the listings. Can you help me?")}`}
+                  target="_blank" rel="noopener noreferrer"
+                  className="px-6 py-2.5 text-white text-sm font-bold rounded-sm hover:opacity-90 transition-opacity flex items-center justify-center gap-2"
+                  style={{ background: '#25D366' }}>
+                  <WhatsAppIcon size={16} /> Contact on WhatsApp
+                </a>
+              </div>
             </div>
           )}
 
           {/* BOTTOM PAGINATION */}
-          <Pagination />
+          <Pagination page={page} total={totalCount} onPage={handlePageChange} />
 
           {/* REVIEWS */}
           <ReviewsSection />
         </div>
       </div>
 
-      {/* scrollbar-hide style */}
       <style>{`
         .scrollbar-hide { scrollbar-width: none; }
         .scrollbar-hide::-webkit-scrollbar { display: none; }

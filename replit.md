@@ -1,45 +1,67 @@
-# [Project name]
+# Wazir Trading LLC
 
-_Replace the heading above with the project's name, and this line with one sentence describing what this app does for users._
+A Japanese used car export website for Wazir Trading LLC — a company that sources vehicles directly from Japan auctions and exports worldwide.
 
-## Run & Operate
+## Project Structure
 
-- `pnpm --filter @workspace/api-server run dev` — run the API server (port 5000)
-- `pnpm run typecheck` — full typecheck across all packages
-- `pnpm run build` — typecheck + build all packages
-- `pnpm --filter @workspace/api-spec run codegen` — regenerate API hooks and Zod schemas from the OpenAPI spec
-- `pnpm --filter @workspace/db run push` — push DB schema changes (dev only)
-- Required env: `DATABASE_URL` — Postgres connection string
+This is a pnpm monorepo with:
+- `artifacts/wazir-trading/` — React + Vite frontend (main website)
+- `artifacts/api-server/` — Express API server (backend)
+- `artifacts/mockup-sandbox/` — Canvas/design preview server
+- `lib/api-client-react/` — Generated API client
+- `lib/api-spec/` — OpenAPI spec
+- `lib/api-zod/` — Zod schemas
 
-## Stack
+## Running the Project
 
-- pnpm workspaces, Node.js 24, TypeScript 5.9
-- API: Express 5
-- DB: PostgreSQL + Drizzle ORM
-- Validation: Zod (`zod/v4`), `drizzle-zod`
-- API codegen: Orval (from OpenAPI spec)
-- Build: esbuild (CJS bundle)
+The main website runs via the configured workflow:
+```
+pnpm --filter @workspace/wazir-trading run dev
+```
 
-## Where things live
+The API server runs via:
+```
+pnpm --filter @workspace/api-server run dev
+```
 
-_Populate as you build — short repo map plus pointers to the source-of-truth file for DB schema, API contracts, theme files, etc._
+Install dependencies:
+```
+pnpm install
+```
 
-## Architecture decisions
+## Tech Stack
 
-_Populate as you build — non-obvious choices a reader couldn't infer from the code (3-5 bullets)._
+- **Frontend**: React 19, Vite 7, TypeScript, Tailwind CSS v4, shadcn/ui, Wouter (routing), TanStack Query, Framer Motion
+- **Backend**: Express 5, TypeScript, Pino (logging)
+- **Database**: Supabase (PostgreSQL) — connection via `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY`
+- **Images**: Cloudinary (`VITE_CLOUDINARY_CLOUD_NAME`)
 
-## Product
+## Environment Variables / Secrets
 
-_Describe the high-level user-facing capabilities of this app once they exist._
+- `VITE_SUPABASE_URL` — Supabase project URL
+- `VITE_SUPABASE_ANON_KEY` — Supabase anonymous key
+- `VITE_WHATSAPP_NUMBER` — WhatsApp contact number (default: 818089227375)
+- `VITE_CLOUDINARY_CLOUD_NAME` — Cloudinary cloud name (default: txb1wiw1)
+- `SESSION_SECRET` — Session secret for API server
 
-## User preferences
+## Key Pages
 
-_Populate as you build — explicit user instructions worth remembering across sessions._
+- `/` — Home page
+- `/cars` — Car inventory with Supabase-connected filters, search, pagination
+- `/cars/:ref` — Car detail page
+- `/about` — About page
+- `/how-it-works` — How It Works page
+- `/contact` — Contact page
 
-## Gotchas
+## Database Tables (Supabase)
 
-_Populate as you build — sharp edges, "always run X before Y" rules._
+- `cars` — Vehicle inventory
+- `car_images` — Vehicle images (columns: id, car_id, url, sort_order)
+- `inquiries` — Customer inquiries
+- `shipping_rates` — Freight rates by country/port (columns: country, port, freight_usd, inspection_fee, insurance_rate)
+- `exchange_rates` — Currency exchange rates (columns: currency, rate)
 
-## Pointers
+## User Preferences
 
-- See the `pnpm-workspace` skill for workspace structure, TypeScript setup, and package details
+- Keep the existing design language (dark navy + red accent color scheme)
+- Maintain the pnpm workspace structure

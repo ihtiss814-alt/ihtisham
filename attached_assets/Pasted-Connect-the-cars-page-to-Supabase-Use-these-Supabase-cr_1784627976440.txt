@@ -1,0 +1,121 @@
+Connect the cars page to Supabase.
+
+Use these Supabase credentials already in 
+Replit Secrets:
+VITE_SUPABASE_URL
+VITE_SUPABASE_ANON_KEY
+
+Do the following:
+
+1. FETCH CARS FROM SUPABASE:
+Replace all hardcoded dummy cars with real 
+data from Supabase cars table.
+
+Query:
+- Fetch cars from cars table
+- Join with car_images table to get primary image
+- Default: order by created_at descending
+- Limit 10 cars per page
+- Show total count above listing
+
+2. CONNECT SIDEBAR FILTERS:
+Each sidebar filter item when clicked adds 
+to URL params and re-fetches from Supabase:
+
+Make filter: WHERE make = selected make
+Price filter: WHERE fob_price_usd BETWEEN min AND max
+Body type: WHERE body_type = selected type
+Fuel: WHERE fuel_type = selected fuel
+Year: WHERE year BETWEEN start AND end year
+Drive: WHERE drive = selected drive
+Transmission: WHERE transmission = selected
+Engine: WHERE engine_cc BETWEEN min AND max
+Mileage: WHERE mileage_km BETWEEN min AND max
+Location: WHERE stock_location = selected
+Color: WHERE color = selected color
+
+3. CONNECT SEARCH BAR:
+When user types and searches, filter cars where:
+make ILIKE search term OR
+model ILIKE search term OR
+ref_number ILIKE search term OR
+variant ILIKE search term
+
+4. CONNECT ADVANCED FILTER PANEL:
+All 18 dropdown fields when Search button 
+clicked fetch from Supabase with all 
+selected conditions combined.
+
+Make dropdown: fetch distinct makes from 
+cars table to populate options.
+Model dropdown: fetch distinct models 
+filtered by selected make.
+
+5. CONNECT COLLECTION TABS:
+New Arrivals: WHERE is_new_arrival = true
+Clearance: WHERE collection = 'clearance'
+Japan Stock: WHERE stock_location = 'Japan'
+Hybrid: WHERE fuel_type = 'Hybrid'
+SUV: WHERE body_type = 'SUV'
+Budget: WHERE fob_price_usd < 2000
+
+Update counts on each tab from Supabase.
+
+6. CONNECT SHOP BY MAKE CAROUSEL:
+Fetch count of cars per make from Supabase:
+SELECT make, COUNT(*) FROM cars 
+GROUP BY make ORDER BY COUNT DESC
+
+7. CONNECT SORTING:
+Sort By dropdown:
+Newest First: ORDER BY created_at DESC
+Price Low to High: ORDER BY fob_price_usd ASC
+Price High to Low: ORDER BY fob_price_usd DESC
+Mileage Low to High: ORDER BY mileage_km ASC
+Year Newest: ORDER BY year DESC
+Year Oldest: ORDER BY year ASC
+
+8. CONNECT PAGINATION:
+10 cars per page
+Page number in URL: /cars?page=2
+Fetch with LIMIT 10 OFFSET (page-1)*10
+Show total pages based on count
+
+9. CONNECT PRICE CALCULATOR:
+Fetch shipping rates from shipping_rates table:
+SELECT freight_usd, inspection_fee, 
+insurance_rate FROM shipping_rates 
+WHERE country = selected country 
+AND port = selected port
+
+Calculate total:
+Total = fob_price_usd + freight_usd + 
+inspection_fee + (fob_price_usd * insurance_rate)
+
+Show PKR equivalent by multiplying 
+total by exchange rate from 
+exchange_rates table where currency = PKR
+
+10. MAKE COUNTS LIVE:
+Left sidebar make counts fetch from Supabase
+Shop by make carousel counts from Supabase
+Total cars count in header from Supabase
+Info bar total cars count from Supabase
+
+11. EACH CAR ROW:
+Clicking car image or name goes to 
+/cars/[ref_number] page
+Inquire Now button opens /cars/[ref_number]
+WhatsApp button opens pre-filled message:
+"Hi, I am interested in [make] [model] [year]
+Reference: [ref_number]
+Please share more details."
+Offer Your Price button opens WhatsApp with:
+"Hi, I would like to offer $[amount] for 
+[make] [model] [year] Ref: [ref_number]"
+
+12. IF NO CARS IN DATABASE:
+Show a message: "No cars found matching 
+your criteria. Please try different filters 
+or contact us on WhatsApp."
+With a WhatsApp contact button below.
