@@ -57,13 +57,32 @@ const ENGINE_SIZES  = ['660CC-1000CC','1000CC-1500CC','1500CC-1800CC','1800CC-20
 const FUELS         = ['Diesel','Electric','Gasoline','Gasoline E Power','Gasoline Hybrid'];
 const MILEAGES      = ['50000KM-80000KM','80000KM-100000KM','100000KM-150000KM','150000KM-200000KM','200000KM-250000KM','250000KM-300000KM'];
 
-const MAKE_BRAND_SLUGS: Record<string,string> = {
-  Toyota: 'toyota', Nissan: 'nissan', Honda: 'honda', Mazda: 'mazda',
-  Mitsubishi: 'mitsubishi', Subaru: 'subaru', Suzuki: 'suzuki',
-  Daihatsu: 'daihatsu', Lexus: 'lexus', Isuzu: 'isuzu',
-  Audi: 'audi', BMW: 'bmw', Mercedes: 'mercedes-benz',
-  Volkswagen: 'volkswagen', 'Land Rover': 'land-rover',
-};
+// Full brand data for auto-scroll carousel
+const MAKE_BRANDS = [
+  { name: 'Toyota',          count: 19334, slug: 'toyota',          accent: '#EB0A1E' },
+  { name: 'Nissan',          count: 6516,  slug: 'nissan',          accent: '#C3002F' },
+  { name: 'Honda',           count: 4187,  slug: 'honda',           accent: '#CC0000' },
+  { name: 'Mazda',           count: 2859,  slug: 'mazda',           accent: '#1E3A8A' },
+  { name: 'Mitsubishi',      count: 877,   slug: 'mitsubishi',      accent: '#E60012' },
+  { name: 'Subaru',          count: 970,   slug: 'subaru',          accent: '#0033A1' },
+  { name: 'Suzuki',          count: 3212,  slug: 'suzuki',          accent: '#1B5CCC' },
+  { name: 'Daihatsu',        count: 1354,  slug: 'daihatsu',        accent: '#005BAC' },
+  { name: 'Lexus',           count: 922,   slug: 'lexus',           accent: '#1A1A1A' },
+  { name: 'Isuzu',           count: 299,   slug: 'isuzu',           accent: '#D40000' },
+  { name: 'Audi',            count: 373,   slug: 'audi',            accent: '#BB0A14' },
+  { name: 'BMW',             count: 765,   slug: 'bmw',             accent: '#0066B1' },
+  { name: 'Mercedes',        count: 654,   slug: 'mercedes',        accent: '#666666' },
+  { name: 'Volkswagen',      count: 426,   slug: 'volkswagen',      accent: '#001E50' },
+  { name: 'Land Rover',      count: 96,    slug: 'landrover',       accent: '#005A2B' },
+  { name: 'Hino',            count: 111,   slug: 'hino',            accent: '#A31922' },
+  { name: 'Iseki',           count: 139,   slug: 'iseki',           accent: '#E05A00' },
+  { name: 'John Deere',      count: 5,     slug: 'john-deere',      accent: '#367C2B' },
+  { name: 'Kubota',          count: 172,   slug: 'kubota',          accent: '#D0231E' },
+  { name: 'Massey Ferguson', count: 1,     slug: 'massey-ferguson', accent: '#CC1011' },
+  { name: 'Mametora',        count: 1,     slug: 'mametora',        accent: '#555555' },
+  { name: 'Shibaura',        count: 19,    slug: 'shibaura',        accent: '#0047AB' },
+  { name: 'Yanmar',          count: 109,   slug: 'yanmar',          accent: '#C8102E' },
+];
 
 const COLLECTION_TABS = [
   { label: 'New Arrivals',   count: 1247 },
@@ -243,7 +262,7 @@ function Sidebar({
   activeMileage: string; setActiveMileage: (v:string)=>void;
 }) {
   return (
-    <div className="border border-gray-200 overflow-hidden shadow-sm" style={{ width: 280, flexShrink: 0 }}>
+    <div className="border border-gray-200 overflow-hidden shadow-sm" style={{ width: 210, flexShrink: 0 }}>
       <AccordionSection title="Shop By Make" defaultOpen>
         {MAKES.map(m => (
           <FilterItem key={m.name} label={m.name} count={m.count}
@@ -336,50 +355,95 @@ function Sidebar({
 }
 
 /* ─────────────────────────────────────────────────────────────── */
-/* SHOP BY MAKE CAROUSEL                                            */
+/* BRAND LOGO (real SVG with accent-color fallback)                 */
+/* ─────────────────────────────────────────────────────────────── */
+function BrandLogo({ slug, name, accent }: { slug: string; name: string; accent: string }) {
+  const [failed, setFailed] = React.useState(false);
+  const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+  const src = `${base}/logos/${slug}.svg`;
+  const initials = name.split(' ').map((w: string) => w[0]).join('').slice(0, 2).toUpperCase();
+
+  if (failed) {
+    return (
+      <div
+        className="flex items-center justify-center w-full h-full rounded-[6px] font-black text-base tracking-tight text-white select-none"
+        style={{ background: accent }}
+      >
+        {initials}
+      </div>
+    );
+  }
+  return (
+    <img
+      src={src}
+      alt={`${name} logo`}
+      onError={() => setFailed(true)}
+      className="w-full h-full object-contain p-1"
+      loading="lazy"
+    />
+  );
+}
+
+/* ─────────────────────────────────────────────────────────────── */
+/* SHOP BY MAKE CAROUSEL — auto-scroll, real logos                  */
 /* ─────────────────────────────────────────────────────────────── */
 function MakeCarousel({ setActiveMake }: { setActiveMake: (v:string)=>void }) {
-  const ref = useRef<HTMLDivElement>(null);
-  const scroll = (dir: 'l'|'r') => {
-    if (ref.current) ref.current.scrollLeft += dir === 'l' ? -240 : 240;
-  };
+  // Duplicate track for seamless infinite loop
+  const track = [...MAKE_BRANDS, ...MAKE_BRANDS];
   return (
-    <div className="mb-6">
-      <div className="flex items-center justify-between mb-3">
+    <div className="mb-6 bg-white border border-gray-100 py-5 -mx-4 md:-mx-6 px-0 overflow-hidden">
+      <style>{`
+        @keyframes make-scroll {
+          0%   { transform: translateX(0); }
+          100% { transform: translateX(-50%); }
+        }
+        .make-track {
+          animation: make-scroll 55s linear infinite;
+          will-change: transform;
+        }
+        .make-track:hover { animation-play-state: paused; }
+      `}</style>
+
+      {/* Heading */}
+      <div className="px-4 md:px-6 mb-4">
+        <p className="text-[10px] tracking-[0.28em] uppercase font-bold mb-1" style={{ color: RED }}>
+          Browse By Brand
+        </p>
         <h3 className="font-bold text-base text-gray-900" style={{ fontFamily: "'Playfair Display',serif" }}>
           Shop By Make
         </h3>
-        <div className="flex gap-1">
-          <button onClick={() => scroll('l')}
-            className="w-8 h-8 rounded-full border border-gray-200 flex items-center justify-center hover:border-[#C8102E] hover:text-[#C8102E] transition-colors">
-            <ChevronLeft size={14} />
-          </button>
-          <button onClick={() => scroll('r')}
-            className="w-8 h-8 rounded-full flex items-center justify-center text-white transition-colors"
-            style={{ background: RED }}>
-            <ChevronRight size={14} />
-          </button>
-        </div>
       </div>
-      <div ref={ref} className="flex gap-3 overflow-x-auto scrollbar-hide scroll-smooth pb-1">
-        {MAKES.map(m => {
-          const slug = MAKE_BRAND_SLUGS[m.name];
-          return (
+
+      {/* Scrolling row */}
+      <div className="relative w-full">
+        {/* Fade edges */}
+        <div className="absolute left-0 top-0 bottom-0 w-8 z-10 pointer-events-none"
+          style={{ background: 'linear-gradient(to right, white, transparent)' }} />
+        <div className="absolute right-0 top-0 bottom-0 w-8 z-10 pointer-events-none"
+          style={{ background: 'linear-gradient(to left, white, transparent)' }} />
+
+        <div className="flex make-track gap-3 px-3" style={{ width: 'max-content' }}>
+          {track.map(({ name, slug, accent, count }, i) => (
             <button
-              key={m.name}
-              onClick={() => setActiveMake(m.name)}
-              className="flex-shrink-0 flex flex-col items-center gap-2 w-[100px] py-3 px-2 border border-gray-200 bg-white hover:border-[#C8102E] hover:shadow-md transition-all rounded-sm cursor-pointer"
+              key={`${name}-${i}`}
+              onClick={() => setActiveMake(name)}
+              className="group flex-shrink-0 flex flex-col items-center gap-2 w-[100px] py-3 px-2 border border-gray-200 bg-white hover:border-[#C8102E] hover:shadow-[0_4px_16px_rgba(200,16,46,0.12)] transition-all cursor-pointer rounded-sm"
             >
-                  <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center text-[11px] font-black text-gray-600">
-                {m.name.slice(0,2).toUpperCase()}
+              {/* Logo box */}
+              <div className="w-12 h-12 flex items-center justify-center rounded-[6px] overflow-hidden bg-gray-50 border border-gray-100 flex-shrink-0">
+                <BrandLogo slug={slug} name={name} accent={accent} />
               </div>
-              <span className="text-[11px] font-bold text-gray-800 text-center leading-tight">{m.name}</span>
+              {/* Name */}
+              <span className="text-[11px] font-bold text-gray-800 group-hover:text-[#C8102E] text-center leading-tight transition-colors">
+                {name}
+              </span>
+              {/* Count */}
               <span className="text-[10px] font-semibold" style={{ color: RED }}>
-                {m.count.toLocaleString()}
+                {count.toLocaleString()}
               </span>
             </button>
-          );
-        })}
+          ))}
+        </div>
       </div>
     </div>
   );
