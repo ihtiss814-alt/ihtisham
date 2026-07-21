@@ -11,6 +11,27 @@ env = { "CI" = "true" }
 [workflows]
 runButton = "Project"
 
+[[workflows.workflow]]
+name = "Project"
+mode = "parallel"
+author = "agent"
+
+[[workflows.workflow.tasks]]
+task = "workflow.run"
+args = "artifacts/wazir-trading: web"
+
+[[workflows.workflow]]
+name = "artifacts/wazir-trading: web"
+author = "agent"
+
+[workflows.workflow.metadata]
+outputType = "webview"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "PORT=24102 BASE_PATH=/ pnpm --filter @workspace/wazir-trading run dev"
+waitForPort = 24102
+
 [agent]
 stack = "PNPM_WORKSPACE"
 expertMode = true

@@ -47,7 +47,20 @@ const PRICE_RANGES = [
   '$9000 - $10000',
 ];
 
-const BODY_TYPES    = ['Sedan','Hatchback','Station Wagon','SUV','Wagon','Truck','Van','Mini Van','Bus','MPV','Cooper'];
+const BODY_TYPE_ITEMS = [
+  { name: 'Sedan',         accent: '#3B82F6', bg: '#EFF6FF' },
+  { name: 'Hatchback',     accent: '#10B981', bg: '#ECFDF5' },
+  { name: 'SUV',           accent: '#F97316', bg: '#FFF7ED' },
+  { name: 'Station Wagon', accent: '#8B5CF6', bg: '#F5F3FF' },
+  { name: 'Van',           accent: '#06B6D4', bg: '#ECFEFF' },
+  { name: 'Mini Van',      accent: '#F59E0B', bg: '#FFFBEB' },
+  { name: 'Truck',         accent: '#EF4444', bg: '#FEF2F2' },
+  { name: 'Bus',           accent: '#6366F1', bg: '#EEF2FF' },
+  { name: 'MPV',           accent: '#EC4899', bg: '#FDF2F8' },
+  { name: 'Wagon',         accent: '#84CC16', bg: '#F7FEE7' },
+  { name: 'Cooper',        accent: '#14B8A6', bg: '#F0FDFA' },
+];
+const BODY_TYPES    = BODY_TYPE_ITEMS.map(b => b.name);
 const CATEGORIES    = ['Gasoline','Hybrid','Diesel','Light Oil'];
 const LOCATIONS     = ['Japan','Chile','UK','UAE','Thailand','China'];
 const YEAR_RANGES   = ['2021-2023','2018-2020','2015-2017','2012-2014','2009-2011','2006-2008','2003-2005','2000-2002'];
@@ -190,6 +203,111 @@ function StarRow({ count }: { count: number }) {
 }
 
 /* ─────────────────────────────────────────────────────────────── */
+/* CAR SILHOUETTE SVG (same as homepage)                            */
+/* ─────────────────────────────────────────────────────────────── */
+function CarSilhouette({ type, color: c }: { type: string; color: string }) {
+  const vb = '0 0 160 72';
+  const Wheel = (cx: number, cy: number, r = 11) => {
+    const ri = r * 0.55; const rh = r * 0.22; const rs = ri * 0.95;
+    return (
+      <g>
+        <circle cx={cx} cy={cy} r={r}   fill="#1a1a2e" stroke={c} strokeWidth="1.8"/>
+        <circle cx={cx} cy={cy} r={ri}  fill={c}/>
+        <line x1={cx-rs} y1={cy}    x2={cx+rs} y2={cy}    stroke="rgba(255,255,255,0.75)" strokeWidth="1"/>
+        <line x1={cx}    y1={cy-rs} x2={cx}    y2={cy+rs} stroke="rgba(255,255,255,0.75)" strokeWidth="1"/>
+        <line x1={cx-rs*0.7} y1={cy-rs*0.7} x2={cx+rs*0.7} y2={cy+rs*0.7} stroke="rgba(255,255,255,0.45)" strokeWidth="0.8"/>
+        <line x1={cx+rs*0.7} y1={cy-rs*0.7} x2={cx-rs*0.7} y2={cy+rs*0.7} stroke="rgba(255,255,255,0.45)" strokeWidth="0.8"/>
+        <circle cx={cx} cy={cy} r={rh} fill="rgba(255,255,255,0.92)"/>
+      </g>
+    );
+  };
+  const win = 'rgba(255,255,255,0.82)'; const det = 'rgba(0,0,0,0.12)';
+  switch (type) {
+    case 'Sedan': return <svg viewBox={vb} width={96} height={44} aria-label="Sedan">
+      <path fill={c} d="M 8,52 L 8,44 L 22,44 Q 30,28 44,20 L 100,20 L 112,30 L 118,44 L 150,44 L 150,52 Z"/>
+      <path fill={win} d="M 46,21 Q 52,20 60,20 L 60,42 L 42,42 Q 35,34 36,27 Z"/>
+      <path fill={win} d="M 62,20 L 98,20 L 108,30 L 108,42 L 62,42 Z"/>
+      <line x1={61} y1={20} x2={61} y2={42} stroke={det} strokeWidth="2.5"/>
+      {Wheel(32, 58)}{Wheel(130, 58)}</svg>;
+    case 'Hatchback': return <svg viewBox={vb} width={96} height={44} aria-label="Hatchback">
+      <path fill={c} d="M 14,52 L 14,44 L 28,44 Q 34,28 44,20 L 100,20 Q 112,34 116,52 Z"/>
+      <path fill={win} d="M 46,21 Q 52,20 62,20 L 62,42 L 42,42 Q 37,34 38,26 Z"/>
+      <path fill={win} d="M 64,20 L 98,20 Q 108,32 110,42 L 64,42 Z"/>
+      <line x1={63} y1={20} x2={63} y2={42} stroke={det} strokeWidth="2.5"/>
+      {Wheel(34, 58)}{Wheel(106, 58)}</svg>;
+    case 'SUV': return <svg viewBox={vb} width={96} height={44} aria-label="SUV">
+      <path fill={c} d="M 6,54 L 6,34 L 20,34 Q 26,14 40,12 L 114,12 Q 126,14 132,30 L 152,30 L 152,54 Z"/>
+      <path fill={win} d="M 42,13 Q 50,12 60,12 L 60,30 L 38,30 Q 33,22 34,16 Z"/>
+      <path fill={win} d="M 62,12 L 112,12 Q 122,14 128,28 L 128,30 L 62,30 Z"/>
+      <line x1={61} y1={12} x2={61} y2={30} stroke={det} strokeWidth="2.5"/>
+      <line x1={95} y1={12} x2={95} y2={30} stroke={det} strokeWidth="1.5"/>
+      {Wheel(34, 60, 12)}{Wheel(128, 60, 12)}</svg>;
+    case 'Station Wagon': return <svg viewBox={vb} width={96} height={44} aria-label="Station Wagon">
+      <path fill={c} d="M 6,52 L 6,44 L 20,44 Q 26,28 36,20 L 122,20 L 122,44 L 152,44 L 152,52 Z"/>
+      <path fill={win} d="M 38,21 Q 44,20 54,20 L 54,42 L 36,42 Q 30,34 31,27 Z"/>
+      <path fill={win} d="M 56,20 L 120,20 L 120,42 L 56,42 Z"/>
+      <line x1={55} y1={20} x2={55} y2={42} stroke={det} strokeWidth="2.5"/>
+      <line x1={88} y1={20} x2={88} y2={42} stroke={det} strokeWidth="1.5"/>
+      {Wheel(30, 58)}{Wheel(134, 58)}</svg>;
+    case 'Van': return <svg viewBox={vb} width={96} height={44} aria-label="Van">
+      <path fill={c} d="M 8,56 L 8,8 Q 8,6 14,6 L 144,6 Q 150,6 150,10 L 150,56 Z"/>
+      <path fill={win} d="M 10,8 L 10,30 L 38,30 L 38,8 Z"/>
+      <path fill={win} d="M 46,10 L 90,10 L 90,30 L 46,30 Z"/>
+      <path fill={win} d="M 96,10 L 140,10 L 140,30 L 96,30 Z"/>
+      <line x1={44} y1={8} x2={44} y2={32} stroke={det} strokeWidth="2"/>
+      <line x1={92} y1={8} x2={92} y2={32} stroke={det} strokeWidth="2"/>
+      {Wheel(32, 62, 11)}{Wheel(124, 62, 11)}</svg>;
+    case 'Mini Van': return <svg viewBox={vb} width={96} height={44} aria-label="Mini Van">
+      <path fill={c} d="M 10,52 L 10,38 Q 14,16 30,14 L 118,14 Q 134,16 138,34 L 150,34 L 150,52 Z"/>
+      <path fill={win} d="M 32,15 Q 40,14 52,14 L 52,32 L 30,32 Q 25,24 26,18 Z"/>
+      <path fill={win} d="M 54,14 L 116,14 Q 130,16 134,32 L 54,32 Z"/>
+      <line x1={53} y1={14} x2={53} y2={32} stroke={det} strokeWidth="2.5"/>
+      <line x1={88} y1={14} x2={88} y2={32} stroke={det} strokeWidth="1.5"/>
+      {Wheel(34, 58)}{Wheel(126, 58)}</svg>;
+    case 'Truck': return <svg viewBox={vb} width={96} height={44} aria-label="Truck">
+      <path fill={c} d="M 6,52 L 6,12 L 70,12 L 70,44 L 6,44 Z"/>
+      <path fill={c} d="M 72,38 L 72,52 L 154,52 L 154,38 Z"/>
+      <rect fill={c} x={72} y={28} width={4} height={14}/>
+      <rect fill={c} x={150} y={28} width={4} height={14}/>
+      <path fill={win} d="M 8,14 L 8,34 L 42,34 L 42,14 Z"/>
+      <path fill={win} d="M 46,14 L 66,14 L 66,34 L 46,34 Z"/>
+      <line x1={44} y1={12} x2={44} y2={36} stroke={det} strokeWidth="2"/>
+      {Wheel(28, 58)}{Wheel(120, 58)}</svg>;
+    case 'Bus': return <svg viewBox={vb} width={96} height={44} aria-label="Bus">
+      <path fill={c} d="M 4,56 Q 4,6 14,6 L 148,6 Q 156,6 156,12 L 156,56 Z"/>
+      <path fill={win} d="M 8,8 L 8,32 L 34,32 L 34,8 Z"/>
+      {[42, 64, 86, 108, 130].map(x => <rect key={x} fill={win} x={x} y={10} width={16} height={22} rx={2}/>)}
+      <line x1={6} y1={34} x2={154} y2={34} stroke={det} strokeWidth="1.5"/>
+      {Wheel(30, 62, 11)}{Wheel(130, 62, 11)}</svg>;
+    case 'MPV': return <svg viewBox={vb} width={96} height={44} aria-label="MPV">
+      <path fill={c} d="M 8,52 L 8,36 Q 18,14 36,12 L 110,12 Q 130,14 138,28 L 144,38 L 152,38 L 152,52 Z"/>
+      <path fill={win} d="M 38,13 Q 46,12 58,12 L 58,32 L 36,32 Q 30,24 31,18 Z"/>
+      <path fill={win} d="M 60,12 L 108,12 Q 126,14 134,30 L 134,32 L 60,32 Z"/>
+      <line x1={59} y1={12} x2={59} y2={32} stroke={det} strokeWidth="2.5"/>
+      <line x1={96} y1={12} x2={96} y2={32} stroke={det} strokeWidth="1.5"/>
+      {Wheel(32, 58)}{Wheel(132, 58)}</svg>;
+    case 'Wagon': return <svg viewBox={vb} width={96} height={44} aria-label="Wagon">
+      <path fill={c} d="M 8,52 L 8,36 Q 14,18 28,16 L 76,16 Q 86,20 90,34 L 90,52 Z"/>
+      <path fill={c} d="M 92,38 L 92,52 L 152,52 L 152,38 Z"/>
+      <rect fill={c} x={92}  y={30} width={4} height={12}/>
+      <rect fill={c} x={148} y={30} width={4} height={12}/>
+      <path fill={win} d="M 30,17 Q 36,16 50,16 L 50,34 L 28,34 Q 23,26 24,20 Z"/>
+      <path fill={win} d="M 52,16 L 74,16 Q 82,20 84,32 L 84,34 L 52,34 Z"/>
+      <line x1={51} y1={16} x2={51} y2={34} stroke={det} strokeWidth="2"/>
+      {Wheel(30, 58)}{Wheel(128, 58)}</svg>;
+    case 'Cooper': return <svg viewBox={vb} width={96} height={44} aria-label="Cooper">
+      <path fill={c} d="M 6,52 L 6,42 L 16,42 Q 24,30 38,20 L 96,20 Q 114,28 126,42 L 152,42 L 152,52 Z"/>
+      <path fill={win} d="M 40,21 Q 48,20 60,20 L 60,40 L 38,40 Q 32,32 33,25 Z"/>
+      <path fill={win} d="M 62,20 L 94,20 Q 110,28 120,40 L 62,40 Z"/>
+      <line x1={61} y1={20} x2={61} y2={40} stroke={det} strokeWidth="2.5"/>
+      {Wheel(32, 58)}{Wheel(132, 58)}</svg>;
+    default: return <svg viewBox={vb} width={96} height={44}>
+      <rect fill={c} x="10" y="24" width="140" height="24" rx="4"/>
+      {Wheel(32, 58)}{Wheel(128, 58)}</svg>;
+  }
+}
+
+/* ─────────────────────────────────────────────────────────────── */
 /* ACCORDION ITEM                                                   */
 /* ─────────────────────────────────────────────────────────────── */
 function AccordionSection({
@@ -279,7 +397,7 @@ function Sidebar({
         ))}
       </AccordionSection>
 
-      <AccordionSection title="Shop By Body Type">
+      <AccordionSection title="Shop By Body Type" defaultOpen>
         {BODY_TYPES.map(b => (
           <FilterItem key={b} label={b}
             active={activeBody === b}
@@ -287,7 +405,7 @@ function Sidebar({
         ))}
       </AccordionSection>
 
-      <AccordionSection title="Shop By Category">
+      <AccordionSection title="Shop By Category" defaultOpen>
         {CATEGORIES.map(c => (
           <FilterItem key={c} label={c}
             active={activeCategory === c}
@@ -295,7 +413,7 @@ function Sidebar({
         ))}
       </AccordionSection>
 
-      <AccordionSection title="Shop By Location">
+      <AccordionSection title="Shop By Location" defaultOpen>
         {LOCATIONS.map(l => (
           <FilterItem key={l} label={l}
             active={activeLocation === l}
@@ -303,7 +421,7 @@ function Sidebar({
         ))}
       </AccordionSection>
 
-      <AccordionSection title="Shop By Year">
+      <AccordionSection title="Shop By Year" defaultOpen>
         {YEAR_RANGES.map(y => (
           <FilterItem key={y} label={y}
             active={activeYear === y}
@@ -311,7 +429,7 @@ function Sidebar({
         ))}
       </AccordionSection>
 
-      <AccordionSection title="Shop By Drive">
+      <AccordionSection title="Shop By Drive" defaultOpen>
         {DRIVES.map(d => (
           <FilterItem key={d} label={d}
             active={activeDrive === d}
@@ -319,7 +437,7 @@ function Sidebar({
         ))}
       </AccordionSection>
 
-      <AccordionSection title="Shop By Transmission">
+      <AccordionSection title="Shop By Transmission" defaultOpen>
         {TRANSMISSIONS.map(t => (
           <FilterItem key={t} label={t}
             active={activeTrans === t}
@@ -327,7 +445,7 @@ function Sidebar({
         ))}
       </AccordionSection>
 
-      <AccordionSection title="Shop By Engine Size">
+      <AccordionSection title="Shop By Engine Size" defaultOpen>
         {ENGINE_SIZES.map(e => (
           <FilterItem key={e} label={e}
             active={activeEngine === e}
@@ -335,7 +453,7 @@ function Sidebar({
         ))}
       </AccordionSection>
 
-      <AccordionSection title="Shop By Fuel">
+      <AccordionSection title="Shop By Fuel" defaultOpen>
         {FUELS.map(f => (
           <FilterItem key={f} label={f}
             active={activeFuel === f}
@@ -343,7 +461,7 @@ function Sidebar({
         ))}
       </AccordionSection>
 
-      <AccordionSection title="Shop By Mileage">
+      <AccordionSection title="Shop By Mileage" defaultOpen>
         {MILEAGES.map(m => (
           <FilterItem key={m} label={m}
             active={activeMileage === m}
@@ -450,48 +568,70 @@ function MakeCarousel({ setActiveMake }: { setActiveMake: (v:string)=>void }) {
 }
 
 /* ─────────────────────────────────────────────────────────────── */
-/* SHOP BY BODY TYPE CAROUSEL                                       */
+/* SHOP BY BODY TYPE CAROUSEL — auto-scroll with SVG silhouettes   */
 /* ─────────────────────────────────────────────────────────────── */
-const BODY_ICONS: Record<string, string> = {
-  'Sedan': '🚗', 'Hatchback': '🚘', 'Station Wagon': '🚙',
-  'SUV': '🛻', 'Wagon': '🚐', 'Truck': '🚚',
-  'Van': '🚐', 'Mini Van': '🚌', 'Bus': '🚌', 'MPV': '🚐', 'Cooper': '🚗',
-};
-
 function BodyTypeCarousel({ setActiveBody }: { setActiveBody: (v:string)=>void }) {
-  const ref = useRef<HTMLDivElement>(null);
-  const scroll = (dir: 'l'|'r') => {
-    if (ref.current) ref.current.scrollLeft += dir === 'l' ? -240 : 240;
-  };
+  const track = [...BODY_TYPE_ITEMS, ...BODY_TYPE_ITEMS];
   return (
-    <div className="mb-6">
-      <div className="flex items-center justify-between mb-3">
+    <div className="mb-6 bg-gray-50 border border-gray-100 py-5 -mx-4 md:-mx-6 px-0 overflow-hidden">
+      <style>{`
+        @keyframes body-scroll {
+          0%   { transform: translateX(0); }
+          100% { transform: translateX(-50%); }
+        }
+        .body-track {
+          animation: body-scroll 40s linear infinite;
+          will-change: transform;
+        }
+        .body-track:hover { animation-play-state: paused; }
+      `}</style>
+
+      {/* Heading */}
+      <div className="px-4 md:px-6 mb-4">
+        <p className="text-[10px] tracking-[0.28em] uppercase font-bold mb-1" style={{ color: RED }}>
+          Browse By Style
+        </p>
         <h3 className="font-bold text-base text-gray-900" style={{ fontFamily: "'Playfair Display',serif" }}>
           Shop By Body Type
         </h3>
-        <div className="flex gap-1">
-          <button onClick={() => scroll('l')}
-            className="w-8 h-8 rounded-full border border-gray-200 flex items-center justify-center hover:border-[#C8102E] hover:text-[#C8102E] transition-colors">
-            <ChevronLeft size={14} />
-          </button>
-          <button onClick={() => scroll('r')}
-            className="w-8 h-8 rounded-full flex items-center justify-center text-white"
-            style={{ background: RED }}>
-            <ChevronRight size={14} />
-          </button>
-        </div>
       </div>
-      <div ref={ref} className="flex gap-3 overflow-x-auto scrollbar-hide scroll-smooth pb-1">
-        {BODY_TYPES.map(b => (
-          <button
-            key={b}
-            onClick={() => setActiveBody(b)}
-            className="flex-shrink-0 flex flex-col items-center gap-2 w-[90px] py-3 px-2 border border-gray-200 bg-white hover:border-[#C8102E] hover:shadow-md transition-all rounded-sm cursor-pointer"
-          >
-            <span className="text-3xl">{BODY_ICONS[b] || '🚗'}</span>
-            <span className="text-[11px] font-bold text-gray-800 text-center leading-tight">{b}</span>
-          </button>
-        ))}
+
+      {/* Scrolling row */}
+      <div className="relative w-full">
+        <div className="absolute left-0 top-0 bottom-0 w-8 z-10 pointer-events-none"
+          style={{ background: 'linear-gradient(to right, #f9fafb, transparent)' }} />
+        <div className="absolute right-0 top-0 bottom-0 w-8 z-10 pointer-events-none"
+          style={{ background: 'linear-gradient(to left, #f9fafb, transparent)' }} />
+
+        <div className="flex body-track gap-3 px-3" style={{ width: 'max-content' }}>
+          {track.map(({ name, accent, bg }, i) => (
+            <button
+              key={`${name}-${i}`}
+              onClick={() => setActiveBody(name)}
+              className="group flex-shrink-0 flex flex-col items-center gap-2 w-[140px] py-4 px-3 bg-white transition-all duration-200 cursor-pointer rounded-[8px]"
+              style={{ border: `1.5px solid ${accent}33`, boxShadow: `0 2px 8px ${accent}0d` }}
+              onMouseEnter={e => {
+                (e.currentTarget as HTMLButtonElement).style.border = `1.5px solid ${accent}`;
+                (e.currentTarget as HTMLButtonElement).style.boxShadow = `0 6px 20px ${accent}30`;
+              }}
+              onMouseLeave={e => {
+                (e.currentTarget as HTMLButtonElement).style.border = `1.5px solid ${accent}33`;
+                (e.currentTarget as HTMLButtonElement).style.boxShadow = `0 2px 8px ${accent}0d`;
+              }}
+            >
+              {/* Icon box */}
+              <div className="w-full h-[64px] flex items-center justify-center rounded-[6px]"
+                style={{ backgroundColor: bg }}>
+                <CarSilhouette type={name} color={accent} />
+              </div>
+              {/* Name */}
+              <span className="text-[11px] font-bold tracking-wide text-center leading-tight"
+                style={{ color: accent }}>
+                {name}
+              </span>
+            </button>
+          ))}
+        </div>
       </div>
     </div>
   );
@@ -1261,11 +1401,67 @@ export default function CarsPage() {
   return (
     <div className="min-h-screen bg-gray-50 pt-[80px]">
 
+      {/* ── HERO SEARCH BANNER ─────────────────────────────── */}
+      <div className="w-full py-8 px-4" style={{ background: NAVY }}>
+        <div className="max-w-4xl mx-auto text-center">
+          <p className="text-[10px] tracking-[0.3em] uppercase font-bold mb-2" style={{ color: '#D4AF37' }}>
+            45,354 Vehicles In Stock
+          </p>
+          <h1 className="text-2xl md:text-3xl font-bold text-white mb-1" style={{ fontFamily: "'Playfair Display',serif" }}>
+            Find Your Perfect Vehicle
+          </h1>
+          <p className="text-white/60 text-sm mb-5">Quality Japanese imports — exported worldwide</p>
+
+          {/* Main Search Bar */}
+          <div className="flex shadow-xl overflow-hidden rounded-sm max-w-2xl mx-auto">
+            <div className="relative flex-1">
+              <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+              <input
+                type="text"
+                value={searchInput}
+                onChange={e => setSearchInput(e.target.value)}
+                onKeyDown={e => e.key === 'Enter' && runSearch()}
+                placeholder="Search make, model, or reference #"
+                className="w-full h-13 pl-10 pr-4 text-sm text-gray-800 placeholder:text-gray-400 outline-none bg-white"
+                style={{ height: 52 }}
+              />
+            </div>
+            <button
+              onClick={runSearch}
+              className="h-[52px] px-6 text-white text-[13px] font-bold tracking-[0.1em] uppercase flex items-center gap-2 flex-shrink-0 hover:opacity-90 transition-opacity"
+              style={{ background: RED }}
+            >
+              <Search size={14} />
+              Search
+            </button>
+          </div>
+
+          {/* Quick stat pills */}
+          <div className="flex flex-wrap justify-center gap-3 mt-5">
+            {[
+              { label: 'Toyota', count: '19,289' },
+              { label: 'Nissan', count: '6,513' },
+              { label: 'Honda', count: '4,187' },
+              { label: 'Mazda', count: '2,859' },
+            ].map(({ label, count }) => (
+              <button
+                key={label}
+                onClick={() => setFilter('make', label)}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[12px] font-semibold border border-white/20 text-white/80 hover:border-white hover:text-white hover:bg-white/10 transition-all"
+              >
+                {label}
+                <span className="text-white/50 text-[10px]">{count}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
+
       {/* ── Mobile Filter Drawer ─────────────────────────────── */}
       {showMobileFilter && (
         <div className="fixed inset-0 z-50 flex flex-col justify-end md:hidden">
           <div className="absolute inset-0 bg-black/50" onClick={() => setShowMobileFilter(false)} />
-          <div className="relative bg-white rounded-t-2xl max-h-[80vh] overflow-y-auto z-10">
+          <div className="relative bg-white rounded-t-2xl max-h-[85vh] overflow-y-auto z-10">
             <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200 sticky top-0 bg-white z-10">
               <span className="font-bold text-gray-900">Filters</span>
               <button onClick={() => setShowMobileFilter(false)}>
@@ -1279,44 +1475,16 @@ export default function CarsPage() {
 
       <div className="flex gap-0">
         {/* ── Desktop Sidebar ────────────────────────────────── */}
-        <div className="hidden md:block sticky top-[80px] self-start overflow-y-auto max-h-[calc(100vh-80px)]">
+        <div className="hidden md:block sticky top-[80px] self-start overflow-y-auto max-h-[calc(100vh-80px)] border-r border-gray-200 bg-white shadow-sm" style={{ minWidth: 220, width: 220 }}>
+          <div className="px-3 py-3 border-b border-gray-100" style={{ background: NAVY }}>
+            <p className="text-white text-[11px] font-bold tracking-[0.15em] uppercase">Filter Vehicles</p>
+            <p className="text-white/50 text-[10px] mt-0.5">45,354 cars in stock</p>
+          </div>
           <Sidebar {...sidebarProps} />
         </div>
 
         {/* ── Main Content ───────────────────────────────────── */}
-        <div className="flex-1 min-w-0 p-4 md:p-6">
-
-          {/* QUICK STATS */}
-          <div className="flex flex-wrap items-center gap-x-5 gap-y-1 mb-4 text-[13px] font-semibold text-gray-600">
-            <span><span className="text-gray-400 font-normal">Toyota: </span><span className="font-bold text-gray-900">19,289</span></span>
-            <span className="text-gray-300 hidden sm:inline">|</span>
-            <span><span className="text-gray-400 font-normal">Nissan: </span><span className="font-bold text-gray-900">6,513</span></span>
-            <span className="text-gray-300 hidden sm:inline">|</span>
-            <span><span className="text-gray-400 font-normal">Honda: </span><span className="font-bold text-gray-900">4,187</span></span>
-          </div>
-
-          {/* SEARCH BAR */}
-          <div className="flex mb-3 shadow-sm border border-gray-200 overflow-hidden">
-            <div className="relative flex-1">
-              <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
-              <input
-                type="text"
-                value={searchInput}
-                onChange={e => setSearchInput(e.target.value)}
-                onKeyDown={e => e.key === 'Enter' && runSearch()}
-                placeholder="Search by keywords or reference #"
-                className="w-full h-11 pl-9 pr-4 text-sm text-gray-800 placeholder:text-gray-400 outline-none bg-white"
-              />
-            </div>
-            <button
-              onClick={runSearch}
-              className="h-11 px-5 text-white text-[12px] font-bold tracking-[0.12em] uppercase flex items-center gap-2 flex-shrink-0 hover:opacity-90 transition-opacity"
-              style={{ background: RED }}
-            >
-              <Search size={13} />
-              Search
-            </button>
-          </div>
+        <div className="flex-1 min-w-0 p-3 md:p-5">
 
           {/* ACTIVE FILTER CHIPS */}
           {activeChips.length > 0 && (
