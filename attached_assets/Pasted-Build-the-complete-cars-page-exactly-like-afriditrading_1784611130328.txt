@@ -1,0 +1,273 @@
+Build the complete /cars page exactly like 
+afriditrading.com/cars but with our professional 
+navy and red theme.
+
+The page layout is two columns:
+Left side: sticky sidebar filter (280px wide)
+Right side: main content area
+
+LEFT SIDEBAR:
+Collapsible accordion sections with red headers 
+and minus/plus toggle icons.
+
+Add these sections with hardcoded data for now:
+
+SHOP BY MAKE (expanded by default)
+Toyota 19334, Nissan 6516, Honda 4187, 
+Mazda 2859, Mitsubishi 877, Subaru 970, 
+Suzuki 3212, Daihatsu 1354, Lexus 922, 
+Isuzu 299, Audi 373, BMW 765, 
+Mercedes 654, Volkswagen 426, Land Rover 96,
+Hino 111, Iseki 139, John Deere 5, 
+Kubota 172, Massey Ferguson 1, 
+Mametora 1, Shibaura 19, Yanmar 109
+
+SHOP BY PRICE (expanded)
+$500 - $1500
+$1500 - $2000
+$2000 - $2500
+$2500 - $3000
+$3000 - $3500
+$3500 - $4000
+$4000 - $4500
+$4500 - $5000
+$5000 - $6000
+$6000 - $7000
+$7000 - $8000
+$8000 - $9000
+$9000 - $10000
+
+SHOP BY BODY TYPE
+Sedan, Hatchback, Station Wagon, SUV, 
+Wagon, Truck, Van, Mini Van, Bus, 
+MPV, Cooper
+
+SHOP BY CATEGORY
+Gasoline, Hybrid, Diesel, Light Oil
+
+SHOP BY LOCATION
+Japan, Chile, UK, UAE, Thailand, China
+
+SHOP BY YEAR
+2021-2023, 2018-2020, 2015-2017, 
+2012-2014, 2009-2011, 2006-2008, 
+2003-2005, 2000-2002
+
+SHOP BY DRIVE
+2WD, 4WD
+
+SHOP BY TRANSMISSION
+AT, MT, FAT, IAT, CVT, CAT, I5, DAT
+
+SHOP BY ENGINE SIZE
+660CC-1000CC, 1000CC-1500CC, 
+1500CC-1800CC, 1800CC-2000CC, 
+2000CC-2500CC, 2500CC-3000CC, 
+3000CC-3500CC
+
+SHOP BY FUEL
+Diesel, Electric, Gasoline, 
+Gasoline E Power, Gasoline Hybrid
+
+SHOP BY MILEAGE
+50000KM-80000KM
+80000KM-100000KM
+100000KM-150000KM
+150000KM-200000KM
+200000KM-250000KM
+250000KM-300000KM
+
+Each sidebar item is clickable and adds 
+filter to URL when clicked.
+Active item is highlighted in red.
+On mobile sidebar is completely hidden 
+and opens as bottom drawer when user 
+clicks Filters button.
+
+MAIN CONTENT AREA (right side):
+
+TOP SECTION:
+Show live stock quick stats in a row:
+Toyota: 19289 | Nissan: 6513 | Honda: 4187
+(hardcoded for now)
+
+Below that: full width search bar with 
+placeholder "Search by keywords or reference #"
+and red search button on right side.
+
+Below search: three quick browse chips:
+Under $2,000 | SUV & 4WD | Right Hand Drive
+
+ADVANCED FILTER PANEL (dark navy background):
+Three rows of six dropdowns each:
+Row 1: Make, Model, Model Code, Steering, 
+Body Type, Fuel
+Row 2: Drive, Transmission, Color, Location, 
+Year From, Year To
+Row 3: Min Price, Max Price, Min Mileage, 
+Max Mileage, Min Engine, Max Engine
+Reset button and Search button at bottom
+
+SHOP BY MAKE CAROUSEL:
+Horizontal scrollable row with left and right 
+arrow buttons showing brand cards with logo 
+and car count. Same brands as sidebar.
+
+SHOP BY BODY TYPE CAROUSEL:
+Horizontal scrollable row with body type 
+cards showing silhouette icon and type name.
+
+TOTAL PRICE CALCULATOR (dark navy card):
+Title: "Total Price Calculator"
+Subtitle: "Estimate the price of the vehicles 
+based on your destination."
+Note: "In some cases the total price cannot 
+be estimated."
+
+Left side fields:
+Destination Country dropdown (searchable):
+Pakistan, UAE, UK, Guyana, Jamaica, 
+Trinidad, Kenya, Ghana, Nigeria, Russia, 
+New Zealand, Papua New Guinea, Germany, 
+Tanzania, Uganda, South Africa, Australia
+
+Ports dropdown (changes based on country):
+Pakistan shows: Karachi, Gwadar
+UAE shows: Dubai, Abu Dhabi
+UK shows: Southampton, Tilbury
+Guyana shows: Georgetown
+Jamaica shows: Kingston
+
+Shipment dropdown: RORO, Container
+
+Freight radio buttons: Prepaid, Collect
+
+Right side fields:
+Currency dropdown: USD, PKR, EUR, GBP, AED
+
+Inspection radio: Yes, No (Yes selected)
+
+Insurance radio: Yes, No (Yes selected)
+
+Calculate button centered at bottom.
+
+After clicking Calculate show:
+TOTAL PRICE in large red text
+Total Price in Local currency in gold text
+
+COLLECTION TABS (pill buttons row):
+New Arrivals with count
+Clearance with count
+Third Party with count
+Machinery with count
+Thailand Stock with count
+China Stock with count
+Engine Stock with count
+UAE Stock with count
+Taiwan Stock with count
+
+Use hardcoded counts for now.
+Active tab is highlighted dark.
+
+STOCK LIST AREA:
+Header row:
+Left: "Stock List" with red underline
+Right: "45,354 Cars" total count
+Below right: Sort By dropdown with options:
+Newest First, Price Low to High, 
+Price High to Low, Mileage Low to High, 
+Year Newest, Year Oldest
+Pagination: < 1 2 3 4 5 ... 4536 >
+
+CAR LISTING ROWS:
+Show 5 hardcoded dummy car rows for now.
+Each row is a horizontal card with:
+
+LEFT SIDE (35% width):
+Car image rectangular and large
+NEW ARRIVAL green badge on top left 
+if applicable
+Heart icon top right for favorites
+Image navigation arrows if multiple images
+
+RIGHT SIDE (65% width):
+Top: Car name "TOYOTA YARIS 2025 Z" bold large
+Top right: red dot + "JAPAN" country indicator
+
+Specs grid 3 columns 4 rows with icons:
+Mileage: 8,000 KM | Year: 2025 | Engine: 1500CC
+Trans: AT | Model Code: MXPA10 | Steering: RHD
+Fuel: Gasoline | Seats: 5 | Engine Code: B
+Color: White | Drive: 2WD | Doors: 5
+
+Bottom action bar:
+Left side: 
+"Reference # WTL-000001" gray pill
+WhatsApp green icon button
+"Inquire Now" green button with email icon
+"Offer your price" outlined red button
+
+Right side (right aligned):
+"FOB PRICE" small gray label
+"$14,200" large red bold
+"Est. C&F Karachi: $17,395" teal small
+"PKR 3,888,132" red small
+
+Hardcoded dummy cars to show:
+
+Car 1:
+Make: Toyota, Model: Yaris, Variant: 2025 Z
+Mileage: 8000KM, Year: 2025, Engine: 1500CC
+Trans: AT, Model Code: MXPA10, Fuel: Gasoline
+Seats: 5, Color: White, Drive: 2WD, Doors: 5
+FOB: $14,200, C&F Karachi: $17,395
+PKR: 3,888,132, Status: New Arrival
+Image: use any white Toyota car image URL
+
+Car 2:
+Make: Honda, Model: Fit, Variant: 2020 Basic
+Mileage: 40000KM, Year: 2020, Engine: 1300CC
+Trans: AT, Model Code: GR1, Fuel: Gasoline
+Seats: 5, Color: White, Drive: 2WD, Doors: 5
+FOB: $8,150, C&F Karachi: $10,825
+PKR: 2,231,569, Status: New Arrival
+
+Car 3:
+Make: Mazda, Model: Demio, Variant: 2014 XD Touring
+Mileage: 60000KM, Year: 2014, Engine: 1500CC
+Trans: AT, Model Code: DJ5FS, Fuel: Light Oil
+Seats: 5, Color: Red, Drive: 2WD, Doors: 5
+FOB: $4,300, C&F Karachi: $6,920
+PKR: 1,177,392, Status: New Arrival
+
+Car 4:
+Make: Nissan, Model: Kix, Variant: 2021 X
+Mileage: 31000KM, Year: 2021, Engine: 1200CC
+Trans: AT, Model Code: P15, Fuel: Hybrid
+Seats: 5, Color: White, Drive: 2WD, Doors: 5
+FOB: $13,950, C&F Karachi: $14,668
+PKR: 3,819,679, Status: New Arrival
+
+Car 5:
+Make: Daihatsu, Model: Move, Variant: 2012 Custom X
+Mileage: 135000KM, Year: 2012, Engine: 660CC
+Trans: AT, Model Code: LA100S, Fuel: Gasoline
+Seats: 4, Color: White, Drive: 2WD, Doors: 5
+FOB: $2,500, C&F Karachi: $4,640
+PKR: 684,397, Status: Clearance
+
+AFTER CAR LISTINGS:
+Pagination row: < 1 2 3 4 5 ... 4536 >
+
+REVIEWS SECTION (compact version):
+Title: "What Our Happy Customers Say"
+Three stats: 500+ Customers | 5.0 Star | 100%
+Two review cards side by side with 
+left right navigation arrows.
+Same reviews as homepage.
+
+Use professional navy and red color scheme 
+throughout. White background for main content 
+area. All cards have subtle shadows. 
+Make it look exactly like Afridi Trading 
+cars page but more premium and professional.
