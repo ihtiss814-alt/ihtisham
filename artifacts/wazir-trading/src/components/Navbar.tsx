@@ -380,20 +380,30 @@ export default function Navbar() {
               </nav>
 
               {/* Live data strip */}
-              <div className="mx-4 mb-3 flex-shrink-0 bg-gray-50 border border-gray-200 rounded-[2px] px-4 py-2.5 flex items-center justify-between text-[10px] text-gray-500 tracking-wide uppercase">
-                <div className="flex items-center gap-1.5">
-                  <Clock size={9} className="text-gray-400" />
-                  <span className="font-mono font-bold text-gray-700">{japanTime || '--:--:--'}</span>
-                  <span className="text-gray-300">JST</span>
+              <div className="mx-4 mb-4 flex-shrink-0 grid grid-cols-3 gap-2">
+                {/* Japan Time */}
+                <div className="flex flex-col items-center gap-1 bg-gray-50 border border-gray-100 rounded-[6px] py-2.5 px-1">
+                  <div className="flex items-center gap-1 text-gray-400">
+                    <Clock size={10} />
+                    <span className="text-[9px] font-semibold tracking-widest uppercase">JST</span>
+                  </div>
+                  <span className="font-mono font-bold text-gray-800 text-[11px] leading-none tabular-nums">
+                    {japanTime ? japanTime.split(', ').slice(-1)[0] : '--:--'}
+                  </span>
                 </div>
-                <span className="h-3 w-px bg-gray-200" />
-                <div>
-                  Stock:{' '}
-                  <strong className="text-[#C8102E]">{stockCount !== null ? stockCount : '—'}</strong>
+
+                {/* Stock count */}
+                <div className="flex flex-col items-center gap-1 bg-[#C8102E]/5 border border-[#C8102E]/15 rounded-[6px] py-2.5 px-1">
+                  <span className="text-[9px] font-semibold tracking-widest uppercase text-[#C8102E]/70">Stock</span>
+                  <span className="font-bold text-[#C8102E] text-[15px] leading-none">
+                    {stockCount !== null ? stockCount : '—'}
+                  </span>
                 </div>
-                <span className="h-3 w-px bg-gray-200" />
-                <div>
-                  $1 = <strong className="text-gray-700">¥162</strong>
+
+                {/* Exchange rate */}
+                <div className="flex flex-col items-center gap-1 bg-gray-50 border border-gray-100 rounded-[6px] py-2.5 px-1">
+                  <span className="text-[9px] font-semibold tracking-widest uppercase text-gray-400">Rate</span>
+                  <span className="font-mono font-bold text-gray-800 text-[11px] leading-none">¥162</span>
                 </div>
               </div>
 
