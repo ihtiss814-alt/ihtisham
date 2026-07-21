@@ -2307,26 +2307,18 @@ function BestSellersSection() {
 }
 
 /* ── Hero rotating background slideshow ─────────────────────── */
-// Desktop: 8K-grade landscape (7680 px wide, q=100)
-// Mobile:  portrait crop (1080×1920) centred on the car — served via <source>
 const HERO_SLIDES = [
   {
-    // Dramatic front-lit black sports car
-    desktop: 'https://images.unsplash.com/photo-1583121274602-3e2820c69888?q=100&w=7680&auto=format&fit=crop',
-    mobile:  'https://images.unsplash.com/photo-1583121274602-3e2820c69888?q=100&w=1080&h=1920&auto=format&fit=crop&crop=center',
-    posD: 'center 50%', posM: 'center 50%',
+    src: 'https://images.unsplash.com/photo-1494976388531-d1058494cdd8?q=90&w=2400&auto=format&fit=crop',
+    pos: 'center 40%',
   },
   {
-    // Porsche rear-quarter — high-contrast, cinematic
-    desktop: 'https://images.unsplash.com/photo-1503376780353-7e6692767b70?q=100&w=7680&auto=format&fit=crop',
-    mobile:  'https://images.unsplash.com/photo-1503376780353-7e6692767b70?q=100&w=1080&h=1920&auto=format&fit=crop&crop=right',
-    posD: 'center 55%', posM: 'center 55%',
+    src: 'https://images.unsplash.com/photo-1503376780353-7e6692767b70?q=90&w=2400&auto=format&fit=crop',
+    pos: 'center 55%',
   },
   {
-    // Dark car on atmospheric mountain road
-    desktop: 'https://images.unsplash.com/photo-1494976388531-d1058494cdd8?q=100&w=7680&auto=format&fit=crop',
-    mobile:  'https://images.unsplash.com/photo-1494976388531-d1058494cdd8?q=100&w=1080&h=1920&auto=format&fit=crop&crop=left',
-    posD: 'center 38%', posM: 'center 40%',
+    src: 'https://images.unsplash.com/photo-1583121274602-3e2820c69888?q=90&w=2400&auto=format&fit=crop',
+    pos: 'center 50%',
   },
 ];
 
@@ -2339,29 +2331,21 @@ function HeroBackground() {
     const id = setInterval(() => {
       setFading(true);
       setTimeout(() => {
-        setPrev(current);
+        setPrev(c => c);
         setCurrent(c => (c + 1) % HERO_SLIDES.length);
         setFading(false);
       }, 1200);
-    }, 6500);
+    }, 6000);
     return () => clearInterval(id);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [current]);
+  }, []);
 
   return (
     <div className="absolute inset-0 z-0 overflow-hidden">
       <style>{`
-        @keyframes kb-in  { from { transform:scale(1);    } to { transform:scale(1.09); } }
-        @keyframes kb-out { from { transform:scale(1.09); } to { transform:scale(1);    } }
-        .hbg-in  { animation: kb-in  7.5s ease-in-out forwards; }
-        .hbg-out { animation: kb-out 7.5s ease-in-out forwards; }
-        /* Mobile object-position override baked into CSS so picture works */
-        @media (max-width:767px) {
-          .hbg-img { object-position: var(--pos-m, center 50%) !important; }
-        }
-        @media (min-width:768px) {
-          .hbg-img { object-position: var(--pos-d, center 50%) !important; }
-        }
+        @keyframes ken-burns-in  { from { transform:scale(1);    } to { transform:scale(1.10); } }
+        @keyframes ken-burns-out { from { transform:scale(1.10); } to { transform:scale(1);    } }
+        .hero-img-in  { animation: ken-burns-in  7s ease-in-out forwards; }
+        .hero-img-out { animation: ken-burns-out 7s ease-in-out forwards; }
       `}</style>
 
       {/* Outgoing slide */}
@@ -2369,57 +2353,33 @@ function HeroBackground() {
         <div key={`p${prev}`}
           style={{ position:'absolute',inset:0,overflow:'hidden',
                    opacity: fading ? 0 : 1, transition:'opacity 1.2s ease-in-out', zIndex:1 }}>
-          <picture style={{ display:'contents' }}>
-            <source media="(max-width:767px)" srcSet={HERO_SLIDES[prev].mobile} />
-            <img
-              src={HERO_SLIDES[prev].desktop}
-              alt=""
-              className="hbg-out hbg-img"
-              style={{
-                width:'100%', height:'100%', objectFit:'cover',
-                '--pos-d': HERO_SLIDES[prev].posD,
-                '--pos-m': HERO_SLIDES[prev].posM,
-              } as React.CSSProperties}
-            />
-          </picture>
+          <img src={HERO_SLIDES[prev].src} alt=""
+            className="hero-img-out"
+            style={{ width:'100%',height:'100%',objectFit:'cover',
+                     objectPosition: HERO_SLIDES[prev].pos }} />
         </div>
       )}
 
       {/* Active slide */}
       <div key={`c${current}`}
-        style={{ position:'absolute',inset:0,overflow:'hidden', opacity:1, zIndex:2 }}>
-        <picture style={{ display:'contents' }}>
-          <source media="(max-width:767px)" srcSet={HERO_SLIDES[current].mobile} />
-          <img
-            src={HERO_SLIDES[current].desktop}
-            alt="Import your dream car — Wazir Trading"
-            className="hbg-in hbg-img"
-            style={{
-              width:'100%', height:'100%', objectFit:'cover',
-              '--pos-d': HERO_SLIDES[current].posD,
-              '--pos-m': HERO_SLIDES[current].posM,
-            } as React.CSSProperties}
-          />
-        </picture>
+        style={{ position:'absolute',inset:0,overflow:'hidden',
+                 opacity:1, zIndex:2 }}>
+        <img src={HERO_SLIDES[current].src} alt="Premium Japanese cars"
+          className="hero-img-in"
+          style={{ width:'100%',height:'100%',objectFit:'cover',
+                   objectPosition: HERO_SLIDES[current].pos }} />
       </div>
 
-      {/* Cinematic overlay stack */}
+      {/* Overlay stack */}
       <div style={{ position:'absolute',inset:0,zIndex:3,pointerEvents:'none' }}>
-        {/* Desktop: left-heavy gradient so text stays readable */}
-        <div className="hidden sm:block" style={{ position:'absolute',inset:0,
-          background:'linear-gradient(108deg,rgba(0,0,0,0.90) 0%,rgba(0,0,0,0.60) 40%,rgba(0,0,0,0.15) 100%)' }}/>
-        {/* Mobile: full-surface softer overlay — car still visible */}
-        <div className="sm:hidden" style={{ position:'absolute',inset:0,
-          background:'linear-gradient(180deg,rgba(0,0,0,0.55) 0%,rgba(0,0,0,0.30) 40%,rgba(0,0,0,0.70) 100%)' }}/>
-        {/* Shared: bottom vignette */}
         <div style={{ position:'absolute',inset:0,
-          background:'linear-gradient(to top,rgba(0,0,0,0.80) 0%,transparent 50%)' }}/>
-        {/* Shared: top vignette */}
+          background:'linear-gradient(108deg,rgba(0,0,0,0.88) 0%,rgba(0,0,0,0.58) 42%,rgba(0,0,0,0.18) 100%)' }}/>
         <div style={{ position:'absolute',inset:0,
-          background:'linear-gradient(to bottom,rgba(0,0,0,0.40) 0%,transparent 30%)' }}/>
-        {/* Brand red glow — bottom-left */}
-        <div style={{ position:'absolute',bottom:0,left:0,width:'60%',height:'50%',
-          background:'radial-gradient(ellipse at bottom left,rgba(200,16,46,0.25) 0%,transparent 68%)' }}/>
+          background:'linear-gradient(to top,rgba(0,0,0,0.78) 0%,transparent 52%)' }}/>
+        <div style={{ position:'absolute',inset:0,
+          background:'linear-gradient(to bottom,rgba(0,0,0,0.42) 0%,transparent 32%)' }}/>
+        <div style={{ position:'absolute',bottom:0,left:0,width:'55%',height:'45%',
+          background:'radial-gradient(ellipse at bottom left,rgba(200,16,46,0.22) 0%,transparent 70%)' }}/>
       </div>
     </div>
   );
@@ -2516,7 +2476,7 @@ export default function HomePage() {
     <div className="min-h-screen bg-background">
 
       {/* ── HERO ──────────────────────────────────────────────────── */}
-      <section className="relative h-[100dvh] flex flex-col justify-center overflow-hidden bg-[#0A0A0A]">
+      <section className="relative min-h-screen flex flex-col justify-center overflow-hidden bg-[#0A0A0A]">
 
         {/* Background slideshow */}
         <HeroBackground />
@@ -2528,14 +2488,14 @@ export default function HomePage() {
         />
 
         {/* Content */}
-        <div className="relative z-10 max-w-4xl mx-auto px-4 md:px-8 w-full pt-[148px] pb-3 md:pb-10 flex flex-col items-center text-center">
+        <div className="relative z-10 max-w-4xl mx-auto px-4 md:px-8 w-full pt-[152px] pb-16 flex flex-col items-center text-center">
 
           {/* Badge */}
           <motion.div
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.1 }}
-            className="mb-2 md:mb-7"
+            className="mb-7"
           >
             <span
               className="px-4 py-1.5 text-[10px] tracking-[0.28em] uppercase font-bold rounded-full border"
@@ -2555,10 +2515,10 @@ export default function HomePage() {
             initial={{ opacity: 0, y: 24 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.22 }}
-            className="font-serif font-bold text-white leading-[1.06] mb-2 md:mb-6"
-            style={{ fontSize: 'clamp(1.85rem, 5.5vw, 5rem)' }}
+            className="font-serif font-bold text-white leading-[1.08] mb-6"
+            style={{ fontSize: 'clamp(2.6rem, 6vw, 5rem)' }}
           >
-            Import Your Dream Car<br className="hidden sm:block" />
+            Japanese Used Cars —<br className="hidden sm:block" />
             <span style={{ color: '#F87171' }}>Exported Worldwide</span>
           </motion.h1>
 
@@ -2567,8 +2527,8 @@ export default function HomePage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.36 }}
-            className="text-white/70 font-light leading-snug mb-3 md:mb-10 max-w-xl"
-            style={{ fontSize: 'clamp(0.82rem, 1.8vw, 1.15rem)' }}
+            className="text-white/70 font-light leading-relaxed mb-10 max-w-xl"
+            style={{ fontSize: 'clamp(1rem, 2vw, 1.15rem)' }}
           >
             Browse thousands of quality-graded Japanese vehicles sourced directly from
             auction halls in Japan — exported to{' '}
@@ -2581,7 +2541,7 @@ export default function HomePage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.7, delay: 0.48 }}
-            className="flex flex-row justify-center gap-2 md:gap-3 mb-4 md:mb-14 w-full sm:w-auto"
+            className="flex flex-col sm:flex-row justify-center gap-3 mb-14 w-full sm:w-auto"
           >
             <Link
               href="/cars"
@@ -2613,13 +2573,13 @@ export default function HomePage() {
             initial={{ opacity: 0, y: 24 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.62 }}
-            className="grid grid-cols-2 md:grid-cols-4 gap-px bg-white/10 rounded-[4px] overflow-hidden mb-3 md:mb-8 w-full max-w-2xl"
+            className="grid grid-cols-2 md:grid-cols-4 gap-px bg-white/10 rounded-[4px] overflow-hidden mb-8 w-full max-w-2xl"
           >
             {STATS.map(({ countObj, suffix, label, note }, i) => (
               <div
                 key={i}
                 ref={countObj.ref}
-                className="flex flex-col items-center justify-center px-2 py-2.5 md:px-4 md:py-5 bg-black/40 backdrop-blur-sm text-center"
+                className="flex flex-col items-center justify-center px-4 py-5 bg-black/40 backdrop-blur-sm text-center"
               >
                 <span className="font-serif font-bold leading-none mb-1" style={{ fontSize: 'clamp(1.8rem, 3.5vw, 2.6rem)', color: i === 0 ? '#F87171' : 'white' }}>
                   {countObj.value}{suffix}
@@ -2635,7 +2595,7 @@ export default function HomePage() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.8, delay: 0.78 }}
-            className="hidden sm:flex flex-wrap justify-center gap-2"
+            className="flex flex-wrap justify-center gap-2"
           >
             {TRUST.map(({ text }, i) => (
               <span
