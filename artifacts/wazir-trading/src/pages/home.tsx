@@ -341,118 +341,213 @@ const BODY_TYPES = [
   { name: 'Convertible',   accent: '#F43F5E', bg: '#FFF1F2' },
 ];
 
-// All silhouettes share viewBox="0 0 120 52", profile facing right.
-// Wheel centres: left cx=25 cy=44 r=8, right at cx/cy per-car.
+// All silhouettes share viewBox="0 0 160 72", profile facing right.
 function CarSilhouette({ type, color: c }: { type: string; color: string }) {
-  const vb = '0 0 120 52';
-  const w  = { fill: c };
-  const mkWheels = (lx: number, rx: number, cy = 44) => (
-    <>
-      <circle cx={lx} cy={cy} r={8}   fill="#fff" stroke={c} strokeWidth="1.5"/>
-      <circle cx={lx} cy={cy} r={3}   fill={c}/>
-      <circle cx={rx} cy={cy} r={8}   fill="#fff" stroke={c} strokeWidth="1.5"/>
-      <circle cx={rx} cy={cy} r={3}   fill={c}/>
-    </>
-  );
+  const vb = '0 0 160 72';
+
+  // Detailed wheel: dark tire + accent rim + white hub + cross spokes
+  const Wheel = (cx: number, cy: number, r = 11) => {
+    const ri = r * 0.55; // rim radius
+    const rh = r * 0.22; // hub radius
+    const rs = ri * 0.95; // spoke reach
+    return (
+      <g>
+        <circle cx={cx} cy={cy} r={r}   fill="#1a1a2e" stroke={c} strokeWidth="1.8"/>
+        <circle cx={cx} cy={cy} r={ri}  fill={c}/>
+        <line x1={cx-rs} y1={cy}    x2={cx+rs} y2={cy}    stroke="rgba(255,255,255,0.75)" strokeWidth="1"/>
+        <line x1={cx}    y1={cy-rs} x2={cx}    y2={cy+rs} stroke="rgba(255,255,255,0.75)" strokeWidth="1"/>
+        <line x1={cx-rs*0.7} y1={cy-rs*0.7} x2={cx+rs*0.7} y2={cy+rs*0.7} stroke="rgba(255,255,255,0.45)" strokeWidth="0.8"/>
+        <line x1={cx+rs*0.7} y1={cy-rs*0.7} x2={cx-rs*0.7} y2={cy+rs*0.7} stroke="rgba(255,255,255,0.45)" strokeWidth="0.8"/>
+        <circle cx={cx} cy={cy} r={rh} fill="rgba(255,255,255,0.92)"/>
+      </g>
+    );
+  };
+
+  const win = 'rgba(255,255,255,0.82)';   // window glass
+  const det = 'rgba(0,0,0,0.12)';         // door/pillar line color
 
   switch (type) {
-    /* 3-box notchback — distinct trunk step at rear */
+
+    /* ── SEDAN — 3-box notchback ── */
     case 'Sedan':
-      return <svg viewBox={vb} width={84} height={36} aria-label="Sedan">
-        <path {...w} d="M 8,36 L 8,30 L 20,30 Q 26,20 36,14 L 76,14 L 84,20 L 86,30 L 112,30 L 112,36 Z"/>
-        {mkWheels(25, 95)}
+      return <svg viewBox={vb} width={96} height={44} aria-label="Sedan">
+        {/* Body */}
+        <path fill={c} d="M 8,52 L 8,44 L 22,44 Q 30,28 44,20 L 100,20 L 112,30 L 118,44 L 150,44 L 150,52 Z"/>
+        {/* Greenhouse / windows */}
+        <path fill={win} d="M 46,21 Q 52,20 60,20 L 60,42 L 42,42 Q 35,34 36,27 Z"/>
+        <path fill={win} d="M 62,20 L 98,20 L 108,30 L 108,42 L 62,42 Z"/>
+        {/* B-pillar */}
+        <line x1={61} y1={20} x2={61} y2={42} stroke={det} strokeWidth="2.5"/>
+        {/* Door line */}
+        <line x1={60} y1={42} x2={112} y2={42} stroke={det} strokeWidth="1"/>
+        {/* Wheels */}
+        {Wheel(32, 58)}
+        {Wheel(130, 58)}
       </svg>;
 
-    /* 2-box — rear hatch sweeps steeply straight to bumper */
+    /* ── HATCHBACK — 2-box steep rear ── */
     case 'Hatchback':
-      return <svg viewBox={vb} width={84} height={36} aria-label="Hatchback">
-        <path {...w} d="M 12,36 L 12,30 L 24,30 Q 28,20 36,14 L 76,14 Q 82,26 84,36 Z"/>
-        {mkWheels(26, 72)}
+      return <svg viewBox={vb} width={96} height={44} aria-label="Hatchback">
+        <path fill={c} d="M 14,52 L 14,44 L 28,44 Q 34,28 44,20 L 100,20 Q 112,34 116,52 Z"/>
+        <path fill={win} d="M 46,21 Q 52,20 62,20 L 62,42 L 42,42 Q 37,34 38,26 Z"/>
+        <path fill={win} d="M 64,20 L 98,20 Q 108,32 110,42 L 64,42 Z"/>
+        <line x1={63} y1={20} x2={63} y2={42} stroke={det} strokeWidth="2.5"/>
+        {Wheel(34, 58)}
+        {Wheel(106, 58)}
       </svg>;
 
-    /* Tall, boxy, high ground clearance */
+    /* ── SUV — tall boxy, high clearance ── */
     case 'SUV':
-      return <svg viewBox={vb} width={84} height={36} aria-label="SUV">
-        <path {...w} d="M 6,38 L 6,22 L 18,22 Q 24,10 34,9 L 82,9 Q 92,10 96,22 L 114,22 L 114,38 Z"/>
-        {mkWheels(25, 95, 46)}
+      return <svg viewBox={vb} width={96} height={44} aria-label="SUV">
+        <path fill={c} d="M 6,54 L 6,34 L 20,34 Q 26,14 40,12 L 114,12 Q 126,14 132,30 L 152,30 L 152,54 Z"/>
+        <path fill={win} d="M 42,13 Q 50,12 60,12 L 60,30 L 38,30 Q 33,22 34,16 Z"/>
+        <path fill={win} d="M 62,12 L 112,12 Q 122,14 128,28 L 128,30 L 62,30 Z"/>
+        <line x1={61} y1={12} x2={61} y2={30} stroke={det} strokeWidth="2.5"/>
+        <line x1={95} y1={12} x2={95} y2={30} stroke={det} strokeWidth="1.5"/>
+        {Wheel(34, 60, 12)}
+        {Wheel(128, 60, 12)}
       </svg>;
 
-    /* Long flat roof extending straight to the tailgate */
+    /* ── STATION WAGON — long flat roofline ── */
     case 'Station Wagon':
-      return <svg viewBox={vb} width={84} height={36} aria-label="Station Wagon">
-        <path {...w} d="M 6,36 L 6,30 L 18,30 Q 24,20 32,14 L 92,14 L 92,30 L 114,30 L 114,36 Z"/>
-        {mkWheels(23, 97)}
+      return <svg viewBox={vb} width={96} height={44} aria-label="Station Wagon">
+        <path fill={c} d="M 6,52 L 6,44 L 20,44 Q 26,28 36,20 L 122,20 L 122,44 L 152,44 L 152,52 Z"/>
+        <path fill={win} d="M 38,21 Q 44,20 54,20 L 54,42 L 36,42 Q 30,34 31,27 Z"/>
+        <path fill={win} d="M 56,20 L 120,20 L 120,42 L 56,42 Z"/>
+        <line x1={55} y1={20} x2={55} y2={42} stroke={det} strokeWidth="2.5"/>
+        <line x1={88} y1={20} x2={88} y2={42} stroke={det} strokeWidth="1.5"/>
+        {Wheel(30, 58)}
+        {Wheel(134, 58)}
       </svg>;
 
-    /* Tall flat-sided box van */
+    /* ── VAN — tall flat-sided box ── */
     case 'Van':
-      return <svg viewBox={vb} width={84} height={36} aria-label="Van">
-        <path {...w} d="M 8,38 L 8,8 Q 8,6 12,6 L 108,6 Q 112,6 112,8 L 112,38 Z"/>
-        {mkWheels(25, 95, 46)}
+      return <svg viewBox={vb} width={96} height={44} aria-label="Van">
+        <path fill={c} d="M 8,56 L 8,8 Q 8,6 14,6 L 144,6 Q 150,6 150,10 L 150,56 Z"/>
+        {/* Front windshield */}
+        <path fill={win} d="M 10,8 L 10,30 L 38,30 L 38,8 Z"/>
+        {/* Side windows */}
+        <path fill={win} d="M 46,10 L 90,10 L 90,30 L 46,30 Z"/>
+        <path fill={win} d="M 96,10 L 140,10 L 140,30 L 96,30 Z"/>
+        <line x1={44} y1={8} x2={44} y2={32} stroke={det} strokeWidth="2"/>
+        <line x1={92} y1={8} x2={92} y2={32} stroke={det} strokeWidth="2"/>
+        {Wheel(32, 62, 11)}
+        {Wheel(124, 62, 11)}
       </svg>;
 
-    /* Rounded people-carrier profile */
+    /* ── MINI VAN — rounded people-carrier ── */
     case 'Mini Van':
-      return <svg viewBox={vb} width={84} height={36} aria-label="Mini Van">
-        <path {...w} d="M 10,36 L 10,28 Q 14,13 26,12 L 88,12 Q 100,13 102,28 L 112,28 L 112,36 Z"/>
-        {mkWheels(27, 93)}
+      return <svg viewBox={vb} width={96} height={44} aria-label="Mini Van">
+        <path fill={c} d="M 10,52 L 10,38 Q 14,16 30,14 L 118,14 Q 134,16 138,34 L 150,34 L 150,52 Z"/>
+        <path fill={win} d="M 32,15 Q 40,14 52,14 L 52,32 L 30,32 Q 25,24 26,18 Z"/>
+        <path fill={win} d="M 54,14 L 116,14 Q 130,16 134,32 L 54,32 Z"/>
+        <line x1={53} y1={14} x2={53} y2={32} stroke={det} strokeWidth="2.5"/>
+        <line x1={88} y1={14} x2={88} y2={32} stroke={det} strokeWidth="1.5"/>
+        {Wheel(34, 58)}
+        {Wheel(126, 58)}
       </svg>;
 
-    /* Cab-over rigid truck — tall flat-nose cab + low flat bed */
+    /* ── TRUCK — cab-over + flat bed ── */
     case 'Truck':
-      return <svg viewBox={vb} width={84} height={36} aria-label="Truck">
-        <path {...w} d="M 6,36 L 6,10 L 52,10 L 52,28 L 114,28 L 114,36 Z"/>
-        {mkWheels(25, 95)}
+      return <svg viewBox={vb} width={96} height={44} aria-label="Truck">
+        {/* Cab */}
+        <path fill={c} d="M 6,52 L 6,12 L 70,12 L 70,44 L 6,44 Z"/>
+        {/* Bed */}
+        <path fill={c} d="M 72,38 L 72,52 L 154,52 L 154,38 Z"/>
+        {/* Bed walls */}
+        <rect fill={c} x={72} y={28} width={4} height={14}/>
+        <rect fill={c} x={150} y={28} width={4} height={14}/>
+        {/* Windshield */}
+        <path fill={win} d="M 8,14 L 8,34 L 42,34 L 42,14 Z"/>
+        {/* Side window */}
+        <path fill={win} d="M 46,14 L 66,14 L 66,34 L 46,34 Z"/>
+        <line x1={44} y1={12} x2={44} y2={36} stroke={det} strokeWidth="2"/>
+        {Wheel(28, 58)}
+        {Wheel(120, 58)}
       </svg>;
 
-    /* Long tall rectangular bus */
+    /* ── BUS — long rectangular ── */
     case 'Bus':
-      return <svg viewBox={vb} width={84} height={36} aria-label="Bus">
-        <path {...w} d="M 2,38 Q 2,6 10,6 L 110,6 Q 118,6 118,10 L 118,38 Z"/>
-        {mkWheels(20, 100, 46)}
+      return <svg viewBox={vb} width={96} height={44} aria-label="Bus">
+        <path fill={c} d="M 4,56 Q 4,6 14,6 L 148,6 Q 156,6 156,12 L 156,56 Z"/>
+        {/* Windshield */}
+        <path fill={win} d="M 8,8 L 8,32 L 34,32 L 34,8 Z"/>
+        {/* Windows row */}
+        {[42, 64, 86, 108, 130].map(x => (
+          <rect key={x} fill={win} x={x} y={10} width={16} height={22} rx={2}/>
+        ))}
+        {/* Horizontal belt line */}
+        <line x1={6} y1={34} x2={154} y2={34} stroke={det} strokeWidth="1.5"/>
+        {Wheel(30, 62, 11)}
+        {Wheel(130, 62, 11)}
       </svg>;
 
-    /* Multi-Purpose Vehicle — taller & aerodynamic, curved nose */
+    /* ── MPV — aerodynamic people-mover ── */
     case 'MPV':
-      return <svg viewBox={vb} width={84} height={36} aria-label="MPV">
-        <path {...w} d="M 8,36 L 8,26 Q 16,12 30,11 L 82,11 Q 96,12 102,24 L 106,30 L 112,30 L 112,36 Z"/>
-        {mkWheels(26, 94)}
+      return <svg viewBox={vb} width={96} height={44} aria-label="MPV">
+        <path fill={c} d="M 8,52 L 8,36 Q 18,14 36,12 L 110,12 Q 130,14 138,28 L 144,38 L 152,38 L 152,52 Z"/>
+        <path fill={win} d="M 38,13 Q 46,12 58,12 L 58,32 L 36,32 Q 30,24 31,18 Z"/>
+        <path fill={win} d="M 60,12 L 108,12 Q 126,14 134,30 L 134,32 L 60,32 Z"/>
+        <line x1={59} y1={12} x2={59} y2={32} stroke={det} strokeWidth="2.5"/>
+        <line x1={96} y1={12} x2={96} y2={32} stroke={det} strokeWidth="1.5"/>
+        {Wheel(32, 58)}
+        {Wheel(132, 58)}
       </svg>;
 
-    /* Pickup — shaped cab + open flatbed (no lid) */
+    /* ── PICKUP TRUCK — cab + open bed ── */
     case 'Pickup Truck':
-      return <svg viewBox={vb} width={84} height={36} aria-label="Pickup Truck">
-        <path {...w} d="M 8,36 L 8,26 Q 12,14 22,13 L 58,13 Q 64,18 66,26 L 66,36 Z"/>
-        <path {...w} d="M 68,28 L 68,36 L 112,36 L 112,28 Z"/>
-        {mkWheels(25, 98)}
+      return <svg viewBox={vb} width={96} height={44} aria-label="Pickup Truck">
+        {/* Cab */}
+        <path fill={c} d="M 8,52 L 8,36 Q 14,18 28,16 L 76,16 Q 86,20 90,34 L 90,52 Z"/>
+        {/* Bed */}
+        <path fill={c} d="M 92,38 L 92,52 L 152,52 L 152,38 Z"/>
+        <rect fill={c} x={92}  y={30} width={4} height={12}/>
+        <rect fill={c} x={148} y={30} width={4} height={12}/>
+        {/* Cab windows */}
+        <path fill={win} d="M 30,17 Q 36,16 50,16 L 50,34 L 28,34 Q 23,26 24,20 Z"/>
+        <path fill={win} d="M 52,16 L 74,16 Q 82,20 84,32 L 84,34 L 52,34 Z"/>
+        <line x1={51} y1={16} x2={51} y2={34} stroke={det} strokeWidth="2"/>
+        {Wheel(30, 58)}
+        {Wheel(128, 58)}
       </svg>;
 
-    /* Sporty fastback — long hood, low sweeping roofline */
+    /* ── COUPE — sporty fastback ── */
     case 'Coupe':
-      return <svg viewBox={vb} width={84} height={36} aria-label="Coupe">
-        <path {...w} d="M 6,36 L 6,30 L 12,30 Q 20,22 30,16 L 72,16 Q 84,22 94,30 L 114,30 L 114,36 Z"/>
-        {mkWheels(25, 95)}
+      return <svg viewBox={vb} width={96} height={44} aria-label="Coupe">
+        <path fill={c} d="M 6,52 L 6,42 L 16,42 Q 24,30 38,20 L 96,20 Q 114,28 126,42 L 152,42 L 152,52 Z"/>
+        <path fill={win} d="M 40,21 Q 48,20 60,20 L 60,40 L 38,40 Q 32,32 33,25 Z"/>
+        <path fill={win} d="M 62,20 L 94,20 Q 110,28 120,40 L 62,40 Z"/>
+        <line x1={61} y1={20} x2={61} y2={40} stroke={det} strokeWidth="2.5"/>
+        {Wheel(32, 58)}
+        {Wheel(132, 58)}
       </svg>;
 
-    /* Convertible — open top, visible windshield post & door sill */
+    /* ── CONVERTIBLE — open top ── */
     case 'Convertible':
-      return <svg viewBox={vb} width={84} height={36} aria-label="Convertible">
-        {/* lower body / sill */}
-        <path {...w} d="M 6,36 L 6,30 L 114,30 L 114,36 Z"/>
-        {/* windshield post + header line (open top) */}
-        <path {...w} d="M 22,30 Q 26,22 34,18 L 40,18 L 40,30 Z"/>
-        {/* rear deck + post */}
-        <path {...w} d="M 80,30 L 80,18 L 86,18 Q 94,22 96,30 Z"/>
-        {/* bumpers */}
-        <rect {...w} x={6}   y={30} width={10} height={4} rx={1}/>
-        <rect {...w} x={104} y={30} width={10} height={4} rx={1}/>
-        {mkWheels(25, 95)}
+      return <svg viewBox={vb} width={96} height={44} aria-label="Convertible">
+        {/* Sill / lower body */}
+        <path fill={c} d="M 8,52 L 8,40 L 152,40 L 152,52 Z"/>
+        {/* Front bumper and fender */}
+        <path fill={c} d="M 8,40 L 8,36 Q 10,30 18,28 L 22,28 L 22,40 Z"/>
+        {/* Rear fender */}
+        <path fill={c} d="M 138,28 L 152,28 L 152,40 L 138,40 Z"/>
+        {/* Windshield frame */}
+        <path fill={c} d="M 30,40 Q 36,28 46,24 L 56,24 L 56,40 Z"/>
+        {/* Rear deck */}
+        <path fill={c} d="M 104,40 L 104,24 L 114,24 Q 124,28 130,40 Z"/>
+        {/* Interior (open cockpit) */}
+        <path fill="rgba(0,0,0,0.25)" d="M 58,24 L 102,24 L 102,40 L 58,40 Z"/>
+        {/* Windshield glass */}
+        <path fill={win} d="M 34,40 Q 40,30 48,26 L 54,26 L 54,40 Z" opacity="0.7"/>
+        {Wheel(30, 58)}
+        {Wheel(130, 58)}
       </svg>;
 
     default:
-      return <svg viewBox={vb} width={84} height={36}>
-        <rect fill={c} x="8" y="18" width="104" height="18" rx="3"/>
-        {mkWheels(25, 95)}
+      return <svg viewBox={vb} width={96} height={44}>
+        <rect fill={c} x="10" y="24" width="140" height="24" rx="4"/>
+        {Wheel(32, 58)}
+        {Wheel(128, 58)}
       </svg>;
   }
 }
@@ -501,7 +596,7 @@ function ShopByBodyTypeSection() {
             <button
               key={`${name}-${i}`}
               onClick={() => navigate(`/cars?body=${encodeURIComponent(name)}`)}
-              className="group flex-shrink-0 flex flex-col items-center gap-3 w-[138px] py-5 px-3 rounded-[10px] bg-white transition-all duration-200 cursor-pointer"
+              className="group flex-shrink-0 flex flex-col items-center gap-3 w-[148px] py-5 px-3 rounded-[10px] bg-white transition-all duration-200 cursor-pointer"
               style={{
                 border: `1.5px solid ${accent}33`,
                 boxShadow: `0 2px 8px ${accent}0d`,
@@ -517,7 +612,7 @@ function ShopByBodyTypeSection() {
             >
               {/* Icon box */}
               <div
-                className="w-full h-[64px] flex items-center justify-center rounded-[6px]"
+                className="w-full h-[76px] flex items-center justify-center rounded-[6px]"
                 style={{ backgroundColor: bg }}
               >
                 <CarSilhouette type={name} color={accent} />
@@ -2189,6 +2284,85 @@ function BestSellersSection() {
   );
 }
 
+/* ── Hero rotating background slideshow ─────────────────────── */
+const HERO_SLIDES = [
+  {
+    src: 'https://images.unsplash.com/photo-1494976388531-d1058494cdd8?q=90&w=2400&auto=format&fit=crop',
+    pos: 'center 40%',
+  },
+  {
+    src: 'https://images.unsplash.com/photo-1503376780353-7e6692767b70?q=90&w=2400&auto=format&fit=crop',
+    pos: 'center 55%',
+  },
+  {
+    src: 'https://images.unsplash.com/photo-1583121274602-3e2820c69888?q=90&w=2400&auto=format&fit=crop',
+    pos: 'center 50%',
+  },
+];
+
+function HeroBackground() {
+  const [current, setCurrent] = useState(0);
+  const [prev, setPrev]       = useState<number | null>(null);
+  const [fading, setFading]   = useState(false);
+
+  useEffect(() => {
+    const id = setInterval(() => {
+      setFading(true);
+      setTimeout(() => {
+        setPrev(c => c);
+        setCurrent(c => (c + 1) % HERO_SLIDES.length);
+        setFading(false);
+      }, 1200);
+    }, 6000);
+    return () => clearInterval(id);
+  }, []);
+
+  return (
+    <div className="absolute inset-0 z-0 overflow-hidden">
+      <style>{`
+        @keyframes ken-burns-in  { from { transform:scale(1);    } to { transform:scale(1.10); } }
+        @keyframes ken-burns-out { from { transform:scale(1.10); } to { transform:scale(1);    } }
+        .hero-img-in  { animation: ken-burns-in  7s ease-in-out forwards; }
+        .hero-img-out { animation: ken-burns-out 7s ease-in-out forwards; }
+      `}</style>
+
+      {/* Outgoing slide */}
+      {prev !== null && (
+        <div key={`p${prev}`}
+          style={{ position:'absolute',inset:0,overflow:'hidden',
+                   opacity: fading ? 0 : 1, transition:'opacity 1.2s ease-in-out', zIndex:1 }}>
+          <img src={HERO_SLIDES[prev].src} alt=""
+            className="hero-img-out"
+            style={{ width:'100%',height:'100%',objectFit:'cover',
+                     objectPosition: HERO_SLIDES[prev].pos }} />
+        </div>
+      )}
+
+      {/* Active slide */}
+      <div key={`c${current}`}
+        style={{ position:'absolute',inset:0,overflow:'hidden',
+                 opacity:1, zIndex:2 }}>
+        <img src={HERO_SLIDES[current].src} alt="Premium Japanese cars"
+          className="hero-img-in"
+          style={{ width:'100%',height:'100%',objectFit:'cover',
+                   objectPosition: HERO_SLIDES[current].pos }} />
+      </div>
+
+      {/* Overlay stack */}
+      <div style={{ position:'absolute',inset:0,zIndex:3,pointerEvents:'none' }}>
+        <div style={{ position:'absolute',inset:0,
+          background:'linear-gradient(108deg,rgba(0,0,0,0.88) 0%,rgba(0,0,0,0.58) 42%,rgba(0,0,0,0.18) 100%)' }}/>
+        <div style={{ position:'absolute',inset:0,
+          background:'linear-gradient(to top,rgba(0,0,0,0.78) 0%,transparent 52%)' }}/>
+        <div style={{ position:'absolute',inset:0,
+          background:'linear-gradient(to bottom,rgba(0,0,0,0.42) 0%,transparent 32%)' }}/>
+        <div style={{ position:'absolute',bottom:0,left:0,width:'55%',height:'45%',
+          background:'radial-gradient(ellipse at bottom left,rgba(200,16,46,0.22) 0%,transparent 70%)' }}/>
+      </div>
+    </div>
+  );
+}
+
 /* ── Animated count-up hook ──────────────────────────────────── */
 function useCountUp(target: number, duration = 1800) {
   const [value, setValue] = useState(0);
@@ -2282,17 +2456,8 @@ export default function HomePage() {
       {/* ── HERO ──────────────────────────────────────────────────── */}
       <section className="relative min-h-screen flex flex-col justify-center overflow-hidden bg-[#0A0A0A]">
 
-        {/* Background image */}
-        <div className="absolute inset-0 z-0">
-          <img
-            src="https://images.unsplash.com/photo-1503376780353-7e6692767b70?q=85&w=2400&auto=format&fit=crop"
-            alt="Premium Japanese cars"
-            className="w-full h-full object-cover object-center"
-          />
-          {/* Multi-layer cinematic overlay */}
-          <div className="absolute inset-0 bg-gradient-to-r from-black/90 via-black/70 to-black/30" />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/40" />
-        </div>
+        {/* Background slideshow */}
+        <HeroBackground />
 
         {/* Subtle red glow bottom-left */}
         <div
