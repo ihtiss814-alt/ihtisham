@@ -2516,7 +2516,7 @@ export default function HomePage() {
     <div className="min-h-screen bg-background">
 
       {/* ── HERO ──────────────────────────────────────────────────── */}
-      <section className="relative min-h-screen flex flex-col justify-center overflow-hidden bg-[#0A0A0A]">
+      <section className="relative h-[100dvh] flex flex-col justify-center overflow-hidden bg-[#0A0A0A]">
 
         {/* Background slideshow */}
         <HeroBackground />
@@ -2528,14 +2528,14 @@ export default function HomePage() {
         />
 
         {/* Content */}
-        <div className="relative z-10 max-w-4xl mx-auto px-4 md:px-8 w-full pt-[152px] pb-16 flex flex-col items-center text-center">
+        <div className="relative z-10 max-w-4xl mx-auto px-4 md:px-8 w-full pt-[148px] pb-3 md:pb-10 flex flex-col items-center text-center">
 
           {/* Badge */}
           <motion.div
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.1 }}
-            className="mb-7"
+            className="mb-2 md:mb-7"
           >
             <span
               className="px-4 py-1.5 text-[10px] tracking-[0.28em] uppercase font-bold rounded-full border"
@@ -2555,8 +2555,8 @@ export default function HomePage() {
             initial={{ opacity: 0, y: 24 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.22 }}
-            className="font-serif font-bold text-white leading-[1.08] mb-6"
-            style={{ fontSize: 'clamp(2.6rem, 6vw, 5rem)' }}
+            className="font-serif font-bold text-white leading-[1.06] mb-2 md:mb-6"
+            style={{ fontSize: 'clamp(1.85rem, 5.5vw, 5rem)' }}
           >
             Import Your Dream Car<br className="hidden sm:block" />
             <span style={{ color: '#F87171' }}>Exported Worldwide</span>
@@ -2567,8 +2567,8 @@ export default function HomePage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.36 }}
-            className="text-white/70 font-light leading-relaxed mb-10 max-w-xl"
-            style={{ fontSize: 'clamp(1rem, 2vw, 1.15rem)' }}
+            className="text-white/70 font-light leading-snug mb-3 md:mb-10 max-w-xl"
+            style={{ fontSize: 'clamp(0.82rem, 1.8vw, 1.15rem)' }}
           >
             Browse thousands of quality-graded Japanese vehicles sourced directly from
             auction halls in Japan — exported to{' '}
@@ -2581,7 +2581,7 @@ export default function HomePage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.7, delay: 0.48 }}
-            className="flex flex-col sm:flex-row justify-center gap-3 mb-14 w-full sm:w-auto"
+            className="flex flex-row justify-center gap-2 md:gap-3 mb-4 md:mb-14 w-full sm:w-auto"
           >
             <Link
               href="/cars"
@@ -2613,13 +2613,13 @@ export default function HomePage() {
             initial={{ opacity: 0, y: 24 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.62 }}
-            className="grid grid-cols-2 md:grid-cols-4 gap-px bg-white/10 rounded-[4px] overflow-hidden mb-8 w-full max-w-2xl"
+            className="grid grid-cols-2 md:grid-cols-4 gap-px bg-white/10 rounded-[4px] overflow-hidden mb-3 md:mb-8 w-full max-w-2xl"
           >
             {STATS.map(({ countObj, suffix, label, note }, i) => (
               <div
                 key={i}
                 ref={countObj.ref}
-                className="flex flex-col items-center justify-center px-4 py-5 bg-black/40 backdrop-blur-sm text-center"
+                className="flex flex-col items-center justify-center px-2 py-2.5 md:px-4 md:py-5 bg-black/40 backdrop-blur-sm text-center"
               >
                 <span className="font-serif font-bold leading-none mb-1" style={{ fontSize: 'clamp(1.8rem, 3.5vw, 2.6rem)', color: i === 0 ? '#F87171' : 'white' }}>
                   {countObj.value}{suffix}
@@ -2635,7 +2635,7 @@ export default function HomePage() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.8, delay: 0.78 }}
-            className="flex flex-wrap justify-center gap-2"
+            className="hidden sm:flex flex-wrap justify-center gap-2"
           >
             {TRUST.map(({ text }, i) => (
               <span
