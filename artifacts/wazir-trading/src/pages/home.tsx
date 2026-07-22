@@ -2496,17 +2496,17 @@ export default function HomePage() {
         />
 
         {/* Content */}
-        <div className="relative z-10 max-w-4xl mx-auto px-4 md:px-8 w-full pt-[152px] pb-16 flex flex-col items-center text-center">
+        <div className="relative z-10 max-w-4xl mx-auto px-4 md:px-8 w-full pt-[110px] pb-10 flex flex-col items-center text-center">
 
           {/* Badge */}
           <motion.div
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.1 }}
-            className="mb-7"
+            className="mb-4"
           >
             <span
-              className="px-4 py-1.5 text-[10px] tracking-[0.28em] uppercase font-bold rounded-full border"
+              className="px-3 py-1 text-[9px] tracking-[0.24em] uppercase font-bold rounded-full border"
               style={{
                 color: '#F87171',
                 borderColor: 'rgba(200,16,46,0.5)',
@@ -2523,8 +2523,8 @@ export default function HomePage() {
             initial={{ opacity: 0, y: 24 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.22 }}
-            className="font-serif font-bold text-white leading-[1.08] mb-6"
-            style={{ fontSize: 'clamp(2.6rem, 6vw, 5rem)' }}
+            className="font-serif font-bold text-white leading-[1.1] mb-3"
+            style={{ fontSize: 'clamp(1.75rem, 4.5vw, 3.4rem)' }}
           >
             Import Your Dream Car —<br className="hidden sm:block" />
             <span style={{ color: '#F87171' }}>Direct from Japan</span>
@@ -2535,8 +2535,8 @@ export default function HomePage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.36 }}
-            className="text-white/70 font-light leading-relaxed mb-10 max-w-xl"
-            style={{ fontSize: 'clamp(1rem, 2vw, 1.15rem)' }}
+            className="text-white/70 font-light leading-relaxed mb-6 max-w-xl"
+            style={{ fontSize: 'clamp(0.82rem, 1.6vw, 0.95rem)' }}
           >
             We source premium, quality-graded vehicles straight from Japan's auction halls
             and ship them to{' '}
@@ -2549,16 +2549,16 @@ export default function HomePage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.7, delay: 0.48 }}
-            className="flex flex-col sm:flex-row justify-center gap-3 mb-14 w-full sm:w-auto"
+            className="flex flex-col sm:flex-row justify-center gap-2.5 mb-6 w-full sm:w-auto"
           >
             <Link
               href="/cars"
-              className="group inline-flex items-center justify-center gap-2 px-8 py-4 font-bold tracking-wide text-white rounded-[3px] transition-all duration-200"
+              className="group inline-flex items-center justify-center gap-2 px-6 py-2.5 font-bold tracking-wide text-white rounded-[3px] transition-all duration-200"
               style={{
                 background: 'linear-gradient(135deg, #C8102E 0%, #A50D25 100%)',
-                boxShadow: '0 4px 20px rgba(200,16,46,0.45)',
-                fontSize: '0.875rem',
-                letterSpacing: '0.12em',
+                boxShadow: '0 4px 16px rgba(200,16,46,0.4)',
+                fontSize: '0.8rem',
+                letterSpacing: '0.1em',
               }}
             >
               Browse Cars
@@ -2568,8 +2568,8 @@ export default function HomePage() {
               href={waLink}
               target="_blank"
               rel="noopener noreferrer"
-              className="group inline-flex items-center justify-center gap-2.5 px-8 py-4 font-semibold rounded-[3px] border border-white/25 text-white hover:bg-white/10 hover:border-white/50 transition-all duration-200 backdrop-blur-sm"
-              style={{ fontSize: '0.875rem', letterSpacing: '0.12em' }}
+              className="group inline-flex items-center justify-center gap-2 px-6 py-2.5 font-semibold rounded-[3px] border border-white/25 text-white hover:bg-white/10 hover:border-white/50 transition-all duration-200 backdrop-blur-sm"
+              style={{ fontSize: '0.8rem', letterSpacing: '0.1em' }}
             >
               <WhatsAppIcon size={15} className="text-[#25D366]" />
               Contact on WhatsApp
@@ -2581,19 +2581,19 @@ export default function HomePage() {
             initial={{ opacity: 0, y: 24 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.62 }}
-            className="grid grid-cols-2 md:grid-cols-4 gap-px bg-white/10 rounded-[4px] overflow-hidden mb-8 w-full max-w-2xl"
+            className="grid grid-cols-2 md:grid-cols-4 gap-px bg-white/10 rounded-[4px] overflow-hidden mb-4 w-full max-w-2xl"
           >
             {STATS.map(({ countObj, suffix, label, note }, i) => (
               <div
                 key={i}
                 ref={countObj.ref}
-                className="flex flex-col items-center justify-center px-4 py-5 bg-black/40 backdrop-blur-sm text-center"
+                className="flex flex-col items-center justify-center px-3 py-3 bg-black/40 backdrop-blur-sm text-center"
               >
-                <span className="font-serif font-bold leading-none mb-1" style={{ fontSize: 'clamp(1.8rem, 3.5vw, 2.6rem)', color: i === 0 ? '#F87171' : 'white' }}>
+                <span className="font-serif font-bold leading-none mb-0.5" style={{ fontSize: 'clamp(1.35rem, 2.8vw, 1.9rem)', color: i === 0 ? '#F87171' : 'white' }}>
                   {countObj.value}{suffix}
                 </span>
-                <span className="text-[11px] font-semibold text-white/80 tracking-wide uppercase mb-0.5">{label}</span>
-                <span className="text-[9px] text-white/40 tracking-widest uppercase">{note}</span>
+                <span className="text-[10px] font-semibold text-white/80 tracking-wide uppercase mb-0">{label}</span>
+                <span className="text-[8px] text-white/40 tracking-widest uppercase">{note}</span>
               </div>
             ))}
           </motion.div>
@@ -2603,12 +2603,12 @@ export default function HomePage() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.8, delay: 0.78 }}
-            className="flex flex-wrap justify-center gap-2"
+            className="flex flex-wrap justify-center gap-1.5"
           >
             {TRUST.map(({ text }, i) => (
               <span
                 key={i}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[10px] font-semibold tracking-wide text-white/75 border border-white/15 backdrop-blur-sm"
+                className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[9px] font-semibold tracking-wide text-white/75 border border-white/15 backdrop-blur-sm"
                 style={{ background: 'rgba(255,255,255,0.06)' }}
               >
                 <CheckCircle2 size={11} className="text-[#4ade80] flex-shrink-0" />
