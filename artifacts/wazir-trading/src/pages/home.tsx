@@ -317,18 +317,27 @@ function ShopByMakeSection() {
 
 /* ── Shop By Body Type ───────────────────────────────────────── */
 const BODY_TYPES = [
-  { name: 'Sedan',         accent: '#3B82F6', bg: '#EFF6FF' },
-  { name: 'Hatchback',     accent: '#10B981', bg: '#ECFDF5' },
-  { name: 'SUV',           accent: '#F97316', bg: '#FFF7ED' },
-  { name: 'Station Wagon', accent: '#8B5CF6', bg: '#F5F3FF' },
-  { name: 'Van',           accent: '#06B6D4', bg: '#ECFEFF' },
-  { name: 'Mini Van',      accent: '#F59E0B', bg: '#FFFBEB' },
-  { name: 'Truck',         accent: '#EF4444', bg: '#FEF2F2' },
-  { name: 'Bus',           accent: '#6366F1', bg: '#EEF2FF' },
-  { name: 'MPV',           accent: '#EC4899', bg: '#FDF2F8' },
-  { name: 'Pickup Truck',  accent: '#84CC16', bg: '#F7FEE7' },
-  { name: 'Coupe',         accent: '#14B8A6', bg: '#F0FDFA' },
-  { name: 'Convertible',   accent: '#F43F5E', bg: '#FFF1F2' },
+  { name: 'Sedan',               accent: '#3B82F6', bg: '#EFF6FF' },
+  { name: 'Hatchback',           accent: '#10B981', bg: '#ECFDF5' },
+  { name: 'SUV',                 accent: '#F97316', bg: '#FFF7ED' },
+  { name: 'Station Wagon',       accent: '#8B5CF6', bg: '#F5F3FF' },
+  { name: 'Van',                 accent: '#06B6D4', bg: '#ECFEFF' },
+  { name: 'Mini Van',            accent: '#F59E0B', bg: '#FFFBEB' },
+  { name: 'Truck',               accent: '#EF4444', bg: '#FEF2F2' },
+  { name: 'Bus',                 accent: '#6366F1', bg: '#EEF2FF' },
+  { name: 'MPV',                 accent: '#EC4899', bg: '#FDF2F8' },
+  { name: 'Pickup Truck',        accent: '#84CC16', bg: '#F7FEE7' },
+  { name: 'Coupe',               accent: '#14B8A6', bg: '#F0FDFA' },
+  { name: 'Convertible',         accent: '#F43F5E', bg: '#FFF1F2' },
+  { name: 'Compact Sedan',       accent: '#2563EB', bg: '#EFF6FF', icon: '/icons/car-bt-compact-sedan.svg' },
+  { name: 'Compact SUV',         accent: '#EA580C', bg: '#FFF7ED', icon: '/icons/car-bt-compact-suv.svg' },
+  { name: 'Compact Hatchback',   accent: '#059669', bg: '#ECFDF5', icon: '/icons/car-bt-compact-hatchback.svg' },
+  { name: 'Subcompact Hatchback',accent: '#7C3AED', bg: '#F5F3FF', icon: '/icons/car-bt-subcompact-hatchback.svg' },
+  { name: 'Micro Van',           accent: '#0891B2', bg: '#ECFEFF', icon: '/icons/car-bt-micro-van.svg' },
+  { name: 'Mini Vehicles',       accent: '#D97706', bg: '#FFFBEB', icon: '/icons/car-bt-mini-vehicles.svg' },
+  { name: 'Single Cabin',        accent: '#DC2626', bg: '#FEF2F2', icon: '/icons/car-bt-single-cabin.svg' },
+  { name: 'Double Cabin',        accent: '#4F46E5', bg: '#EEF2FF', icon: '/icons/car-bt-double-cabin.svg' },
+  { name: 'Off-Road Vehicles',   accent: '#16A34A', bg: '#F0FDF4', icon: '/icons/car-bt-off-road-vehicles.svg' },
 ];
 
 // All silhouettes share viewBox="0 0 160 72", profile facing right.
@@ -499,7 +508,7 @@ function ShopByBodyTypeSection() {
           style={{ background: 'linear-gradient(to left, #f9fafb, transparent)' }} />
 
         <div className="flex body-track gap-4 px-4" style={{ width: 'max-content' }}>
-          {track.map(({ name, accent, bg }, i) => (
+          {track.map(({ name, accent, bg, icon }, i) => (
             <button
               key={`${name}-${i}`}
               onClick={() => navigate(`/cars?body=${encodeURIComponent(name)}`)}
@@ -522,7 +531,9 @@ function ShopByBodyTypeSection() {
                 className="w-full h-[76px] flex items-center justify-center rounded-[6px]"
                 style={{ backgroundColor: bg }}
               >
-                <CarSilhouette type={name} color={accent} />
+                {icon
+                  ? <img src={icon} alt={name} className="h-12 w-auto object-contain" />
+                  : <CarSilhouette type={name} color={accent} />}
               </div>
 
               {/* Body type name */}

@@ -38,17 +38,26 @@ const PRICE_RANGES = [
 ];
 
 const BODY_TYPE_ITEMS = [
-  { name: 'Sedan',         accent: '#3B82F6', bg: '#EFF6FF' },
-  { name: 'Hatchback',     accent: '#10B981', bg: '#ECFDF5' },
-  { name: 'SUV',           accent: '#F97316', bg: '#FFF7ED' },
-  { name: 'Station Wagon', accent: '#8B5CF6', bg: '#F5F3FF' },
-  { name: 'Van',           accent: '#06B6D4', bg: '#ECFEFF' },
-  { name: 'Mini Van',      accent: '#F59E0B', bg: '#FFFBEB' },
-  { name: 'Truck',         accent: '#EF4444', bg: '#FEF2F2' },
-  { name: 'Bus',           accent: '#6366F1', bg: '#EEF2FF' },
-  { name: 'MPV',           accent: '#EC4899', bg: '#FDF2F8' },
-  { name: 'Wagon',         accent: '#84CC16', bg: '#F7FEE7' },
-  { name: 'Cooper',        accent: '#14B8A6', bg: '#F0FDFA' },
+  { name: 'Sedan',               accent: '#3B82F6', bg: '#EFF6FF' },
+  { name: 'Hatchback',           accent: '#10B981', bg: '#ECFDF5' },
+  { name: 'SUV',                 accent: '#F97316', bg: '#FFF7ED' },
+  { name: 'Station Wagon',       accent: '#8B5CF6', bg: '#F5F3FF' },
+  { name: 'Van',                 accent: '#06B6D4', bg: '#ECFEFF' },
+  { name: 'Mini Van',            accent: '#F59E0B', bg: '#FFFBEB' },
+  { name: 'Truck',               accent: '#EF4444', bg: '#FEF2F2' },
+  { name: 'Bus',                 accent: '#6366F1', bg: '#EEF2FF' },
+  { name: 'MPV',                 accent: '#EC4899', bg: '#FDF2F8' },
+  { name: 'Wagon',               accent: '#84CC16', bg: '#F7FEE7' },
+  { name: 'Cooper',              accent: '#14B8A6', bg: '#F0FDFA' },
+  { name: 'Compact Sedan',       accent: '#2563EB', bg: '#EFF6FF', icon: '/icons/car-bt-compact-sedan.svg' },
+  { name: 'Compact SUV',         accent: '#EA580C', bg: '#FFF7ED', icon: '/icons/car-bt-compact-suv.svg' },
+  { name: 'Compact Hatchback',   accent: '#059669', bg: '#ECFDF5', icon: '/icons/car-bt-compact-hatchback.svg' },
+  { name: 'Subcompact Hatchback',accent: '#7C3AED', bg: '#F5F3FF', icon: '/icons/car-bt-subcompact-hatchback.svg' },
+  { name: 'Micro Van',           accent: '#0891B2', bg: '#ECFEFF', icon: '/icons/car-bt-micro-van.svg' },
+  { name: 'Mini Vehicles',       accent: '#D97706', bg: '#FFFBEB', icon: '/icons/car-bt-mini-vehicles.svg' },
+  { name: 'Single Cabin',        accent: '#DC2626', bg: '#FEF2F2', icon: '/icons/car-bt-single-cabin.svg' },
+  { name: 'Double Cabin',        accent: '#4F46E5', bg: '#EEF2FF', icon: '/icons/car-bt-double-cabin.svg' },
+  { name: 'Off-Road Vehicles',   accent: '#16A34A', bg: '#F0FDF4', icon: '/icons/car-bt-off-road-vehicles.svg' },
 ];
 const BODY_TYPES    = BODY_TYPE_ITEMS.map(b => b.name);
 const CATEGORIES    = ['Gasoline', 'Hybrid', 'Diesel', 'Light Oil'];
@@ -488,7 +497,7 @@ function BodyTypeCarousel({ setActiveBody }: { setActiveBody: (v: string) => voi
         <div className="absolute right-0 top-0 bottom-0 w-8 z-10 pointer-events-none"
           style={{ background: 'linear-gradient(to left, #f9fafb, transparent)' }} />
         <div className="flex body-track gap-3 px-3" style={{ width: 'max-content' }}>
-          {track.map(({ name, accent, bg }, i) => (
+          {track.map(({ name, accent, bg, icon }, i) => (
             <button key={`${name}-${i}`} onClick={() => setActiveBody(name)}
               className="group flex-shrink-0 flex flex-col items-center gap-2 w-[140px] py-4 px-3 bg-white transition-all duration-200 cursor-pointer rounded-[8px]"
               style={{ border: `1.5px solid ${accent}33`, boxShadow: `0 2px 8px ${accent}0d` }}
@@ -496,7 +505,9 @@ function BodyTypeCarousel({ setActiveBody }: { setActiveBody: (v: string) => voi
               onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.border = `1.5px solid ${accent}33`; (e.currentTarget as HTMLButtonElement).style.boxShadow = `0 2px 8px ${accent}0d`; }}
             >
               <div className="w-full h-[64px] flex items-center justify-center rounded-[6px]" style={{ backgroundColor: bg }}>
-                <CarSilhouette type={name} color={accent} />
+                {icon
+                  ? <img src={icon} alt={name} className="h-10 w-auto object-contain" />
+                  : <CarSilhouette type={name} color={accent} />}
               </div>
               <span className="text-[11px] font-bold tracking-wide text-center leading-tight" style={{ color: accent }}>{name}</span>
             </button>
