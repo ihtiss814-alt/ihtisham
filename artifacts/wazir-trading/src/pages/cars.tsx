@@ -1358,7 +1358,7 @@ export default function CarsPage() {
   const totalDisplay = totalCount.toLocaleString();
 
   return (
-    <div className="min-h-screen bg-gray-50 pt-[80px]">
+    <div className="min-h-screen bg-gray-50 pt-[175px] md:pt-[148px]">
 
       {/* ── HERO SEARCH BANNER ─────────────────────────────── */}
       <div className="w-full py-10 px-4" style={{ background: NAVY }}>
@@ -1435,7 +1435,7 @@ export default function CarsPage() {
 
       <div ref={resultsRef} className="flex gap-0">
         {/* ── Desktop Sidebar ────────────────────────────────── */}
-        <div className="hidden md:block sticky top-[80px] self-start overflow-y-auto max-h-[calc(100vh-80px)] border-r border-gray-200 bg-white shadow-sm" style={{ minWidth: 220, width: 220 }}>
+        <div className="hidden md:block sticky top-[148px] self-start overflow-y-auto max-h-[calc(100vh-148px)] border-r border-gray-200 bg-white shadow-sm" style={{ minWidth: 220, width: 220 }}>
           <div className="px-3 py-3 border-b border-gray-100" style={{ background: NAVY }}>
             <p className="text-white text-[11px] font-bold tracking-[0.15em] uppercase">Filter Vehicles</p>
             <p className="text-white/50 text-[10px] mt-0.5">{totalDisplay} cars in stock</p>

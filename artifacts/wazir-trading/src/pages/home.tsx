@@ -2496,7 +2496,7 @@ export default function HomePage() {
         />
 
         {/* Content */}
-        <div className="relative z-10 max-w-4xl mx-auto px-4 md:px-8 w-full pt-[110px] pb-10 flex flex-col items-center text-center">
+        <div className="relative z-10 max-w-4xl mx-auto px-4 md:px-8 w-full pt-[185px] sm:pt-[160px] md:pt-[110px] pb-10 flex flex-col items-center text-center">
 
           {/* Badge */}
           <motion.div
@@ -2526,7 +2526,8 @@ export default function HomePage() {
             className="font-serif font-bold text-white leading-[1.1] mb-3"
             style={{ fontSize: 'clamp(1.75rem, 4.5vw, 3.4rem)' }}
           >
-            Import Your Dream Car —<br className="hidden sm:block" />
+            Import Your Dream Car
+            <br />
             <span style={{ color: '#F87171' }}>Direct from Japan</span>
           </motion.h1>
 
