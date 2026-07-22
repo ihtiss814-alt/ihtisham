@@ -20,7 +20,7 @@ type CarWithImage = Car & { car_images?: Array<{ image_url: string; is_primary: 
 const NAVY = '#0D1B3E';
 const RED  = '#C8102E';
 const WA_NUMBER = import.meta.env.VITE_WHATSAPP_NUMBER || '818089227375';
-const PAGE_SIZE = 10;
+const PAGE_SIZE = 20;
 
 const MAKE_NAMES = [
   'Toyota', 'Nissan', 'Honda', 'Mazda', 'Mitsubishi', 'Subaru',
