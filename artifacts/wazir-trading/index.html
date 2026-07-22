@@ -3,19 +3,49 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1" />
-    <title>Wazir Trading LLC</title>
-    <meta name="description" content="Wazir Trading LLC — built on Replit. Update this description to reflect the app." />
+    <title>Wazir Trading LLC — Import Japanese Cars</title>
+    <meta name="description" content="Wazir Trading LLC — Premium Japanese used car exports to 130+ countries. Buy directly from Japan's top auction houses." />
     <meta name="robots" content="index, follow" />
-    <meta property="og:title" content="Wazir Trading LLC" />
-    <meta property="og:description" content="Wazir Trading LLC — built on Replit. Update this description to reflect the app." />
+    <meta property="og:title" content="Wazir Trading LLC — Import Japanese Cars" />
+    <meta property="og:description" content="Premium Japanese used car exports to 130+ countries. Buy directly from Japan's top auction houses." />
     <meta property="og:type" content="website" />
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content="Wazir Trading LLC" />
-    <meta name="twitter:description" content="Wazir Trading LLC — built on Replit. Update this description to reflect the app." />
+    <meta name="twitter:description" content="Premium Japanese used car exports to 130+ countries." />
+
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Preload the logo (above-the-fold critical asset) -->
+    <link rel="preload" as="image" href="/logo.webp" type="image/webp" />
+
+    <!-- DNS + TLS pre-negotiation for external origins used at runtime -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="preconnect" href="https://res.cloudinary.com" crossorigin />
+
+    <!--
+      Google Fonts — loaded non-blocking so it never delays first paint.
+      The media="print" trick: browser fetches it low-priority, then
+      onload flips it to media="all" making it apply without blocking render.
+    -->
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+      media="print"
+      onload="this.media='all'"
+    />
+    <!-- Fallback for no-JS: loads normally (blocking) but only in that edge case -->
+    <noscript>
+      <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" />
+    </noscript>
+
+    <!--
+      Critical inline CSS: ensures Inter (or system fallback) is set before
+      the JS bundle loads, preventing a flash of unstyled text.
+    -->
+    <style>
+      body { font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
+    </style>
   </head>
   <body>
     <div id="root"></div>

@@ -215,13 +215,19 @@ export default function Navbar() {
 
               {/* Logo */}
               <Link href="/" className="flex-shrink-0 group" data-testid="link-logo">
-                <img
-                  src="/logo.png"
-                  alt="Wazir Trading LLC"
-                  className="h-[64px] md:h-[72px] w-auto transition-opacity duration-200 group-hover:opacity-85"
-                  style={{ mixBlendMode: 'multiply' }}
-                  loading="eager"
-                />
+                <picture>
+                  <source srcSet="/logo.webp" type="image/webp" />
+                  <img
+                    src="/logo-small.png"
+                    alt="Wazir Trading LLC"
+                    className="h-[64px] md:h-[72px] w-auto transition-opacity duration-200 group-hover:opacity-85"
+                    style={{ mixBlendMode: 'multiply' }}
+                    loading="eager"
+                    decoding="sync"
+                    width="267"
+                    height="178"
+                  />
+                </picture>
               </Link>
 
               {/* Desktop nav */}
@@ -336,13 +342,19 @@ export default function Navbar() {
               {/* Drawer header */}
               <div className="flex items-center justify-between px-5 h-[64px] border-b border-gray-100 flex-shrink-0">
                 <Link href="/" onClick={() => setMobileOpen(false)}>
-                  <img
-                    src="/logo.png"
-                    alt="Wazir Trading LLC"
-                    className="h-[48px] w-auto"
-                    style={{ mixBlendMode: 'multiply' }}
-                    loading="eager"
-                  />
+                  <picture>
+                    <source srcSet="/logo.webp" type="image/webp" />
+                    <img
+                      src="/logo-small.png"
+                      alt="Wazir Trading LLC"
+                      className="h-[48px] w-auto"
+                      style={{ mixBlendMode: 'multiply' }}
+                      loading="eager"
+                      decoding="sync"
+                      width="267"
+                      height="178"
+                    />
+                  </picture>
                 </Link>
                 <button
                   onClick={() => setMobileOpen(false)}

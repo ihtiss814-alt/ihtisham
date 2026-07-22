@@ -1,9 +1,31 @@
-import React, { useEffect } from 'react';
+import React, { Suspense, useEffect } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Toaster } from '@/components/ui/toaster';
 import { TooltipProvider } from '@/components/ui/tooltip';
-import NotFound from '@/pages/not-found';
 import { Route, Switch, Router as WouterRouter, useLocation } from 'wouter';
+
+// Components always needed — load eagerly
+import Navbar from '@/components/Navbar';
+import Footer from '@/components/Footer';
+
+// Pages — lazy-loaded so each route only downloads its own code
+const HomePage      = React.lazy(() => import('@/pages/home'));
+const CarsPage      = React.lazy(() => import('@/pages/cars'));
+const CarDetailPage = React.lazy(() => import('@/pages/car-detail'));
+const AboutPage     = React.lazy(() => import('@/pages/about'));
+const HowItWorksPage = React.lazy(() => import('@/pages/how-it-works'));
+const ContactPage   = React.lazy(() => import('@/pages/contact'));
+const NotFound      = React.lazy(() => import('@/pages/not-found'));
+
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 60_000,       // 60 s — avoid refetching on every mount
+      gcTime: 5 * 60_000,      // 5 min cache retention
+      retry: 1,
+    },
+  },
+});
 
 function ScrollToTop() {
   const [location] = useLocation();
@@ -13,31 +35,26 @@ function ScrollToTop() {
   return null;
 }
 
-// Components
-import Navbar from '@/components/Navbar';
-import Footer from '@/components/Footer';
-
-// Pages
-import HomePage from '@/pages/home';
-import CarsPage from '@/pages/cars';
-import CarDetailPage from '@/pages/car-detail';
-import AboutPage from '@/pages/about';
-import HowItWorksPage from '@/pages/how-it-works';
-import ContactPage from '@/pages/contact';
-
-const queryClient = new QueryClient();
+// Minimal skeleton shown while a lazy chunk is downloading (rare after first load)
+function PageSkeleton() {
+  return (
+    <div className="min-h-screen bg-gray-50 animate-pulse" aria-hidden="true" />
+  );
+}
 
 function Router() {
   return (
-    <Switch>
-      <Route path="/" component={HomePage} />
-      <Route path="/cars" component={CarsPage} />
-      <Route path="/cars/:ref" component={CarDetailPage} />
-      <Route path="/about" component={AboutPage} />
-      <Route path="/how-it-works" component={HowItWorksPage} />
-      <Route path="/contact" component={ContactPage} />
-      <Route component={NotFound} />
-    </Switch>
+    <Suspense fallback={<PageSkeleton />}>
+      <Switch>
+        <Route path="/" component={HomePage} />
+        <Route path="/cars" component={CarsPage} />
+        <Route path="/cars/:ref" component={CarDetailPage} />
+        <Route path="/about" component={AboutPage} />
+        <Route path="/how-it-works" component={HowItWorksPage} />
+        <Route path="/contact" component={ContactPage} />
+        <Route component={NotFound} />
+      </Switch>
+    </Suspense>
   );
 }
 
