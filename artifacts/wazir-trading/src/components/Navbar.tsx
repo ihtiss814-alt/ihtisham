@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Link, useLocation } from 'wouter';
 import { Menu, X, ChevronRight, AlertTriangle, Clock, Car, Mail, Phone } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -51,17 +51,28 @@ function useStockCount() {
 
 export default function Navbar() {
   const [scrolled, setScrolled]     = useState(false);
+  const [navHidden, setNavHidden]   = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [location]                  = useLocation();
   const japanTime                   = useJapanTime();
   const stockCount                  = useStockCount();
+  const lastScrollY                 = useRef(0);
 
   const waNumber  = import.meta.env.VITE_WHATSAPP_NUMBER || '818089227375';
   const waMessage = encodeURIComponent('Hello, I am interested in purchasing a Japanese used car from Wazir Trading LLC.');
   const waLink    = `https://wa.me/${waNumber}?text=${waMessage}`;
 
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 20);
+    const onScroll = () => {
+      const y = window.scrollY;
+      setScrolled(y > 20);
+      if (y > 120) {
+        setNavHidden(y > lastScrollY.current);
+      } else {
+        setNavHidden(false);
+      }
+      lastScrollY.current = y;
+    };
     window.addEventListener('scroll', onScroll, { passive: true });
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
@@ -78,7 +89,9 @@ export default function Navbar() {
   return (
     <>
       <header
-        className="fixed top-0 inset-x-0 z-50 transition-shadow duration-300"
+        className={`fixed top-0 inset-x-0 z-50 transition-all duration-300 ease-in-out ${
+          navHidden && !mobileOpen ? '-translate-y-full' : 'translate-y-0'
+        }`}
         style={{ boxShadow: scrolled ? '0 2px 16px rgba(0,0,0,0.10)' : 'none' }}
         data-testid="site-header"
       >

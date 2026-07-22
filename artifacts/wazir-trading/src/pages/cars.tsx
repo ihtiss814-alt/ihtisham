@@ -651,7 +651,6 @@ function TotalPriceCalculator() {
 /* CAR LISTING CARD                                                 */
 /* ─────────────────────────────────────────────────────────────── */
 function CarRow({ car, pkrRate }: { car: CarWithImage; pkrRate: number }) {
-  const [showFeatures, setShowFeatures] = useState(false);
   const primaryImage =
     car.car_images?.find(img => img.is_primary)?.image_url ||
     car.car_images?.[0]?.image_url ||
@@ -675,121 +674,116 @@ function CarRow({ car, pkrRate }: { car: CarWithImage; pkrRate: number }) {
     window.open(`https://wa.me/${WA_NUMBER}?text=${msg}`, '_blank');
   };
 
-  const specs = [
-    { icon: <Gauge size={13} />,    label: 'Mileage',      value: `${car.mileage_km.toLocaleString()} KM` },
-    { icon: <Calendar size={13} />, label: 'Year',          value: String(car.year) },
-    { icon: <Zap size={13} />,      label: 'Engine',        value: `${car.engine_cc} CC` },
-    { icon: <Settings size={13} />, label: 'Trans.',         value: car.transmission },
-    { icon: <Navigation size={13} />,label:'Body Type',     value: car.body_type || '-' },
-    { icon: <MapPin size={13} />,   label: 'Steering',       value: car.steering },
-    { icon: <Fuel size={13} />,     label: 'Fuel',           value: car.fuel_type },
-    { icon: <Users size={13} />,    label: 'Seats',          value: car.seats > 0 ? String(car.seats) : '-' },
-    { icon: <span className="text-[10px] font-bold text-gray-400">LOC</span>, label: 'Location', value: car.stock_location || '-' },
-    { icon: <Palette size={13} />,  label: 'Color',          value: car.color },
-    { icon: <Settings size={13} />, label: 'Drive',          value: car.drive },
-    { icon: <DoorOpen size={13} />, label: 'Doors',          value: String(car.doors) },
-  ];
+  const badges = [
+    car.year ? String(car.year) : null,
+    car.mileage_km ? `${car.mileage_km.toLocaleString()} km` : null,
+    car.engine_cc  ? `${car.engine_cc} cc` : null,
+    car.transmission || null,
+    car.fuel_type || null,
+    car.body_type || null,
+    car.steering || null,
+    car.drive || null,
+    car.color || null,
+  ].filter(Boolean) as string[];
 
   return (
-    <div className="bg-white border border-gray-200 shadow-sm mb-4 overflow-hidden">
-      {/* Title */}
-      <Link href={`/cars/${car.ref_number}`}>
-        <div className="px-4 pt-4 pb-2 cursor-pointer hover:text-[#C8102E] transition-colors">
-          <h3 className="font-bold text-[15px] text-gray-900 leading-snug">
-            {car.make.toUpperCase()} {car.model.toUpperCase()} {car.variant ? car.variant.toUpperCase() : ''}
-          </h3>
-        </div>
-      </Link>
+    <div className="bg-white border border-gray-200 shadow-sm mb-3 overflow-hidden flex flex-col sm:flex-row">
 
-      {/* Image */}
-      <Link href={`/cars/${car.ref_number}`}>
-        <div className="relative w-full bg-gray-100 cursor-pointer" style={{ aspectRatio: '16/9' }}>
-          {isNewArrival && (
-            <div className="absolute top-3 left-3 z-10 px-2 py-0.5 text-[10px] font-bold text-white uppercase tracking-wider rounded-sm"
-              style={{ background: '#16A34A' }}>New Arrival</div>
-          )}
-          {isClearance && (
-            <div className="absolute top-3 left-3 z-10 px-2 py-0.5 text-[10px] font-bold text-white uppercase tracking-wider"
-              style={{ background: '#D97706' }}>CLEARANCE</div>
+      {/* ── Image ── */}
+      <Link href={`/cars/${car.ref_number}`}
+        className="relative sm:w-[220px] sm:flex-shrink-0 block">
+        <div className="relative bg-gray-100 aspect-[4/3] sm:w-[220px] sm:h-full sm:aspect-auto min-h-[160px]">
+          {(isNewArrival || isClearance) && (
+            <div
+              className="absolute top-2 left-2 z-10 px-1.5 py-0.5 text-[10px] font-bold text-white uppercase tracking-wider"
+              style={{ background: isClearance ? '#D97706' : '#16A34A' }}>
+              {isClearance ? 'CLEARANCE' : 'New Arrival'}
+            </div>
           )}
           {primaryImage ? (
-            <img src={primaryImage} alt={`${car.make} ${car.model}`}
-              className="w-full h-full object-cover" />
+            <img
+              src={primaryImage}
+              alt={`${car.make} ${car.model}`}
+              className="absolute inset-0 w-full h-full object-cover"
+              loading="lazy"
+            />
           ) : (
-            <div className="w-full h-full flex flex-col items-center justify-center gap-2 bg-gray-100">
-              <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
-              <span className="text-[12px] font-medium text-gray-400 tracking-wide">Photo Coming Soon</span>
+            <div className="absolute inset-0 flex flex-col items-center justify-center gap-1.5 bg-gray-100">
+              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                <rect x="3" y="3" width="18" height="18" rx="2"/>
+                <circle cx="8.5" cy="8.5" r="1.5"/>
+                <path d="M21 15l-5-5L5 21"/>
+              </svg>
+              <span className="text-[11px] font-medium text-gray-400">Photo Coming Soon</span>
             </div>
           )}
         </div>
       </Link>
 
-      {/* Ref + Location */}
-      <div className="px-4 pt-3 pb-1 flex items-center justify-between">
-        <span className="text-[12px] text-gray-500">Reference #{car.ref_number}</span>
-        <div className="flex items-center gap-1.5">
-          <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: RED }} />
-          <span className="text-[12px] font-bold text-gray-700 tracking-wider">{car.stock_location?.toUpperCase()}</span>
+      {/* ── Details ── */}
+      <div className="flex-1 flex flex-col p-3 min-w-0">
+
+        {/* Title + ref */}
+        <div className="flex items-start justify-between gap-2 mb-1">
+          <Link href={`/cars/${car.ref_number}`}>
+            <h3 className="font-bold text-[13px] sm:text-[14px] text-gray-900 leading-snug hover:text-[#C8102E] transition-colors">
+              {car.make.toUpperCase()} {car.model.toUpperCase()}{car.variant ? ` ${car.variant.toUpperCase()}` : ''}
+            </h3>
+          </Link>
+          <span className="text-[10px] text-gray-400 whitespace-nowrap flex-shrink-0 mt-px">
+            #{car.ref_number}
+          </span>
         </div>
-      </div>
 
-      {/* Pricing */}
-      <div className="px-4 pt-1 pb-3">
-        <div className="text-[11px] text-gray-400 uppercase tracking-wider font-semibold mb-0.5">FOB PRICE</div>
-        <div className="text-[26px] font-black leading-none" style={{ color: RED }}>
-          ${car.fob_price_usd.toLocaleString()}
+        {/* Location */}
+        <div className="flex items-center gap-1 mb-2">
+          <span className="w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ background: RED }} />
+          <span className="text-[10px] font-semibold text-gray-500 tracking-widest uppercase">
+            {car.stock_location || 'Japan'}
+          </span>
         </div>
-        {pkrRate > 0 && (
-          <div className="text-[13px] font-semibold mt-1" style={{ color: '#374151' }}>
-            PKR {pkrPrice.toLocaleString()}
-          </div>
-        )}
-      </div>
 
-      {/* CTAs */}
-      <div className="px-4 pb-3 flex flex-col gap-2">
-        <Link href={`/cars/${car.ref_number}`}
-          className="flex items-center justify-center gap-2 w-full py-2.5 font-bold text-[13px] text-white rounded-sm transition-opacity hover:opacity-90"
-          style={{ background: NAVY }}>
-          Inquire Now
-        </Link>
-        <a href={waInquireLink} target="_blank" rel="noopener noreferrer"
-          className="flex items-center justify-center gap-2 w-full py-2.5 font-bold text-[13px] text-white rounded-sm transition-opacity hover:opacity-90"
-          style={{ background: '#25D366' }}>
-          <WhatsAppIcon size={15} /> WhatsApp
-        </a>
-        <button onClick={handleOfferPrice}
-          className="flex items-center justify-center gap-2 w-full py-2.5 font-bold text-[13px] border rounded-sm transition-colors hover:bg-red-50"
-          style={{ borderColor: RED, color: RED }}>
-          Offer Your Price
-        </button>
-      </div>
+        {/* Spec badges */}
+        <div className="flex flex-wrap gap-1 mb-3">
+          {badges.map((b, i) => (
+            <span key={i}
+              className="px-1.5 py-0.5 text-[10px] font-medium text-gray-600 bg-gray-100 border border-gray-200">
+              {b}
+            </span>
+          ))}
+        </div>
 
-      {/* Features toggle */}
-      <div className="border-t border-gray-100">
-        <button onClick={() => setShowFeatures(v => !v)}
-          className="w-full flex items-center justify-between px-4 py-2.5 text-[12px] font-semibold text-gray-600 hover:bg-gray-50 transition-colors">
-          <div className="flex items-center gap-2">
-            <div className="w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0"
-              style={{ background: '#25D366' }}>
-              <WhatsAppIcon size={13} />
+        {/* Price + Actions */}
+        <div className="mt-auto flex flex-wrap items-center gap-2">
+          {/* Price */}
+          <div className="mr-auto">
+            <div className="text-[20px] sm:text-[22px] font-black leading-none" style={{ color: RED }}>
+              ${car.fob_price_usd.toLocaleString()}
             </div>
-          </div>
-          <span>{showFeatures ? 'Hide Features' : 'View Features'}</span>
-          {showFeatures ? <ChevronUp size={14} className="text-gray-400" /> : <ChevronDown size={14} className="text-gray-400" />}
-        </button>
-        {showFeatures && (
-          <div className="border-t border-gray-100">
-            {specs.map((s, i) => (
-              <div key={i} className="flex items-center px-4 py-2 text-[12px] border-b border-gray-50 last:border-b-0"
-                style={{ background: i % 2 === 0 ? '#fff' : '#fafafa' }}>
-                <span className="text-gray-400 w-5 flex-shrink-0">{s.icon}</span>
-                <span className="text-gray-500 flex-1">{s.label}</span>
-                <span className="font-semibold text-gray-800 text-right">{s.value || '-'}</span>
+            {pkrRate > 0 && (
+              <div className="text-[10px] font-semibold text-gray-400 mt-0.5">
+                PKR {pkrPrice.toLocaleString()}
               </div>
-            ))}
+            )}
           </div>
-        )}
+
+          {/* CTA buttons */}
+          <Link href={`/cars/${car.ref_number}`}
+            className="px-3 py-1.5 text-[11px] font-bold text-white tracking-wide hover:opacity-90 transition-opacity"
+            style={{ background: NAVY }}>
+            View Details
+          </Link>
+          <a href={waInquireLink} target="_blank" rel="noopener noreferrer"
+            className="flex items-center gap-1 px-3 py-1.5 text-[11px] font-bold text-white hover:opacity-90 transition-opacity"
+            style={{ background: '#25D366' }}>
+            <WhatsAppIcon size={12} /> WhatsApp
+          </a>
+          <button onClick={handleOfferPrice}
+            className="px-3 py-1.5 text-[11px] font-bold border hover:bg-red-50 transition-colors"
+            style={{ borderColor: RED, color: RED }}>
+            Offer Price
+          </button>
+        </div>
       </div>
     </div>
   );
