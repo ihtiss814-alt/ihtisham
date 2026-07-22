@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { Link, useLocation } from 'wouter';
-import { Menu, X, ChevronRight, AlertTriangle, Clock, Car, Mail, Phone } from 'lucide-react';
+import { Menu, X, ChevronRight, Clock, Car, Mail, Phone } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import { useExchangeRate } from '@/hooks/useExchangeRate';
 
@@ -103,39 +103,6 @@ export default function Navbar() {
         data-testid="site-header"
       >
 
-        {/* ── BAR 1: Fraud Warning ──────────────────────────────────── */}
-        <div className="bg-[#7F1D1D]">
-          <div className="max-w-7xl mx-auto px-4 md:px-8 py-[7px] flex items-center justify-center gap-3 flex-wrap">
-            <div className="flex items-center gap-1.5 flex-shrink-0">
-              <AlertTriangle size={11} className="text-amber-300" />
-              <span className="text-amber-300 text-[10.5px] font-bold tracking-[0.18em] uppercase">
-                Fraud Warning
-              </span>
-            </div>
-            <span className="hidden sm:block h-3 w-px bg-white/20" />
-            <p className="text-center text-[10.5px] leading-snug text-white/85 font-normal tracking-wide">
-              We will{' '}
-              <strong className="text-white font-semibold">never</strong>{' '}
-              request payment to a personal account —{' '}
-              <span className="text-white/90 font-medium">official bank is in Japan only.</span>
-              {' '}Verify all details:{' '}
-              <a
-                href="tel:+818089227375"
-                className="text-amber-300 hover:text-amber-200 font-semibold transition-colors whitespace-nowrap"
-              >
-                +81 80-8922-7375
-              </a>
-              <span className="text-white/40 mx-1.5">·</span>
-              <a
-                href="mailto:wazirtrading-pc@outlook.jp"
-                className="text-amber-300 hover:text-amber-200 font-semibold transition-colors whitespace-nowrap"
-              >
-                wazirtrading-pc@outlook.jp
-              </a>
-            </p>
-          </div>
-        </div>
-
         {/* ── BAR 2: Info strip ─────────────────────────────────────── */}
         <div className="bg-[#F9F9F9] border-b border-gray-200">
 
@@ -221,7 +188,7 @@ export default function Navbar() {
                   <img
                     src="/logo-small.png"
                     alt="Wazir Trading LLC"
-                    className="h-[64px] md:h-[72px] w-auto transition-opacity duration-200 group-hover:opacity-85"
+                    className="h-[76px] md:h-[88px] w-auto transition-opacity duration-200 group-hover:opacity-85"
                     style={{ mixBlendMode: 'multiply' }}
                     loading="eager"
                     decoding="sync"
@@ -354,18 +321,6 @@ export default function Navbar() {
           >
             <X size={16} />
           </button>
-        </div>
-
-        {/* Fraud alert in drawer */}
-        <div className="mx-4 mt-4 flex-shrink-0 bg-red-50 border border-red-100 rounded-[2px] px-3 py-2.5 flex gap-2">
-          <AlertTriangle size={12} className="text-[#C8102E] flex-shrink-0 mt-0.5" />
-          <div className="text-[10px] text-gray-600 leading-relaxed">
-            <span className="font-bold text-[#C8102E]">Fraud Warning — </span>
-            never pay to personal accounts. Bank in Japan only.{' '}
-            <a href="tel:+818089227375" className="font-semibold text-[#C8102E] underline underline-offset-2">
-              +81 80-8922-7375
-            </a>
-          </div>
         </div>
 
         {/* Nav links */}
