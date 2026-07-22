@@ -2526,8 +2526,8 @@ export default function HomePage() {
             className="font-serif font-bold text-white leading-[1.08] mb-6"
             style={{ fontSize: 'clamp(2.6rem, 6vw, 5rem)' }}
           >
-            Japanese Used Cars —<br className="hidden sm:block" />
-            <span style={{ color: '#F87171' }}>Exported Worldwide</span>
+            Import Your Dream Car —<br className="hidden sm:block" />
+            <span style={{ color: '#F87171' }}>Direct from Japan</span>
           </motion.h1>
 
           {/* Subtext */}
@@ -2538,10 +2538,10 @@ export default function HomePage() {
             className="text-white/70 font-light leading-relaxed mb-10 max-w-xl"
             style={{ fontSize: 'clamp(1rem, 2vw, 1.15rem)' }}
           >
-            Browse thousands of quality-graded Japanese vehicles sourced directly from
-            auction halls in Japan — exported to{' '}
-            <span className="text-white font-medium">130+ countries</span>{' '}
-            at the best auction prices. No middlemen.
+            We source premium, quality-graded vehicles straight from Japan's auction halls
+            and ship them to{' '}
+            <span className="text-white font-medium">130+ countries worldwide</span>
+            {' '}— at unbeatable auction prices, with zero middlemen and full transparency.
           </motion.p>
 
           {/* CTA buttons */}
