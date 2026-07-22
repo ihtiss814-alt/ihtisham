@@ -1223,7 +1223,7 @@ export default function CarsPage() {
   useEffect(() => {
     fetchMakeCounts();
     fetchTabCounts();
-  }, [fetchMakeCounts, fetchTabCounts, fetchPKRRate]);
+  }, [fetchMakeCounts, fetchTabCounts]);
 
   // ── Re-fetch cars when filters/page/sort/tab change ──
   useEffect(() => {
