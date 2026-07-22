@@ -12,7 +12,7 @@ import type { Car } from '@/components/CarCard';
 /* ─────────────────────────────────────────────────────────────── */
 /* TYPES                                                            */
 /* ─────────────────────────────────────────────────────────────── */
-type CarWithImage = Car;
+type CarWithImage = Car & { car_images?: Array<{ image_url: string; is_primary: boolean }> };
 
 /* ─────────────────────────────────────────────────────────────── */
 /* CONSTANTS                                                        */
@@ -652,8 +652,10 @@ function TotalPriceCalculator() {
 /* ─────────────────────────────────────────────────────────────── */
 function CarRow({ car, pkrRate }: { car: CarWithImage; pkrRate: number }) {
   const [showFeatures, setShowFeatures] = useState(false);
-  const cloudName = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME || 'txb1wiw1';
-  const primaryImage = `https://res.cloudinary.com/${cloudName}/image/upload/cars/${car.ref_number?.toLowerCase()}-1`;
+  const primaryImage =
+    car.car_images?.find(img => img.is_primary)?.image_url ||
+    car.car_images?.[0]?.image_url ||
+    null;
 
   const pkrPrice = Math.round(car.fob_price_usd * pkrRate);
   const isNewArrival = car.is_new_arrival;
@@ -710,9 +712,15 @@ function CarRow({ car, pkrRate }: { car: CarWithImage; pkrRate: number }) {
             <div className="absolute top-3 left-3 z-10 px-2 py-0.5 text-[10px] font-bold text-white uppercase tracking-wider"
               style={{ background: '#D97706' }}>CLEARANCE</div>
           )}
-          <img src={primaryImage} alt={`${car.make} ${car.model}`}
-            className="w-full h-full object-cover"
-            onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} />
+          {primaryImage ? (
+            <img src={primaryImage} alt={`${car.make} ${car.model}`}
+              className="w-full h-full object-cover" />
+          ) : (
+            <div className="w-full h-full flex flex-col items-center justify-center gap-2 bg-gray-100">
+              <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
+              <span className="text-[12px] font-medium text-gray-400 tracking-wide">Photo Coming Soon</span>
+            </div>
+          )}
         </div>
       </Link>
 
@@ -1128,7 +1136,7 @@ export default function CarsPage() {
     try {
       let query = supabase
         .from('cars')
-        .select('*', { count: 'exact' });
+        .select('*, car_images(image_url, is_primary)', { count: 'exact' });
 
       query = applyFiltersToQuery(query, currentFilters, currentTab, currentSort);
 
