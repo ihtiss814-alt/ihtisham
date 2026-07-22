@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { Link, useLocation } from 'wouter';
 import {
   Search, ChevronDown, ChevronUp, ChevronLeft, ChevronRight,
@@ -1090,6 +1090,23 @@ export default function CarsPage() {
   const [pkrRate, setPkrRate]           = useState(0);
   const [showMobileFilter, setShowMobileFilter] = useState(false);
 
+  // ── Ref for scroll-to-results ──
+  const resultsRef = useRef<HTMLDivElement>(null);
+
+  // ── Scroll to results when arriving from a filtered link ──
+  useEffect(() => {
+    const p = getParams();
+    const hasFilter = ['q','make','price','body','category','location','year','drive','trans',
+      'engine','fuel','mileage','steering','minPrice','maxPrice','advMake','advModel',
+      'advBody','advFuel','advDrive','advTrans','advYearFrom','advYearTo','advMinPrice',
+      'advMaxPrice','advColor','advLocation','advMinMil','advMaxMil','advMinEng','advMaxEng',
+    ].some(k => p.get(k));
+    const delay = hasFilter ? setTimeout(() => {
+      resultsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 400) : null;
+    return () => { if (delay !== null) clearTimeout(delay); };
+  }, []);
+
   // ── Search input state ──
   const [searchInput, setSearchInput] = useState(filters.q);
 
@@ -1344,37 +1361,58 @@ export default function CarsPage() {
     <div className="min-h-screen bg-gray-50 pt-[80px]">
 
       {/* ── HERO SEARCH BANNER ─────────────────────────────── */}
-      <div className="w-full py-8 px-4" style={{ background: NAVY }}>
-        <div className="max-w-4xl mx-auto text-center">
-          <p className="text-[10px] tracking-[0.3em] uppercase font-bold mb-2" style={{ color: '#D4AF37' }}>
-            {totalCount > 0 ? `${totalDisplay} Vehicles In Stock` : 'Searching Inventory…'}
-          </p>
-          <h1 className="text-2xl md:text-3xl font-bold text-white mb-1" style={{ fontFamily: "'Playfair Display',serif" }}>
+      <div className="w-full py-10 px-4" style={{ background: NAVY }}>
+        <div className="max-w-3xl mx-auto text-center">
+          {/* Stock count badge */}
+          <div className="inline-flex items-center gap-2 mb-4 px-3 py-1 rounded-full border border-white/10"
+            style={{ background: 'rgba(212,175,55,0.12)' }}>
+            <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: '#D4AF37' }} />
+            <span className="text-[11px] tracking-[0.25em] uppercase font-bold" style={{ color: '#D4AF37' }}>
+              {totalCount > 0 ? `${totalDisplay} Vehicles In Stock` : 'Loading Inventory…'}
+            </span>
+          </div>
+
+          <h1 className="text-2xl sm:text-3xl font-bold text-white mb-2 leading-tight"
+            style={{ fontFamily: "'Playfair Display',serif" }}>
             Find Your Perfect Vehicle
           </h1>
-          <p className="text-white/60 text-sm mb-5">Quality Japanese imports — exported worldwide</p>
-          <div className="flex shadow-xl overflow-hidden rounded-sm max-w-2xl mx-auto">
-            <div className="relative flex-1">
-              <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
-              <input type="text" value={searchInput}
+          <p className="text-white/50 text-sm mb-6">
+            Quality Japanese imports — exported worldwide
+          </p>
+
+          {/* Search bar */}
+          <div className="flex w-full max-w-2xl mx-auto rounded-sm overflow-hidden shadow-2xl">
+            <div className="relative flex-1 min-w-0">
+              <Search size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+              <input
+                type="text"
+                value={searchInput}
                 onChange={e => setSearchInput(e.target.value)}
                 onKeyDown={e => e.key === 'Enter' && runSearch()}
                 placeholder="Search make, model, or reference #"
-                className="w-full h-13 pl-10 pr-4 text-sm text-gray-800 placeholder:text-gray-400 outline-none bg-white"
-                style={{ height: 52 }} />
+                className="w-full pl-10 pr-3 text-sm text-gray-800 placeholder:text-gray-400 outline-none bg-white"
+                style={{ height: 50 }}
+              />
             </div>
-            <button onClick={runSearch}
-              className="h-[52px] px-6 text-white text-[13px] font-bold tracking-[0.1em] uppercase flex items-center gap-2 flex-shrink-0 hover:opacity-90 transition-opacity"
+            <button
+              onClick={runSearch}
+              className="h-[50px] px-5 sm:px-7 text-white text-[12px] font-bold tracking-[0.08em] uppercase flex items-center gap-1.5 flex-shrink-0 hover:opacity-90 transition-opacity whitespace-nowrap"
               style={{ background: RED }}>
-              <Search size={14} /> Search
+              <Search size={13} className="hidden sm:block" /> Search
             </button>
           </div>
-          <div className="flex flex-wrap justify-center gap-3 mt-5">
+
+          {/* Quick make pills */}
+          <div className="flex flex-wrap justify-center gap-2 mt-5">
             {['Toyota', 'Nissan', 'Honda', 'Mazda'].map(label => (
-              <button key={label} onClick={() => setFilter('make', label)}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[12px] font-semibold border border-white/20 text-white/80 hover:border-white hover:text-white hover:bg-white/10 transition-all">
+              <button
+                key={label}
+                onClick={() => setFilter('make', label)}
+                className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-[12px] font-semibold border border-white/20 text-white/70 hover:border-white/60 hover:text-white hover:bg-white/10 transition-all duration-150">
                 {label}
-                {makeCounts[label] ? <span className="text-white/50 text-[10px]">{makeCounts[label].toLocaleString()}</span> : null}
+                {makeCounts[label] ? (
+                  <span className="text-white/40 text-[10px]">{makeCounts[label].toLocaleString()}</span>
+                ) : null}
               </button>
             ))}
           </div>
@@ -1395,7 +1433,7 @@ export default function CarsPage() {
         </div>
       )}
 
-      <div className="flex gap-0">
+      <div ref={resultsRef} className="flex gap-0">
         {/* ── Desktop Sidebar ────────────────────────────────── */}
         <div className="hidden md:block sticky top-[80px] self-start overflow-y-auto max-h-[calc(100vh-80px)] border-r border-gray-200 bg-white shadow-sm" style={{ minWidth: 220, width: 220 }}>
           <div className="px-3 py-3 border-b border-gray-100" style={{ background: NAVY }}>

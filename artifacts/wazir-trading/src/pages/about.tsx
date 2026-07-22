@@ -117,7 +117,7 @@ function ValueCard({ icon, title, desc }: { icon: React.ReactNode, title: string
   return (
     <div className="bg-card border border-border p-8 text-center hover:border-primary/50 transition-colors">
       <div className="w-16 h-16 rounded-full bg-primary/10 text-primary flex items-center justify-center mx-auto mb-6">
-        {React.cloneElement(icon as React.ReactElement, { size: 28 })}
+        {React.cloneElement(icon as React.ReactElement<{ size?: number }>, { size: 28 })}
       </div>
       <h3 className="text-xl font-serif font-bold mb-3">{title}</h3>
       <p className="text-muted-foreground text-sm leading-relaxed">{desc}</p>
