@@ -22,29 +22,43 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link rel="preconnect" href="https://res.cloudinary.com" crossorigin />
+    <link rel="dns-prefetch" href="https://flagcdn.com" />
+    <link rel="dns-prefetch" href="https://images.unsplash.com" />
+
+    <!-- Preload the first hero background so LCP doesn't wait on it -->
+    <link
+      rel="preload"
+      as="image"
+      href="https://images.unsplash.com/photo-1494976388531-d1058494cdd8?q=75&w=1200&auto=format&fit=crop"
+      fetchpriority="high"
+    />
 
     <!--
       Google Fonts — loaded non-blocking so it never delays first paint.
       The media="print" trick: browser fetches it low-priority, then
       onload flips it to media="all" making it apply without blocking render.
     -->
+    <!--
+      Google Fonts — non-blocking via media="print" trick so fonts never delay first paint.
+      Both Inter (body) and Playfair Display (headings) loaded together in one request.
+    -->
     <link
       rel="stylesheet"
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap"
       media="print"
       onload="this.media='all'"
     />
-    <!-- Fallback for no-JS: loads normally (blocking) but only in that edge case -->
     <noscript>
-      <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" />
+      <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" />
     </noscript>
 
     <!--
-      Critical inline CSS: ensures Inter (or system fallback) is set before
-      the JS bundle loads, preventing a flash of unstyled text.
+      Critical inline CSS: system font stack prevents FOUT before Google Fonts arrive.
+      Playfair Display falls back to Georgia (a serif), Inter falls back to system-ui.
     -->
     <style>
       body { font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
+      h1,h2,h3,h4,h5,h6 { font-family: 'Playfair Display', Georgia, 'Times New Roman', serif; }
     </style>
   </head>
   <body>

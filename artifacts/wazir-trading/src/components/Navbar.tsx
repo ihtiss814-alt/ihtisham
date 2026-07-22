@@ -1,7 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { Link, useLocation } from 'wouter';
 import { Menu, X, ChevronRight, AlertTriangle, Clock, Car, Mail, Phone } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
 import { supabase } from '@/lib/supabase';
 
 // ─── Brand tokens ────────────────────────────────────────────────
@@ -291,186 +290,168 @@ export default function Navbar() {
                 </a>
               </div>
 
-              {/* Mobile hamburger */}
+              {/* Mobile hamburger — CSS-only icon swap, no JS animation library */}
               <button
                 onClick={() => setMobileOpen((v) => !v)}
                 className="lg:hidden w-10 h-10 flex items-center justify-center rounded-[2px] text-gray-700 border border-gray-200 hover:border-gray-400 hover:bg-gray-50 transition-all duration-150"
                 aria-label="Toggle menu"
                 data-testid="btn-mobile-menu"
               >
-                <AnimatePresence mode="wait" initial={false}>
-                  <motion.span
-                    key={mobileOpen ? 'x' : 'menu'}
-                    initial={{ opacity: 0, rotate: -90 }}
-                    animate={{ opacity: 1, rotate: 0 }}
-                    exit={{ opacity: 0, rotate: 90 }}
-                    transition={{ duration: 0.12 }}
-                  >
-                    {mobileOpen ? <X size={18} /> : <Menu size={18} />}
-                  </motion.span>
-                </AnimatePresence>
+                <span className={`transition-all duration-150 ${mobileOpen ? 'opacity-0 rotate-90 scale-75' : 'opacity-100 rotate-0 scale-100'} absolute`}>
+                  <Menu size={18} />
+                </span>
+                <span className={`transition-all duration-150 ${mobileOpen ? 'opacity-100 rotate-0 scale-100' : 'opacity-0 -rotate-90 scale-75'} absolute`}>
+                  <X size={18} />
+                </span>
               </button>
             </div>
           </div>
         </div>
       </header>
 
-      {/* ── Mobile drawer ──────────────────────────────────────────── */}
-      <AnimatePresence>
-        {mobileOpen && (
-          <>
-            <motion.div
-              className="fixed inset-0 z-40 bg-black/40 backdrop-blur-sm"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.18 }}
-              onClick={() => setMobileOpen(false)}
-            />
+      {/* ── Backdrop — CSS opacity transition, no JS animation library ── */}
+      <div
+        className={`fixed inset-0 z-40 bg-black/40 backdrop-blur-sm transition-opacity duration-200 ${
+          mobileOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
+        }`}
+        onClick={() => setMobileOpen(false)}
+        aria-hidden="true"
+      />
 
-            <motion.div
-              className="fixed top-0 right-0 bottom-0 z-50 w-[min(320px,88vw)] bg-white flex flex-col"
-              style={{ boxShadow: '-4px 0 32px rgba(0,0,0,0.12)' }}
-              initial={{ x: '100%' }}
-              animate={{ x: 0 }}
-              exit={{ x: '100%' }}
-              transition={{ type: 'spring', stiffness: 340, damping: 36 }}
-            >
-              {/* Crimson top rule */}
-              <div className="h-[3px] bg-[#C8102E] flex-shrink-0" />
+      {/* ── Mobile drawer — CSS transform transition ── */}
+      <div
+        className={`fixed top-0 right-0 bottom-0 z-50 w-[min(320px,88vw)] bg-white flex flex-col transition-transform duration-300 ease-out ${
+          mobileOpen ? 'translate-x-0' : 'translate-x-full'
+        }`}
+        style={{ boxShadow: '-4px 0 32px rgba(0,0,0,0.12)' }}
+        aria-hidden={!mobileOpen}
+      >
+        {/* Crimson top rule */}
+        <div className="h-[3px] bg-[#C8102E] flex-shrink-0" />
 
-              {/* Drawer header */}
-              <div className="flex items-center justify-between px-5 h-[64px] border-b border-gray-100 flex-shrink-0">
-                <Link href="/" onClick={() => setMobileOpen(false)}>
-                  <picture>
-                    <source srcSet="/logo.webp" type="image/webp" />
-                    <img
-                      src="/logo-small.png"
-                      alt="Wazir Trading LLC"
-                      className="h-[48px] w-auto"
-                      style={{ mixBlendMode: 'multiply' }}
-                      loading="eager"
-                      decoding="sync"
-                      width="267"
-                      height="178"
-                    />
-                  </picture>
-                </Link>
-                <button
-                  onClick={() => setMobileOpen(false)}
-                  className="w-8 h-8 flex items-center justify-center rounded text-gray-500 hover:bg-gray-100 transition-colors"
-                >
-                  <X size={16} />
-                </button>
-              </div>
+        {/* Drawer header */}
+        <div className="flex items-center justify-between px-5 h-[64px] border-b border-gray-100 flex-shrink-0">
+          <Link href="/" onClick={() => setMobileOpen(false)}>
+            <picture>
+              <source srcSet="/logo.webp" type="image/webp" />
+              <img
+                src="/logo-small.png"
+                alt="Wazir Trading LLC"
+                className="h-[48px] w-auto"
+                style={{ mixBlendMode: 'multiply' }}
+                loading="eager"
+                decoding="sync"
+                width="267"
+                height="178"
+              />
+            </picture>
+          </Link>
+          <button
+            onClick={() => setMobileOpen(false)}
+            className="w-8 h-8 flex items-center justify-center rounded text-gray-500 hover:bg-gray-100 transition-colors"
+          >
+            <X size={16} />
+          </button>
+        </div>
 
-              {/* Fraud alert in drawer */}
-              <div className="mx-4 mt-4 flex-shrink-0 bg-red-50 border border-red-100 rounded-[2px] px-3 py-2.5 flex gap-2">
-                <AlertTriangle size={12} className="text-[#C8102E] flex-shrink-0 mt-0.5" />
-                <div className="text-[10px] text-gray-600 leading-relaxed">
-                  <span className="font-bold text-[#C8102E]">Fraud Warning — </span>
-                  never pay to personal accounts. Bank in Japan only.{' '}
-                  <a href="tel:+818089227375" className="font-semibold text-[#C8102E] underline underline-offset-2">
-                    +81 80-8922-7375
-                  </a>
-                </div>
-              </div>
+        {/* Fraud alert in drawer */}
+        <div className="mx-4 mt-4 flex-shrink-0 bg-red-50 border border-red-100 rounded-[2px] px-3 py-2.5 flex gap-2">
+          <AlertTriangle size={12} className="text-[#C8102E] flex-shrink-0 mt-0.5" />
+          <div className="text-[10px] text-gray-600 leading-relaxed">
+            <span className="font-bold text-[#C8102E]">Fraud Warning — </span>
+            never pay to personal accounts. Bank in Japan only.{' '}
+            <a href="tel:+818089227375" className="font-semibold text-[#C8102E] underline underline-offset-2">
+              +81 80-8922-7375
+            </a>
+          </div>
+        </div>
 
-              {/* Nav links */}
-              <nav className="flex-1 overflow-y-auto px-4 pt-3 pb-2">
-                {NAV_LINKS.map((link, i) => {
-                  const active = isActive(link.href);
-                  return (
-                    <motion.div
-                      key={link.href}
-                      initial={{ opacity: 0, x: 16 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: i * 0.04 + 0.06, duration: 0.2 }}
-                    >
-                      <Link
-                        href={link.href}
-                        onClick={() => setMobileOpen(false)}
-                        className={`flex items-center justify-between w-full px-4 py-3.5 mb-px rounded-[2px] transition-all duration-150 ${
-                          active
-                            ? 'bg-red-50 text-[#C8102E] border-l-[3px] border-[#C8102E] pl-3.5'
-                            : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900 border-l-[3px] border-transparent'
-                        }`}
-                        data-testid={`mobile-nav-${link.label.toLowerCase().replace(/\s+/g, '-')}`}
-                      >
-                        <span className="text-[11px] tracking-[0.2em] uppercase font-semibold">
-                          {link.label}
-                        </span>
-                        <ChevronRight
-                          size={14}
-                          className={active ? 'text-[#C8102E]' : 'text-gray-300'}
-                        />
-                      </Link>
-                    </motion.div>
-                  );
-                })}
-              </nav>
+        {/* Nav links */}
+        <nav className="flex-1 overflow-y-auto px-4 pt-3 pb-2">
+          {NAV_LINKS.map((link) => {
+            const active = isActive(link.href);
+            return (
+              <Link
+                key={link.href}
+                href={link.href}
+                onClick={() => setMobileOpen(false)}
+                className={`flex items-center justify-between w-full px-4 py-3.5 mb-px rounded-[2px] transition-all duration-150 ${
+                  active
+                    ? 'bg-red-50 text-[#C8102E] border-l-[3px] border-[#C8102E] pl-3.5'
+                    : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900 border-l-[3px] border-transparent'
+                }`}
+                data-testid={`mobile-nav-${link.label.toLowerCase().replace(/\s+/g, '-')}`}
+              >
+                <span className="text-[11px] tracking-[0.2em] uppercase font-semibold">
+                  {link.label}
+                </span>
+                <ChevronRight
+                  size={14}
+                  className={active ? 'text-[#C8102E]' : 'text-gray-300'}
+                />
+              </Link>
+            );
+          })}
+        </nav>
 
-              {/* Live data strip */}
-              <div className="mx-4 mb-4 flex-shrink-0 grid grid-cols-3 gap-2">
-                {/* Japan Time */}
-                <div className="flex flex-col items-center gap-1 bg-gray-50 border border-gray-100 rounded-[6px] py-2.5 px-1">
-                  <div className="flex items-center gap-1 text-gray-400">
-                    <Clock size={10} />
-                    <span className="text-[9px] font-semibold tracking-widest uppercase">JST</span>
-                  </div>
-                  <span className="font-mono font-bold text-gray-800 text-[11px] leading-none tabular-nums">
-                    {japanTime ? japanTime.split(', ').slice(-1)[0] : '--:--'}
-                  </span>
-                </div>
+        {/* Live data strip */}
+        <div className="mx-4 mb-4 flex-shrink-0 grid grid-cols-3 gap-2">
+          {/* Japan Time */}
+          <div className="flex flex-col items-center gap-1 bg-gray-50 border border-gray-100 rounded-[6px] py-2.5 px-1">
+            <div className="flex items-center gap-1 text-gray-400">
+              <Clock size={10} />
+              <span className="text-[9px] font-semibold tracking-widest uppercase">JST</span>
+            </div>
+            <span className="font-mono font-bold text-gray-800 text-[11px] leading-none tabular-nums">
+              {japanTime ? japanTime.split(', ').slice(-1)[0] : '--:--'}
+            </span>
+          </div>
 
-                {/* Stock count */}
-                <div className="flex flex-col items-center gap-1 bg-[#C8102E]/5 border border-[#C8102E]/15 rounded-[6px] py-2.5 px-1">
-                  <span className="text-[9px] font-semibold tracking-widest uppercase text-[#C8102E]/70">Stock</span>
-                  <span className="font-bold text-[#C8102E] text-[15px] leading-none">
-                    {stockCount !== null ? stockCount : '—'}
-                  </span>
-                </div>
+          {/* Stock count */}
+          <div className="flex flex-col items-center gap-1 bg-[#C8102E]/5 border border-[#C8102E]/15 rounded-[6px] py-2.5 px-1">
+            <span className="text-[9px] font-semibold tracking-widest uppercase text-[#C8102E]/70">Stock</span>
+            <span className="font-bold text-[#C8102E] text-[15px] leading-none">
+              {stockCount !== null ? stockCount : '—'}
+            </span>
+          </div>
 
-                {/* Exchange rate */}
-                <div className="flex flex-col items-center gap-1 bg-gray-50 border border-gray-100 rounded-[6px] py-2.5 px-1">
-                  <span className="text-[9px] font-semibold tracking-widest uppercase text-gray-400">Rate</span>
-                  <span className="font-mono font-bold text-gray-800 text-[11px] leading-none">¥162</span>
-                </div>
-              </div>
+          {/* Exchange rate */}
+          <div className="flex flex-col items-center gap-1 bg-gray-50 border border-gray-100 rounded-[6px] py-2.5 px-1">
+            <span className="text-[9px] font-semibold tracking-widest uppercase text-gray-400">Rate</span>
+            <span className="font-mono font-bold text-gray-800 text-[11px] leading-none">¥162</span>
+          </div>
+        </div>
 
-              {/* CTA buttons */}
-              <div className="px-4 pb-8 pt-1 border-t border-gray-100 space-y-2.5 flex-shrink-0">
-                <Link
-                  href="/cars"
-                  onClick={() => setMobileOpen(false)}
-                  className="flex items-center justify-center gap-2 w-full py-3 bg-[#C8102E] hover:bg-[#A50D25] text-white text-[10.5px] tracking-[0.2em] uppercase font-bold rounded-[2px] transition-colors duration-150"
-                >
-                  View Inventory
-                  <ChevronRight size={12} strokeWidth={2.5} />
-                </Link>
-                <a
-                  href={waLink}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  onClick={() => setMobileOpen(false)}
-                  className="flex items-center justify-center gap-2 w-full py-3 bg-[#25D366] hover:bg-[#1DAA57] text-white text-[10.5px] tracking-[0.2em] uppercase font-bold rounded-[2px] transition-colors duration-150"
-                  data-testid="mobile-whatsapp-btn"
-                >
-                  <WhatsAppIcon size={14} className="text-white" />
-                  WhatsApp Us
-                </a>
+        {/* CTA buttons */}
+        <div className="px-4 pb-8 pt-1 border-t border-gray-100 space-y-2.5 flex-shrink-0">
+          <Link
+            href="/cars"
+            onClick={() => setMobileOpen(false)}
+            className="flex items-center justify-center gap-2 w-full py-3 bg-[#C8102E] hover:bg-[#A50D25] text-white text-[10.5px] tracking-[0.2em] uppercase font-bold rounded-[2px] transition-colors duration-150"
+          >
+            View Inventory
+            <ChevronRight size={12} strokeWidth={2.5} />
+          </Link>
+          <a
+            href={waLink}
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={() => setMobileOpen(false)}
+            className="flex items-center justify-center gap-2 w-full py-3 bg-[#25D366] hover:bg-[#1DAA57] text-white text-[10.5px] tracking-[0.2em] uppercase font-bold rounded-[2px] transition-colors duration-150"
+            data-testid="mobile-whatsapp-btn"
+          >
+            <WhatsAppIcon size={14} className="text-white" />
+            WhatsApp Us
+          </a>
 
-                {/* Contact links */}
-                <div className="flex items-center justify-center gap-4 pt-1">
-                  <a href="mailto:info@wazirtrading.com" className="flex items-center gap-1 text-[10px] text-gray-400 hover:text-gray-600 transition-colors">
-                    <Mail size={10} /> info@wazirtrading.com
-                  </a>
-                </div>
-              </div>
-            </motion.div>
-          </>
-        )}
-      </AnimatePresence>
+          {/* Contact links */}
+          <div className="flex items-center justify-center gap-4 pt-1">
+            <a href="mailto:info@wazirtrading.com" className="flex items-center gap-1 text-[10px] text-gray-400 hover:text-gray-600 transition-colors">
+              <Mail size={10} /> info@wazirtrading.com
+            </a>
+          </div>
+        </div>
+      </div>
     </>
   );
 }

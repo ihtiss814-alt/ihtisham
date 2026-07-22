@@ -22,15 +22,20 @@ export default defineConfig({
     emptyOutDir: true,
     assetsInlineLimit: 4096,
     chunkSizeWarningLimit: 600,
+    // Target modern browsers only — smaller, faster output
+    target: 'es2020',
     rollupOptions: {
       output: {
         manualChunks(id) {
-          // Keep framer-motion in its own chunk — it's large and only used by some pages
+          // framer-motion — large, only needed by home + about + how-it-works (lazy pages)
+          // After removing it from Navbar, it won't be in the critical path at all
           if (id.includes('framer-motion')) return 'vendor-framer';
           // Recharts + d3 — only used on specific pages
           if (id.includes('recharts') || id.includes('d3-')) return 'vendor-charts';
           // Supabase — separate so it can be cached independently
           if (id.includes('@supabase')) return 'vendor-supabase';
+          // Radix UI — many small packages, group them
+          if (id.includes('@radix-ui')) return 'vendor-radix';
           // Everything else in node_modules (React, Radix, etc.) stays together
           // so React.createContext is always available to components in the same chunk
           if (id.includes('node_modules')) return 'vendor';

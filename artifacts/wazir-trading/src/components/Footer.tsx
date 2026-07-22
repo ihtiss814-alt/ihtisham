@@ -12,12 +12,18 @@ export default function Footer() {
           {/* Brand */}
           <div className="space-y-6">
             <div>
-              <img
-                src="/logo.png"
-                alt="Wazir Trading LLC"
-                className="h-[90px] w-auto"
-                loading="eager"
-              />
+              <picture>
+                <source srcSet="/logo.webp" type="image/webp" />
+                <img
+                  src="/logo.png"
+                  alt="Wazir Trading LLC"
+                  className="h-[90px] w-auto"
+                  loading="lazy"
+                  decoding="async"
+                  width="267"
+                  height="178"
+                />
+              </picture>
             </div>
             <p className="text-sm text-secondary-foreground/70 leading-relaxed max-w-sm">
               Premium Japanese used vehicles exported globally. We bridge the gap between Japanese auto auctions and the world with integrity and excellence.

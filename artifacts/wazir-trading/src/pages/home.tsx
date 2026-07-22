@@ -99,33 +99,6 @@ function DestinationCountriesSection() {
 
   return (
     <section className="bg-[#0A0A0A] py-12 overflow-hidden">
-      <style>{`
-        @keyframes marquee-scroll {
-          0%   { transform: translateX(0); }
-          100% { transform: translateX(-50%); }
-        }
-        .marquee-track {
-          animation: marquee-scroll 36s linear infinite;
-          will-change: transform;
-        }
-        .marquee-track:hover {
-          animation-play-state: paused;
-        }
-        .dest-flag {
-          display: block;
-          width: 72px;
-          height: 48px;
-          object-fit: cover;
-          border-radius: 4px;
-          box-shadow: 0 2px 8px rgba(0,0,0,0.45);
-          transition: transform 0.2s ease, box-shadow 0.2s ease;
-        }
-        .dest-card:hover .dest-flag {
-          transform: scale(1.06);
-          box-shadow: 0 4px 16px rgba(200,16,46,0.35);
-        }
-      `}</style>
-
       {/* Section heading */}
       <div className="text-center mb-8 px-4">
         <p className="text-[10px] tracking-[0.28em] uppercase font-bold text-[#C8102E] mb-2">
@@ -289,20 +262,6 @@ function ShopByMakeSection() {
 
   return (
     <section className="bg-white border-b border-gray-100 py-12 overflow-hidden">
-      <style>{`
-        @keyframes brand-scroll {
-          0%   { transform: translateX(0); }
-          100% { transform: translateX(-50%); }
-        }
-        .brand-track {
-          animation: brand-scroll 40s linear infinite;
-          will-change: transform;
-        }
-        .brand-track:hover {
-          animation-play-state: paused;
-        }
-      `}</style>
-
       {/* Heading */}
       <div className="text-center mb-8 px-4">
         <p className="text-[10px] tracking-[0.28em] uppercase font-bold text-[#C8102E] mb-2">
@@ -588,20 +547,6 @@ function ShopByBodyTypeSection() {
 
   return (
     <section className="bg-gray-50 border-b border-gray-100 py-12 overflow-hidden">
-      <style>{`
-        @keyframes body-scroll {
-          0%   { transform: translateX(0); }
-          100% { transform: translateX(-50%); }
-        }
-        .body-track {
-          animation: body-scroll 45s linear infinite;
-          will-change: transform;
-        }
-        .body-track:hover {
-          animation-play-state: paused;
-        }
-      `}</style>
-
       {/* Heading */}
       <div className="text-center mb-8 px-4">
         <p className="text-[10px] tracking-[0.28em] uppercase font-bold text-[#C8102E] mb-2">
@@ -937,6 +882,10 @@ function FcCarCard({ car, imgMap, waNumber, navigate }: {
           <img
             src={primaryImg}
             alt={`${car.make} ${car.model}`}
+            loading="lazy"
+            decoding="async"
+            width={272}
+            height={170}
             style={{
               width: '100%', height: '100%', objectFit: 'cover',
               transform: hov ? 'scale(1.06)' : 'scale(1)',
@@ -1059,18 +1008,6 @@ function FeaturedCollectionSection() {
 
   return (
     <section className="py-16 relative overflow-hidden" style={{ background: '#FAFBFC' }}>
-      <style>{`
-        @keyframes fc-scroll {
-          0%   { transform: translateX(0); }
-          100% { transform: translateX(-50%); }
-        }
-        .fc-track {
-          animation: fc-scroll var(--fc-dur, 30s) linear infinite;
-          will-change: transform;
-        }
-        .fc-track:hover { animation-play-state: paused; }
-      `}</style>
-
       {/* Subtle top border accent */}
       <div className="absolute top-0 inset-x-0 h-px"
         style={{ background: 'linear-gradient(to right, transparent 0%, rgba(200,16,46,0.3) 30%, rgba(200,16,46,0.3) 70%, transparent 100%)' }}/>
@@ -2317,15 +2254,16 @@ function BestSellersSection() {
 /* ── Hero rotating background slideshow ─────────────────────── */
 const HERO_SLIDES = [
   {
-    src: 'https://images.unsplash.com/photo-1494976388531-d1058494cdd8?q=90&w=2400&auto=format&fit=crop',
+    // First slide preloaded in index.html — match exact URL
+    src: 'https://images.unsplash.com/photo-1494976388531-d1058494cdd8?q=75&w=1200&auto=format&fit=crop',
     pos: 'center 40%',
   },
   {
-    src: 'https://images.unsplash.com/photo-1503376780353-7e6692767b70?q=90&w=2400&auto=format&fit=crop',
+    src: 'https://images.unsplash.com/photo-1503376780353-7e6692767b70?q=75&w=1200&auto=format&fit=crop',
     pos: 'center 55%',
   },
   {
-    src: 'https://images.unsplash.com/photo-1583121274602-3e2820c69888?q=90&w=2400&auto=format&fit=crop',
+    src: 'https://images.unsplash.com/photo-1583121274602-3e2820c69888?q=75&w=1200&auto=format&fit=crop',
     pos: 'center 50%',
   },
 ];
@@ -2349,13 +2287,6 @@ function HeroBackground() {
 
   return (
     <div className="absolute inset-0 z-0 overflow-hidden">
-      <style>{`
-        @keyframes ken-burns-in  { from { transform:scale(1);    } to { transform:scale(1.10); } }
-        @keyframes ken-burns-out { from { transform:scale(1.10); } to { transform:scale(1);    } }
-        .hero-img-in  { animation: ken-burns-in  7s ease-in-out forwards; }
-        .hero-img-out { animation: ken-burns-out 7s ease-in-out forwards; }
-      `}</style>
-
       {/* Outgoing slide */}
       {prev !== null && (
         <div key={`p${prev}`}
@@ -2374,6 +2305,9 @@ function HeroBackground() {
                  opacity:1, zIndex:2 }}>
         <img src={HERO_SLIDES[current].src} alt="Premium Japanese cars"
           className="hero-img-in"
+          fetchPriority={current === 0 ? 'high' : 'auto'}
+          loading="eager"
+          decoding={current === 0 ? 'sync' : 'async'}
           style={{ width:'100%',height:'100%',objectFit:'cover',
                    objectPosition: HERO_SLIDES[current].pos }} />
       </div>

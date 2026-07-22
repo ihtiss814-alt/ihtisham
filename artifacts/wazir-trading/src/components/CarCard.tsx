@@ -36,7 +36,8 @@ export interface Car {
 export default function CarCard({ car }: { car: Car }) {
   const [imageError, setImageError] = useState(false);
   const cloudName = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME || 'txb1wiw1';
-  const imageUrl = `https://res.cloudinary.com/${cloudName}/image/upload/cars/${car.ref_number.toLowerCase()}-1`;
+  // f_auto → best format (WebP/AVIF), q_auto → smart quality, w_600 → cap width
+  const imageUrl = `https://res.cloudinary.com/${cloudName}/image/upload/f_auto,q_auto,w_600/cars/${car.ref_number.toLowerCase()}-1`;
 
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(price);
@@ -62,6 +63,10 @@ export default function CarCard({ car }: { car: Car }) {
               alt={`${car.make} ${car.model}`}
               onError={() => setImageError(true)}
               className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+              loading="lazy"
+              decoding="async"
+              width={600}
+              height={450}
             />
           ) : (
             <div className="w-full h-full flex items-center justify-center bg-secondary/10">
