@@ -1,287 +1,926 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, Link } from 'wouter';
 import { supabase } from '@/lib/supabase';
 import { Car } from '@/components/CarCard';
 import ImageGallery from '@/components/ImageGallery';
-import { ArrowLeft, Check, Copy, Info, Phone, Send } from 'lucide-react';
-import { motion } from 'framer-motion';
+import {
+  Heart, Share2, Check, ChevronRight, Phone, Send,
+  Gauge, Settings, Droplet, Palette, Users, DoorOpen,
+  Star, ChevronLeft, MessageCircle, Loader2,
+} from 'lucide-react';
 
+/* ─────────────────────────────── types ─────────────────────────────── */
+type ExtendedCar = Car & {
+  engine_code?: string;
+  model_code?: string;
+  features?: Record<string, boolean> | null;
+};
+
+interface ShippingRate {
+  country: string;
+  port: string;
+  freight_usd: number;
+  inspection_fee: number;
+  insurance_rate: number;
+}
+
+interface ExchangeRate {
+  currency: string;
+  rate: number; // relative to USD
+}
+
+/* ──────────────────────────── constants ─────────────────────────────── */
+const RED = '#C8102E';
+const NAVY = '#0D1B3E';
+const WA_NUMBER = import.meta.env.VITE_WHATSAPP_NUMBER || '818089227375';
+
+const COUNTRIES_PORTS: Record<string, string[]> = {
+  Pakistan: ['Karachi', 'Gwadar'],
+  UAE: ['Dubai', 'Abu Dhabi'],
+  UK: ['Southampton', 'Tilbury'],
+  Guyana: ['Georgetown'],
+  Jamaica: ['Kingston'],
+  Trinidad: ['Port of Spain'],
+  Barbados: ['Bridgetown'],
+  Antigua: ['St. John\'s'],
+  'St Kitts': ['Basseterre'],
+  'St Vincent': ['Kingstown'],
+  Suriname: ['Paramaribo'],
+  Aruba: ['Oranjestad'],
+  Anguilla: ['Blowing Point'],
+  Dominica: ['Roseau'],
+  Grenada: ['St. George\'s'],
+  Chile: ['Valparaíso'],
+  'Papua New Guinea': ['Port Moresby'],
+  Kenya: ['Mombasa'],
+  Uganda: ['Mombasa (via KE)'],
+  Mauritius: ['Port Louis'],
+  Fiji: ['Suva'],
+  Zimbabwe: ['Beira (via MZ)'],
+  Cyprus: ['Limassol'],
+  Tanzania: ['Dar es Salaam'],
+  Namibia: ['Walvis Bay'],
+  Zambia: ['Durban (via ZA)'],
+  'South Africa': ['Durban'],
+  'South Sudan': ['Mombasa (via KE)'],
+  Georgia: ['Poti'],
+  Malta: ['Valletta'],
+  Australia: ['Melbourne', 'Sydney'],
+  Ghana: ['Tema'],
+};
+
+const ALL_FEATURES = [
+  '360 Camera', 'Air Bag', 'Air Conditioner', 'Alloy Wheels', 'Anti Brake System',
+  'Automatic Air Conditioning', 'Back Camera', 'Back Spoiler', 'Double Muffler',
+  'FOG Light', 'HID', 'Keyless Entry', 'Leather Seats', 'Navigation',
+  'Parking Sensors', 'Power Steering', 'Power Windows', 'Push Start', 'Radio',
+  'Retractable Mirror', 'Roof Rail', 'Sun Roof', 'TV', 'Cruise Control',
+  'Blind Spot Monitor',
+];
+
+const CURRENCIES = ['USD', 'GBP', 'EUR', 'JPY'] as const;
+type Currency = typeof CURRENCIES[number];
+
+const CURRENCY_SYMBOLS: Record<Currency, string> = {
+  USD: '$', GBP: '£', EUR: '€', JPY: '¥',
+};
+
+/* ─────────────────────────── helpers ───────────────────────────────── */
+function fmt(n: number, currency = 'USD') {
+  return new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency,
+    maximumFractionDigits: 0,
+  }).format(n);
+}
+
+function fmtNum(n: number) {
+  return new Intl.NumberFormat('en-US').format(n);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   MAIN PAGE
+══════════════════════════════════════════════════════════════════════ */
 export default function CarDetailPage() {
   const params = useParams();
-  const ref = params.ref;
-  
-  const [car, setCar] = useState<Car | null>(null);
+  const ref = params.ref as string;
+
+  // core data
+  const [car, setCar] = useState<ExtendedCar | null>(null);
   const [loading, setLoading] = useState(true);
+  const [similarCars, setSimilarCars] = useState<Car[]>([]);
+  const [exchangeRates, setExchangeRates] = useState<Record<string, number>>({});
+
+  // UI state
+  const [currency, setCurrency] = useState<Currency>('USD');
   const [copied, setCopied] = useState(false);
-  const [formOpen, setFormOpen] = useState(false);
+  const [saved, setSaved] = useState(false);
+
+  // price calculator
+  const [country, setCountry] = useState('Pakistan');
+  const [port, setPort] = useState('Karachi');
+  const [shipment, setShipment] = useState<'RORO' | 'Container'>('RORO');
+  const [freightType, setFreightType] = useState<'Prepaid' | 'Collect'>('Prepaid');
+  const [withInspection, setWithInspection] = useState(true);
+  const [withInsurance, setWithInsurance] = useState(true);
+  const [shippingRate, setShippingRate] = useState<ShippingRate | null>(null);
+  const [rateLoading, setRateLoading] = useState(false);
+
+  // inquiry form
+  const [formCountry, setFormCountry] = useState('');
   const [formStatus, setFormStatus] = useState<'idle' | 'submitting' | 'success' | 'error'>('idle');
 
-  const waNumber = import.meta.env.VITE_WHATSAPP_NUMBER || '818089227375';
-
+  /* ─── fetch car ─── */
   useEffect(() => {
-    async function fetchCar() {
+    async function load() {
       if (!ref) return;
-      try {
-        const { data, error } = await supabase
-          .from('cars')
-          .select('*')
-          .eq('ref_number', ref)
-          .single();
-
-        if (error) throw error;
-        setCar(data);
-      } catch (err) {
-        console.error("Failed to fetch car details", err);
-      } finally {
-        setLoading(false);
-      }
+      setLoading(true);
+      const { data } = await supabase.from('cars').select('*').eq('ref_number', ref).single();
+      setCar(data);
+      setLoading(false);
     }
-    fetchCar();
+    load();
   }, [ref]);
 
-  const handleCopyLink = () => {
-    navigator.clipboard.writeText(window.location.href);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
-  };
+  /* ─── check saved ─── */
+  useEffect(() => {
+    const saved = JSON.parse(localStorage.getItem('wazir_saved_cars') || '[]');
+    setSaved(saved.includes(ref));
+  }, [ref]);
 
-  const handleEnquirySubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    setFormStatus('submitting');
-    
-    const formData = new FormData(e.currentTarget);
-    const data = {
-      car_ref: car?.ref_number,
-      name: formData.get('name') as string,
-      email: formData.get('email') as string,
-      phone: formData.get('phone') as string,
-      country: formData.get('country') as string,
-      message: formData.get('message') as string,
-    };
+  /* ─── SEO ─── */
+  useEffect(() => {
+    if (!car) return;
+    document.title = `${car.make} ${car.model} ${car.year}${car.variant ? ' ' + car.variant : ''} | Buy from Japan | Wazir Trading LLC`;
+    const desc = document.querySelector('meta[name="description"]');
+    const content = `${car.make} ${car.model} ${car.year}, ${fmtNum(car.mileage_km)}km, ${car.engine_cc}CC, ${car.color}, ${car.transmission}. FOB $${car.fob_price_usd}. Export from Japan. Ref ${car.ref_number}. Contact Wazir Trading.`;
+    if (desc) desc.setAttribute('content', content);
+    else {
+      const m = document.createElement('meta');
+      m.name = 'description';
+      m.content = content;
+      document.head.appendChild(m);
+    }
+    return () => { document.title = 'Wazir Trading LLC'; };
+  }, [car]);
 
-    try {
-      const { error } = await supabase.from('inquiries').insert([data]);
-      if (error) throw error;
-      setFormStatus('success');
-      setTimeout(() => {
-        setFormOpen(false);
-        setFormStatus('idle');
-      }, 3000);
-    } catch (err) {
-      console.error(err);
-      setFormStatus('error');
+  /* ─── similar cars ─── */
+  useEffect(() => {
+    if (!car) return;
+    async function fetchSimilar() {
+      let { data } = await supabase
+        .from('cars')
+        .select('*')
+        .eq('make', car!.make)
+        .eq('model', car!.model)
+        .neq('id', car!.id)
+        .eq('status', 'available')
+        .order('year', { ascending: false })
+        .limit(6);
+      if (!data || data.length < 3) {
+        const { data: fallback } = await supabase
+          .from('cars')
+          .select('*')
+          .eq('make', car!.make)
+          .neq('model', car!.model)
+          .neq('id', car!.id)
+          .eq('status', 'available')
+          .order('year', { ascending: false })
+          .limit(6);
+        data = fallback;
+      }
+      setSimilarCars(data || []);
+    }
+    fetchSimilar();
+  }, [car]);
+
+  /* ─── exchange rates ─── */
+  useEffect(() => {
+    async function fetchRates() {
+      const { data } = await supabase.from('exchange_rates').select('currency, rate');
+      if (data) {
+        const map: Record<string, number> = {};
+        data.forEach((r: ExchangeRate) => { map[r.currency] = r.rate; });
+        setExchangeRates(map);
+      }
+    }
+    fetchRates();
+  }, []);
+
+  /* ─── shipping rate ─── */
+  const fetchShippingRate = useCallback(async (c: string, p: string) => {
+    setRateLoading(true);
+    setShippingRate(null);
+    const { data } = await supabase
+      .from('shipping_rates')
+      .select('*')
+      .eq('country', c)
+      .eq('port', p)
+      .maybeSingle();
+    setShippingRate(data);
+    setRateLoading(false);
+  }, []);
+
+  useEffect(() => {
+    fetchShippingRate(country, port);
+  }, [country, port, fetchShippingRate]);
+
+  /* ─── handlers ─── */
+  const handleShare = async () => {
+    if (navigator.share) {
+      await navigator.share({ title: document.title, url: window.location.href });
+    } else {
+      await navigator.clipboard.writeText(window.location.href);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
     }
   };
 
+  const handleSave = () => {
+    const list: string[] = JSON.parse(localStorage.getItem('wazir_saved_cars') || '[]');
+    if (saved) {
+      const updated = list.filter(r => r !== ref);
+      localStorage.setItem('wazir_saved_cars', JSON.stringify(updated));
+      setSaved(false);
+    } else {
+      list.push(ref);
+      localStorage.setItem('wazir_saved_cars', JSON.stringify(list));
+      setSaved(true);
+    }
+  };
+
+  const handleCountryChange = (c: string) => {
+    setCountry(c);
+    const ports = COUNTRIES_PORTS[c] || [];
+    setPort(ports[0] || '');
+  };
+
+  const handleInquirySubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (!car) return;
+    setFormStatus('submitting');
+    const fd = new FormData(e.currentTarget);
+    const payload = {
+      car_ref: car.ref_number,
+      car_name: `${car.make} ${car.model} ${car.year}`,
+      destination_country: fd.get('dest_country') as string,
+      destination_port: fd.get('dest_port') as string,
+      name: fd.get('name') as string,
+      email: fd.get('email') as string,
+      phone: fd.get('phone') as string,
+      message: fd.get('message') as string,
+      inquiry_type: 'car-inquiry',
+    };
+    const { error } = await supabase.from('inquiries').insert([payload]);
+    if (error) { setFormStatus('error'); return; }
+    setFormStatus('success');
+    // open WhatsApp
+    const waMsg = encodeURIComponent(
+      `New inquiry for ${car.make} ${car.model} ${car.year}\nRef: ${car.ref_number}\nName: ${payload.name}\nCountry: ${payload.destination_country}\nContact: ${payload.phone}`
+    );
+    window.open(`https://wa.me/${WA_NUMBER}?text=${waMsg}`, '_blank');
+  };
+
+  /* ─── computed ─── */
+  const convertPrice = (usd: number): string => {
+    if (currency === 'USD') return fmt(usd, 'USD');
+    const rate = exchangeRates[currency] ?? 1;
+    return `${CURRENCY_SYMBOLS[currency]}${fmtNum(Math.round(usd * rate))}`;
+  };
+
+  const calcTotal = (): { total: number | null; pkr: string | null } => {
+    if (!car || !shippingRate) return { total: null, pkr: null };
+    const fob = car.fob_price_usd;
+    const freight = freightType === 'Prepaid' ? shippingRate.freight_usd : 0;
+    const inspection = withInspection ? shippingRate.inspection_fee : 0;
+    const insurance = withInsurance ? fob * shippingRate.insurance_rate : 0;
+    const total = fob + freight + inspection + insurance;
+    const pkrRate = exchangeRates['PKR'] ?? 0;
+    const pkr = pkrRate ? `PKR ${fmtNum(Math.round(total * pkrRate))}` : null;
+    return { total, pkr };
+  };
+
+  /* ─── loading / not found ─── */
   if (loading) {
-    return <div className="min-h-screen pt-[130px] bg-background flex items-center justify-center">
-      <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full"></div>
-    </div>;
+    return (
+      <div className="min-h-screen pt-32 flex items-center justify-center bg-white">
+        <Loader2 size={32} className="animate-spin text-[#C8102E]" />
+      </div>
+    );
   }
 
   if (!car) {
-    return <div className="min-h-screen pt-[130px] pb-16 bg-background text-center">
-      <h1 className="text-3xl font-serif mb-4">Vehicle Not Found</h1>
-      <p className="mb-8">The vehicle you are looking for does not exist or has been removed.</p>
-      <Link href="/cars" className="text-primary hover:underline">Return to Inventory</Link>
-    </div>;
+    return (
+      <div className="min-h-screen pt-32 pb-20 bg-white text-center px-4">
+        <h1 className="text-3xl font-serif font-bold text-[#0D1B3E] mb-4">Car Not Found</h1>
+        <p className="text-gray-500 mb-8">This car is no longer available or has been removed from our inventory.</p>
+        <Link href="/cars" className="inline-flex items-center gap-2 bg-[#C8102E] text-white px-6 py-3 font-semibold hover:bg-red-700 transition-colors">
+          <ChevronLeft size={16} /> Back to Cars
+        </Link>
+      </div>
+    );
   }
 
-  const formatPrice = (price: number) => {
-    return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(price);
-  };
+  const waOfferMsg = encodeURIComponent(
+    `Hi, I would like to make an offer for ${car.make} ${car.model} ${car.year}\nReference: ${car.ref_number}\nPlease let me know your best price.`
+  );
+  const waDetailMsg = encodeURIComponent(
+    `Hi Wazir Trading, I am interested in ${car.make} ${car.model} ${car.year} (Ref: ${car.ref_number}). Is it still available?`
+  );
+  const waLink = `https://wa.me/${WA_NUMBER}?text=${waDetailMsg}`;
 
-  const waMessage = encodeURIComponent(`Hi Wazir Trading, I am interested in ${car.make} ${car.model} (Ref: ${car.ref_number}). Is it still available?`);
-  const waLink = `https://wa.me/${waNumber}?text=${waMessage}`;
+  const { total: calcTotalVal, pkr: calcPkr } = calcTotal();
 
   return (
-    <div className="min-h-screen bg-background pt-[130px] pb-20">
-      <div className="container mx-auto px-4 md:px-8">
-        {/* Breadcrumb */}
-        <div className="mb-6 flex items-center text-sm text-muted-foreground">
-          <Link href="/cars" className="hover:text-primary flex items-center transition-colors">
-            <ArrowLeft size={14} className="mr-1" /> Back to Inventory
-          </Link>
-          <span className="mx-2">/</span>
-          <span>{car.make} {car.model}</span>
-        </div>
+    <div className="min-h-screen bg-gray-50 pt-28 pb-24">
+      <div className="max-w-[1280px] mx-auto px-4 md:px-6">
 
-        <div className="flex flex-col lg:flex-row gap-10">
-          {/* Main Content Area */}
-          <div className="lg:w-2/3 space-y-10">
-            {/* Header */}
-            <div>
-              <div className="flex justify-between items-start mb-2">
-                <span className="bg-secondary text-white text-xs px-2 py-1 uppercase tracking-wider font-medium">
-                  {car.ref_number}
-                </span>
-                <button 
-                  onClick={handleCopyLink}
-                  className="text-muted-foreground hover:text-foreground flex items-center gap-1 text-sm transition-colors"
-                >
-                  {copied ? <Check size={16} className="text-primary" /> : <Copy size={16} />} 
-                  {copied ? 'Copied' : 'Share'}
-                </button>
+        {/* Breadcrumb */}
+        <nav className="mb-5 flex items-center gap-1.5 text-sm text-gray-400 flex-wrap">
+          <Link href="/" className="hover:text-[#C8102E] transition-colors">Home</Link>
+          <ChevronRight size={13} className="text-gray-300" />
+          <Link href="/cars" className="hover:text-[#C8102E] transition-colors">Cars</Link>
+          <ChevronRight size={13} className="text-gray-300" />
+          <span className="text-gray-400">Japan Stock</span>
+          <ChevronRight size={13} className="text-gray-300" />
+          <span className="text-gray-600 font-medium">{car.make} {car.model}</span>
+        </nav>
+
+        {/* Two-column layout */}
+        <div className="flex flex-col lg:flex-row gap-6">
+
+          {/* ══════════════ LEFT COLUMN ══════════════ */}
+          <div className="lg:w-[65%] space-y-5">
+
+            {/* ── Section 1: Car Header Card ── */}
+            <div className="bg-white border border-gray-200 rounded-sm p-6 shadow-sm">
+              <div className="flex items-start justify-between gap-4 mb-3">
+                <p className="text-xs font-semibold tracking-widest text-gray-400 uppercase">
+                  JAPAN STOCK · REF #{car.ref_number}
+                  <span className="inline-flex items-center gap-1 ml-2 text-[#C8102E]">
+                    <span className="w-1.5 h-1.5 rounded-full bg-[#C8102E] inline-block" /> JAPAN
+                  </span>
+                </p>
+                <div className="flex items-center gap-2 shrink-0">
+                  <button
+                    onClick={handleSave}
+                    className={`w-8 h-8 flex items-center justify-center rounded-full border transition-all ${saved ? 'bg-red-50 border-red-200 text-[#C8102E]' : 'border-gray-200 text-gray-400 hover:border-[#C8102E] hover:text-[#C8102E]'}`}
+                    title={saved ? 'Saved' : 'Save'}
+                  >
+                    <Heart size={15} fill={saved ? '#C8102E' : 'none'} />
+                  </button>
+                  <button
+                    onClick={handleShare}
+                    className="w-8 h-8 flex items-center justify-center rounded-full border border-gray-200 text-gray-400 hover:border-[#C8102E] hover:text-[#C8102E] transition-all relative"
+                    title="Share"
+                  >
+                    <Share2 size={15} />
+                    {copied && (
+                      <span className="absolute -top-8 left-1/2 -translate-x-1/2 bg-gray-800 text-white text-[10px] px-2 py-0.5 rounded whitespace-nowrap">
+                        Link copied!
+                      </span>
+                    )}
+                  </button>
+                </div>
               </div>
-              <h1 className="text-4xl md:text-5xl font-serif font-bold text-foreground">
-                {car.year} {car.make} {car.model}
-              </h1>
-              {car.variant && <h2 className="text-xl text-muted-foreground mt-2">{car.variant}</h2>}
+
+              <div className="flex items-baseline gap-3 flex-wrap mb-1">
+                <h1 className="text-3xl md:text-4xl font-serif font-bold text-[#0D1B3E]">
+                  {car.make} {car.model}
+                </h1>
+                <span className="text-2xl md:text-3xl font-serif font-bold text-[#C8102E]">{car.year}</span>
+              </div>
+              {car.variant && (
+                <p className="text-base text-gray-400 font-medium mb-4">{car.variant}</p>
+              )}
+
+              {/* Quick spec chips */}
+              <div className="flex flex-wrap gap-2 mt-4">
+                {[
+                  { icon: <Gauge size={13} />, label: `${fmtNum(car.mileage_km)} KM` },
+                  { icon: <Settings size={13} />, label: `${car.engine_cc} CC` },
+                  { icon: <Droplet size={13} />, label: car.fuel_type },
+                  { icon: <span className="text-[11px]">⚙️</span>, label: car.transmission },
+                  { icon: <Palette size={13} />, label: car.color },
+                  { icon: <Users size={13} />, label: `${car.seats} Seats` },
+                  { icon: <DoorOpen size={13} />, label: `${car.doors} Doors` },
+                ].map((chip, i) => (
+                  <span key={i} className="inline-flex items-center gap-1.5 bg-gray-50 border border-gray-200 text-gray-600 text-xs font-medium px-2.5 py-1.5 rounded-sm">
+                    <span className="text-[#C8102E]">{chip.icon}</span>
+                    {chip.label}
+                  </span>
+                ))}
+              </div>
             </div>
 
-            {/* Gallery */}
-            <ImageGallery 
-              carId={car.id} 
-              refNumber={car.ref_number} 
-              make={car.make} 
-              model={car.model} 
-            />
+            {/* ── Section 2: Image Gallery ── */}
+            <div className="bg-white border border-gray-200 rounded-sm p-4 shadow-sm">
+              <ImageGallery
+                carId={car.id}
+                refNumber={car.ref_number}
+                make={car.make}
+                model={car.model}
+              />
+            </div>
 
-            {/* Specifications */}
-            <div className="bg-card border border-border p-8">
-              <h3 className="text-2xl font-serif font-bold border-b border-border pb-4 mb-6">Vehicle Specifications</h3>
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-y-4 gap-x-12">
-                <SpecRow label="Make" value={car.make} />
-                <SpecRow label="Model" value={car.model} />
-                <SpecRow label="Year" value={car.year.toString()} />
-                <SpecRow label="Mileage" value={`${car.mileage_km.toLocaleString()} km`} />
-                <SpecRow label="Engine" value={`${car.engine_cc} cc`} />
-                <SpecRow label="Fuel" value={car.fuel_type} />
-                <SpecRow label="Transmission" value={car.transmission} />
-                <SpecRow label="Drive" value={car.drive} />
-                <SpecRow label="Steering" value={car.steering} />
-                <SpecRow label="Color" value={car.color} />
-                <SpecRow label="Body Type" value={car.body_type} />
-                <SpecRow label="Doors" value={car.doors.toString()} />
-                <SpecRow label="Seats" value={car.seats.toString()} />
-                <SpecRow label="Chassis No." value={car.chassis_number} />
+            {/* ── Section 3: Specifications Table ── */}
+            <div className="bg-white border border-gray-200 rounded-sm overflow-hidden shadow-sm">
+              <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
+                <h2 className="text-xl font-serif font-bold text-[#0D1B3E]">Specifications</h2>
+                <span className="text-xs font-semibold text-[#C8102E] flex items-center gap-1">
+                  <span className="w-1.5 h-1.5 rounded-full bg-[#C8102E] inline-block" /> JAPAN
+                </span>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2">
+                {[
+                  ['Reference #', car.ref_number],
+                  ['Chassis No.', car.chassis_number],
+                  ['Mileage', `${fmtNum(car.mileage_km)} km`],
+                  ['Year', car.year],
+                  ['Engine', `${car.engine_cc} CC`],
+                  ['Fuel', car.fuel_type],
+                  ['Seats', car.seats],
+                  ['Engine Code', (car as ExtendedCar).engine_code || '—'],
+                  ['Color', car.color],
+                  ['Drive', car.drive],
+                  ['Doors', car.doors],
+                  ['Transmission', car.transmission],
+                  ['Model Code', (car as ExtendedCar).model_code || '—'],
+                  ['Steering', car.steering],
+                  ['Auction Grade', car.auction_grade],
+                  ['Body Type', car.body_type],
+                ].map(([label, value], i) => (
+                  <div
+                    key={i}
+                    className={`flex justify-between items-center px-6 py-3 border-b border-gray-100 ${i % 2 === 0 ? 'bg-white' : 'bg-gray-50/70'}`}
+                  >
+                    <span className="text-sm text-gray-400 font-medium">{label}</span>
+                    <span className="text-sm font-bold text-[#0D1B3E] text-right">{String(value ?? '—')}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* ── Section 4: Key Features ── */}
+            <div className="bg-white border border-gray-200 rounded-sm shadow-sm overflow-hidden">
+              <div className="px-6 py-4 border-b border-gray-100">
+                <h2 className="text-xl font-serif font-bold text-[#0D1B3E]">Key Features</h2>
+                <p className="text-sm text-gray-400 mt-0.5">Features</p>
+              </div>
+              <div className="p-6 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
+                {ALL_FEATURES.map(feat => {
+                  const has = car.features
+                    ? (typeof car.features === 'object' && !Array.isArray(car.features)
+                        ? !!car.features[feat]
+                        : Array.isArray(car.features)
+                          ? (car.features as string[]).includes(feat)
+                          : false)
+                    : false;
+                  return (
+                    <div key={feat} className={`flex items-center gap-2 text-xs py-1 ${has ? 'text-gray-800 font-semibold' : 'text-gray-300'}`}>
+                      {has
+                        ? <span className="w-4 h-4 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center shrink-0 text-[10px] font-bold">✓</span>
+                        : <span className="w-4 h-4 rounded-full border border-gray-200 shrink-0" />
+                      }
+                      {feat}
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* ── Section 5: Similar Cars ── */}
+            {similarCars.length > 0 && (
+              <div className="bg-white border border-gray-200 rounded-sm shadow-sm overflow-hidden">
+                <div className="px-6 py-4 border-b border-gray-100">
+                  <h2 className="text-xl font-serif font-bold text-[#0D1B3E]">Similar Cars</h2>
+                </div>
+                <div className="px-6 py-4">
+                  <div className="flex gap-4 overflow-x-auto pb-2">
+                    {similarCars.map(sc => (
+                      <SimilarCarCard key={sc.id} car={sc} />
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* ── Section 6: Reviews compact ── */}
+            <div className="bg-white border border-gray-200 rounded-sm shadow-sm">
+              <div className="grid grid-cols-3 divide-x divide-gray-100">
+                {[
+                  { value: '500+', label: 'Happy Customers' },
+                  { value: '5.0', label: 'Star Rating', icon: <Star size={14} className="text-yellow-400 fill-yellow-400" /> },
+                  { value: '100%', label: 'Satisfaction' },
+                ].map((stat, i) => (
+                  <div key={i} className="flex flex-col items-center justify-center py-6 px-4 text-center">
+                    <div className="flex items-center gap-1">
+                      {stat.icon}
+                      <span className="text-2xl font-serif font-bold text-[#0D1B3E]">{stat.value}</span>
+                    </div>
+                    <p className="text-xs text-gray-400 mt-1 font-medium">{stat.label}</p>
+                  </div>
+                ))}
               </div>
             </div>
           </div>
 
-          {/* Sticky Sidebar */}
-          <div className="lg:w-1/3">
-            <div className="sticky top-28 bg-secondary text-white p-8 border border-secondary-border shadow-xl">
-              <div className="mb-8">
-                <div className="text-secondary-foreground/70 uppercase tracking-widest text-xs font-medium mb-2">FOB Price (Japan)</div>
-                <div className="text-4xl font-serif font-bold text-primary">{formatPrice(car.fob_price_usd)}</div>
-                <p className="text-xs text-white/50 mt-2">Freight and local taxes not included.</p>
+          {/* ══════════════ RIGHT COLUMN (sticky) ══════════════ */}
+          <div className="lg:w-[35%]">
+            <div className="lg:sticky lg:top-28 space-y-4">
+
+              {/* ── Price Card ── */}
+              <div className="rounded-sm overflow-hidden shadow-lg" style={{ background: NAVY }}>
+                <div className="px-6 pt-6 pb-4">
+                  <p className="text-xs font-bold tracking-widest text-white/50 uppercase mb-3">Vehicle Price</p>
+
+                  {/* Currency tabs */}
+                  <div className="flex mb-4 bg-white/10 rounded-sm overflow-hidden">
+                    {CURRENCIES.map(c => (
+                      <button
+                        key={c}
+                        onClick={() => setCurrency(c)}
+                        className={`flex-1 py-1.5 text-xs font-bold transition-all ${currency === c ? 'text-white' : 'text-white/40 hover:text-white/70'}`}
+                        style={currency === c ? { background: RED } : {}}
+                      >
+                        {c}
+                      </button>
+                    ))}
+                  </div>
+
+                  <div className="text-4xl font-serif font-bold text-[#C8102E] mb-1">
+                    {convertPrice(car.fob_price_usd)}
+                  </div>
+                  <p className="text-xs text-white/40 mb-5">FOB Price · Japan</p>
+
+                  {/* Offer button */}
+                  <a
+                    href={`https://wa.me/${WA_NUMBER}?text=${waOfferMsg}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="w-full flex items-center justify-center gap-2 py-3 font-bold text-sm text-white rounded-sm transition-all hover:opacity-90"
+                    style={{ background: '#25D366' }}
+                  >
+                    ⭐ Offer Your Price
+                  </a>
+                </div>
+
+                {/* Stock info */}
+                <div className="px-6 py-4 border-t border-white/10 space-y-2">
+                  {[
+                    ['Stock Location', car.stock_location],
+                    ['Port of Loading', car.port_of_loading],
+                    ['Shipment', car.shipment_method],
+                    ['Auction Grade', car.auction_grade],
+                  ].map(([k, v]) => (
+                    <div key={k} className="flex justify-between text-xs">
+                      <span className="text-white/40">{k}</span>
+                      <span className="text-white font-semibold">{v || '—'}</span>
+                    </div>
+                  ))}
+                </div>
               </div>
 
-              <div className="flex items-center gap-4 bg-white/5 border border-white/10 p-4 mb-8">
-                <div className="text-3xl font-bold text-white leading-none">{car.auction_grade}</div>
-                <div>
-                  <div className="flex items-center gap-1 font-medium text-sm">
-                    Auction Grade 
-                    <div className="group relative">
-                      <Info size={14} className="text-primary/70 cursor-help" />
-                      <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-48 p-2 bg-background text-foreground text-xs rounded-sm shadow-lg hidden group-hover:block z-10 border border-border">
-                        Japanese Vehicle Inspection Grading: 5 = Excellent, 4.5 = Very Good, 4 = Good, 3.5 = Average
+              {/* ── Total Price Calculator ── */}
+              <div className="rounded-sm overflow-hidden shadow-lg" style={{ background: NAVY }}>
+                <div className="px-6 py-4 border-b border-white/10">
+                  <h3 className="text-base font-serif font-bold text-white">Total Price Calculator</h3>
+                </div>
+                <div className="px-6 py-4 space-y-4">
+
+                  {/* Country */}
+                  <div>
+                    <label className="block text-[11px] font-semibold text-white/50 uppercase tracking-wider mb-1.5">Destination Country</label>
+                    <select
+                      value={country}
+                      onChange={e => handleCountryChange(e.target.value)}
+                      className="w-full bg-white/10 border border-white/20 text-white text-sm py-2 px-3 rounded-sm focus:outline-none focus:border-[#C8102E] appearance-none"
+                    >
+                      {Object.keys(COUNTRIES_PORTS).map(c => (
+                        <option key={c} value={c} className="text-gray-900 bg-white">{c}</option>
+                      ))}
+                    </select>
+                  </div>
+
+                  {/* Port */}
+                  <div>
+                    <label className="block text-[11px] font-semibold text-white/50 uppercase tracking-wider mb-1.5">Destination Port</label>
+                    <select
+                      value={port}
+                      onChange={e => setPort(e.target.value)}
+                      className="w-full bg-white/10 border border-white/20 text-white text-sm py-2 px-3 rounded-sm focus:outline-none focus:border-[#C8102E] appearance-none"
+                    >
+                      {(COUNTRIES_PORTS[country] || []).map(p => (
+                        <option key={p} value={p} className="text-gray-900 bg-white">{p}</option>
+                      ))}
+                    </select>
+                  </div>
+
+                  {/* Shipment type */}
+                  <div>
+                    <label className="block text-[11px] font-semibold text-white/50 uppercase tracking-wider mb-1.5">Shipment Type</label>
+                    <div className="flex bg-white/10 rounded-sm overflow-hidden border border-white/20">
+                      {(['RORO', 'Container'] as const).map(t => (
+                        <button
+                          key={t}
+                          onClick={() => setShipment(t)}
+                          className={`flex-1 py-2 text-xs font-bold transition-all ${shipment === t ? 'text-white' : 'text-white/40 hover:text-white/70'}`}
+                          style={shipment === t ? { background: RED } : {}}
+                        >
+                          {t}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Freight */}
+                  <div>
+                    <label className="block text-[11px] font-semibold text-white/50 uppercase tracking-wider mb-1.5">Freight</label>
+                    <div className="flex gap-4">
+                      {(['Prepaid', 'Collect'] as const).map(f => (
+                        <label key={f} className="flex items-center gap-2 cursor-pointer">
+                          <input
+                            type="radio"
+                            name="freight"
+                            value={f}
+                            checked={freightType === f}
+                            onChange={() => setFreightType(f)}
+                            className="accent-[#C8102E] w-3.5 h-3.5"
+                          />
+                          <span className="text-xs text-white/70 font-medium">{f}</span>
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Inspection + Insurance */}
+                  <div className="flex gap-6">
+                    <div>
+                      <label className="block text-[11px] font-semibold text-white/50 uppercase tracking-wider mb-1.5">Inspection</label>
+                      <div className="flex gap-3">
+                        {[true, false].map(v => (
+                          <label key={String(v)} className="flex items-center gap-1.5 cursor-pointer">
+                            <input
+                              type="radio"
+                              name="inspection"
+                              checked={withInspection === v}
+                              onChange={() => setWithInspection(v)}
+                              className="accent-[#C8102E] w-3.5 h-3.5"
+                            />
+                            <span className="text-xs text-white/70 font-medium">{v ? 'Yes' : 'No'}</span>
+                          </label>
+                        ))}
+                      </div>
+                    </div>
+                    <div>
+                      <label className="block text-[11px] font-semibold text-white/50 uppercase tracking-wider mb-1.5">Insurance</label>
+                      <div className="flex gap-3">
+                        {[true, false].map(v => (
+                          <label key={String(v)} className="flex items-center gap-1.5 cursor-pointer">
+                            <input
+                              type="radio"
+                              name="insurance"
+                              checked={withInsurance === v}
+                              onChange={() => setWithInsurance(v)}
+                              className="accent-[#C8102E] w-3.5 h-3.5"
+                            />
+                            <span className="text-xs text-white/70 font-medium">{v ? 'Yes' : 'No'}</span>
+                          </label>
+                        ))}
                       </div>
                     </div>
                   </div>
-                  <div className="text-xs text-white/60">Verified Japanese Standard</div>
+
+                  {/* Result */}
+                  <div className="pt-3 border-t border-white/10">
+                    {rateLoading ? (
+                      <div className="flex items-center gap-2 text-white/50 text-sm py-2">
+                        <Loader2 size={14} className="animate-spin" /> Calculating…
+                      </div>
+                    ) : calcTotalVal !== null ? (
+                      <div>
+                        <div className="text-2xl font-serif font-bold text-[#C8102E]">
+                          TOTAL PRICE {fmt(calcTotalVal)}
+                        </div>
+                        {calcPkr && (
+                          <p className="text-xs text-white/50 mt-1">Total Price in Local {calcPkr}</p>
+                        )}
+                        <div className="mt-2 space-y-1">
+                          <div className="flex justify-between text-xs text-white/50">
+                            <span>FOB Price</span><span className="text-white">{fmt(car.fob_price_usd)}</span>
+                          </div>
+                          {freightType === 'Prepaid' && shippingRate && (
+                            <div className="flex justify-between text-xs text-white/50">
+                              <span>Freight</span><span className="text-white">{fmt(shippingRate.freight_usd)}</span>
+                            </div>
+                          )}
+                          {withInspection && shippingRate && (
+                            <div className="flex justify-between text-xs text-white/50">
+                              <span>Inspection</span><span className="text-white">{fmt(shippingRate.inspection_fee)}</span>
+                            </div>
+                          )}
+                          {withInsurance && shippingRate && (
+                            <div className="flex justify-between text-xs text-white/50">
+                              <span>Insurance</span><span className="text-white">{fmt(car.fob_price_usd * shippingRate.insurance_rate)}</span>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    ) : (
+                      <div>
+                        <div className="text-2xl font-serif font-bold text-[#C8102E] mb-2">ASK</div>
+                        <p className="text-xs text-white/40 mb-3">Rate not available. Contact us for a quote.</p>
+                        <a
+                          href={waLink}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="w-full flex items-center justify-center gap-2 py-2.5 text-xs font-bold text-white rounded-sm transition-all hover:opacity-90"
+                          style={{ background: '#25D366' }}
+                        >
+                          <MessageCircle size={13} /> Get Quote on WhatsApp
+                        </a>
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
 
-              <div className="space-y-4">
-                <a 
-                  href={waLink} 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className="w-full bg-[#25D366] text-white py-4 font-medium flex items-center justify-center gap-2 hover:bg-[#20bd5a] transition-colors"
-                >
-                  <Phone size={20} /> Enquire on WhatsApp
-                </a>
-                
-                <button 
-                  onClick={() => setFormOpen(!formOpen)}
-                  className="w-full bg-transparent border border-primary text-primary hover:bg-primary hover:text-primary-foreground py-4 font-medium flex items-center justify-center gap-2 transition-colors"
-                >
-                  <Send size={20} /> Send Email Enquiry
-                </button>
-              </div>
+              {/* ── Inquiry Form ── */}
+              <div className="bg-white border border-gray-200 rounded-sm shadow-sm overflow-hidden">
+                <div className="px-6 py-4 border-b border-gray-100" style={{ background: NAVY }}>
+                  <h3 className="text-base font-serif font-bold text-white">Send Inquiry</h3>
+                  <p className="text-xs text-white/50 mt-0.5">Send Inquiry for this Vehicle</p>
+                </div>
 
-              <div className="mt-8 pt-8 border-t border-white/10 text-sm text-white/60 space-y-3">
-                <div className="flex justify-between">
-                  <span>Stock Location</span>
-                  <span className="text-white">{car.stock_location}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span>Port of Loading</span>
-                  <span className="text-white">{car.port_of_loading}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span>Shipment</span>
-                  <span className="text-white">{car.shipment_method}</span>
-                </div>
-              </div>
-            </div>
-
-            {/* Sliding Form */}
-            {formOpen && (
-              <motion.div 
-                initial={{ opacity: 0, height: 0 }}
-                animate={{ opacity: 1, height: 'auto' }}
-                className="mt-4 bg-card border border-border p-6 shadow-md"
-              >
-                <h4 className="font-serif font-bold text-lg mb-4">Request a Quote</h4>
-                
                 {formStatus === 'success' ? (
-                  <div className="bg-primary/10 text-primary border border-primary/20 p-4 text-center">
-                    <Check className="mx-auto mb-2" />
-                    <p className="font-medium">Enquiry sent successfully.</p>
-                    <p className="text-sm mt-1">Our team will contact you shortly.</p>
+                  <div className="p-6 text-center">
+                    <div className="w-12 h-12 rounded-full bg-emerald-100 flex items-center justify-center mx-auto mb-3">
+                      <Check size={22} className="text-emerald-600" />
+                    </div>
+                    <p className="font-semibold text-gray-800 mb-1">Inquiry Sent!</p>
+                    <p className="text-sm text-gray-500">
+                      Thank you! We will contact you within 24 hours on WhatsApp with pricing and shipping details.
+                    </p>
                   </div>
                 ) : (
-                  <form onSubmit={handleEnquirySubmit} className="space-y-4">
+                  <form onSubmit={handleInquirySubmit} className="p-5 space-y-3">
+                    <p className="text-xs text-gray-400">Receive a price quote and shipping details directly in your inbox.</p>
+
                     <div>
-                      <label className="block text-xs uppercase tracking-wider mb-1">Name</label>
-                      <input required name="name" type="text" className="w-full border border-border bg-background p-2 text-sm focus:border-primary outline-none" />
+                      <label className="block text-xs font-semibold text-gray-500 mb-1">Reference Number</label>
+                      <input
+                        type="text"
+                        value={car.ref_number}
+                        readOnly
+                        className="w-full border border-gray-200 bg-gray-50 text-gray-500 text-sm px-3 py-2 rounded-sm cursor-not-allowed"
+                      />
                     </div>
-                    <div>
-                      <label className="block text-xs uppercase tracking-wider mb-1">Email</label>
-                      <input required name="email" type="email" className="w-full border border-border bg-background p-2 text-sm focus:border-primary outline-none" />
-                    </div>
-                    <div className="grid grid-cols-2 gap-4">
+
+                    <div className="grid grid-cols-2 gap-3">
                       <div>
-                        <label className="block text-xs uppercase tracking-wider mb-1">Phone</label>
-                        <input name="phone" type="tel" className="w-full border border-border bg-background p-2 text-sm focus:border-primary outline-none" />
+                        <label className="block text-xs font-semibold text-gray-500 mb-1">Destination Country *</label>
+                        <select
+                          name="dest_country"
+                          required
+                          value={formCountry}
+                          onChange={e => setFormCountry(e.target.value)}
+                          className="w-full border border-gray-200 text-gray-800 text-sm px-3 py-2 rounded-sm focus:outline-none focus:border-[#C8102E] bg-white"
+                        >
+                          <option value="">Select…</option>
+                          {Object.keys(COUNTRIES_PORTS).map(c => (
+                            <option key={c} value={c}>{c}</option>
+                          ))}
+                        </select>
                       </div>
                       <div>
-                        <label className="block text-xs uppercase tracking-wider mb-1">Country</label>
-                        <input required name="country" type="text" className="w-full border border-border bg-background p-2 text-sm focus:border-primary outline-none" />
+                        <label className="block text-xs font-semibold text-gray-500 mb-1">Destination Port</label>
+                        <input
+                          name="dest_port"
+                          type="text"
+                          placeholder="Port name"
+                          className="w-full border border-gray-200 text-gray-800 text-sm px-3 py-2 rounded-sm focus:outline-none focus:border-[#C8102E]"
+                        />
                       </div>
                     </div>
+
                     <div>
-                      <label className="block text-xs uppercase tracking-wider mb-1">Message</label>
-                      <textarea required name="message" rows={4} defaultValue={`I would like to know more about the ${car.year} ${car.make} ${car.model} (Ref: ${car.ref_number}). Please send me the final price including shipping to my country.`} className="w-full border border-border bg-background p-2 text-sm focus:border-primary outline-none resize-none" />
+                      <label className="block text-xs font-semibold text-gray-500 mb-1">Full Name *</label>
+                      <input name="name" type="text" required placeholder="Your name" className="w-full border border-gray-200 text-gray-800 text-sm px-3 py-2 rounded-sm focus:outline-none focus:border-[#C8102E]" />
                     </div>
-                    <button 
-                      type="submit" 
+                    <div>
+                      <label className="block text-xs font-semibold text-gray-500 mb-1">Email *</label>
+                      <input name="email" type="email" required placeholder="your@email.com" className="w-full border border-gray-200 text-gray-800 text-sm px-3 py-2 rounded-sm focus:outline-none focus:border-[#C8102E]" />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-semibold text-gray-500 mb-1">WhatsApp / Phone *</label>
+                      <input name="phone" type="tel" required placeholder="+1 234 567 8900" className="w-full border border-gray-200 text-gray-800 text-sm px-3 py-2 rounded-sm focus:outline-none focus:border-[#C8102E]" />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-semibold text-gray-500 mb-1">Message</label>
+                      <textarea
+                        name="message"
+                        rows={3}
+                        defaultValue={`I am interested in the ${car.year} ${car.make} ${car.model} (Ref: ${car.ref_number}). Please send me the total price including shipping.`}
+                        className="w-full border border-gray-200 text-gray-800 text-sm px-3 py-2 rounded-sm focus:outline-none focus:border-[#C8102E] resize-none"
+                      />
+                    </div>
+
+                    {formStatus === 'error' && (
+                      <p className="text-xs text-[#C8102E]">Something went wrong. Please try again or contact us on WhatsApp.</p>
+                    )}
+
+                    <button
+                      type="submit"
                       disabled={formStatus === 'submitting'}
-                      className="w-full bg-primary text-primary-foreground py-3 font-medium disabled:opacity-70"
+                      className="w-full py-3 font-bold text-sm text-white rounded-sm transition-all hover:opacity-90 disabled:opacity-60 flex items-center justify-center gap-2"
+                      style={{ background: RED }}
                     >
-                      {formStatus === 'submitting' ? 'Sending...' : 'Submit Request'}
+                      {formStatus === 'submitting' ? (
+                        <><Loader2 size={15} className="animate-spin" /> Sending…</>
+                      ) : (
+                        <><Send size={15} /> Submit Inquiry</>
+                      )}
                     </button>
-                    {formStatus === 'error' && <p className="text-destructive text-sm text-center">An error occurred. Please try again.</p>}
                   </form>
                 )}
-              </motion.div>
-            )}
+              </div>
+
+            </div>
           </div>
         </div>
       </div>
+
+      {/* ── WhatsApp floating button (mobile) ── */}
+      <a
+        href={waLink}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="fixed bottom-6 right-5 z-40 lg:hidden w-14 h-14 rounded-full flex items-center justify-center text-white shadow-xl hover:scale-110 transition-transform"
+        style={{ background: '#25D366' }}
+        aria-label="Chat on WhatsApp"
+      >
+        <MessageCircle size={26} />
+      </a>
     </div>
   );
 }
 
-function SpecRow({ label, value }: { label: string, value: string | number }) {
+/* ══════════════════════════════════════════════════════════════════════
+   SIMILAR CAR CARD
+══════════════════════════════════════════════════════════════════════ */
+function SimilarCarCard({ car }: { car: Car }) {
+  const [imgErr, setImgErr] = useState(false);
+  const cloudName = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME || 'txb1wiw1';
+  const imgUrl = `https://res.cloudinary.com/${cloudName}/image/upload/cars/${car.ref_number.toLowerCase()}-1`;
+  const waNum = import.meta.env.VITE_WHATSAPP_NUMBER || '818089227375';
+  const waMsg = encodeURIComponent(`Hi, I am interested in ${car.make} ${car.model} ${car.year} (Ref: ${car.ref_number}). Is it available?`);
+  const pkrRate = 280; // fallback; ideally passed from parent
+
   return (
-    <div className="flex flex-col border-b border-border/50 py-2">
-      <span className="text-xs uppercase tracking-widest text-muted-foreground">{label}</span>
-      <span className="font-medium text-foreground">{value || '-'}</span>
+    <div className="flex-shrink-0 w-52 bg-white border border-gray-200 rounded-sm overflow-hidden hover:shadow-md transition-shadow">
+      <Link href={`/cars/${car.ref_number}`}>
+        <div className="relative aspect-[4/3] bg-gray-100 overflow-hidden">
+          <span className="absolute top-2 left-2 z-10 bg-[#0D1B3E] text-white text-[10px] font-bold px-2 py-0.5">{car.year}</span>
+          <span className="absolute top-2 right-2 z-10 bg-black/70 text-white text-[10px] font-bold px-2 py-0.5">{car.engine_cc}CC</span>
+          {!imgErr ? (
+            <img src={imgUrl} alt={`${car.make} ${car.model}`} onError={() => setImgErr(true)} className="w-full h-full object-cover hover:scale-105 transition-transform duration-500" />
+          ) : (
+            <div className="w-full h-full flex items-center justify-center bg-gray-50">
+              <span className="text-xs text-gray-300 font-serif">{car.make} {car.model}</span>
+            </div>
+          )}
+        </div>
+      </Link>
+      <div className="p-3">
+        <Link href={`/cars/${car.ref_number}`} className="block font-serif font-bold text-[#0D1B3E] text-sm leading-tight hover:text-[#C8102E] transition-colors mb-0.5 line-clamp-1">
+          {car.make} {car.model}
+        </Link>
+        <p className="text-[10px] text-gray-400 mb-2">REF #{car.ref_number}</p>
+        <p className="text-base font-serif font-bold text-[#C8102E]">
+          ${car.fob_price_usd.toLocaleString()}
+        </p>
+        <p className="text-[10px] text-gray-400 mb-3">
+          PKR {(car.fob_price_usd * pkrRate).toLocaleString()}
+        </p>
+        <div className="flex gap-1.5">
+          <Link
+            href={`/cars/${car.ref_number}`}
+            className="flex-1 text-center text-[10px] font-bold py-1.5 text-white rounded-sm"
+            style={{ background: '#C8102E' }}
+          >
+            Inquire
+          </Link>
+          <a
+            href={`https://wa.me/${waNum}?text=${waMsg}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex-1 text-center text-[10px] font-bold py-1.5 text-white rounded-sm flex items-center justify-center gap-1"
+            style={{ background: '#25D366' }}
+          >
+            <MessageCircle size={10} /> WA
+          </a>
+        </div>
+      </div>
     </div>
   );
 }
