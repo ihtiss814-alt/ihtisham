@@ -329,7 +329,7 @@ export default function CarDetailPage() {
   const { total: calcTotalVal, pkr: calcPkr } = calcTotal();
 
   return (
-    <div className="min-h-screen bg-gray-50 pt-28 pb-24">
+    <div className="min-h-screen bg-gray-50 pt-28 pb-28 lg:pb-24">
       <div className="max-w-[1280px] mx-auto px-4 md:px-6">
 
         {/* Breadcrumb */}
@@ -406,6 +406,66 @@ export default function CarDetailPage() {
                     <span className="text-[#C8102E]">{chip.icon}</span>
                     {chip.label}
                   </span>
+                ))}
+              </div>
+            </div>
+
+            {/* ── Mobile-only: compact price + CTA (visible before gallery on small screens) ── */}
+            <div className="lg:hidden rounded-sm overflow-hidden shadow-lg" style={{ background: NAVY }}>
+              <div className="px-4 pt-4 pb-3">
+                {/* Currency tabs */}
+                <div className="flex mb-3 bg-white/10 rounded-sm overflow-hidden">
+                  {CURRENCIES.map(c => (
+                    <button
+                      key={c}
+                      onClick={() => setCurrency(c)}
+                      className={`flex-1 py-1.5 text-xs font-bold transition-all ${currency === c ? 'text-white' : 'text-white/40 hover:text-white/70'}`}
+                      style={currency === c ? { background: RED } : {}}
+                    >
+                      {c}
+                    </button>
+                  ))}
+                </div>
+                <div className="flex items-end justify-between mb-3">
+                  <div>
+                    <p className="text-[10px] font-bold tracking-widest text-white/40 uppercase mb-1">Vehicle Price · FOB Japan</p>
+                    <div className="text-3xl font-serif font-bold text-[#C8102E]">{convertPrice(car.fob_price_usd)}</div>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-[10px] text-white/40 mb-0.5">PKR</p>
+                    <p className="text-sm font-bold text-white/70">{fmtNum(Math.round(car.fob_price_usd * rates.pkr))}</p>
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-2">
+                  <a
+                    href={`https://wa.me/${WA_NUMBER}?text=${waOfferMsg}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center justify-center gap-1.5 py-2.5 font-bold text-xs text-white rounded-sm transition-all hover:opacity-90"
+                    style={{ background: '#25D366' }}
+                  >
+                    ⭐ Offer Price
+                  </a>
+                  <a
+                    href="#inquiry-section"
+                    className="flex items-center justify-center gap-1.5 py-2.5 font-bold text-xs text-white rounded-sm transition-all hover:opacity-90"
+                    style={{ background: RED }}
+                  >
+                    <Send size={13} /> Send Inquiry
+                  </a>
+                </div>
+              </div>
+              <div className="px-4 py-3 border-t border-white/10 grid grid-cols-2 gap-x-4 gap-y-1.5">
+                {[
+                  ['Stock', car.stock_location],
+                  ['Port', car.port_of_loading],
+                  ['Shipment', car.shipment_method],
+                  ['Auction Grade', car.auction_grade],
+                ].map(([k, v]) => (
+                  <div key={k} className="flex flex-col">
+                    <span className="text-[10px] text-white/40">{k}</span>
+                    <span className="text-xs font-semibold text-white">{v || '—'}</span>
+                  </div>
                 ))}
               </div>
             </div>
@@ -743,7 +803,7 @@ export default function CarDetailPage() {
               </div>
 
               {/* ── Inquiry Form ── */}
-              <div className="bg-white border border-gray-200 rounded-sm shadow-sm overflow-hidden">
+              <div id="inquiry-section" className="bg-white border border-gray-200 rounded-sm shadow-sm overflow-hidden">
                 <div className="px-6 py-4 border-b border-gray-100" style={{ background: NAVY }}>
                   <h3 className="text-base font-serif font-bold text-white">Send Inquiry</h3>
                   <p className="text-xs text-white/50 mt-0.5">Send Inquiry for this Vehicle</p>
@@ -773,7 +833,7 @@ export default function CarDetailPage() {
                       />
                     </div>
 
-                    <div className="grid grid-cols-2 gap-3">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                       <div>
                         <label className="block text-xs font-semibold text-gray-500 mb-1">Destination Country *</label>
                         <select
@@ -847,17 +907,31 @@ export default function CarDetailPage() {
         </div>
       </div>
 
-      {/* ── WhatsApp floating button (mobile) ── */}
-      <a
-        href={waLink}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="fixed bottom-6 right-5 z-40 lg:hidden w-14 h-14 rounded-full flex items-center justify-center text-white shadow-xl hover:scale-110 transition-transform"
-        style={{ background: '#25D366' }}
-        aria-label="Chat on WhatsApp"
-      >
-        <MessageCircle size={26} />
-      </a>
+      {/* ── Sticky mobile action bar (replaces floating WA button) ── */}
+      <div className="fixed bottom-0 left-0 right-0 z-40 lg:hidden shadow-2xl" style={{ background: NAVY }}>
+        <div className="flex items-center gap-3 px-4 py-3 border-t border-white/10">
+          <div className="flex-1 min-w-0">
+            <p className="text-[10px] text-white/40 uppercase tracking-wider leading-none mb-0.5">FOB Price</p>
+            <p className="text-lg font-serif font-bold text-[#C8102E] truncate leading-tight">{convertPrice(car.fob_price_usd)}</p>
+          </div>
+          <a
+            href={waLink}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-1.5 px-4 py-2.5 font-bold text-xs text-white rounded-sm shrink-0 transition-opacity hover:opacity-90 active:opacity-75"
+            style={{ background: '#25D366' }}
+          >
+            <MessageCircle size={14} /> WhatsApp
+          </a>
+          <a
+            href="#inquiry-section"
+            className="flex items-center gap-1.5 px-4 py-2.5 font-bold text-xs text-white rounded-sm shrink-0 transition-opacity hover:opacity-90 active:opacity-75"
+            style={{ background: RED }}
+          >
+            <Send size={14} /> Inquire
+          </a>
+        </div>
+      </div>
     </div>
   );
 }
