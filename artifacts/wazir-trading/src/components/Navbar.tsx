@@ -65,9 +65,12 @@ export default function Navbar() {
   useEffect(() => {
     const onScroll = () => {
       const y = window.scrollY;
+      const delta = y - lastScrollY.current;
       setScrolled(y > 20);
-      if (y > 120) {
-        setNavHidden(y > lastScrollY.current);
+      // Ignore micro-scrolls (iOS rubber-band / momentum noise)
+      if (Math.abs(delta) < 4) return;
+      if (y > 80) {
+        setNavHidden(delta > 0); // positive delta = scrolling down
       } else {
         setNavHidden(false);
       }
@@ -89,10 +92,13 @@ export default function Navbar() {
   return (
     <>
       <header
-        className={`fixed top-0 inset-x-0 z-50 transition-all duration-300 ease-in-out ${
+        className={`fixed top-0 inset-x-0 z-50 transition-transform duration-300 ease-in-out ${
           navHidden && !mobileOpen ? '-translate-y-full' : 'translate-y-0'
         }`}
-        style={{ boxShadow: scrolled ? '0 2px 16px rgba(0,0,0,0.10)' : 'none' }}
+        style={{
+          boxShadow: scrolled ? '0 2px 16px rgba(0,0,0,0.10)' : 'none',
+          willChange: 'transform',
+        }}
         data-testid="site-header"
       >
 
