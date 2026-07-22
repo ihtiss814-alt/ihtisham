@@ -8,6 +8,7 @@ import {
 } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import type { Car } from '@/components/CarCard';
+import { useExchangeRate } from '@/hooks/useExchangeRate';
 
 /* ─────────────────────────────────────────────────────────────── */
 /* TYPES                                                            */
@@ -549,25 +550,21 @@ function TotalPriceCalculator() {
     setCalcLoading(true);
     setResult(null);
     try {
-      const [rateRes, fxRes] = await Promise.all([
-        supabase.from('shipping_rates').select('freight_usd, inspection_fee, insurance_rate')
-          .eq('country', country).eq('port', port).limit(1).maybeSingle(),
-        supabase.from('exchange_rates').select('rate').eq('currency', 'PKR').limit(1).maybeSingle(),
-      ]);
+      const rateRes = await supabase.from('shipping_rates').select('freight_usd, inspection_fee, insurance_rate')
+        .eq('country', country).eq('port', port).limit(1).maybeSingle();
 
       const fobPrice   = parseFloat(fob) || 0;
       const freightUSD = rateRes.data?.freight_usd    ?? (country === 'Pakistan' ? 1200 : 1500);
       const inspFee    = inspection === 'Yes' ? (rateRes.data?.inspection_fee ?? 150)  : 0;
       const insRate    = insurance  === 'Yes' ? (rateRes.data?.insurance_rate  ?? 0.025) : 0;
       const totalUSD   = fobPrice + freightUSD + inspFee + (fobPrice * insRate);
-      const pkrRate    = fxRes.data?.rate ?? 278;
 
       setResult({ usd: totalUSD, pkr: Math.round(totalUSD * pkrRate) });
     } catch {
       // Fallback to basic calculation
       const fobPrice = parseFloat(fob) || 0;
       const totalUSD = fobPrice + 1200 + (inspection === 'Yes' ? 150 : 0) + (insurance === 'Yes' ? fobPrice * 0.025 : 0);
-      setResult({ usd: totalUSD, pkr: Math.round(totalUSD * 278) });
+      setResult({ usd: totalUSD, pkr: Math.round(totalUSD * pkrRate) });
     } finally {
       setCalcLoading(false);
     }
@@ -1087,7 +1084,7 @@ export default function CarsPage() {
   const [activeTab, setActiveTab]       = useState('');
   const [makeCounts, setMakeCounts]     = useState<Record<string, number>>({});
   const [tabCounts, setTabCounts]       = useState<Record<string, number>>({});
-  const [pkrRate, setPkrRate]           = useState(0);
+  const { pkr: pkrRate }                = useExchangeRate();
   const [showMobileFilter, setShowMobileFilter] = useState(false);
 
   // ── Ref for scroll-to-results ──
@@ -1210,13 +1207,7 @@ export default function CarsPage() {
     }
   }, []);
 
-  // ── Fetch PKR exchange rate ──
-  const fetchPKRRate = useCallback(async () => {
-    try {
-      const { data } = await supabase.from('exchange_rates').select('rate').eq('currency', 'PKR').limit(1).maybeSingle();
-      if (data?.rate) setPkrRate(data.rate);
-    } catch { /* use 0 = don't show PKR */ }
-  }, []);
+  // PKR rate is now live via useExchangeRate() — no Supabase fetch needed
 
   // ── Fetch models for advanced filter ──
   useEffect(() => {
@@ -1232,7 +1223,6 @@ export default function CarsPage() {
   useEffect(() => {
     fetchMakeCounts();
     fetchTabCounts();
-    fetchPKRRate();
   }, [fetchMakeCounts, fetchTabCounts, fetchPKRRate]);
 
   // ── Re-fetch cars when filters/page/sort/tab change ──

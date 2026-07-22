@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { Link, useLocation } from 'wouter';
 import { Menu, X, ChevronRight, AlertTriangle, Clock, Car, Mail, Phone } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
+import { useExchangeRate } from '@/hooks/useExchangeRate';
 
 // ─── Brand tokens ────────────────────────────────────────────────
 // Primary:   #C8102E  (crimson — extracted from logo shield)
@@ -55,6 +56,7 @@ export default function Navbar() {
   const [location]                  = useLocation();
   const japanTime                   = useJapanTime();
   const stockCount                  = useStockCount();
+  const { jpy, isLive }             = useExchangeRate();
   const lastScrollY                 = useRef(0);
 
   const waNumber  = import.meta.env.VITE_WHATSAPP_NUMBER || '818089227375';
@@ -167,7 +169,7 @@ export default function Navbar() {
                 </span>
               </div>
               <span className="h-3 w-px bg-gray-300" />
-              <span>$1 = <strong className="text-gray-700 font-semibold">¥162</strong></span>
+              <span>$1 = <strong className="text-gray-700 font-semibold">¥{jpy.toFixed(1)}</strong>{isLive && <span title="Live rate" className="ml-1 inline-block w-1.5 h-1.5 rounded-full bg-green-400 align-middle" />}</span>
             </div>
           </div>
 
@@ -198,7 +200,7 @@ export default function Navbar() {
 
             {/* Rate */}
             <span className="text-[9.5px] text-gray-400 whitespace-nowrap flex-shrink-0">
-              $1 = <strong className="text-gray-700">¥162</strong>
+              $1 = <strong className="text-gray-700">¥{jpy.toFixed(1)}</strong>{isLive && <span title="Live rate" className="ml-0.5 inline-block w-1.5 h-1.5 rounded-full bg-green-400 align-middle" />}
             </span>
           </div>
 
@@ -417,8 +419,10 @@ export default function Navbar() {
 
           {/* Exchange rate */}
           <div className="flex flex-col items-center gap-1 bg-gray-50 border border-gray-100 rounded-[6px] py-2.5 px-1">
-            <span className="text-[9px] font-semibold tracking-widest uppercase text-gray-400">Rate</span>
-            <span className="font-mono font-bold text-gray-800 text-[11px] leading-none">¥162</span>
+            <span className="text-[9px] font-semibold tracking-widest uppercase text-gray-400 flex items-center gap-1">
+              Rate{isLive && <span title="Live rate" className="inline-block w-1.5 h-1.5 rounded-full bg-green-400" />}
+            </span>
+            <span className="font-mono font-bold text-gray-800 text-[11px] leading-none">¥{jpy.toFixed(1)}</span>
           </div>
         </div>
 

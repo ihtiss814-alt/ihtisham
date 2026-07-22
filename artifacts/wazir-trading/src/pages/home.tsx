@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Link, useLocation } from 'wouter';
 import { motion, useInView } from 'framer-motion';
+import { useExchangeRate } from '@/hooks/useExchangeRate';
 import { ArrowRight, CheckCircle2, ShieldCheck, Ship, Globe, Award, Search } from 'lucide-react';
 
 /* ── Search bar component ────────────────────────────────────── */
@@ -741,8 +742,7 @@ function ShopByBudgetSection() {
 }
 
 /* ── Featured Collection ─────────────────────────────────────── */
-// PKR/USD rate — update this constant when the rate changes
-const PKR_PER_USD = 278;
+// PKR_PER_USD is now live via useExchangeRate() inside FcCarCard
 
 type FcCar = {
   id: string;
@@ -813,8 +813,9 @@ function FcCarCard({ car, imgMap, waNumber, navigate }: {
   navigate: (to: string) => void;
 }) {
   const [hov, setHov] = React.useState(false);
+  const { pkr: pkrPerUsd } = useExchangeRate();
   const primaryImg = imgMap[car.id] ?? null;
-  const pkrPrice   = Math.round(car.fob_price_usd * PKR_PER_USD).toLocaleString('en-PK');
+  const pkrPrice   = Math.round(car.fob_price_usd * pkrPerUsd).toLocaleString('en-PK');
   const waMsg      = encodeURIComponent(
     `Hi Wazir Trading, I'm interested in the ${car.year} ${car.make} ${car.model}${car.variant ? ' ' + car.variant : ''} (Ref: ${car.ref_number}). Please share details and availability.`
   );
@@ -2012,6 +2013,7 @@ function CustomerReviewsSection() {
 function BestSellersSection() {
   type Car = import('@/components/CarCard').Car;
   const [, navigate] = useLocation();
+  const { pkr: pkrPerUsd } = useExchangeRate();
   const [cars, setCars]       = React.useState<Car[]>([]);
   const [imgMap, setImgMap]   = React.useState<Record<string, string>>({});
   const [loading, setLoading] = React.useState(true);
@@ -2080,7 +2082,7 @@ function BestSellersSection() {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
             {cars.map(car => {
               const img       = imgMap[car.id] ?? null;
-              const pkrPrice  = Math.round(car.fob_price_usd * PKR_PER_USD).toLocaleString('en-PK');
+              const pkrPrice  = Math.round(car.fob_price_usd * pkrPerUsd).toLocaleString('en-PK');
               const isSold    = car.status === 'sold';
               const isNew     = !!car.is_new_arrival;
               const isLiked   = !!liked[car.id];

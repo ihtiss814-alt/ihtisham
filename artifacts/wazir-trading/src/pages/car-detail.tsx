@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, Link } from 'wouter';
 import { supabase } from '@/lib/supabase';
+import { useExchangeRate } from '@/hooks/useExchangeRate';
 import { Car } from '@/components/CarCard';
 import ImageGallery from '@/components/ImageGallery';
 import {
@@ -105,11 +106,13 @@ export default function CarDetailPage() {
   const params = useParams();
   const ref = params.ref as string;
 
+  // live exchange rates
+  const rates = useExchangeRate();
+
   // core data
   const [car, setCar] = useState<ExtendedCar | null>(null);
   const [loading, setLoading] = useState(true);
   const [similarCars, setSimilarCars] = useState<Car[]>([]);
-  const [exchangeRates, setExchangeRates] = useState<Record<string, number>>({});
 
   // UI state
   const [currency, setCurrency] = useState<Currency>('USD');
@@ -194,18 +197,7 @@ export default function CarDetailPage() {
     fetchSimilar();
   }, [car]);
 
-  /* ─── exchange rates ─── */
-  useEffect(() => {
-    async function fetchRates() {
-      const { data } = await supabase.from('exchange_rates').select('currency, rate');
-      if (data) {
-        const map: Record<string, number> = {};
-        data.forEach((r: ExchangeRate) => { map[r.currency] = r.rate; });
-        setExchangeRates(map);
-      }
-    }
-    fetchRates();
-  }, []);
+  // exchange rates are now provided by the useExchangeRate hook above
 
   /* ─── shipping rate ─── */
   const fetchShippingRate = useCallback(async (c: string, p: string) => {
@@ -284,7 +276,13 @@ export default function CarDetailPage() {
   /* ─── computed ─── */
   const convertPrice = (usd: number): string => {
     if (currency === 'USD') return fmt(usd, 'USD');
-    const rate = exchangeRates[currency] ?? 1;
+    const rateMap: Record<Currency, number> = {
+      USD: 1,
+      GBP: rates.gbp,
+      EUR: rates.eur,
+      JPY: rates.jpy,
+    };
+    const rate = rateMap[currency] ?? 1;
     return `${CURRENCY_SYMBOLS[currency]}${fmtNum(Math.round(usd * rate))}`;
   };
 
@@ -295,8 +293,7 @@ export default function CarDetailPage() {
     const inspection = withInspection ? shippingRate.inspection_fee : 0;
     const insurance = withInsurance ? fob * shippingRate.insurance_rate : 0;
     const total = fob + freight + inspection + insurance;
-    const pkrRate = exchangeRates['PKR'] ?? 0;
-    const pkr = pkrRate ? `PKR ${fmtNum(Math.round(total * pkrRate))}` : null;
+    const pkr = `PKR ${fmtNum(Math.round(total * rates.pkr))}`;
     return { total, pkr };
   };
 
@@ -874,7 +871,7 @@ function SimilarCarCard({ car }: { car: Car }) {
   const imgUrl = `https://res.cloudinary.com/${cloudName}/image/upload/cars/${car.ref_number.toLowerCase()}-1`;
   const waNum = import.meta.env.VITE_WHATSAPP_NUMBER || '818089227375';
   const waMsg = encodeURIComponent(`Hi, I am interested in ${car.make} ${car.model} ${car.year} (Ref: ${car.ref_number}). Is it available?`);
-  const pkrRate = 280; // fallback; ideally passed from parent
+  const { pkr: pkrRate } = useExchangeRate();
 
   return (
     <div className="flex-shrink-0 w-52 bg-white border border-gray-200 rounded-sm overflow-hidden hover:shadow-md transition-shadow">
