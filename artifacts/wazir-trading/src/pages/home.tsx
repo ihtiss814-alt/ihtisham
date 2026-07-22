@@ -324,7 +324,7 @@ const BODY_TYPES = [
   { name: 'Van',                 accent: '#06B6D4', bg: '#ECFEFF' },
   { name: 'Mini Van',            accent: '#F59E0B', bg: '#FFFBEB' },
   { name: 'Truck',               accent: '#EF4444', bg: '#FEF2F2' },
-  { name: 'Bus',                 accent: '#6366F1', bg: '#EEF2FF' },
+  { name: 'Bus',                 accent: '#6366F1', bg: '#EEF2FF', icon: '/icons/car-bt-bus.svg' },
   { name: 'MPV',                 accent: '#EC4899', bg: '#FDF2F8' },
   { name: 'Pickup Truck',        accent: '#84CC16', bg: '#F7FEE7' },
   { name: 'Coupe',               accent: '#14B8A6', bg: '#F0FDFA' },
