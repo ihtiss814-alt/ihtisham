@@ -29,6 +29,10 @@ outputType = "webview"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
+args = "pnpm install --frozen-lockfile"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
 args = "PORT=24102 BASE_PATH=/ pnpm --filter @workspace/wazir-trading run dev"
 waitForPort = 24102
 

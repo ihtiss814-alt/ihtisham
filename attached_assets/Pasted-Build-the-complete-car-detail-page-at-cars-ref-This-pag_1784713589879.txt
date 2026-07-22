@@ -1,0 +1,282 @@
+Build the complete car detail page at /cars/:ref
+
+This page opens when user clicks any car.
+Fetch car data from Supabase cars table 
+where ref_number matches the URL parameter.
+Also fetch all images from car_images table 
+where car_id matches.
+
+PAGE LAYOUT:
+Two columns on desktop.
+Left column 65% width.
+Right column 35% width sticky.
+Single column on mobile.
+
+BREADCRUMB at very top:
+Home > Cars > Japan Stock > [Make Model]
+Each item is a clickable link.
+
+LEFT COLUMN:
+
+SECTION 1 - CAR HEADER CARD:
+Small label row:
+"JAPAN STOCK · REF #[ref_number] ● JAPAN"
+Large headline:
+"[MAKE] [MODEL]" bold large
+"[YEAR]" in red next to make model
+"[VARIANT]" in gray smaller text
+
+Quick spec chips in a horizontal row 
+with icons:
+🛣️ Mileage: [mileage_km] KM
+⚙️ Engine: [engine_cc] CC
+⛽ Fuel: [fuel_type]
+🔄 Trans: [transmission]
+🎨 Color: [color]
+🪑 Seats: [seats]
+🚪 Doors: [doors] Doors
+
+SECTION 2 - IMAGE GALLERY:
+Show total photo count: "17 Photos" 
+top left badge
+
+Main large image display area.
+Left and right arrow buttons to 
+navigate between images.
+Dot indicators below showing 
+current image position.
+
+Thumbnail strip below main image 
+showing all images as small squares.
+Clicking thumbnail jumps to that image.
+
+"View All" button bottom right 
+opens fullscreen lightbox overlay.
+Lightbox shows all images full screen.
+Click outside or X button to close.
+Keyboard left right arrows to navigate.
+
+"Download All" button below gallery 
+downloads all car images.
+
+SECTION 3 - SPECIFICATIONS TABLE:
+Header: "Specifications" 
+Right side: "● JAPAN" indicator
+
+Two column table grid:
+Reference # | [ref_number]
+Chassis No. | [chassis_number]
+Mileage | [mileage_km] km
+Year | [year]
+Engine | [engine_cc] CC
+Fuel | [fuel_type]
+Seats | [seats]
+Engine Code | [engine_code]
+Color | [color]
+Drive | [drive]
+Doors | [doors]
+Transmission | [transmission]
+Model Code | [model_code]
+Steering | [steering]
+Auction Grade | [auction_grade]
+
+Each row alternates subtle background 
+for readability.
+Label in gray, value in dark bold.
+
+SECTION 4 - KEY FEATURES:
+Header: "Key Features"
+Sub header: "Features"
+
+Show all features in a 4 column grid.
+Features that car HAS: 
+bold dark text with green checkmark ✓
+Features that car does NOT have: 
+gray text no checkmark
+
+All possible features to show:
+360 Camera, Air Bag, Air Conditioner,
+Alloy Wheels, Anti Brake System,
+Automatic Air Conditioning, Back Camera,
+Back Spoiler, Double Muffler, FOG Light,
+HID, Keyless Entry, Leather Seats,
+Navigation, Parking Sensors,
+Power Steering, Power Windows,
+Push Start, Radio, Retractable Mirror,
+Roof Rail, Sun Roof, TV,
+Cruise Control, Blind Spot Monitor
+
+Read feature values from the features 
+JSONB column in cars table.
+
+SECTION 5 - SIMILAR CARS:
+Header: "Similar Cars"
+
+Fetch from Supabase:
+SELECT * FROM cars 
+WHERE make = [current car make]
+AND model = [current car model]
+AND id != [current car id]
+AND status = 'available'
+ORDER BY year DESC
+LIMIT 6
+
+Show as horizontal scrollable row.
+Each card shows:
+Year badge top left on image
+Engine CC badge top right on image
+Make Model as link to that car page
+Reference number
+FOB price in red
+PKR equivalent
+Inquire Now button
+WhatsApp button
+
+If fewer than 3 same model cars exist
+fall back to same make different model.
+
+SECTION 6 - REVIEWS (compact):
+Show just the three stats:
+500+ Happy Customers
+5.0 Star Rating  
+100% Satisfaction
+
+No full review cards on detail page.
+Just the compact stats bar.
+
+RIGHT COLUMN (sticky):
+
+SECTION 1 - PRICE CARD:
+"VEHICLE PRICE" label
+Currency toggle tabs: USD | GBP | EUR | JPY
+Large price: "$[fob_price_usd]" in red
+"FOB Price" label below price
+
+Full width green button:
+"⭐ Offer Your Price"
+Opens WhatsApp with pre-filled message:
+"Hi, I would like to make an offer for
+[make] [model] [year]
+Reference: [ref_number]
+Please let me know your best price."
+
+SECTION 2 - TOTAL PRICE CALCULATOR:
+Header: "Total Price Calculator"
+
+Destination Country dropdown (searchable):
+Pakistan, UAE, UK, Guyana, Jamaica,
+Trinidad, Barbados, Antigua, St Kitts,
+St Vincent, Suriname, Aruba, Anguilla,
+Dominica, Grenada, Chile, Papua New Guinea,
+Kenya, Uganda, Mauritius, Fiji, Zimbabwe,
+Cyprus, Tanzania, Namibia, Zambia,
+South Africa, South Sudan, Georgia,
+Malta, Australia, Ghana
+
+Ports dropdown (updates based on country):
+Pakistan: Karachi, Gwadar
+UAE: Dubai, Abu Dhabi
+UK: Southampton, Tilbury
+Guyana: Georgetown
+Jamaica: Kingston
+Kenya: Mombasa
+Ghana: Tema
+Tanzania: Dar es Salaam
+Australia: Melbourne, Sydney
+All others: show main port
+
+Shipment: RORO / Container tabs
+
+Freight: Prepaid / Collect radio buttons
+
+Inspection: Yes / No radio (default Yes)
+
+Insurance: Yes / No radio (default Yes)
+
+Live calculation (updates instantly):
+Fetch shipping rate from shipping_rates 
+table based on country + port + shipment.
+If rate found:
+Total = fob_price_usd + freight_usd + 
+        inspection_fee + 
+        (fob_price_usd * insurance_rate)
+Show: "TOTAL PRICE $[amount]" in red
+Show: "Total Price in Local PKR [amount]"
+      multiply by PKR exchange rate from
+      exchange_rates table
+
+If rate not found show "ASK" in red
+with WhatsApp button to get quote.
+
+SECTION 3 - SEND INQUIRY FORM:
+Header: "Send Inquiry"
+Sub: "Send Inquiry for this Vehicle"
+Small text: "Receive a price quote and 
+shipping details directly in your inbox."
+
+Form fields:
+Reference number (pre-filled, read only)
+Destination Country (dropdown)
+Destination Port (text input)
+Name (text input)
+Email (email input)
+Contact/WhatsApp number (tel input)
+Message (textarea)
+
+"Submit Inquiry" red button full width.
+
+On submit:
+Save to Supabase inquiries table with:
+car_ref = ref_number
+car_name = make + model + year
+All form fields saved
+inquiry_type = 'car-inquiry'
+
+Show success message:
+"Thank you! We will contact you within 
+24 hours on WhatsApp with pricing and 
+shipping details."
+
+Also open WhatsApp with message:
+"New inquiry for [make] [model] [year]
+Ref: [ref_number]
+Name: [name]
+Country: [country]
+Contact: [phone]"
+
+ADDITIONAL FEATURES:
+
+1. Share button:
+On mobile use navigator.share() to open 
+native share sheet.
+On desktop copy link to clipboard.
+Show tooltip "Link copied!" for 2 seconds.
+
+2. Favorite/Save button (heart icon):
+Toggle save state in localStorage.
+Saved cars persist across browser sessions.
+Show filled red heart when saved.
+
+3. WhatsApp floating button visible 
+on mobile when scrolling.
+Pre-filled with car details.
+
+4. Page title for SEO:
+[Make] [Model] [Year] [Variant] | 
+Buy from Japan | Wazir Trading LLC
+
+5. Meta description:
+[Make] [Model] [Year], [mileage]km, 
+[engine]CC, [color], [transmission]. 
+FOB $[price]. Export from Japan. 
+Ref [ref_number]. Contact Wazir Trading.
+
+6. If car not found show:
+"Car not found or no longer available"
+with link back to /cars page.
+
+Make the page look exactly like 
+Afridi Trading car detail page but 
+with our professional navy and red theme.
+White background on left column.
+Dark navy sticky panel on right.
