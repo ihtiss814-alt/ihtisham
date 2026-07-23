@@ -13,9 +13,10 @@ const HomePage      = React.lazy(() => import('@/pages/home'));
 const CarsPage      = React.lazy(() => import('@/pages/cars'));
 const CarDetailPage = React.lazy(() => import('@/pages/car-detail'));
 const AboutPage     = React.lazy(() => import('@/pages/about'));
-const HowItWorksPage = React.lazy(() => import('@/pages/how-it-works'));
-const ContactPage   = React.lazy(() => import('@/pages/contact'));
-const NotFound      = React.lazy(() => import('@/pages/not-found'));
+const HowItWorksPage          = React.lazy(() => import('@/pages/how-it-works'));
+const ShippingInformationPage = React.lazy(() => import('@/pages/shipping-information'));
+const ContactPage             = React.lazy(() => import('@/pages/contact'));
+const NotFound                = React.lazy(() => import('@/pages/not-found'));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -51,6 +52,7 @@ function Router() {
         <Route path="/cars/:ref" component={CarDetailPage} />
         <Route path="/about" component={AboutPage} />
         <Route path="/how-it-works" component={HowItWorksPage} />
+        <Route path="/shipping-information" component={ShippingInformationPage} />
         <Route path="/contact" component={ContactPage} />
         <Route component={NotFound} />
       </Switch>

@@ -1,0 +1,168 @@
+Build a Shipping Information page at /shipping-information
+
+PAGE STRUCTURE:
+
+HERO SECTION:
+Title: "Shipping Information"
+Subtitle: "Global shipping schedules from Japan 
+to worldwide destinations"
+Background: dark navy with subtle pattern
+
+ROUTE TABS (11 buttons in a grid):
+Each button when clicked shows that 
+route's shipping table below.
+Default selected: Asia, Africa (RO-RO)
+
+Button 1: Shipping Info EUROPE (RO-RO)
+Button 2: Shipping Info ASIA, AFRICA (RO-RO)
+Button 3: Shipping Info BLACK SEA (CONTAINER)
+Button 4: Shipping Info RUSSIA (FESCO)
+Button 5: Shipping Info CARIBBEAN
+Button 6: Shipping Info N/S AMERICA
+Button 7: Shipping Info OCEANIA
+Button 8: Shipping Info MIDDLE EAST
+Button 9: Shipping Info EAST ASIA (RO-RO)
+Button 10: Shipping Info EAST ASIA (CONTAINER)
+Button 11: Shipping Info AFRICA (CONTAINER)
+
+Active button: red background white text
+Inactive buttons: white background red text 
+red border
+
+SHIPPING TABLE:
+Each route shows a responsive scrollable table
+with dark header row.
+
+Two main sections separated by arrow (→):
+Left section: DEPARTURE PORT (Japan ports)
+Right section: ARRIVAL PORT (destination ports)
+
+Columns for each route:
+
+ROUTE 1 - EUROPE (RO-RO):
+Departure: Company, Ship Name, Voyage, 
+Yoko Hama, Kawa Saki, Nagoya, Kobe, 
+Osaka, Hakata, Kanda, Kisa Razu, Hitachi Naka
+Arrival: Larnaca, Dublin, Southampton, 
+Bremerhaven, Hanko, Limassol, Rotterdam, 
+Valletta, Drammen, Le Havre, Antwerp, 
+Amsterdam, Derince, Zeebrugge, Bristol, 
+Newcastle
+
+ROUTE 2 - ASIA, AFRICA (RO-RO):
+Departure: Company, Ship Name, Voyage, 
+Yoko Hama, Kawa Saki, Nagoya, Kobe, 
+Osaka, Hakata, Kanda, Kisa Razu, 
+Nakano Seki, Hitachi Naka
+Arrival: Jebel Ali, Karachi, Port Louis, 
+Durban, Dar, Mombasa, Maput, Hambantota
+
+ROUTE 3 - BLACK SEA (CONTAINER):
+Departure: Company, Ship Name, Voyage, 
+Yoko Hama, Nagoya, Kobe, Osaka, 
+Hakata, Hitachi Naka
+Arrival: Novorossiysk, Poti, Batumi
+
+ROUTE 4 - RUSSIA (FESCO):
+Departure: Company, Ship Name, Voyage, 
+Yoko Hama, Kawa Saki, Nagoya, Kobe, 
+Osaka, Toyama, Maizuru, Hakata, Fukui, 
+Otaru, Kisa Razu, Karatsu, Shinmoji, 
+Imari, Naoetsu, Tomakomai, Hitachi Naka
+Arrival: Vladivostok
+
+ROUTE 5 - CARIBBEAN:
+Departure: Company, Ship Name, Voyage, 
+Yoko Hama, Kawa Saki, Nagoya, Kobe, 
+Osaka, Hakata, Kanda, Kisa Razu, Hitachi Naka
+Arrival: Kingston, Nassau, Port Of Spain, 
+George Town Guy, Paramaribo, Castries, 
+Roseau, St Georges, St Johns, Aruba, 
+Freeport Texas, Tacoma, Savannah, 
+Los Angeles, Jacksonville, Bridgetown, 
+Basseterre, Kingstown
+
+ROUTE 6 - N/S AMERICA:
+Departure: Company, Ship Name, Voyage, 
+Yoko Hama, Kawa Saki, Nagoya, Kobe, 
+Osaka, Hakata, Kanda, Kisa Razu, 
+Nakano Seki, Hitachi Naka
+Arrival: Iquique, Asuncion, Vancouver, 
+New Westminster
+
+ROUTE 7 - OCEANIA:
+Departure: Company, Ship Name, Voyage, 
+Yoko Hama, Kawa Saki, Nagoya, Kobe, 
+Osaka, Kanda, Kisa Razu, 
+Nakano Seki, Hitachi Naka
+Arrival: Brisbane, Port Kembla, Melbourne, 
+Auckland, Wellington, Lyttelton, Suva, 
+Lautoka, Port Moresby, Nelson, Adelaide, 
+Fremantle, Darwin
+
+ROUTE 8 - MIDDLE EAST:
+Departure: Company, Ship Name, Voyage, 
+Yoko Hama, Nagoya, Kobe, Osaka, 
+Tokyo, Hakata, Hitachi Naka
+Arrival: Karachi, Famagusta
+
+ROUTE 9 - EAST ASIA (RO-RO):
+Departure: Company, Ship Name, Voyage, 
+Yoko Hama, Kawa Saki, Nagoya, Kobe, 
+Osaka, Hakata, Kanda, Kisa Razu, Hitachi Naka
+Arrival: Hong Kong, Laem Chabang, 
+Hambantota, Chittagong, Mongla, Subic
+
+ROUTE 10 - EAST ASIA (CONTAINER):
+Departure: Company, Ship Name, Voyage, 
+Yoko Hama, Kawa Saki, Nagoya, Kobe, 
+Osaka, Hakata, Hitachi Naka
+Arrival: Huangpu, Yangon, Laem Chabang, 
+Ulaanbaatar, Zamin Uud
+
+ROUTE 11 - AFRICA (CONTAINER):
+Departure: Company, Ship Name, Voyage, 
+Yoko Hama, Nagoya, Kobe, Osaka, 
+Hakata, Hitachi Naka
+Arrival: Mombasa, Dar Es Salaam, Port Louis, 
+Matadi, Walvis Bay, Nacala, Maputo, 
+Durban, Berbera, Beira
+
+TABLE DESIGN:
+Header row: dark navy background white text
+Alternating rows: white and very light gray
+Each cell: center aligned text-sm
+Date cells: dark text bold
+Empty cells: show dash (-)
+"O" cells: show "O" in gray
+Horizontal scroll on mobile
+Sticky first 3 columns (Company, Ship Name, 
+Voyage) so they stay visible when scrolling
+
+TABLE DATA:
+For now populate each table with 5 sample 
+rows using the company names and routes 
+from the data above. Client will update 
+with real current schedule data.
+
+BELOW TABLE:
+Note: "Shipping schedules are updated 
+regularly. For the most current schedule 
+please contact us on WhatsApp."
+
+WhatsApp button linking to 
+wa.me/818089227375
+
+IMPORTANT NOTICE BOX:
+Dark card showing:
+"For shipping inquiries and quotations 
+please contact us:"
+WhatsApp: +81 80-8922-7375
+Email: wazirtrading-pc@outlook.jp
+Japan Standard Time: Mon-Sat 9AM-6PM
+
+Add this page to the navbar under a 
+"Help" dropdown menu with links:
+How It Works → /how-it-works
+Shipping Information → /shipping-information
+FAQs → /faqs

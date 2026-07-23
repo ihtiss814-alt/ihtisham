@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { Link, useLocation } from 'wouter';
-import { Menu, X, ChevronRight, Clock, Car, Mail, Phone } from 'lucide-react';
+import { Menu, X, ChevronRight, ChevronDown, Clock, Car, Mail } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import { useExchangeRate } from '@/hooks/useExchangeRate';
 
@@ -12,11 +12,16 @@ import { useExchangeRate } from '@/hooks/useExchangeRate';
 // Divider:   #E5E7EB  (gray-200)
 
 const NAV_LINKS = [
-  { label: 'Home',         href: '/' },
-  { label: 'Cars',         href: '/cars' },
-  { label: 'How It Works', href: '/how-it-works' },
-  { label: 'About',        href: '/about' },
-  { label: 'Contact',      href: '/contact' },
+  { label: 'Home',    href: '/' },
+  { label: 'Cars',    href: '/cars' },
+  { label: 'About',   href: '/about' },
+  { label: 'Contact', href: '/contact' },
+];
+
+const HELP_LINKS = [
+  { label: 'How It Works',        href: '/how-it-works' },
+  { label: 'Shipping Information', href: '/shipping-information' },
+  { label: 'FAQs',                href: '/faqs' },
 ];
 
 function useJapanTime() {
@@ -53,11 +58,25 @@ export default function Navbar() {
   const [scrolled, setScrolled]     = useState(false);
   const [navHidden, setNavHidden]   = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [helpOpen, setHelpOpen]     = useState(false);
+  const [mobileHelpOpen, setMobileHelpOpen] = useState(false);
   const [location]                  = useLocation();
   const japanTime                   = useJapanTime();
   const stockCount                  = useStockCount();
   const { jpy, isLive }             = useExchangeRate();
   const lastScrollY                 = useRef(0);
+  const helpRef                     = useRef<HTMLDivElement>(null);
+
+  // Close help dropdown when clicking outside
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (helpRef.current && !helpRef.current.contains(e.target as Node)) {
+        setHelpOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, []);
 
   const waNumber  = import.meta.env.VITE_WHATSAPP_NUMBER || '818089227375';
   const waMessage = encodeURIComponent('Hello, I am interested in purchasing a Japanese used car from Wazir Trading LLC.');
@@ -218,7 +237,6 @@ export default function Navbar() {
                       >
                         {link.label}
                       </span>
-                      {/* Underline indicator */}
                       <span
                         className={`absolute -bottom-px left-3 right-3 h-[2px] rounded-full bg-[#C8102E] transition-all duration-200 origin-left ${
                           active ? 'scale-x-100 opacity-100' : 'scale-x-0 opacity-0 group-hover:scale-x-100 group-hover:opacity-40'
@@ -227,6 +245,48 @@ export default function Navbar() {
                     </Link>
                   );
                 })}
+
+                {/* Help dropdown */}
+                <div ref={helpRef} className="relative">
+                  <button
+                    onClick={() => setHelpOpen(v => !v)}
+                    className="relative px-4 py-1 flex items-center gap-1 group"
+                  >
+                    <span className={`text-[11px] tracking-[0.2em] uppercase font-semibold transition-colors duration-150 ${
+                      HELP_LINKS.some(l => isActive(l.href)) ? 'text-[#C8102E]' : 'text-gray-600 group-hover:text-gray-900'
+                    }`}>
+                      Help
+                    </span>
+                    <ChevronDown size={11} strokeWidth={2.5} className={`transition-transform duration-200 ${helpOpen ? 'rotate-180' : ''} ${
+                      HELP_LINKS.some(l => isActive(l.href)) ? 'text-[#C8102E]' : 'text-gray-400'
+                    }`} />
+                    <span className={`absolute -bottom-px left-3 right-3 h-[2px] rounded-full bg-[#C8102E] transition-all duration-200 origin-left ${
+                      HELP_LINKS.some(l => isActive(l.href)) ? 'scale-x-100 opacity-100' : 'scale-x-0 opacity-0 group-hover:scale-x-100 group-hover:opacity-40'
+                    }`} />
+                  </button>
+
+                  {/* Dropdown panel */}
+                  <div className={`absolute top-full left-0 mt-2 w-52 bg-white border border-gray-100 rounded-[4px] shadow-xl transition-all duration-150 origin-top z-50 ${
+                    helpOpen ? 'opacity-100 scale-y-100 pointer-events-auto' : 'opacity-0 scale-y-95 pointer-events-none'
+                  }`}>
+                    <div className="h-[2px] bg-[#C8102E] rounded-t-[4px]" />
+                    {HELP_LINKS.map((link) => (
+                      <Link
+                        key={link.href}
+                        href={link.href}
+                        onClick={() => setHelpOpen(false)}
+                        className={`flex items-center justify-between px-4 py-3 text-[11px] tracking-wide uppercase font-semibold transition-colors duration-150 ${
+                          isActive(link.href)
+                            ? 'text-[#C8102E] bg-red-50'
+                            : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+                        }`}
+                      >
+                        {link.label}
+                        <ChevronRight size={11} className="opacity-40" />
+                      </Link>
+                    ))}
+                  </div>
+                </div>
               </nav>
 
               {/* Desktop CTAs */}
@@ -349,6 +409,48 @@ export default function Navbar() {
               </Link>
             );
           })}
+
+          {/* Help accordion */}
+          <div className="mb-px">
+            <button
+              onClick={() => setMobileHelpOpen(v => !v)}
+              className={`flex items-center justify-between w-full px-4 py-3.5 rounded-[2px] transition-all duration-150 ${
+                HELP_LINKS.some(l => isActive(l.href))
+                  ? 'bg-red-50 text-[#C8102E] border-l-[3px] border-[#C8102E] pl-3.5'
+                  : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900 border-l-[3px] border-transparent'
+              }`}
+            >
+              <span className="text-[11px] tracking-[0.2em] uppercase font-semibold">Help</span>
+              <ChevronDown
+                size={14}
+                className={`transition-transform duration-200 ${mobileHelpOpen ? 'rotate-180' : ''} ${
+                  HELP_LINKS.some(l => isActive(l.href)) ? 'text-[#C8102E]' : 'text-gray-300'
+                }`}
+              />
+            </button>
+            {mobileHelpOpen && (
+              <div className="ml-4 border-l-2 border-gray-100 pl-3 mt-1 mb-1 space-y-px">
+                {HELP_LINKS.map((link) => {
+                  const active = isActive(link.href);
+                  return (
+                    <Link
+                      key={link.href}
+                      href={link.href}
+                      onClick={() => { setMobileOpen(false); setMobileHelpOpen(false); }}
+                      className={`flex items-center justify-between w-full px-3 py-2.5 rounded-[2px] transition-all duration-150 ${
+                        active
+                          ? 'bg-red-50 text-[#C8102E]'
+                          : 'text-gray-500 hover:bg-gray-50 hover:text-gray-800'
+                      }`}
+                    >
+                      <span className="text-[10.5px] tracking-[0.18em] uppercase font-semibold">{link.label}</span>
+                      <ChevronRight size={12} className={active ? 'text-[#C8102E]' : 'text-gray-300'} />
+                    </Link>
+                  );
+                })}
+              </div>
+            )}
+          </div>
         </nav>
 
         {/* Live data strip */}
