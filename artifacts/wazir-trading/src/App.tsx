@@ -17,6 +17,7 @@ const HowItWorksPage          = React.lazy(() => import('@/pages/how-it-works'))
 const ShippingInformationPage = React.lazy(() => import('@/pages/shipping-information'));
 const ContactPage             = React.lazy(() => import('@/pages/contact'));
 const FaqsPage                = React.lazy(() => import('@/pages/faqs'));
+const PaymentInformationPage  = React.lazy(() => import('@/pages/payment-information'));
 const NotFound                = React.lazy(() => import('@/pages/not-found'));
 
 const queryClient = new QueryClient({
@@ -56,6 +57,7 @@ function Router() {
         <Route path="/shipping-information" component={ShippingInformationPage} />
         <Route path="/contact" component={ContactPage} />
         <Route path="/faqs" component={FaqsPage} />
+        <Route path="/payment-information" component={PaymentInformationPage} />
         <Route component={NotFound} />
       </Switch>
     </Suspense>

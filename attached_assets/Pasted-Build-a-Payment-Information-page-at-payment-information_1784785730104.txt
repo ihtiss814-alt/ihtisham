@@ -1,0 +1,193 @@
+Build a Payment Information page at /payment-information
+
+HERO SECTION:
+Title: "Payment Information"
+Subtitle: "Secure and transparent payment 
+process for your peace of mind"
+Background: dark navy
+
+SECTION 1 - BANKING DETAILS CARD:
+Large prominent card showing Wazir Trading 
+bank details with copy buttons.
+
+Title: "Official Bank Account — Japan Only"
+Warning badge: "⚠️ We ONLY accept payments 
+to this account"
+
+Bank details table with copy button 
+next to each field:
+
+Bank Name: Mitsui Sumitomo Ginko (0009)
+[Copy button]
+
+Branch Name: Nagoya Ekimae Branch (402)
+[Copy button]
+
+Account Name: Wazir Trading LLC
+[Copy button]
+
+Account Number: 7917020
+[Copy button]
+
+SWIFT Code: SMBCJPJT
+[Copy button]
+
+Bank Address: Nagoya Mitsui Building 
+North 5 Floor Nakamura-ku, Meieki, 
+4-8-18 Nagoya-shi, Aichi, 450-0002
+[Copy button]
+
+"Copy All Bank Details" button at bottom
+Copies all details to clipboard at once
+Shows success message "Copied!" for 2 seconds
+
+SECTION 2 - PAYMENT METHOD:
+Title: "Accepted Payment Method"
+
+One payment method card:
+Telegraphic Transfer (TT)
+Bank-to-Bank wire transfer directly 
+to our Japan bank account.
+This is the only accepted payment method.
+Icon: Bank/transfer icon
+
+Note below: "We do not accept Western Union, 
+MoneyGram, PayPal, or any personal 
+payment services."
+
+SECTION 3 - PAYMENT SECURITY (4 Steps):
+Title: "Protect Your Payments and Avoid Scams"
+Subtitle: "Wazir Trading values your trust 
+and wants to ensure the security 
+of your transactions."
+
+4 security cards in a grid:
+
+Card 1: Verify Bank Account Details
+Icon: Shield checkmark
+Text: Before making any payment, confirm 
+you are using the correct bank account 
+information. The beneficiary for all 
+accounts is Wazir Trading LLC and we 
+exclusively use the Japan bank details 
+stated above. We do not use Western Union 
+or any money transfer services.
+
+Card 2: Avoid Fake Emails and Scams
+Icon: Email warning icon
+Text: Beware of fake or fraudulent emails 
+impersonating Wazir Trading LLC. Always 
+confirm the sender email ends with 
+@wazirtrading.com or check 
+wazirtrading-pc@outlook.jp before 
+acting on any payment instructions.
+
+Card 3: Payment Guidelines
+Icon: Document icon
+Text: Wazir Trading strictly prohibits 
+any local agents from accepting payments 
+on our behalf. Our staff is not authorized 
+to conduct any transactions on behalf 
+of clients. All payments go directly to 
+our Japan bank account only.
+
+Important points list:
+- Bank account is in Japan only
+- Never pay to personal accounts
+- Never pay to agents outside Japan  
+- Always verify details before transfer
+- Contact us if anything seems suspicious
+
+Card 4: Right to Cancel
+Icon: Cancel/block icon
+Text: Wazir Trading reserves the right 
+to cancel, terminate, or suspend any 
+deal if there are suspicions of 
+fraudulent activities or unauthorized 
+transactions by any party involved.
+
+SECTION 4 - HOW TO MAKE PAYMENT:
+Title: "Step by Step Payment Guide"
+
+4 steps horizontal:
+
+Step 1: Get Your Invoice
+After confirming your car, request your 
+official Proforma Invoice from us via 
+WhatsApp or email. Invoice includes 
+full bank details and payment amount.
+
+Step 2: Verify Bank Details
+Cross-check bank details on invoice 
+with the official details on this page. 
+If anything is different contact us 
+immediately before sending.
+
+Step 3: Make Transfer
+Visit your bank and make a Telegraphic 
+Transfer (TT) to our Japan account. 
+Make sure to include your Invoice Number 
+in the transfer reference.
+
+Step 4: Send Payment Receipt
+After transfer, send us a clear photo 
+or scan of your bank payment receipt 
+via WhatsApp. This confirms payment 
+and we begin processing your shipment.
+
+SECTION 5 - IMPORTANT WARNINGS BOX:
+Full width red warning card:
+Title: "⚠️ IMPORTANT PAYMENT WARNINGS"
+
+Three warning points with icons:
+
+Warning 1: 
+Our bank account is ONLY in Japan.
+Never send payment to any other country.
+
+Warning 2:
+We do NOT accept payments to personal 
+bank accounts, mobile wallets, or agents.
+If anyone requests this contact us immediately.
+
+Warning 3:
+Always verify bank details directly 
+on this page before every transaction.
+Bank details never change without 
+official notice from us.
+
+SECTION 6 - NEED PAYMENT HELP:
+Dark card at bottom:
+Title: "Need Payment Assistance?"
+Text: "For any questions about making 
+your payment or if you suspect fraud, 
+contact us immediately."
+
+Three contact options:
+WhatsApp: +81 80-8922-7375 
+(green button, most urgent)
+Email: wazirtrading-pc@outlook.jp
+Phone: 050-3740-8980
+
+Add /payment-information to the 
+Help dropdown in Navbar.
+
+COPY BUTTON FUNCTIONALITY:
+Each copy button uses navigator.clipboard.writeText()
+Shows checkmark icon and "Copied!" text for 2 seconds
+Then reverts back to copy icon
+"Copy All" button copies formatted text:
+Bank Name: Mitsui Sumitomo Ginko (0009)
+Branch: Nagoya Ekimae Branch (402)
+Account Name: Wazir Trading LLC
+Account Number: 7917020
+SWIFT: SMBCJPJT
+Address: Nagoya Mitsui Building North 5F, 
+Nakamura-ku, Meieki 4-8-18, Nagoya, Aichi
+
+PAGE META:
+Title: "Payment Information | Wazir Trading LLC"
+Description: "Official bank details for 
+Wazir Trading LLC Japan. Secure telegraphic 
+transfer payment instructions and 
+fraud prevention guidelines."

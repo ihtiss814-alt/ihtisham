@@ -19,9 +19,10 @@ const NAV_LINKS = [
 ];
 
 const HELP_LINKS = [
-  { label: 'How It Works',        href: '/how-it-works' },
-  { label: 'Shipping Information', href: '/shipping-information' },
-  { label: 'FAQs',                href: '/faqs' },
+  { label: 'How It Works',          href: '/how-it-works' },
+  { label: 'Shipping Information',  href: '/shipping-information' },
+  { label: 'Payment Information',   href: '/payment-information' },
+  { label: 'FAQs',                  href: '/faqs' },
 ];
 
 function useJapanTime() {
