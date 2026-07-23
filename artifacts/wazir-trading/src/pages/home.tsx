@@ -2376,25 +2376,6 @@ export default function HomePage() {
         {/* Content */}
         <div className="relative z-10 max-w-4xl mx-auto px-4 md:px-8 w-full pt-[185px] sm:pt-[160px] md:pt-[110px] pb-10 flex flex-col items-center text-center">
 
-          {/* Badge */}
-          <motion.div
-            initial={{ opacity: 0, y: 16 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.1 }}
-            className="mb-4"
-          >
-            <span
-              className="px-3 py-1 text-[9px] tracking-[0.24em] uppercase font-bold rounded-full border"
-              style={{
-                color: '#F87171',
-                borderColor: 'rgba(200,16,46,0.5)',
-                background: 'rgba(200,16,46,0.12)',
-                backdropFilter: 'blur(8px)',
-              }}
-            >
-              ● Direct from Japan Auctions
-            </span>
-          </motion.div>
 
           {/* Headline */}
           <motion.h1
