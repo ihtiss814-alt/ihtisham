@@ -1,0 +1,236 @@
+Build a How To Buy page at /how-it-works
+
+HERO SECTION:
+Title: "How To Buy Your Dream Car"
+Subtitle: "Simple, transparent and hassle-free 
+process from Japan to your door"
+Background: dark navy with subtle car pattern
+Two CTA buttons:
+"Browse Cars" linking to /cars
+"Chat on WhatsApp" linking to wa.me/818089227375
+
+SECTION 1 - CHOOSE YOUR BUYING OPTION:
+Title: "Choose Your Buying Option"
+Two cards side by side:
+
+Card 1: Purchase from Stock
+Icon: Car icon
+Title: "Purchase from Stock"
+Text: "Browse and purchase from our live 
+inventory of quality Japanese used cars 
+available for immediate export from Japan."
+Button: "Browse Stock" linking to /cars
+
+Card 2: Can't Find Your Car?
+Icon: Search icon
+Title: "Source Your Specific Car"
+Text: "Tell us exactly what you need and 
+we will search Japanese auctions to find 
+your perfect vehicle at the best price."
+Button: "Submit Request" linking to /contact
+
+SECTION 2 - 5 STEP PROCESS:
+Title: "Simple 5 Step Process"
+Subtitle: "From selecting your ideal car 
+to delivery at your destination port"
+
+Show 5 steps with large step numbers,
+icons, titles and detailed descriptions.
+Steps connected by a dotted line on desktop.
+Stack vertically on mobile.
+
+Step 1: Browse and Select
+Icon: Search/magnifying glass
+Title: "Browse and Select"
+Description: Browse our live inventory of 
+quality Japanese used cars. Filter by make, 
+model, year, price, and body type. Each car 
+includes full specifications, auction grade, 
+mileage, and multiple photos. Click 
+Inquire Now on any car you like.
+
+Step 2: Get Your Proforma Invoice
+Icon: Document icon
+Title: "Get Your Proforma Invoice"
+Description: Once you select your car, 
+contact us on WhatsApp or submit an inquiry. 
+We will send you an official Proforma Invoice 
+within 24 hours. The invoice includes the 
+full price breakdown, banking details, and 
+shipment information.
+
+Step 3: Make Secure Payment
+Icon: Bank/payment icon
+Title: "Make Secure Payment"
+Description: Make a Telegraphic Transfer 
+directly to our official Wazir Trading LLC 
+bank account in Japan only. We accept 50% 
+deposit to reserve the car and remaining 
+50% before shipment. Send us your payment 
+receipt via WhatsApp to confirm.
+
+Bank details shown in a small info box:
+Bank: Mitsui Sumitomo Ginko (0009)
+Account: Wazir Trading LLC
+SWIFT: SMBCJPJT
+
+Step 4: Professional Shipping
+Icon: Ship icon
+Title: "Professional Shipping"
+Description: Once payment is confirmed 
+we arrange immediate shipment from 
+Yokohama port. We offer both RORO and 
+Container shipping options. You will 
+receive photos of your car being loaded, 
+vessel name, voyage number, and 
+estimated arrival date at your port.
+
+Step 5: Receive Your Car
+Icon: Location pin / checkmark
+Title: "Receive Your Car"
+Description: We send you the original 
+Bill of Lading and all required export 
+documents to clear your car at your 
+destination port. Our team is available 
+to assist with any documentation 
+questions throughout the process.
+
+SECTION 3 - SHIPPING TIMELINE TABLE:
+Title: "Estimated Delivery Timelines"
+Subtitle: "Average shipping time from 
+Japan to major destination ports"
+
+Table with these columns:
+Region | Destination | Port | 
+Shipping Method | Est. Time
+
+Rows:
+South Asia | Pakistan | Karachi | RORO | 3-4 weeks
+South Asia | Pakistan | Gwadar | RORO | 4-5 weeks
+Middle East | UAE | Dubai | RORO | 2-3 weeks
+Caribbean | Guyana | Georgetown | RORO | 6-8 weeks
+Caribbean | Jamaica | Kingston | RORO | 6-8 weeks
+Caribbean | Trinidad | Port of Spain | RORO | 6-8 weeks
+Africa | Kenya | Mombasa | RORO | 4-5 weeks
+Africa | Tanzania | Dar es Salaam | RORO | 4-5 weeks
+Africa | Ghana | Tema | RORO | 6-7 weeks
+Africa | Nigeria | Lagos | RORO | 6-7 weeks
+Pacific | New Zealand | Auckland | RORO | 3-4 weeks
+Pacific | Papua New Guinea | Port Moresby | RORO | 4-5 weeks
+Europe | UK | Southampton | RORO | 5-6 weeks
+Europe | Germany | Hamburg | RORO | 5-6 weeks
+Russia | Russia | Vladivostok | RORO | 2-3 weeks
+
+Note below table: 
+"Timelines are estimates and may vary 
+based on vessel availability and 
+customs clearance at destination port."
+
+SECTION 4 - PAYMENT TERMS:
+Title: "Payment Terms"
+
+Two cards side by side:
+
+Card 1: Standard Payment
+50% deposit to reserve the car
+50% balance before loading on vessel
+Both payments to Japan bank account only
+
+Card 2: For Multiple Vehicles
+Contact us for special bulk pricing
+Special payment terms available
+20% bulk discount for 5 or more vehicles
+
+SECTION 5 - WHY CHOOSE WAZIR TRADING:
+Title: "Why Choose Wazir Trading LLC?"
+
+6 benefit cards in a 3 column grid:
+
+Direct from Japan Auctions
+Access to 100,000+ vehicles weekly
+through all major Japanese auctions
+
+Competitive Pricing
+Best auction prices with no 
+unnecessary middleman fees
+
+Quality Inspection
+Every car inspected and verified 
+against auction inspection sheet
+
+Secure Payment
+Official Japan bank account only
+Bank-to-Bank TT transfers
+
+Fast Shipping
+Earliest available vessel from 
+Yokohama after payment confirmation
+
+Complete Documentation
+All export documents, Bill of Lading 
+and shipping papers handled by us
+
+SECTION 6 - PRICE CALCULATOR CTA:
+Dark section with:
+Title: "Want to Know the Total Cost?"
+Text: "Use our Total Price Calculator 
+to get an instant estimate of the 
+full C&F price to your destination port 
+including shipping, inspection 
+and insurance."
+Button: "Calculate Your Price" 
+linking to /cars (calculator is on cars page)
+
+SECTION 7 - FAQ TEASER:
+Title: "Common Questions"
+Show 4 FAQ accordions:
+
+Q: How long does delivery take?
+A: Typically 4 to 8 weeks depending on 
+your destination. See our timeline 
+table above for specific estimates.
+
+Q: What payment method do you accept?
+A: We accept Telegraphic Transfer (TT) 
+only to our official Japan bank account. 
+Visit our Payment Information page 
+for full banking details.
+
+Q: Can you source a car not in your stock?
+A: Yes. Submit your requirements using 
+our Car Request form and we will search 
+Japanese auctions to find your vehicle.
+
+Q: Do I need an agent to buy from you?
+A: No. You can buy directly from us. 
+Never pay to any third party agent 
+claiming to represent Wazir Trading.
+
+"See All FAQs" link to /faqs
+
+SECTION 8 - BOTTOM CTA:
+Dark full width section:
+Title: "Ready to Start Your Journey?"
+Text: "Our expert team is available 
+Mon-Sat 9AM-6PM Japan Standard Time. 
+Contact us now for personalized 
+assistance with your car purchase."
+
+Two buttons side by side:
+"Browse Available Cars" red button 
+linking to /cars
+"Chat on WhatsApp" green button 
+linking to wa.me/818089227375
+
+Also display contact info:
+WhatsApp: +81 80-8922-7375
+Email: wazirtrading-pc@outlook.jp
+Hours: Mon-Sat 9AM-6PM JST
+
+PAGE META:
+Title: "How To Buy Japanese Cars | 
+Step by Step Guide | Wazir Trading LLC"
+Description: "Learn how to buy quality 
+Japanese used cars from Wazir Trading LLC. 
+Simple 5 step process from browsing to 
+delivery at your destination port."
