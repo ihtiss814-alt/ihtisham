@@ -1,0 +1,239 @@
+Build a FAQ page at /faqs for Wazir Trading LLC.
+
+HERO SECTION:
+Title: "Frequently Asked Questions"
+Subtitle: "Got Questions? We Have Answers!"
+Small text: "Find answers to the most commonly 
+asked questions about our services, 
+processes, and policies."
+Background: dark navy with subtle pattern
+
+SEARCH BAR:
+Below hero add a search box:
+"Search your question..."
+As user types, filter FAQs that match 
+the search term instantly.
+
+FAQ SECTIONS:
+Group FAQs into categories shown as 
+tab buttons:
+All | Buying Process | Payment | Shipping | 
+General | Auction
+
+ACCORDION FAQ LIST:
+Each FAQ is a clickable accordion item.
+Clicking question expands the answer below.
+Only one FAQ open at a time.
+Open FAQ shows red left border.
+Arrow icon rotates when expanded.
+
+Use these FAQs for Wazir Trading:
+
+CATEGORY: Buying Process
+
+Q: How can I start buying cars from 
+Wazir Trading LLC?
+A: Follow these 5 simple steps:
+1. Search your desired vehicle on our website
+2. Click Inquire Now or contact us on WhatsApp
+3. Receive your Proforma Invoice from us
+4. Make payment via Telegraphic Transfer 
+   to our Japan bank account only
+5. We arrange shipment and send you 
+   Bill of Lading
+Visit our How To Buy page for full details.
+
+Q: Who can buy cars from Wazir Trading?
+A: Anyone can buy from us including 
+automobile dealers and individual buyers 
+worldwide. We recommend checking your 
+country's import regulations before 
+making a purchase.
+
+Q: How many cars do you have available?
+A: We maintain a live inventory of 
+thousands of quality Japanese used cars 
+on our website. We also have access to 
+over 100,000 cars weekly through Japanese 
+auto auctions including USS, TAA, JAA, 
+and AUCNET auction houses.
+
+Q: Can I cancel my purchase order?
+A: Yes, cancellation is possible but 
+you may need to cover any incurred costs 
+as we may need to resell the vehicle. 
+Please contact us as soon as possible 
+if you wish to cancel.
+
+Q: Do you help find specific cars 
+not listed on your website?
+A: Yes. Use our "Can't Find Your Car?" 
+form on the homepage or contact us on 
+WhatsApp with your requirements. We will 
+search Japanese auctions to find your 
+exact vehicle within your budget.
+
+CATEGORY: Payment
+
+Q: What payment methods do you accept?
+A: We accept payment via Telegraphic 
+Transfer (TT) directly to our official 
+bank account in Japan only.
+
+Bank Details:
+Bank: Mitsui Sumitomo Ginko (0009)
+Branch: Nagoya Ekimae Branch (402)
+Account Name: Wazir Trading LLC
+Account Number: 7917020
+SWIFT Code: SMBCJPJT
+
+IMPORTANT: We never accept payments 
+to personal accounts or agents outside 
+Japan. If anyone requests payment 
+elsewhere please contact us immediately.
+
+Q: Who covers the bank transfer fees?
+A: Bank transfer fees are the buyer's 
+responsibility. Please contact your bank 
+to verify the exact transfer fee amount 
+before sending payment.
+
+Q: Is there a registration or hidden fee?
+A: No. There are absolutely no 
+registration fees or hidden charges. 
+All costs are clearly stated in your 
+Proforma Invoice before you make payment.
+
+Q: What additional charges apply 
+after the car price?
+A: FOB price: You pay freight, clearance, 
+import duty, registration, and compliance 
+fees in your country.
+C&F price: Freight is included, you pay 
+remaining charges.
+CIF price: Freight and insurance included, 
+you pay remaining charges.
+
+CATEGORY: Shipping
+
+Q: How long does delivery take?
+A: Typical delivery time is 4 to 8 weeks 
+depending on your destination port and 
+shipping schedule. Once payment is 
+confirmed we ship on the earliest 
+available vessel from Yokohama port.
+
+Q: What shipping methods do you offer?
+A: We offer both RORO (Roll-on Roll-off) 
+and Container shipping depending on 
+your destination country. RORO is 
+generally faster and cheaper for 
+single vehicles.
+
+Q: Do you ship to my country?
+A: We ship to 50+ countries worldwide 
+including Pakistan, UAE, UK, Guyana, 
+Jamaica, Trinidad, Kenya, Ghana, 
+Nigeria, Tanzania, Uganda, New Zealand, 
+Papua New Guinea, Australia, Russia, 
+Germany, Georgia, and many more. 
+Contact us to confirm your destination.
+
+Q: How do I track my shipment?
+A: Once your car is shipped we send you:
+- Photos of your car loaded on the vessel
+- Container/vessel name and voyage number
+- Estimated arrival date at your port
+- Original Bill of Lading documents
+- Shipping invoice
+
+Q: What documents do I receive 
+after purchase?
+A: You receive: Proforma Invoice, 
+Original Bill of Lading, Export 
+Certificate, and any other documents 
+required by your destination country 
+for customs clearance.
+
+CATEGORY: Auction
+
+Q: How does the Japanese auction process work?
+A: Japan has multiple auction houses 
+including USS, TAA, JAA, and AUCNET. 
+We attend these auctions on your behalf 
+and bid on vehicles matching your 
+requirements. Auction cars are graded 
+by condition (Grade 3 to Grade 5) 
+and include detailed inspection sheets.
+
+Q: What do auction grades mean?
+A: Japanese auction grades indicate 
+vehicle condition:
+Grade 5 / 5A: Excellent condition, 
+like new, very low mileage
+Grade 4.5: Very good condition, 
+minor wear only
+Grade 4: Good condition, small scratches 
+or minor issues
+Grade 3.5: Average condition, 
+some visible wear
+Grade 3: Fair condition, 
+noticeable wear or minor damage
+
+Q: How can I know the right bidding 
+price for a vehicle?
+A: We have access to auction price 
+history for the last 3 months which 
+shows what similar vehicles have sold 
+for. This helps us advise you on a 
+competitive and fair bidding price.
+
+CATEGORY: General
+
+Q: Do you inspect cars before shipping?
+A: Yes. All cars in our inventory are 
+inspected and we verify the auction 
+inspection sheet for every vehicle. 
+For additional peace of mind you can 
+request an independent third-party 
+inspection before shipment.
+
+Q: Can I get Left Hand Drive (LHD) cars?
+A: LHD cars are rare in Japan but we 
+can source them from our network. 
+Please contact us with your specific 
+LHD requirements and we will search 
+for the best options available.
+
+Q: What is FOB price vs C&F price?
+A: FOB (Free On Board): Price of the 
+car loaded on the ship in Japan. 
+You pay shipping separately.
+C&F (Cost and Freight): FOB price plus 
+shipping cost to your destination port. 
+This is the total price to your port.
+CIF (Cost Insurance Freight): C&F 
+price plus marine insurance coverage.
+
+Q: How do I contact Wazir Trading?
+A: You can reach us through:
+WhatsApp: +81 80-8922-7375 (fastest)
+Phone: 050-3740-8980
+Email: wazirtrading-pc@outlook.jp
+We are available Mon-Sat 9AM-6PM JST
+
+BOTTOM CONTACT SECTION:
+Dark card at bottom of page:
+Title: "Still Have Questions? Let's Talk!"
+Text: "For further inquiries contact us 
+through WhatsApp for the fastest response."
+
+Three contact cards side by side:
+Phone: +81 80-8922-7375
+Email: wazirtrading-pc@outlook.jp  
+WhatsApp: +81 80-8922-7375 
+(green button, opens wa.me link)
+
+Add /faqs to the Help dropdown 
+in the Navbar alongside 
+How It Works and Shipping Information.
