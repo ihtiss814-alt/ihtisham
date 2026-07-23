@@ -4,7 +4,7 @@ import {
   Search, ChevronDown, ChevronUp, ChevronLeft, ChevronRight,
   MessageCircle, X, SlidersHorizontal, MapPin,
   Gauge, Calendar, Zap, Settings, Users, Palette, DoorOpen,
-  Navigation, Fuel, Loader2,
+  Navigation, Fuel, Loader2, Tag, Car as CarIcon, Truck, Tractor, Cog, Droplets, Droplet,
 } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import type { Car } from '@/components/CarCard';
@@ -248,6 +248,30 @@ function CarSilhouette({ type, color: c }: { type: string; color: string }) {
 }
 
 /* ─────────────────────────────────────────────────────────────── */
+/* MAKE SIDEBAR ICON                                                */
+/* ─────────────────────────────────────────────────────────────── */
+const AGRICULTURAL_MAKES = new Set([
+  'Iseki', 'John Deere', 'Kubota', 'Massey Ferguson', 'Mametora', 'Shibaura', 'Yanmar',
+]);
+function MakeSidebarIcon({ name, slug }: { name: string; slug: string }) {
+  const [failed, setFailed] = React.useState(false);
+  const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+  if (AGRICULTURAL_MAKES.has(name)) return <Tractor size={13} />;
+  if (name === 'Hino') return <Truck size={13} />;
+  if (!failed) {
+    return (
+      <img
+        src={`${base}/logos/${slug}.svg`}
+        alt=""
+        className="w-3.5 h-3.5 object-contain"
+        onError={() => setFailed(true)}
+      />
+    );
+  }
+  return <CarIcon size={13} />;
+}
+
+/* ─────────────────────────────────────────────────────────────── */
 /* ACCORDION ITEM                                                   */
 /* ─────────────────────────────────────────────────────────────── */
 function AccordionSection({
@@ -273,18 +297,21 @@ function AccordionSection({
 /* SIDEBAR FILTER ITEM                                             */
 /* ─────────────────────────────────────────────────────────────── */
 function FilterItem({
-  label, count, active, onClick,
-}: { label: string; count?: number; active?: boolean; onClick: () => void }) {
+  label, count, active, onClick, icon,
+}: { label: string; count?: number; active?: boolean; onClick: () => void; icon?: React.ReactNode }) {
   return (
     <button
       onClick={onClick}
       className="w-full flex items-center justify-between px-4 py-1.5 text-sm text-left hover:bg-red-50 transition-colors"
     >
-      <span className={`${active ? 'text-[#C8102E] font-semibold' : 'text-gray-700'}`}>
-        {active && <span className="mr-1">●</span>}{label}
+      <span className={`flex items-center gap-1.5 min-w-0 ${active ? 'text-[#C8102E] font-semibold' : 'text-gray-700'}`}>
+        <span className={`flex-shrink-0 w-4 h-4 flex items-center justify-center ${active ? 'opacity-100' : 'opacity-50'}`}>
+          {icon ?? (active ? <span className="text-[9px]">●</span> : null)}
+        </span>
+        <span className="truncate">{label}</span>
       </span>
       {count !== undefined && (
-        <span className="text-[11px] text-gray-400 tabular-nums">{count.toLocaleString()}</span>
+        <span className="text-[11px] text-gray-400 tabular-nums ml-1 flex-shrink-0">{count.toLocaleString()}</span>
       )}
     </button>
   );
@@ -315,93 +342,144 @@ function Sidebar({
   activeFuel: string;     setActiveFuel: (v: string) => void;
   activeMileage: string;  setActiveMileage: (v: string) => void;
 }) {
+  const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+
+  const CATEGORY_ICONS: Record<string, React.ReactNode> = {
+    Gasoline:    <Fuel size={13} />,
+    Hybrid:      <Zap size={13} />,
+    Diesel:      <Droplets size={13} />,
+    'Light Oil': <Droplet size={13} />,
+  };
+
+  const LOCATION_FLAGS: Record<string, string> = {
+    Japan: '🇯🇵', Chile: '🇨🇱', UK: '🇬🇧', UAE: '🇦🇪', Thailand: '🇹🇭', China: '🇨🇳',
+  };
+
+  const FUEL_ICONS: Record<string, React.ReactNode> = {
+    Diesel:              <Droplets size={13} />,
+    Electric:            <Zap size={13} />,
+    Gasoline:            <Fuel size={13} />,
+    'Gasoline E Power':  <Zap size={13} />,
+    'Gasoline Hybrid':   <Zap size={13} />,
+  };
+
   return (
     <div className="border border-gray-200 overflow-hidden shadow-sm" style={{ width: 210, flexShrink: 0 }}>
+      {/* Make */}
       <AccordionSection title="Shop By Make" defaultOpen>
-        {MAKE_NAMES.map(name => (
-          <FilterItem key={name} label={name} count={makeCounts[name]}
-            active={activeMake === name}
-            onClick={() => setActiveMake(activeMake === name ? '' : name)} />
-        ))}
+        {MAKE_NAMES.map(name => {
+          const brand = MAKE_BRANDS.find(b => b.name === name)!;
+          return (
+            <FilterItem key={name} label={name} count={makeCounts[name]}
+              active={activeMake === name}
+              onClick={() => setActiveMake(activeMake === name ? '' : name)}
+              icon={<MakeSidebarIcon name={name} slug={brand.slug} />} />
+          );
+        })}
       </AccordionSection>
 
+      {/* Price */}
       <AccordionSection title="Shop By Price" defaultOpen>
         {PRICE_RANGES.map(p => (
           <FilterItem key={p} label={p}
             active={activePrice === p}
-            onClick={() => setActivePrice(activePrice === p ? '' : p)} />
+            onClick={() => setActivePrice(activePrice === p ? '' : p)}
+            icon={<Tag size={13} />} />
         ))}
       </AccordionSection>
 
+      {/* Body Type */}
       <AccordionSection title="Shop By Body Type" defaultOpen>
-        {BODY_TYPES.map(b => (
-          <FilterItem key={b} label={b}
-            active={activeBody === b}
-            onClick={() => setActiveBody(activeBody === b ? '' : b)} />
-        ))}
+        {BODY_TYPE_ITEMS.map(b => {
+          const icon = b.icon
+            ? <img src={`${base}${b.icon}`} alt="" className="w-3.5 h-3.5 object-contain" />
+            : (['Truck', 'Van', 'SUV', 'Bus'].includes(b.name) ? <Truck size={13} /> : <CarIcon size={13} />);
+          return (
+            <FilterItem key={b.name} label={b.name}
+              active={activeBody === b.name}
+              onClick={() => setActiveBody(activeBody === b.name ? '' : b.name)}
+              icon={icon} />
+          );
+        })}
       </AccordionSection>
 
+      {/* Category */}
       <AccordionSection title="Shop By Category" defaultOpen>
         {CATEGORIES.map(c => (
           <FilterItem key={c} label={c}
             active={activeCategory === c}
-            onClick={() => setActiveCategory(activeCategory === c ? '' : c)} />
+            onClick={() => setActiveCategory(activeCategory === c ? '' : c)}
+            icon={CATEGORY_ICONS[c]} />
         ))}
       </AccordionSection>
 
+      {/* Location */}
       <AccordionSection title="Shop By Location" defaultOpen>
         {LOCATIONS.map(l => (
           <FilterItem key={l} label={l}
             active={activeLocation === l}
-            onClick={() => setActiveLocation(activeLocation === l ? '' : l)} />
+            onClick={() => setActiveLocation(activeLocation === l ? '' : l)}
+            icon={<span className="text-[14px] leading-none">{LOCATION_FLAGS[l]}</span>} />
         ))}
       </AccordionSection>
 
+      {/* Year */}
       <AccordionSection title="Shop By Year" defaultOpen>
         {YEAR_RANGES.map(y => (
           <FilterItem key={y} label={y}
             active={activeYear === y}
-            onClick={() => setActiveYear(activeYear === y ? '' : y)} />
+            onClick={() => setActiveYear(activeYear === y ? '' : y)}
+            icon={<Calendar size={13} />} />
         ))}
       </AccordionSection>
 
+      {/* Drive */}
       <AccordionSection title="Shop By Drive" defaultOpen>
         {DRIVES.map(d => (
           <FilterItem key={d} label={d}
             active={activeDrive === d}
-            onClick={() => setActiveDrive(activeDrive === d ? '' : d)} />
+            onClick={() => setActiveDrive(activeDrive === d ? '' : d)}
+            icon={d === '4WD' ? <Truck size={13} /> : <CarIcon size={13} />} />
         ))}
       </AccordionSection>
 
+      {/* Transmission */}
       <AccordionSection title="Shop By Transmission" defaultOpen>
         {TRANSMISSIONS.map(t => (
           <FilterItem key={t} label={t}
             active={activeTrans === t}
-            onClick={() => setActiveTrans(activeTrans === t ? '' : t)} />
+            onClick={() => setActiveTrans(activeTrans === t ? '' : t)}
+            icon={<Cog size={13} />} />
         ))}
       </AccordionSection>
 
+      {/* Engine Size */}
       <AccordionSection title="Shop By Engine Size" defaultOpen>
         {ENGINE_SIZES.map(e => (
           <FilterItem key={e} label={e}
             active={activeEngine === e}
-            onClick={() => setActiveEngine(activeEngine === e ? '' : e)} />
+            onClick={() => setActiveEngine(activeEngine === e ? '' : e)}
+            icon={<Gauge size={13} />} />
         ))}
       </AccordionSection>
 
+      {/* Fuel */}
       <AccordionSection title="Shop By Fuel" defaultOpen>
         {FUELS.map(f => (
           <FilterItem key={f} label={f}
             active={activeFuel === f}
-            onClick={() => setActiveFuel(activeFuel === f ? '' : f)} />
+            onClick={() => setActiveFuel(activeFuel === f ? '' : f)}
+            icon={FUEL_ICONS[f]} />
         ))}
       </AccordionSection>
 
+      {/* Mileage */}
       <AccordionSection title="Shop By Mileage" defaultOpen>
         {MILEAGES.map(m => (
           <FilterItem key={m} label={m}
             active={activeMileage === m}
-            onClick={() => setActiveMileage(activeMileage === m ? '' : m)} />
+            onClick={() => setActiveMileage(activeMileage === m ? '' : m)}
+            icon={<Gauge size={13} />} />
         ))}
       </AccordionSection>
     </div>
