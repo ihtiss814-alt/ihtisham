@@ -154,7 +154,7 @@ export default function Footer() {
               </a>
 
               <a
-                href="mailto:info@wazirtrading.com"
+                href="mailto:wazirtrading-pc@outlook.jp"
                 aria-label="Email us"
                 className="flex items-center justify-center w-10 h-10 rounded-full bg-white/8 border border-white/10 text-white/60 hover:text-white hover:bg-[#C8102E] hover:border-[#C8102E] transition-all duration-200"
               >
@@ -237,7 +237,7 @@ export default function Footer() {
               <li className="flex items-start gap-3 text-white/60">
                 <MapPin size={16} className="text-[#C8102E] shrink-0 mt-0.5" />
                 <span>
-                  Tokyo, Japan
+                  Kuwana-City, Mie-Pref, Japan
                   <br />
                   <span className="text-white/40 text-xs">Global Export Division</span>
                 </span>
@@ -261,12 +261,12 @@ export default function Footer() {
 
               <li>
                 <a
-                  href="mailto:info@wazirtrading.com"
+                  href="mailto:wazirtrading-pc@outlook.jp"
                   className="flex items-center gap-3 text-white/60 hover:text-[#C8102E] transition-colors"
                 >
                   <Mail size={16} className="text-[#C8102E] shrink-0" />
                   <span>
-                    info@wazirtrading.com
+                    wazirtrading-pc@outlook.jp
                   </span>
                 </a>
               </li>

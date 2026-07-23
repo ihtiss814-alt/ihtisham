@@ -53,7 +53,11 @@ export default function ContactPage() {
                     </div>
                     <div>
                       <h4 className="font-bold text-sm uppercase tracking-wider mb-1">Address</h4>
-                      <p className="text-muted-foreground text-sm leading-relaxed">Tokyo, Japan<br/>(Visits by appointment only)</p>
+                      <p className="text-muted-foreground text-sm leading-relaxed">
+                        Heights Mizutani 1C, 158-1 Jizou<br/>
+                        Kuwana-City, Mie-Pref, Japan<br/>
+                        <span className="text-xs opacity-70">(Visits by appointment only)</span>
+                      </p>
                     </div>
                   </div>
                   
@@ -63,7 +67,11 @@ export default function ContactPage() {
                     </div>
                     <div>
                       <h4 className="font-bold text-sm uppercase tracking-wider mb-1">WhatsApp & Phone</h4>
-                      <p className="text-muted-foreground text-sm leading-relaxed">+{waNumber}</p>
+                      <p className="text-muted-foreground text-sm leading-relaxed">
+                        +{waNumber} <span className="text-xs opacity-70">(WhatsApp preferred)</span><br/>
+                        050-3740-8980 <span className="text-xs opacity-70">(Office)</span><br/>
+                        050-3588-6588 <span className="text-xs opacity-70">(Fax)</span>
+                      </p>
                     </div>
                   </div>
 
@@ -73,7 +81,7 @@ export default function ContactPage() {
                     </div>
                     <div>
                       <h4 className="font-bold text-sm uppercase tracking-wider mb-1">Email</h4>
-                      <p className="text-muted-foreground text-sm leading-relaxed">info@wazirtrading.com</p>
+                      <p className="text-muted-foreground text-sm leading-relaxed">wazirtrading-pc@outlook.jp</p>
                     </div>
                   </div>
                 </div>
