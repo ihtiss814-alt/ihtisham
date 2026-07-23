@@ -1413,7 +1413,7 @@ function CantFindCarSection() {
                 </div>
                 <div>
                   <div className="font-bold text-gray-900 text-sm">Vehicle Request Form</div>
-                  <div className="text-xs text-gray-400">We'll search Japan auctions and reply within 24 hours</div>
+                  <div className="text-xs text-gray-400">Tell us what you need — we'll find it and send you the price</div>
                 </div>
               </div>
 
@@ -1426,9 +1426,12 @@ function CantFindCarSection() {
                       <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>
                     </svg>
                   </div>
-                  <h3 className="font-serif font-bold text-xl text-gray-900 mb-2">Request Submitted!</h3>
-                  <p className="text-gray-500 text-sm max-w-sm">
-                    Thank you! We will search our Japanese auction network and contact you within 24 hours on WhatsApp.
+                  <h3 className="font-serif font-bold text-xl text-gray-900 mb-2">We're On It!</h3>
+                  <p className="text-gray-500 text-sm max-w-sm mb-2">
+                    Your request is with our Japan sourcing desk. We'll search the auction network and send you matching options — with full pricing — on WhatsApp within 24 hours.
+                  </p>
+                  <p className="text-xs text-gray-400 max-w-xs">
+                    No payment needed at this stage. We'll confirm availability and price before anything moves forward.
                   </p>
                   <button onClick={() => setSuccess(false)}
                     className="mt-6 px-6 py-2.5 rounded-full text-sm font-semibold text-white cursor-pointer"
@@ -1514,7 +1517,7 @@ function CantFindCarSection() {
                     <div className="sm:col-span-2">
                       <label style={label}>Specific Requirements</label>
                       <textarea value={form.requirements} onChange={set('requirements')}
-                        placeholder="Any specific color, mileage, features, grade or other requirements?"
+                        placeholder="e.g. Right-hand drive, under 80,000 km, silver or white, auction grade 4 or above, sunroof preferred. The more detail you give us, the better we can match."
                         rows={4}
                         style={{ ...inp, resize: 'vertical', minHeight: 100 }}
                         onFocus={e => { e.target.style.borderColor = '#C8102E'; e.target.style.boxShadow = '0 0 0 3px rgba(200,16,46,0.1)'; }}
@@ -1546,7 +1549,7 @@ function CantFindCarSection() {
                         onMouseEnter={e => { if (!submitting) (e.currentTarget as HTMLButtonElement).style.boxShadow = '0 8px 32px rgba(200,16,46,0.45)'; }}
                         onMouseLeave={e => { if (!submitting) (e.currentTarget as HTMLButtonElement).style.boxShadow = '0 4px 20px rgba(200,16,46,0.35)'; }}
                       >
-                        {submitting ? 'Sending Request…' : 'Send Request'}
+                        {submitting ? 'Sending Request…' : 'Search Japan Auctions for Me'}
                       </button>
                     </div>
                   </div>

@@ -4,6 +4,7 @@ import { Mail, MapPin, Phone, Check } from 'lucide-react';
 
 export default function ContactPage() {
   const [status, setStatus] = useState<'idle' | 'submitting' | 'success' | 'error'>('idle');
+  const [inquiryType, setInquiryType] = useState('');
   const waNumber = import.meta.env.VITE_WHATSAPP_NUMBER || '818089227375';
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -110,41 +111,92 @@ export default function ContactPage() {
                   <div className="w-16 h-16 bg-primary/20 text-primary rounded-full flex items-center justify-center mb-6">
                     <Check size={32} />
                   </div>
-                  <h3 className="text-xl font-bold mb-2">Message Sent</h3>
-                  <p className="text-muted-foreground">Thank you for contacting Wazir Trading. Our team will get back to you shortly.</p>
+                  <h3 className="text-xl font-bold mb-2">Message Received</h3>
+                  <p className="text-muted-foreground mb-3">
+                    Our team will review your inquiry and reply within a few hours — primarily on WhatsApp for the fastest response.
+                  </p>
+                  <p className="text-xs text-muted-foreground/60">
+                    You can also reach us at<br />
+                    <span className="font-semibold text-foreground/80">wazirtrading-pc@outlook.jp</span>
+                  </p>
                 </div>
               ) : (
                 <form onSubmit={handleSubmit} className="space-y-5">
+
+                  {/* Inquiry type selector */}
                   <div>
-                    <label className="block text-xs uppercase tracking-wider mb-2 font-medium text-foreground/80">Full Name</label>
-                    <input required name="name" type="text" className="w-full border border-border bg-background p-3 focus:border-primary outline-none transition-colors" />
+                    <label className="block text-xs uppercase tracking-wider mb-2 font-medium text-foreground/80">What can we help you with?</label>
+                    <div className="grid grid-cols-2 gap-2">
+                      {[
+                        { value: 'sourcing',  label: '🚗  Vehicle Sourcing' },
+                        { value: 'shipping',  label: '🚢  Shipping Quote'   },
+                        { value: 'payment',   label: '💳  Payment Info'     },
+                        { value: 'general',   label: '📋  General Question' },
+                      ].map(opt => (
+                        <button
+                          key={opt.value}
+                          type="button"
+                          onClick={() => setInquiryType(opt.value)}
+                          className={`py-2.5 px-3 text-xs font-medium border text-left transition-colors ${
+                            inquiryType === opt.value
+                              ? 'border-primary bg-primary/5 text-primary'
+                              : 'border-border text-muted-foreground hover:border-primary/40'
+                          }`}
+                        >
+                          {opt.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-xs uppercase tracking-wider mb-2 font-medium text-foreground/80">Full Name *</label>
+                    <input required name="name" type="text" placeholder="e.g. Ahmed Al-Rashid" className="w-full border border-border bg-background p-3 focus:border-primary outline-none transition-colors" />
                   </div>
                   <div>
-                    <label className="block text-xs uppercase tracking-wider mb-2 font-medium text-foreground/80">Email Address</label>
-                    <input required name="email" type="email" className="w-full border border-border bg-background p-3 focus:border-primary outline-none transition-colors" />
+                    <label className="block text-xs uppercase tracking-wider mb-2 font-medium text-foreground/80">Email Address *</label>
+                    <input required name="email" type="email" placeholder="your@email.com" className="w-full border border-border bg-background p-3 focus:border-primary outline-none transition-colors" />
                   </div>
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-xs uppercase tracking-wider mb-2 font-medium text-foreground/80">Phone / WhatsApp</label>
-                      <input name="phone" type="tel" className="w-full border border-border bg-background p-3 focus:border-primary outline-none transition-colors" />
+                      <label className="block text-xs uppercase tracking-wider mb-2 font-medium text-foreground/80">WhatsApp / Phone</label>
+                      <input name="phone" type="tel" placeholder="+1 234 567 8900" className="w-full border border-border bg-background p-3 focus:border-primary outline-none transition-colors" />
                     </div>
                     <div>
-                      <label className="block text-xs uppercase tracking-wider mb-2 font-medium text-foreground/80">Country</label>
-                      <input required name="country" type="text" className="w-full border border-border bg-background p-3 focus:border-primary outline-none transition-colors" />
+                      <label className="block text-xs uppercase tracking-wider mb-2 font-medium text-foreground/80">Your Country *</label>
+                      <input required name="country" type="text" placeholder="e.g. Pakistan" className="w-full border border-border bg-background p-3 focus:border-primary outline-none transition-colors" />
                     </div>
                   </div>
                   <div>
-                    <label className="block text-xs uppercase tracking-wider mb-2 font-medium text-foreground/80">Message</label>
-                    <textarea required name="message" rows={5} placeholder="How can we help you?" className="w-full border border-border bg-background p-3 focus:border-primary outline-none resize-none transition-colors" />
+                    <label className="block text-xs uppercase tracking-wider mb-2 font-medium text-foreground/80">Message *</label>
+                    <textarea
+                      required
+                      name="message"
+                      rows={5}
+                      placeholder={
+                        inquiryType === 'sourcing'
+                          ? "e.g. I'm looking for a Toyota Land Cruiser 2018–2020, budget around $12,000, shipping to Karachi. Please advise on availability and total price."
+                          : inquiryType === 'shipping'
+                          ? "e.g. I need a shipping quote for a Toyota Hilux (already purchased) to Mombasa, Kenya. Please include inspection and insurance options."
+                          : inquiryType === 'payment'
+                          ? "e.g. What payment methods do you accept? Can I pay by bank transfer from the UK, and when is payment due?"
+                          : "How can we help you? Please include as much detail as possible so we can give you a useful answer."
+                      }
+                      className="w-full border border-border bg-background p-3 focus:border-primary outline-none resize-none transition-colors"
+                    />
                   </div>
-                  <button 
-                    type="submit" 
+                  <button
+                    type="submit"
                     disabled={status === 'submitting'}
                     className="w-full bg-primary text-primary-foreground py-4 font-medium uppercase tracking-widest text-sm disabled:opacity-70 transition-colors"
                   >
-                    {status === 'submitting' ? 'Sending...' : 'Send Message'}
+                    {status === 'submitting' ? 'Sending…' : 'Send My Inquiry'}
                   </button>
-                  {status === 'error' && <p className="text-destructive text-sm text-center">Failed to send message. Please try again.</p>}
+                  {status === 'error' && (
+                    <p className="text-destructive text-sm text-center">
+                      Failed to send. Please try WhatsApp instead — we're always available there.
+                    </p>
+                  )}
                 </form>
               )}
             </div>

@@ -805,8 +805,8 @@ export default function CarDetailPage() {
               {/* ── Inquiry Form ── */}
               <div id="inquiry-section" className="bg-white border border-gray-200 rounded-sm shadow-sm overflow-hidden">
                 <div className="px-6 py-4 border-b border-gray-100" style={{ background: NAVY }}>
-                  <h3 className="text-base font-serif font-bold text-white">Send Inquiry</h3>
-                  <p className="text-xs text-white/50 mt-0.5">Send Inquiry for this Vehicle</p>
+                  <h3 className="text-base font-serif font-bold text-white">Get Price &amp; Shipping Quote</h3>
+                  <p className="text-xs text-white/50 mt-0.5">We'll reply on WhatsApp with your full landed cost</p>
                 </div>
 
                 {formStatus === 'success' ? (
@@ -814,28 +814,32 @@ export default function CarDetailPage() {
                     <div className="w-12 h-12 rounded-full bg-emerald-100 flex items-center justify-center mx-auto mb-3">
                       <Check size={22} className="text-emerald-600" />
                     </div>
-                    <p className="font-semibold text-gray-800 mb-1">Inquiry Sent!</p>
-                    <p className="text-sm text-gray-500">
-                      Thank you! We will contact you within 24 hours on WhatsApp with pricing and shipping details.
+                    <p className="font-bold text-gray-800 mb-2">Quote Request Received!</p>
+                    <p className="text-sm text-gray-500 leading-relaxed">
+                      Our team will reach out on WhatsApp within a few hours with your complete price — FOB, freight, inspection, and insurance all included.
                     </p>
                   </div>
                 ) : (
                   <form onSubmit={handleInquirySubmit} className="p-5 space-y-3">
-                    <p className="text-xs text-gray-400">Receive a price quote and shipping details directly in your inbox.</p>
+                    <p className="text-xs text-gray-400 leading-relaxed">
+                      Tell us where to ship it. We'll calculate the full landed cost and send you a breakdown — no commitment required.
+                    </p>
 
                     <div>
-                      <label className="block text-xs font-semibold text-gray-500 mb-1">Reference Number</label>
+                      <label className="block text-xs font-semibold text-gray-500 mb-1">Vehicle Reference</label>
                       <input
                         type="text"
                         value={car.ref_number}
                         readOnly
-                        className="w-full border border-gray-200 bg-gray-50 text-gray-500 text-sm px-3 py-2 rounded-sm cursor-not-allowed"
+                        className="w-full border border-gray-200 bg-gray-50 text-gray-400 text-sm px-3 py-2 rounded-sm cursor-not-allowed font-mono tracking-wide"
                       />
                     </div>
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                       <div>
-                        <label className="block text-xs font-semibold text-gray-500 mb-1">Destination Country *</label>
+                        <label className="block text-xs font-semibold text-gray-500 mb-1">
+                          Destination Country <span className="text-[#C8102E]">*</span>
+                        </label>
                         <select
                           name="dest_country"
                           required
@@ -843,47 +847,57 @@ export default function CarDetailPage() {
                           onChange={e => setFormCountry(e.target.value)}
                           className="w-full border border-gray-200 text-gray-800 text-sm px-3 py-2 rounded-sm focus:outline-none focus:border-[#C8102E] bg-white"
                         >
-                          <option value="">Select…</option>
+                          <option value="">Where are you shipping to?</option>
                           {Object.keys(COUNTRIES_PORTS).map(c => (
                             <option key={c} value={c}>{c}</option>
                           ))}
                         </select>
                       </div>
                       <div>
-                        <label className="block text-xs font-semibold text-gray-500 mb-1">Destination Port</label>
+                        <label className="block text-xs font-semibold text-gray-500 mb-1">Nearest Port</label>
                         <input
                           name="dest_port"
                           type="text"
-                          placeholder="Port name"
+                          placeholder="e.g. Karachi, Dubai, Mombasa"
                           className="w-full border border-gray-200 text-gray-800 text-sm px-3 py-2 rounded-sm focus:outline-none focus:border-[#C8102E]"
                         />
                       </div>
                     </div>
 
                     <div>
-                      <label className="block text-xs font-semibold text-gray-500 mb-1">Full Name *</label>
-                      <input name="name" type="text" required placeholder="Your name" className="w-full border border-gray-200 text-gray-800 text-sm px-3 py-2 rounded-sm focus:outline-none focus:border-[#C8102E]" />
+                      <label className="block text-xs font-semibold text-gray-500 mb-1">
+                        Your Full Name <span className="text-[#C8102E]">*</span>
+                      </label>
+                      <input name="name" type="text" required placeholder="e.g. Ahmed Al-Rashid" className="w-full border border-gray-200 text-gray-800 text-sm px-3 py-2 rounded-sm focus:outline-none focus:border-[#C8102E]" />
                     </div>
+
                     <div>
-                      <label className="block text-xs font-semibold text-gray-500 mb-1">Email *</label>
+                      <label className="block text-xs font-semibold text-gray-500 mb-1">
+                        WhatsApp Number <span className="text-[#C8102E]">*</span>
+                      </label>
+                      <input name="phone" type="tel" required placeholder="+1 234 567 8900 (with country code)" className="w-full border border-gray-200 text-gray-800 text-sm px-3 py-2 rounded-sm focus:outline-none focus:border-[#C8102E]" />
+                      <p className="text-[10px] text-gray-400 mt-0.5">We'll send your quote here first</p>
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-semibold text-gray-500 mb-1">
+                        Email Address <span className="text-[#C8102E]">*</span>
+                      </label>
                       <input name="email" type="email" required placeholder="your@email.com" className="w-full border border-gray-200 text-gray-800 text-sm px-3 py-2 rounded-sm focus:outline-none focus:border-[#C8102E]" />
                     </div>
+
                     <div>
-                      <label className="block text-xs font-semibold text-gray-500 mb-1">WhatsApp / Phone *</label>
-                      <input name="phone" type="tel" required placeholder="+1 234 567 8900" className="w-full border border-gray-200 text-gray-800 text-sm px-3 py-2 rounded-sm focus:outline-none focus:border-[#C8102E]" />
-                    </div>
-                    <div>
-                      <label className="block text-xs font-semibold text-gray-500 mb-1">Message</label>
+                      <label className="block text-xs font-semibold text-gray-500 mb-1">Additional Notes</label>
                       <textarea
                         name="message"
                         rows={3}
-                        defaultValue={`I am interested in the ${car.year} ${car.make} ${car.model} (Ref: ${car.ref_number}). Please send me the total price including shipping.`}
+                        defaultValue={`Hi, I'm interested in the ${car.year} ${car.make} ${car.model} (Ref: ${car.ref_number}). Please send me the total landed cost to my destination, including freight, inspection, and insurance.`}
                         className="w-full border border-gray-200 text-gray-800 text-sm px-3 py-2 rounded-sm focus:outline-none focus:border-[#C8102E] resize-none"
                       />
                     </div>
 
                     {formStatus === 'error' && (
-                      <p className="text-xs text-[#C8102E]">Something went wrong. Please try again or contact us on WhatsApp.</p>
+                      <p className="text-xs text-[#C8102E]">⚠ Something went wrong. Please try again or reach us directly on WhatsApp.</p>
                     )}
 
                     <button
@@ -893,11 +907,12 @@ export default function CarDetailPage() {
                       style={{ background: RED }}
                     >
                       {formStatus === 'submitting' ? (
-                        <><Loader2 size={15} className="animate-spin" /> Sending…</>
+                        <><Loader2 size={15} className="animate-spin" /> Calculating your quote…</>
                       ) : (
-                        <><Send size={15} /> Submit Inquiry</>
+                        <><Send size={15} /> Get My Shipping Quote</>
                       )}
                     </button>
+                    <p className="text-[10px] text-gray-400 text-center">No payment required. We'll send you the full price breakdown.</p>
                   </form>
                 )}
               </div>
