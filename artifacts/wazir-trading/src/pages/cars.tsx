@@ -600,6 +600,7 @@ function BodyTypeCarousel({ setActiveBody }: { setActiveBody: (v: string) => voi
 /* TOTAL PRICE CALCULATOR (Supabase-connected)                      */
 /* ─────────────────────────────────────────────────────────────── */
 function TotalPriceCalculator() {
+  const { pkr: pkrRate } = useExchangeRate();
   const [country, setCountry]       = useState('Pakistan');
   const [port, setPort]             = useState('Karachi');
   const [fob, setFob]               = useState('');
