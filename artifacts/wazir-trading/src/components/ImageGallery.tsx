@@ -33,14 +33,14 @@ export default function ImageGallery({ carId, refNumber, make, model }: ImageGal
       try {
         const { data, error } = await supabase
           .from('car_images')
-          .select('url, sort_order')
+          .select('image_url, display_order, is_primary')
           .eq('car_id', carId)
-          .order('sort_order');
+          .order('display_order');
 
         if (cancelled) return;
 
         if (!error && data && data.length > 0) {
-          const urls = data.map((r: { url: string }) => r.url);
+          const urls = data.map((r: { image_url: string }) => r.image_url);
           setCandidates(urls);
           setStatuses(urls.map(() => 'pending' as ImgStatus));
         } else {

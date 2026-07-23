@@ -17,6 +17,10 @@ type ExtendedCar = Car & {
   features?: Record<string, boolean> | null;
 };
 
+type SimilarCar = Car & {
+  primaryImage?: string;
+};
+
 interface ShippingRate {
   country: string;
   port: string;
@@ -112,7 +116,7 @@ export default function CarDetailPage() {
   // core data
   const [car, setCar] = useState<ExtendedCar | null>(null);
   const [loading, setLoading] = useState(true);
-  const [similarCars, setSimilarCars] = useState<Car[]>([]);
+  const [similarCars, setSimilarCars] = useState<SimilarCar[]>([]);
 
   // UI state
   const [currency, setCurrency] = useState<Currency>('USD');
@@ -167,7 +171,7 @@ export default function CarDetailPage() {
     return () => { document.title = 'Wazir Trading LLC'; };
   }, [car]);
 
-  /* ─── similar cars ─── */
+  /* ─── similar cars (with primary images) ─── */
   useEffect(() => {
     if (!car) return;
     async function fetchSimilar() {
@@ -192,7 +196,24 @@ export default function CarDetailPage() {
           .limit(6);
         data = fallback;
       }
-      setSimilarCars(data || []);
+      if (!data) { setSimilarCars([]); return; }
+
+      // Fetch primary images for all similar cars in one query
+      const ids = data.map((c: Car) => c.id);
+      const { data: imgs } = await supabase
+        .from('car_images')
+        .select('car_id, image_url, is_primary, display_order')
+        .in('car_id', ids)
+        .order('display_order');
+
+      const imgMap: Record<string, string> = {};
+      for (const img of (imgs ?? []) as { car_id: string; image_url: string; is_primary: boolean }[]) {
+        if (!imgMap[img.car_id] || img.is_primary) {
+          imgMap[img.car_id] = img.image_url;
+        }
+      }
+
+      setSimilarCars(data.map((c: Car) => ({ ...c, primaryImage: imgMap[c.id] })));
     }
     fetchSimilar();
   }, [car]);
@@ -954,13 +975,12 @@ export default function CarDetailPage() {
 /* ══════════════════════════════════════════════════════════════════════
    SIMILAR CAR CARD
 ══════════════════════════════════════════════════════════════════════ */
-function SimilarCarCard({ car }: { car: Car }) {
+function SimilarCarCard({ car }: { car: SimilarCar }) {
   const [imgErr, setImgErr] = useState(false);
-  const cloudName = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME || 'txb1wiw1';
-  const imgUrl = `https://res.cloudinary.com/${cloudName}/image/upload/cars/${car.ref_number.toLowerCase()}-1`;
   const waNum = import.meta.env.VITE_WHATSAPP_NUMBER || '818089227375';
   const waMsg = encodeURIComponent(`Hi, I am interested in ${car.make} ${car.model} ${car.year} (Ref: ${car.ref_number}). Is it available?`);
   const { pkr: pkrRate } = useExchangeRate();
+  const imgUrl = car.primaryImage ?? null;
 
   return (
     <div className="flex-shrink-0 w-52 bg-white border border-gray-200 rounded-sm overflow-hidden hover:shadow-md transition-shadow">
@@ -968,7 +988,7 @@ function SimilarCarCard({ car }: { car: Car }) {
         <div className="relative aspect-[4/3] bg-gray-100 overflow-hidden">
           <span className="absolute top-2 left-2 z-10 bg-[#0D1B3E] text-white text-[10px] font-bold px-2 py-0.5">{car.year}</span>
           <span className="absolute top-2 right-2 z-10 bg-black/70 text-white text-[10px] font-bold px-2 py-0.5">{car.engine_cc}CC</span>
-          {!imgErr ? (
+          {imgUrl && !imgErr ? (
             <img src={imgUrl} alt={`${car.make} ${car.model}`} onError={() => setImgErr(true)} className="w-full h-full object-cover hover:scale-105 transition-transform duration-500" />
           ) : (
             <div className="w-full h-full flex items-center justify-center bg-gray-50">
