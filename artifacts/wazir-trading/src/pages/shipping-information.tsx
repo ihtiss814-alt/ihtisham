@@ -424,8 +424,8 @@ function ShippingTable({ route }: { route: RouteConfig }) {
               {fixedCols.map((col, ci) => (
                 <th
                   key={ci}
-                  className="text-center text-[10px] tracking-wide font-semibold text-white/90 whitespace-nowrap px-2 py-2 border-b border-white/10 border-r border-white/10 sticky z-20"
-                  style={{ left: colWidths.slice(0, ci).reduce((a, b) => a + b, 0), minWidth: colWidths[ci], background: '#2a2a3e' }}
+                  className="text-center text-[10px] tracking-wide font-semibold text-white/90 whitespace-nowrap px-2 py-2 border-b border-white/10 border-r border-white/10"
+                  style={{ minWidth: colWidths[ci], background: '#2a2a3e' }}
                 >
                   {col}
                 </th>
@@ -467,8 +467,8 @@ function ShippingTable({ route }: { route: RouteConfig }) {
                     return (
                       <td
                         key={ci}
-                        className={`sticky z-10 whitespace-nowrap px-2 py-[5px] border-b border-gray-100 border-r border-r-gray-200 ${ci === 0 ? 'text-[10px] font-bold text-gray-700' : ci === 1 ? 'text-[11px] font-medium text-gray-700' : 'text-[10px] font-mono text-gray-500'}`}
-                        style={{ left: colWidths.slice(0, ci).reduce((a, b) => a + b, 0), minWidth: colWidths[ci], background: bg }}
+                        className={`whitespace-nowrap px-2 py-[5px] border-b border-gray-100 border-r border-r-gray-200 ${ci === 0 ? 'text-[10px] font-bold text-gray-700' : ci === 1 ? 'text-[11px] font-medium text-gray-700' : 'text-[10px] font-mono text-gray-500'}`}
+                        style={{ minWidth: colWidths[ci], background: bg }}
                       >
                         {val}
                       </td>
