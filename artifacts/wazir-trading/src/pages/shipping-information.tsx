@@ -1,26 +1,28 @@
-import { useState } from 'react';
-import { MessageCircle } from 'lucide-react';
+import { useState, useRef } from 'react';
+import { MessageCircle, Mail, ChevronRight, ArrowRight, Ship, Info } from 'lucide-react';
 
-/* ─── Brand tokens ── */
+/* ─── Brand ──────────────────────────────────────────────────────── */
+const NAVY = '#0D1B3E';
 const RED  = '#C8102E';
-const DARK = '#1a1a1a';
-
 const WA_LINK = 'https://wa.me/818089227375';
 
-/* ─── Route definitions ─────────────────────────────────────── */
+/* ─── Route definitions ──────────────────────────────────────────── */
 interface RouteConfig {
   id: string;
-  label: string;
+  short: string;    // short label for tabs
+  label: string;    // full label for card header
+  type: 'RO-RO' | 'Container' | 'Mixed';
   departurePorts: string[];
   arrivalPorts: string[];
   rows: string[][];
 }
 
 const ROUTES: RouteConfig[] = [
-  /* ── EUROPE (RO-RO) ─────────────────────────────────────────── */
   {
     id: 'europe-roro',
-    label: 'EUROPE(RO-RO)',
+    short: 'Europe',
+    label: 'EUROPE (RO-RO)',
+    type: 'RO-RO',
     departurePorts: ['Yoko Hama','Kawa Saki','Nagoya','Kobe','Osaka','Hakata','Kanda','Kisa Razu','Hitachi Naka'],
     arrivalPorts:   ['Larnaca','Dublin','Southampton','Bremerhaven','Hanko','Limassol','Rotterdam','Valletta','Drammen','Le Havre','Antwerp','Amsterdam','Derince','Zeebrugge','Bristol','Newcastle'],
     rows: [
@@ -45,11 +47,11 @@ const ROUTES: RouteConfig[] = [
       ['ARMACUP',         'TBA Armacup',       '-',     '-','O','-','-','-','-','-','-',             '-',    '-','-','-','-','-','-','-','-','-','-','O','-','-','-'],
     ],
   },
-
-  /* ── ASIA, AFRICA (RO-RO) ──────────────────────────────────── */
   {
     id: 'asia-africa-roro',
-    label: 'ASIA, AFRICA(RO-RO)',
+    short: 'Asia & Africa',
+    label: 'ASIA & AFRICA (RO-RO)',
+    type: 'RO-RO',
     departurePorts: ['Yoko Hama','Kawa Saki','Nagoya','Kobe','Osaka','Hakata','Kanda','Kisa Razu','Nakano Seki','Hitachi Naka'],
     arrivalPorts:   ['Jebel Ali','Karachi','Port Louis','Durban','Dar','Mombasa','Maputo','Hambantota'],
     rows: [
@@ -81,11 +83,11 @@ const ROUTES: RouteConfig[] = [
       ['HOEGH',                      'Hoegh Brasilia',    '115',   'Feb 28','-','-','Mar 1','-','-','-','Feb 27','-','-',               'Apr 4', 'Mar 28','Mar 25','Apr 2','-','-'],
     ],
   },
-
-  /* ── BLACK SEA (CONTAINER) ─────────────────────────────────── */
   {
     id: 'black-sea-container',
-    label: 'BLACK SEA(CONTAINER)',
+    short: 'Black Sea',
+    label: 'BLACK SEA (Container)',
+    type: 'Container',
     departurePorts: ['Yoko Hama','Nagoya','Kobe','Osaka','Hakata','Hitachi Naka'],
     arrivalPorts:   ['Novorossiysk','Poti','Batumi'],
     rows: [
@@ -124,11 +126,11 @@ const ROUTES: RouteConfig[] = [
       ['MSC',    'MSC Valentina',    'HG408A', '-','-','-','-','-','Feb 15',  '-','O','-'],
     ],
   },
-
-  /* ── RUSSIA (FESCO) ────────────────────────────────────────── */
   {
     id: 'russia-fesco',
-    label: 'RUSSIA(FESCO)',
+    short: 'Russia',
+    label: 'RUSSIA (FESCO)',
+    type: 'Mixed',
     departurePorts: ['Yoko Hama','Kawa Saki','Nagoya','Kobe','Osaka','Toyama','Maizuru','Hakata','Fukui','Otaru','Kisa Razu','Karatsu','Shinmoji','Imari','Naoetsu','Tomakomai','Hitachi Naka'],
     arrivalPorts:   ['Vladivostok'],
     rows: [
@@ -152,11 +154,11 @@ const ROUTES: RouteConfig[] = [
       ['JAL',          'Ural',           '6',      '-','-','-','-','-','-','-','-','-','Feb 19 Cut:Feb 07','-','-','-','-','-','-','-',                 'O'],
     ],
   },
-
-  /* ── CARIBBEAN ─────────────────────────────────────────────── */
   {
     id: 'caribbean',
+    short: 'Caribbean',
     label: 'CARIBBEAN',
+    type: 'RO-RO',
     departurePorts: ['Yoko Hama','Kawa Saki','Nagoya','Kobe','Osaka','Hakata','Kanda','Kisa Razu','Hitachi Naka'],
     arrivalPorts:   ['Kingston','Nassau','Port Of Spain','George Town Guy','Paramaribo','Castries','Roseau','St Georges','St Johns','Aruba','Freeport TX','Tacoma','Savannah','Los Angeles','Jacksonville','Bridgetown','Basseterre','Kingstown'],
     rows: [
@@ -182,11 +184,11 @@ const ROUTES: RouteConfig[] = [
       ['Nissan Motor Carrier',   'TBN East',            '-',      '-','-','-','-','O','-','-','-','-',               '-','-','-','-','-','-','-','-','-','-','-','-','-','-','-','-','-'],
     ],
   },
-
-  /* ── N/S AMERICA ───────────────────────────────────────────── */
   {
     id: 'ns-america',
+    short: 'N/S America',
     label: 'N/S AMERICA',
+    type: 'RO-RO',
     departurePorts: ['Yoko Hama','Kawa Saki','Nagoya','Kobe','Osaka','Hakata','Kanda','Kisa Razu','Nakano Seki','Hitachi Naka'],
     arrivalPorts:   ['Iquique','Asuncion','Vancouver','New Westminster'],
     rows: [
@@ -206,11 +208,11 @@ const ROUTES: RouteConfig[] = [
       ['OCEAN NETWORK EXPRESS', 'ACX Diamond',       '-',    'Feb 27','-','Feb 28','Feb 29','-','Mar 2','-','-','-','-','-',    '-',    '-'],
     ],
   },
-
-  /* ── OCEANIA ────────────────────────────────────────────────── */
   {
     id: 'oceania',
+    short: 'Oceania',
     label: 'OCEANIA',
+    type: 'RO-RO',
     departurePorts: ['Yoko Hama','Kawa Saki','Nagoya','Kobe','Osaka','Kanda','Kisa Razu','Nakano Seki','Hitachi Naka'],
     arrivalPorts:   ['Brisbane','Port Kembla','Melbourne','Auckland','Wellington','Lyttelton','Suva','Lautoka','Port Moresby','Nelson','Adelaide','Fremantle','Darwin'],
     rows: [
@@ -241,11 +243,11 @@ const ROUTES: RouteConfig[] = [
       ['DAIWA SHIPPING',  'To Be Confirmed',       '-',     '-','O','-','O','-','-','-','-','-',                  '-','-','-','-','-','-','-','-','-','-','-','-','-'],
     ],
   },
-
-  /* ── MIDDLE EAST ────────────────────────────────────────────── */
   {
     id: 'middle-east',
+    short: 'Middle East',
     label: 'MIDDLE EAST',
+    type: 'Container',
     departurePorts: ['Yoko Hama','Nagoya','Kobe','Osaka','Tokyo','Hakata','Hitachi Naka'],
     arrivalPorts:   ['Karachi','Famagusta'],
     rows: [
@@ -264,11 +266,11 @@ const ROUTES: RouteConfig[] = [
       ['INTERASIA LINE',  'Hoegh Trove',      'S174', '-','-','Feb 6','-','-','-','-',   'O','-'],
     ],
   },
-
-  /* ── EAST ASIA (RO-RO) ─────────────────────────────────────── */
   {
     id: 'east-asia-roro',
-    label: 'EAST ASIA(RO-RO)',
+    short: 'East Asia',
+    label: 'EAST ASIA (RO-RO)',
+    type: 'RO-RO',
     departurePorts: ['Yoko Hama','Kawa Saki','Nagoya','Kobe','Osaka','Hakata','Kanda','Kisa Razu','Hitachi Naka'],
     arrivalPorts:   ['Hong Kong','Laem Chabang','Hambantota','Chittagong','Mongla','Subic'],
     rows: [
@@ -280,11 +282,11 @@ const ROUTES: RouteConfig[] = [
       ['ECL','Malaysia Brave',   'END', 'Feb 22','-','Feb 22','-','Feb 22','-','-','-','-',         '-',    'O',     'O',     '-','-'],
     ],
   },
-
-  /* ── EAST ASIA (CONTAINER) ─────────────────────────────────── */
   {
     id: 'east-asia-container',
-    label: 'EAST ASIA(CONTAINER)',
+    short: 'East Asia · CTR',
+    label: 'EAST ASIA (Container)',
+    type: 'Container',
     departurePorts: ['Yoko Hama','Kawa Saki','Nagoya','Kobe','Osaka','Hakata','Hitachi Naka'],
     arrivalPorts:   ['Huangpu','Yangon','Laem Chabang','Ulaanbaatar','Zamin Uud'],
     rows: [
@@ -324,11 +326,11 @@ const ROUTES: RouteConfig[] = [
       ['YANG MING',             'YM Initiative',       '320S',  '-','-','-','-','-','Jan 28 Cut:Jan 26','-','-','Feb 6','-','-','-'],
     ],
   },
-
-  /* ── AFRICA (CONTAINER) ─────────────────────────────────────── */
   {
     id: 'africa-container',
-    label: 'AFRICA(CONTAINER)',
+    short: 'Africa · CTR',
+    label: 'AFRICA (Container)',
+    type: 'Container',
     departurePorts: ['Yoko Hama','Nagoya','Kobe','Osaka','Hakata','Hitachi Naka'],
     arrivalPorts:   ['Mombasa','Dar Es Salaam','Port Louis','Matadi','Walvis Bay','Nacala','Maputo','Durban','Berbera','Beira'],
     rows: [
@@ -358,209 +360,292 @@ const ROUTES: RouteConfig[] = [
   },
 ];
 
-/* ─── Table Component ────────────────────────────────────────── */
-function ShippingTable({ route }: { route: RouteConfig }) {
-  const fixedCols = ['Company', 'Ship Name', 'Voyage'];
-  const colWidths = [130, 148, 72];
+/* ─── Type badge ─────────────────────────────────────────────────── */
+function TypeBadge({ type }: { type: RouteConfig['type'] }) {
+  const map = {
+    'RO-RO':     { bg: 'bg-blue-50',   text: 'text-blue-700',  border: 'border-blue-200'  },
+    'Container': { bg: 'bg-purple-50', text: 'text-purple-700',border: 'border-purple-200'},
+    'Mixed':     { bg: 'bg-amber-50',  text: 'text-amber-700', border: 'border-amber-200' },
+  };
+  const s = map[type];
+  return (
+    <span className={`inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wide border ${s.bg} ${s.text} ${s.border}`}>
+      {type}
+    </span>
+  );
+}
 
+/* ─── Shipping Table ─────────────────────────────────────────────── */
+function ShippingTable({ route }: { route: RouteConfig }) {
+  const tableRef = useRef<HTMLDivElement>(null);
+  const fixedCols = ['Company', 'Ship Name', 'Voyage'];
+  const colWidths = [130, 148, 68];
   const totalFixed = colWidths.reduce((a, b) => a + b, 0);
 
   return (
-    <div className="overflow-auto" style={{ maxHeight: '560px' }}>
-      <table
-        className="border-collapse text-xs"
-        style={{ minWidth: `${totalFixed + route.departurePorts.length * 76 + 36 + route.arrivalPorts.length * 76}px` }}
+    <div>
+      {/* Mobile swipe hint */}
+      <div className="flex items-center gap-1.5 px-3 py-2 bg-blue-50 border-b border-blue-100 md:hidden">
+        <ArrowRight size={12} className="text-blue-400" />
+        <span className="text-[11px] text-blue-600 font-medium">Swipe left to see all ports and arrival dates</span>
+      </div>
+
+      <div
+        ref={tableRef}
+        className="overflow-auto"
+        style={{ maxHeight: '520px' }}
       >
-        <thead style={{ position: 'sticky', top: 0, zIndex: 30 }}>
-          {/* Section labels */}
-          <tr>
-            <th
-              colSpan={fixedCols.length + route.departurePorts.length}
-              className="text-center text-[10.5px] tracking-[0.2em] uppercase font-bold text-white px-4 py-2.5 border-r border-white/20"
-              style={{ background: DARK }}
-            >
-              Departure Port
-            </th>
-            <th style={{ background: DARK, minWidth: 32, borderRight: '1px solid rgba(255,255,255,0.2)' }} />
-            <th
-              colSpan={route.arrivalPorts.length}
-              className="text-center text-[10.5px] tracking-[0.2em] uppercase font-bold text-white px-4 py-2.5"
-              style={{ background: DARK }}
-            >
-              Arrival Port
-            </th>
-          </tr>
-
-          {/* Column names */}
-          <tr style={{ background: '#2c2c2c' }}>
-            {fixedCols.map((col, ci) => (
+        <table
+          className="border-collapse text-xs"
+          style={{ minWidth: `${totalFixed + route.departurePorts.length * 74 + 28 + route.arrivalPorts.length * 74}px` }}
+        >
+          <thead style={{ position: 'sticky', top: 0, zIndex: 30 }}>
+            {/* Section labels */}
+            <tr>
               <th
-                key={ci}
-                className="text-center text-[10px] tracking-wide font-semibold text-white whitespace-nowrap px-2 py-2 border-b border-white/10 border-r border-r-white/10 sticky z-20"
-                style={{ left: colWidths.slice(0, ci).reduce((a, b) => a + b, 0), minWidth: colWidths[ci], background: '#2c2c2c' }}
+                colSpan={fixedCols.length + route.departurePorts.length}
+                className="text-center text-[10px] tracking-[0.2em] uppercase font-bold text-white px-4 py-2 border-r border-white/20"
+                style={{ background: '#1a1a2e' }}
               >
-                {col}
+                ← Departure Port
               </th>
-            ))}
-            {route.departurePorts.map((port, ci) => (
+              <th style={{ background: '#1a1a2e', minWidth: 28, borderRight: '1px solid rgba(255,255,255,0.15)' }} />
               <th
-                key={`d${ci}`}
-                className="text-center text-[10px] font-semibold text-white whitespace-nowrap px-2 py-2 border-b border-white/10 border-r border-r-white/10"
-                style={{ minWidth: 76, background: '#2c2c2c' }}
+                colSpan={route.arrivalPorts.length}
+                className="text-center text-[10px] tracking-[0.2em] uppercase font-bold text-white px-4 py-2"
+                style={{ background: '#1a1a2e' }}
               >
-                {port}
+                Arrival Port →
               </th>
-            ))}
-            {/* Arrow separator */}
-            <th className="px-1 py-2 border-b border-white/10 border-r border-r-white/30 text-center" style={{ background: '#2c2c2c', minWidth: 32 }}>
-              <span className="text-white/50 text-[11px]">→</span>
-            </th>
-            {route.arrivalPorts.map((port, ci) => (
-              <th
-                key={`a${ci}`}
-                className="text-center text-[10px] font-semibold text-white whitespace-nowrap px-2 py-2 border-b border-white/10 border-r border-r-white/10"
-                style={{ minWidth: 76, background: '#2c2c2c' }}
-              >
-                {port}
+            </tr>
+
+            {/* Column names */}
+            <tr style={{ background: '#2a2a3e' }}>
+              {fixedCols.map((col, ci) => (
+                <th
+                  key={ci}
+                  className="text-center text-[10px] tracking-wide font-semibold text-white/90 whitespace-nowrap px-2 py-2 border-b border-white/10 border-r border-white/10 sticky z-20"
+                  style={{ left: colWidths.slice(0, ci).reduce((a, b) => a + b, 0), minWidth: colWidths[ci], background: '#2a2a3e' }}
+                >
+                  {col}
+                </th>
+              ))}
+              {route.departurePorts.map((port, ci) => (
+                <th
+                  key={`d${ci}`}
+                  className="text-center text-[10px] font-semibold text-white/80 whitespace-nowrap px-1.5 py-2 border-b border-white/10 border-r border-white/10"
+                  style={{ minWidth: 74, background: '#2a2a3e' }}
+                >
+                  {port}
+                </th>
+              ))}
+              {/* Separator */}
+              <th className="px-1 py-2 border-b border-white/10 border-r border-white/25 text-center" style={{ background: '#2a2a3e', minWidth: 28 }}>
+                <span className="text-white/40 text-[11px]">→</span>
               </th>
-            ))}
-          </tr>
-        </thead>
+              {route.arrivalPorts.map((port, ci) => (
+                <th
+                  key={`a${ci}`}
+                  className="text-center text-[10px] font-semibold text-[#C8102E]/90 whitespace-nowrap px-1.5 py-2 border-b border-white/10 border-r border-white/10"
+                  style={{ minWidth: 74, background: '#2a2a3e' }}
+                >
+                  {port}
+                </th>
+              ))}
+            </tr>
+          </thead>
 
-        <tbody>
-          {route.rows.map((row, ri) => {
-            const bg = ri % 2 === 0 ? '#fff' : '#f6f6f6';
-            const depCnt = fixedCols.length + route.departurePorts.length;
+          <tbody>
+            {route.rows.map((row, ri) => {
+              const bg = ri % 2 === 0 ? '#ffffff' : '#f8f8fc';
+              const depCnt = fixedCols.length + route.departurePorts.length;
+              return (
+                <tr key={ri} className="hover:bg-blue-50/40 transition-colors">
+                  {/* Fixed sticky cols */}
+                  {fixedCols.map((_, ci) => {
+                    const val = row[ci] ?? '-';
+                    return (
+                      <td
+                        key={ci}
+                        className={`sticky z-10 whitespace-nowrap px-2 py-[5px] border-b border-gray-100 border-r border-r-gray-200 ${ci === 0 ? 'text-[10px] font-bold text-gray-700' : ci === 1 ? 'text-[11px] font-medium text-gray-700' : 'text-[10px] font-mono text-gray-500'}`}
+                        style={{ left: colWidths.slice(0, ci).reduce((a, b) => a + b, 0), minWidth: colWidths[ci], background: bg }}
+                      >
+                        {val}
+                      </td>
+                    );
+                  })}
 
-            return (
-              <tr key={ri}>
-                {/* Fixed columns */}
-                {fixedCols.map((_, ci) => {
-                  const val = row[ci] ?? '-';
-                  return (
-                    <td
-                      key={ci}
-                      className={`sticky z-10 whitespace-nowrap px-2 py-[6px] border-b border-gray-200 border-r border-r-gray-200 text-[11px] font-medium text-gray-800 ${ci === 0 ? 'font-semibold text-[10px]' : ''}`}
-                      style={{ left: colWidths.slice(0, ci).reduce((a, b) => a + b, 0), minWidth: colWidths[ci], background: bg }}
-                    >
-                      {val}
-                    </td>
-                  );
-                })}
+                  {/* Departure dates */}
+                  {route.departurePorts.map((_, ci) => {
+                    const val = row[fixedCols.length + ci] ?? '-';
+                    const isDash = val === '-';
+                    return (
+                      <td
+                        key={`d${ci}`}
+                        className={`text-center whitespace-nowrap px-1.5 py-[5px] border-b border-gray-100 border-r border-r-gray-100 text-[11px] ${isDash ? 'text-gray-200' : 'text-gray-700 font-medium'}`}
+                        style={{ background: isDash ? bg : '#eff6ff' }}
+                      >
+                        {val}
+                      </td>
+                    );
+                  })}
 
-                {/* Departure data */}
-                {route.departurePorts.map((_, ci) => {
-                  const val = row[fixedCols.length + ci] ?? '-';
-                  const isDash = val === '-';
-                  return (
-                    <td
-                      key={`d${ci}`}
-                      className={`text-center whitespace-nowrap px-2 py-[6px] border-b border-gray-200 border-r border-r-gray-100 text-[11px] ${isDash ? 'text-gray-300' : 'text-gray-700'}`}
-                      style={{ background: bg }}
-                    >
-                      {val}
-                    </td>
-                  );
-                })}
+                  {/* Arrow */}
+                  <td className="text-center px-1 border-b border-gray-100 border-r border-r-gray-300 text-gray-300 text-[11px]" style={{ background: bg }}>→</td>
 
-                {/* Arrow */}
-                <td className="text-center px-1 border-b border-gray-200 border-r border-r-gray-300 text-gray-400 text-[11px]" style={{ background: bg }}>→</td>
-
-                {/* Arrival data */}
-                {route.arrivalPorts.map((_, ci) => {
-                  const val = row[depCnt + ci] ?? '-';
-                  const isDash = val === '-';
-                  const isO = val === 'O';
-                  return (
-                    <td
-                      key={`a${ci}`}
-                      className={`text-center whitespace-nowrap px-2 py-[6px] border-b border-gray-200 border-r border-r-gray-100 text-[11px] ${isDash ? 'text-gray-300' : isO ? 'text-gray-400 font-semibold' : 'text-gray-700'}`}
-                      style={{ background: bg }}
-                    >
-                      {val}
-                    </td>
-                  );
-                })}
-              </tr>
-            );
-          })}
-        </tbody>
-      </table>
+                  {/* Arrival dates */}
+                  {route.arrivalPorts.map((_, ci) => {
+                    const val = row[depCnt + ci] ?? '-';
+                    const isDash = val === '-';
+                    const isO = val === 'O';
+                    return (
+                      <td
+                        key={`a${ci}`}
+                        className={`text-center whitespace-nowrap px-1.5 py-[5px] border-b border-gray-100 border-r border-r-gray-100 text-[11px] ${isDash ? 'text-gray-200' : isO ? 'text-gray-400 font-semibold' : 'text-gray-800 font-semibold'}`}
+                        style={{ background: isDash ? bg : isO ? bg : '#f0fdf4' }}
+                      >
+                        {val}
+                      </td>
+                    );
+                  })}
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 }
 
-/* ─── Main Page ──────────────────────────────────────────────── */
+/* ─── Main Page ──────────────────────────────────────────────────── */
 export default function ShippingInformationPage() {
   const [activeRoute, setActiveRoute] = useState('europe-roro');
   const current = ROUTES.find(r => r.id === activeRoute) ?? ROUTES[0];
 
   return (
-    <div className="min-h-screen bg-white" style={{ paddingTop: '127px' }}>
+    <div className="min-h-screen bg-gray-50 pt-[110px] md:pt-[130px]">
 
-      {/* ── Title strip ─────────────────────────────────────────── */}
-      <div className="border-b border-gray-100">
-        <div className="max-w-[1440px] mx-auto px-4 md:px-6 py-4">
-          <div className="flex items-center gap-3">
-            <div className="w-1 h-6 rounded-full flex-shrink-0" style={{ background: RED }} />
-            <h1 className="text-xl font-bold text-gray-900 tracking-tight">Shipping Information</h1>
-            <span className="text-xs text-gray-400 font-medium">— Japan to Worldwide</span>
+      {/* ── Hero ───────────────────────────────────────────────── */}
+      <section className="relative overflow-hidden" style={{ background: NAVY }}>
+        <div className="absolute inset-0 opacity-[0.04]" style={{
+          backgroundImage: `linear-gradient(rgba(255,255,255,0.5) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.5) 1px, transparent 1px)`,
+          backgroundSize: '48px 48px',
+        }} />
+        <div className="relative container mx-auto px-4 md:px-8 py-10 md:py-14 max-w-4xl">
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
+            <div>
+              <div className="inline-flex items-center gap-2 mb-3">
+                <span className="h-px w-6 bg-[#C8102E]" />
+                <span className="text-[10px] tracking-[0.3em] uppercase font-bold text-[#C8102E]">Logistics</span>
+                <span className="h-px w-6 bg-[#C8102E]" />
+              </div>
+              <h1 className="text-3xl md:text-4xl font-bold text-white mb-2">Shipping Information</h1>
+              <p className="text-white/50 text-sm">Japan → Worldwide · RO-RO &amp; Container Schedules</p>
+            </div>
+            {/* Stats */}
+            <div className="flex gap-4 md:gap-6">
+              {[
+                { val: ROUTES.length, label: 'Routes' },
+                { val: '130+', label: 'Countries' },
+                { val: 'RO-RO &\nContainer', label: 'Methods' },
+              ].map((s, i) => (
+                <div key={i} className="text-center">
+                  <p className="text-xl md:text-2xl font-bold text-white leading-none whitespace-pre-line">{s.val}</p>
+                  <p className="text-[10px] text-white/40 uppercase tracking-wide mt-0.5">{s.label}</p>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
-      </div>
+      </section>
 
-      <div className="max-w-[1440px] mx-auto px-4 md:px-6 py-5">
+      {/* ── Main Content ─────────────────────────────────────────── */}
+      <div className="max-w-[1440px] mx-auto px-3 md:px-6 py-5 md:py-7">
 
-        {/* ── Route tabs ──────────────────────────────────────────── */}
-        <div className="flex flex-wrap gap-[6px] mb-5">
-          {ROUTES.map((route) => {
-            const active = route.id === activeRoute;
-            return (
-              <button
-                key={route.id}
-                onClick={() => setActiveRoute(route.id)}
-                className="px-3 py-[7px] text-[10.5px] font-bold tracking-wide border rounded-[2px] transition-colors duration-120 cursor-pointer whitespace-nowrap leading-tight"
-                style={
-                  active
-                    ? { background: RED, color: '#fff', borderColor: RED }
-                    : { background: '#fff', color: RED, borderColor: RED }
-                }
-              >
-                Shipping Info {route.label}
-              </button>
-            );
-          })}
+        {/* ── Route Tab Selector ──────────────────────────────── */}
+        <div className="mb-4">
+          <p className="text-[10px] text-gray-400 uppercase tracking-widest font-semibold mb-2 px-0.5">Select Route</p>
+          {/* Mobile: 2-col grid | Desktop: flex wrap */}
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:flex md:flex-wrap gap-1.5 md:gap-2">
+            {ROUTES.map((route) => {
+              const active = route.id === activeRoute;
+              return (
+                <button
+                  key={route.id}
+                  onClick={() => setActiveRoute(route.id)}
+                  className={`px-3 py-2 md:py-1.5 text-[11px] md:text-[10.5px] font-bold tracking-wide border rounded-md md:rounded transition-all duration-150 text-left md:text-center leading-tight whitespace-nowrap ${
+                    active
+                      ? 'text-white border-[#C8102E]'
+                      : 'bg-white text-gray-600 border-gray-200 hover:border-[#C8102E] hover:text-[#C8102E]'
+                  }`}
+                  style={active ? { background: RED, borderColor: RED } : {}}
+                >
+                  <Ship size={10} className="inline mr-1 mb-0.5 opacity-70" />
+                  {route.short}
+                </button>
+              );
+            })}
+          </div>
         </div>
 
-        {/* ── Table card ──────────────────────────────────────────── */}
-        <div className="border border-gray-200 rounded-[2px] overflow-hidden shadow-sm mb-4">
+        {/* ── Table Card ──────────────────────────────────────── */}
+        <div className="bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm mb-4">
           {/* Card header */}
-          <div className="flex items-center justify-between px-4 py-2.5 border-b border-gray-100 bg-gray-50">
-            <div className="flex items-center gap-2">
-              <div className="w-[3px] h-4 rounded-full" style={{ background: RED }} />
-              <span className="font-bold text-sm text-gray-800">{current.label}</span>
-              <span className="text-gray-400 text-[11px] ml-1">
-                {current.departurePorts.length} departure · {current.arrivalPorts.length} arrival ports
+          <div className="flex flex-wrap items-center justify-between gap-2 px-4 py-3 border-b border-gray-100 bg-gray-50">
+            <div className="flex items-center gap-2.5 min-w-0">
+              <div className="w-0.5 h-5 rounded-full flex-shrink-0" style={{ background: RED }} />
+              <p className="font-bold text-sm text-gray-800 truncate">{current.label}</p>
+              <TypeBadge type={current.type} />
+            </div>
+            <div className="flex items-center gap-3 text-[11px] text-gray-400">
+              <span className="flex items-center gap-1">
+                <span className="font-semibold text-gray-600">{current.departurePorts.length}</span> departures
+              </span>
+              <span className="text-gray-200">·</span>
+              <span className="flex items-center gap-1">
+                <span className="font-semibold text-gray-600">{current.arrivalPorts.length}</span> arrivals
+              </span>
+              <span className="px-2 py-0.5 rounded-full text-[10px] font-bold" style={{ background: `${RED}15`, color: RED }}>
+                {current.rows.length} sailings
               </span>
             </div>
-            <span className="text-[10px] tracking-widest uppercase font-semibold px-2.5 py-1 rounded-full" style={{ background: `${RED}15`, color: RED }}>
-              {current.rows.length} sailings
+          </div>
+
+          <ShippingTable route={current} />
+
+          {/* Legend */}
+          <div className="flex flex-wrap items-center gap-3 px-4 py-2.5 border-t border-gray-100 bg-gray-50 text-[11px] text-gray-500">
+            <span className="flex items-center gap-1.5">
+              <span className="inline-block w-6 h-4 rounded bg-blue-50 border border-blue-100" />
+              Departure date
+            </span>
+            <span className="flex items-center gap-1.5">
+              <span className="inline-block w-6 h-4 rounded bg-green-50 border border-green-100" />
+              Arrival date
+            </span>
+            <span className="flex items-center gap-1.5">
+              <span className="font-bold text-gray-400">O</span>
+              Port call (date TBC)
+            </span>
+            <span className="flex items-center gap-1.5">
+              <span className="text-gray-200">—</span>
+              Not calling
             </span>
           </div>
-          <ShippingTable route={current} />
         </div>
 
-        {/* ── Note bar ────────────────────────────────────────────── */}
-        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 bg-amber-50 border border-amber-200 rounded-[2px] px-4 py-3 mb-6">
+        {/* ── Note bar ─────────────────────────────────────────── */}
+        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 bg-amber-50 border border-amber-200 rounded-xl px-4 py-3.5 mb-5">
+          <Info size={15} className="text-amber-500 flex-shrink-0 mt-0.5 sm:mt-0" />
           <p className="text-[12.5px] text-amber-800 flex-1 leading-relaxed">
-            <span className="font-bold">Note:</span>{' '}
-            Schedules are updated regularly. Dates marked <strong>O</strong> indicate port calls (date TBC). For the latest schedule or booking assistance, contact us on WhatsApp.
+            <strong>Note:</strong> Schedules are updated regularly. Dates marked <strong>O</strong> indicate port calls with date TBC. For the latest schedule or booking assistance, contact us on WhatsApp.
           </p>
           <a
             href={WA_LINK}
             target="_blank"
             rel="noopener noreferrer"
-            className="flex-shrink-0 flex items-center gap-2 px-4 py-2 rounded-[2px] text-white text-[11px] tracking-wide font-bold transition-opacity hover:opacity-90"
+            className="flex-shrink-0 flex items-center gap-2 px-4 py-2 rounded-lg text-white text-[11px] font-bold tracking-wide hover:opacity-90 transition-opacity"
             style={{ background: '#25D366' }}
           >
             <MessageCircle size={13} />
@@ -568,31 +653,62 @@ export default function ShippingInformationPage() {
           </a>
         </div>
 
-        {/* ── Contact strip ───────────────────────────────────────── */}
-        <div className="grid grid-cols-1 md:grid-cols-3 border border-gray-200 rounded-[2px] overflow-hidden">
-          <div className="md:col-span-3 px-5 py-3 bg-gray-50 border-b border-gray-100 flex items-center gap-2.5">
-            <div className="w-[3px] h-4 rounded-full" style={{ background: RED }} />
-            <div>
-              <span className="text-[10px] tracking-[0.2em] uppercase font-bold" style={{ color: RED }}>Get in Touch</span>
-              <span className="text-gray-400 text-[11px] ml-2">For inquiries, quotations &amp; bookings:</span>
+        {/* ── Contact Strip ────────────────────────────────────── */}
+        <div className="bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm">
+          {/* Header */}
+          <div className="px-5 py-3 border-b border-gray-100 flex items-center gap-2.5" style={{ background: NAVY }}>
+            <div className="w-0.5 h-4 rounded-full" style={{ background: RED }} />
+            <p className="text-[10px] tracking-[0.2em] uppercase font-bold text-white/80">Get in Touch</p>
+            <p className="text-white/40 text-[11px]">— Inquiries, quotations &amp; bookings</p>
+          </div>
+
+          {/* Contact cards */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 divide-y sm:divide-y-0 sm:divide-x divide-gray-100">
+            {/* WhatsApp */}
+            <a
+              href={WA_LINK}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-4 px-5 py-4 hover:bg-gray-50 transition-colors group"
+            >
+              <div className="w-9 h-9 rounded-full bg-green-50 flex items-center justify-center flex-shrink-0">
+                <MessageCircle size={17} className="text-green-600" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-[10px] text-gray-400 uppercase tracking-wider font-semibold mb-0.5">WhatsApp</p>
+                <p className="font-bold text-sm text-gray-800 group-hover:text-green-600 transition-colors">+81 80-8922-7375</p>
+              </div>
+              <ChevronRight size={15} className="text-gray-300 group-hover:text-green-500 transition-colors flex-shrink-0" />
+            </a>
+
+            {/* Email */}
+            <a
+              href="mailto:wazirtrading-pc@outlook.jp"
+              className="flex items-center gap-4 px-5 py-4 hover:bg-gray-50 transition-colors group"
+            >
+              <div className="w-9 h-9 rounded-full bg-blue-50 flex items-center justify-center flex-shrink-0">
+                <Mail size={17} className="text-blue-500" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-[10px] text-gray-400 uppercase tracking-wider font-semibold mb-0.5">Email</p>
+                <p className="font-bold text-sm text-gray-800 group-hover:text-blue-600 transition-colors truncate">wazirtrading-pc@outlook.jp</p>
+              </div>
+              <ChevronRight size={15} className="text-gray-300 group-hover:text-blue-500 transition-colors flex-shrink-0" />
+            </a>
+
+            {/* Hours */}
+            <div className="flex items-center gap-4 px-5 py-4">
+              <div className="w-9 h-9 rounded-full bg-red-50 flex items-center justify-center flex-shrink-0">
+                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#C8102E" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+                </svg>
+              </div>
+              <div>
+                <p className="text-[10px] text-gray-400 uppercase tracking-wider font-semibold mb-0.5">Business Hours</p>
+                <p className="font-bold text-sm text-gray-800">Mon – Sat</p>
+                <p className="text-[11px] text-gray-400">9:00 AM – 6:00 PM · Japan Standard Time</p>
+              </div>
             </div>
-          </div>
-          <div className="px-5 py-4 border-b md:border-b-0 md:border-r border-gray-100">
-            <p className="text-[10px] tracking-widest uppercase font-semibold text-gray-400 mb-1">WhatsApp</p>
-            <a href={WA_LINK} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 font-bold text-sm text-gray-800 hover:text-green-600 transition-colors">
-              <MessageCircle size={14} className="text-green-500" />+81 80-8922-7375
-            </a>
-          </div>
-          <div className="px-5 py-4 border-b md:border-b-0 md:border-r border-gray-100">
-            <p className="text-[10px] tracking-widest uppercase font-semibold text-gray-400 mb-1">Email</p>
-            <a href="mailto:wazirtrading-pc@outlook.jp" className="font-bold text-sm text-gray-800 hover:text-blue-600 transition-colors break-all">
-              wazirtrading-pc@outlook.jp
-            </a>
-          </div>
-          <div className="px-5 py-4">
-            <p className="text-[10px] tracking-widest uppercase font-semibold text-gray-400 mb-1">Business Hours</p>
-            <p className="font-bold text-sm text-gray-800">Mon – Sat</p>
-            <p className="text-gray-400 text-[11px]">9:00 AM – 6:00 PM  ·  Japan Standard Time</p>
           </div>
         </div>
 
