@@ -158,17 +158,38 @@ export default function CarDetailPage() {
   /* ─── SEO ─── */
   useEffect(() => {
     if (!car) return;
-    document.title = `${car.make} ${car.model} ${car.year}${car.variant ? ' ' + car.variant : ''} | Buy from Japan | Wazir Trading LLC`;
-    const desc = document.querySelector('meta[name="description"]');
+    const title = `${car.make} ${car.model} ${car.year}${car.variant ? ' ' + car.variant : ''} | Buy from Japan | Wazir Trading LLC`;
     const content = `${car.make} ${car.model} ${car.year}, ${fmtNum(car.mileage_km)}km, ${car.engine_cc}CC, ${car.color}, ${car.transmission}. FOB $${car.fob_price_usd}. Export from Japan. Ref ${car.ref_number}. Contact Wazir Trading.`;
-    if (desc) desc.setAttribute('content', content);
-    else {
-      const m = document.createElement('meta');
-      m.name = 'description';
-      m.content = content;
-      document.head.appendChild(m);
-    }
-    return () => { document.title = 'Wazir Trading LLC'; };
+    const canonicalUrl = `https://wazirtradingllc.com/cars/${car.ref_number}`;
+
+    document.title = title;
+
+    // Description
+    let desc = document.querySelector<HTMLMetaElement>('meta[name="description"]');
+    if (!desc) { desc = document.createElement('meta'); desc.name = 'description'; document.head.appendChild(desc); }
+    desc.setAttribute('content', content);
+
+    // Canonical
+    let canonical = document.querySelector<HTMLLinkElement>('link[rel="canonical"]');
+    if (!canonical) { canonical = document.createElement('link'); canonical.rel = 'canonical'; document.head.appendChild(canonical); }
+    canonical.href = canonicalUrl;
+
+    // OG tags
+    const setMeta = (property: string, value: string) => {
+      let el = document.querySelector<HTMLMetaElement>(`meta[property="${property}"]`);
+      if (!el) { el = document.createElement('meta'); el.setAttribute('property', property); document.head.appendChild(el); }
+      el.setAttribute('content', value);
+    };
+    setMeta('og:title', title);
+    setMeta('og:description', content);
+    setMeta('og:url', canonicalUrl);
+
+    return () => {
+      document.title = 'Wazir Trading LLC';
+      // Restore canonical to home
+      const c = document.querySelector<HTMLLinkElement>('link[rel="canonical"]');
+      if (c) c.href = 'https://wazirtradingllc.com/';
+    };
   }, [car]);
 
   /* ─── similar cars (with primary images) ─── */

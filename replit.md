@@ -1,46 +1,59 @@
 # Wazir Trading LLC
 
-A car trading and export website built with React + Vite and Supabase.
+A premium Japanese used-car export website built with React + Vite + Supabase.
 
 ## Stack
 
-- **Frontend**: React 19, Vite, TailwindCSS, shadcn/ui, Wouter (routing), TanStack Query
-- **Backend/Data**: Supabase (cars inventory, inquiries, shipping rates)
-- **API Server**: Express 5 (`artifacts/api-server`) — minimal, currently only a `/api/health` route
+- **Frontend**: React 19, TypeScript, Vite 7, Tailwind CSS v4, Wouter (routing), Framer Motion
+- **Backend/Data**: Supabase (PostgreSQL) — cars, shipping rates, exchange rates
+- **Images**: Cloudinary (`txb1wiw1`) — `f_auto,q_auto,w_600` transformations on car photos
+- **Deployment**: Vercel at **https://wazirtradingllc.com**
+- **Monorepo**: pnpm workspace — artifact lives at `artifacts/wazir-trading/`
 
-## Running the app
+## Running locally on Replit
 
-The frontend dev server starts automatically via the **`artifacts/wazir-trading: web`** workflow:
+The workflow `artifacts/wazir-trading: web` starts the dev server automatically.
 
 ```
-pnpm install --frozen-lockfile && PORT=24102 BASE_PATH=/ pnpm --filter @workspace/wazir-trading run dev
+PORT=24102 BASE_PATH=/ pnpm --filter @workspace/wazir-trading run dev
 ```
 
-The app is served at `/` in the Replit preview.
+The app is available at the Replit preview pane (proxied to port 24102).
 
-## Environment variables
-
-The frontend requires two Supabase env vars to load real data:
+## Environment variables (already set in Replit)
 
 | Variable | Purpose |
 |---|---|
-| `VITE_SUPABASE_URL` | Your Supabase project URL |
-| `VITE_SUPABASE_ANON_KEY` | Your Supabase anon/public key |
-| `VITE_WHATSAPP_NUMBER` | WhatsApp contact number (optional — defaults to `818089227375`) |
+| `VITE_SUPABASE_URL` | Supabase project URL |
+| `VITE_SUPABASE_ANON_KEY` | Supabase anon key |
+| `VITE_CLOUDINARY_CLOUD_NAME` | Cloudinary cloud name for car images |
+| `VITE_WHATSAPP_NUMBER` | WhatsApp business number |
 
-Without Supabase credentials the app renders but data queries will fail silently.
+## Key pages
 
-## Project structure
+| Route | File |
+|---|---|
+| `/` | `src/pages/home.tsx` |
+| `/cars` | `src/pages/cars.tsx` |
+| `/cars/:ref` | `src/pages/car-detail.tsx` |
+| `/about` | `src/pages/about.tsx` |
+| `/contact` | `src/pages/contact.tsx` |
+| `/how-it-works` | `src/pages/how-it-works.tsx` |
+| `/shipping-information` | `src/pages/shipping-information.tsx` |
+| `/payment-information` | `src/pages/payment-information.tsx` |
+| `/faqs` | `src/pages/faqs.tsx` |
 
-```
-artifacts/
-  wazir-trading/     # React/Vite frontend (main app)
-    src/
-      pages/         # Route-level components (home, cars, car-detail, contact, …)
-      components/    # Shared components (Navbar, Footer, CarCard, …)
-      lib/           # supabase.ts client, utils
-      hooks/         # useExchangeRate, etc.
-  api-server/        # Express API server (minimal — /api/health only)
-```
+## Performance approach
+
+- All JS/CSS chunks are content-hashed → Vercel serves them with `Cache-Control: immutable` (1 year)
+- Lazy-loaded page routes — only the current page's code is downloaded
+- Cloudinary `f_auto,q_auto` delivers WebP/AVIF automatically
+- Non-blocking Google Fonts via `media="print"` trick + `display=swap`
+- Hero image preloaded with `fetchpriority="high"` in `<head>`
+- Supabase preconnect in `<head>` — DNS/TLS resolved before JS runs
+- Code-split vendor chunks: framer-motion, supabase, radix-ui separated for long-term caching
 
 ## User preferences
+
+- Keep the existing project structure — do not migrate or restructure
+- Production domain is **wazirtradingllc.com** — use it for canonical URLs, OG tags, and sitemap
