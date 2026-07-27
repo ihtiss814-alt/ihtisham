@@ -11,6 +11,21 @@ interface ImageGalleryProps {
 
 type ImgStatus = 'pending' | 'loaded' | 'error';
 
+/**
+ * Injects Cloudinary transformation params into a raw upload URL.
+ * Handles both /image/upload/PUBLIC_ID and /image/upload/v123/PUBLIC_ID.
+ * Skips URLs that already carry transformation segments.
+ */
+function withTransforms(url: string, transforms = 'f_auto,q_auto,w_800'): string {
+  const marker = '/image/upload/';
+  const idx = url.indexOf(marker);
+  if (idx === -1) return url; // not a Cloudinary URL
+  const after = url.slice(idx + marker.length);
+  // Already has a transformation segment (contains a comma or known param)
+  if (/^[a-z]_/.test(after)) return url;
+  return url.slice(0, idx + marker.length) + transforms + '/' + after;
+}
+
 /** Returns true when a URL's filename ends in _map (e.g. ref-1_map.jpg) */
 function isMapImage(url: string) {
   const path = url.split('?')[0];
@@ -55,7 +70,7 @@ export default function ImageGallery({ carId, refNumber, make, model }: ImageGal
         if (cancelled) return;
 
         if (!error && data && data.length > 0) {
-          const allUrls = data.map((r: { image_url: string }) => r.image_url);
+          const allUrls = data.map((r: { image_url: string }) => withTransforms(r.image_url));
           const regular = allUrls.filter((u: string) => !isMapImage(u));
           const maps    = allUrls.filter((u: string) => isMapImage(u));
           setCandidates(regular);

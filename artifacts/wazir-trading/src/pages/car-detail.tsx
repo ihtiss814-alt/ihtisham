@@ -115,6 +115,47 @@ const ALL_FEATURES = [
   'Blind Spot Monitor',
 ];
 
+/**
+ * Abbreviations used in the spreadsheet / database → full display label.
+ * Lookups are case-insensitive (keys are stored lower-cased in the set below).
+ */
+const FEATURE_ALIASES: Record<string, string> = {
+  ps:      'Power Steering',
+  pw:      'Power Windows',
+  aw:      'Alloy Wheels',
+  abs:     'Anti Brake System',
+  aac:     'Automatic Air Conditioning',
+  navi:    'Navigation',
+  hid:     'HID',
+  ac:      'Air Conditioner',
+  keyless: 'Keyless Entry',
+};
+
+/** All keys (abbrev + full label, lower-cased) that mean a given display label is active. */
+function buildFeatureKeys(label: string): Set<string> {
+  const keys = new Set([label.toLowerCase()]);
+  for (const [abbr, full] of Object.entries(FEATURE_ALIASES)) {
+    if (full.toLowerCase() === label.toLowerCase()) keys.add(abbr);
+  }
+  return keys;
+}
+
+/** Returns true if `features` (any shape the DB might return) includes the given display label. */
+function hasFeature(features: unknown, label: string): boolean {
+  if (!features) return false;
+  const keys = buildFeatureKeys(label);
+
+  if (Array.isArray(features)) {
+    return (features as string[]).some(v => keys.has(String(v).toLowerCase()));
+  }
+  if (typeof features === 'object' && features !== null) {
+    return Object.entries(features as Record<string, unknown>).some(
+      ([k, v]) => keys.has(k.toLowerCase()) && !!v
+    );
+  }
+  return false;
+}
+
 const CURRENCIES = ['USD', 'GBP', 'EUR', 'JPY'] as const;
 type Currency = typeof CURRENCIES[number];
 
@@ -610,13 +651,7 @@ export default function CarDetailPage() {
               </div>
               <div className="p-6 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
                 {ALL_FEATURES.map(feat => {
-                  const has = car.features
-                    ? (typeof car.features === 'object' && !Array.isArray(car.features)
-                        ? !!car.features[feat]
-                        : Array.isArray(car.features)
-                          ? (car.features as string[]).includes(feat)
-                          : false)
-                    : false;
+                  const has = hasFeature(car.features, feat);
                   return (
                     <div key={feat} className={`flex items-center gap-2 text-xs py-1 ${has ? 'text-gray-800 font-semibold' : 'text-gray-300'}`}>
                       {has
