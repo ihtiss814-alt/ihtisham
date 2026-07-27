@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { memo, useState } from 'react';
 import { Link } from 'wouter';
 import { Settings, Droplet, Calendar, Gauge } from 'lucide-react';
 
@@ -31,13 +31,24 @@ export interface Car {
   is_new_arrival: boolean;
   features: any;
   created_at: string;
+  exterior_grade?: string;
+  interior_grade?: string;
+  lot_number?: string;
+  manufacture_month?: string | number;
 }
 
-export default function CarCard({ car }: { car: Car }) {
+function CarCard({ car }: { car: Car }) {
   const [imageError, setImageError] = useState(false);
   const cloudName = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME || 'txb1wiw1';
-  // f_auto → best format (WebP/AVIF), q_auto → smart quality, w_600 → cap width
-  const imageUrl = `https://res.cloudinary.com/${cloudName}/image/upload/f_auto,q_auto,w_600/cars/${car.ref_number.toLowerCase()}-1`;
+  const ref = car.ref_number.toLowerCase();
+  // f_auto → WebP/AVIF, q_auto → smart quality — responsive sizes for mobile/tablet/desktop
+  const base = `https://res.cloudinary.com/${cloudName}/image/upload`;
+  const imageUrl  = `${base}/f_auto,q_auto,w_600/cars/${ref}-1`;
+  const imageSrcSet = [
+    `${base}/f_auto,q_auto,w_380/cars/${ref}-1 380w`,
+    `${base}/f_auto,q_auto,w_600/cars/${ref}-1 600w`,
+    `${base}/f_auto,q_auto,w_800/cars/${ref}-1 800w`,
+  ].join(', ');
 
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(price);
@@ -59,7 +70,9 @@ export default function CarCard({ car }: { car: Car }) {
           
           {!imageError ? (
             <img 
-              src={imageUrl} 
+              src={imageUrl}
+              srcSet={imageSrcSet}
+              sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 380px"
               alt={`${car.make} ${car.model}`}
               onError={() => setImageError(true)}
               className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
@@ -119,6 +132,8 @@ export default function CarCard({ car }: { car: Car }) {
     </Link>
   );
 }
+
+export default memo(CarCard);
 
 function ChevronRightIcon() {
   return (

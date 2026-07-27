@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Link, useLocation } from 'wouter';
-import { motion, useInView } from 'framer-motion';
+import { useInView } from 'framer-motion';
 import { useExchangeRate } from '@/hooks/useExchangeRate';
 import { ArrowRight, CheckCircle2, ShieldCheck, Ship, Globe, Award, Search } from 'lucide-react';
 
@@ -241,28 +241,41 @@ function accentToFilter(hex: string): string {
 
 function ShopByMakeSection() {
   const [, navigate] = useLocation();
+  const sectionRef = React.useRef<HTMLElement>(null);
   const [makeCounts, setMakeCounts] = React.useState<Record<string, number>>({});
 
+  // Defer the query until this section is near the viewport — avoids a full-table
+  // scan on page load. Also scoped to just the brands we actually display.
   React.useEffect(() => {
-    supabase
-      .from('cars')
-      .select('make')
-      .eq('status', 'available')
-      .then(({ data }) => {
-        if (!data) return;
-        const counts: Record<string, number> = {};
-        for (const row of data) {
-          if (row.make) counts[row.make] = (counts[row.make] ?? 0) + 1;
-        }
-        setMakeCounts(counts);
-      });
+    const el = sectionRef.current;
+    if (!el) return;
+    const brandNames = BRANDS.map(b => b.name);
+    const obs = new IntersectionObserver(([entry]) => {
+      if (!entry.isIntersecting) return;
+      obs.disconnect();
+      supabase
+        .from('cars')
+        .select('make')
+        .eq('status', 'available')
+        .in('make', brandNames)
+        .then(({ data }) => {
+          if (!data) return;
+          const counts: Record<string, number> = {};
+          for (const row of data) {
+            if (row.make) counts[row.make] = (counts[row.make] ?? 0) + 1;
+          }
+          setMakeCounts(counts);
+        });
+    }, { rootMargin: '400px' });
+    obs.observe(el);
+    return () => obs.disconnect();
   }, []);
 
   // Duplicate for seamless loop
   const track = [...BRANDS, ...BRANDS];
 
   return (
-    <section className="bg-white border-b border-gray-100 py-12 overflow-hidden">
+    <section ref={sectionRef} className="bg-white border-b border-gray-100 py-12 overflow-hidden">
       {/* Heading */}
       <div className="text-center mb-8 px-4">
         <p className="text-[10px] tracking-[0.28em] uppercase font-bold text-[#C8102E] mb-2">
@@ -1164,7 +1177,7 @@ const HOW_TO_BUY_STEPS = [
 
 function HowToBuySection() {
   return (
-    <section className="py-20 relative overflow-hidden" style={{ background: '#fff' }}>
+    <section className="section-lazy py-20 relative overflow-hidden" style={{ background: '#fff' }}>
       {/* Subtle background grid */}
       <div className="absolute inset-0 pointer-events-none opacity-[0.025]"
         style={{ backgroundImage: 'linear-gradient(#C8102E 1px, transparent 1px), linear-gradient(90deg, #C8102E 1px, transparent 1px)', backgroundSize: '48px 48px' }}/>
@@ -1678,7 +1691,7 @@ const TRUST_ITEMS = [
 
 function TrustBadgesSection() {
   return (
-    <section className="py-14 relative" style={{ background: '#fff' }}>
+    <section className="section-lazy py-14 relative" style={{ background: '#fff' }}>
       <div className="absolute top-0 inset-x-0 h-px"
         style={{ background: 'linear-gradient(to right, transparent 0%, rgba(200,16,46,0.2) 30%, rgba(200,16,46,0.2) 70%, transparent 100%)' }}/>
 
@@ -1801,7 +1814,7 @@ function CustomerReviewsSection() {
   const visible = REVIEWS.slice(active * perPage, active * perPage + perPage);
 
   return (
-    <section className="py-20 relative overflow-hidden" style={{ background: '#F8FAFC' }}>
+    <section className="section-lazy py-20 relative overflow-hidden" style={{ background: '#F8FAFC' }}>
       <div className="absolute top-0 inset-x-0 h-px"
         style={{ background: 'linear-gradient(to right, transparent 0%, rgba(200,16,46,0.25) 30%, rgba(200,16,46,0.25) 70%, transparent 100%)' }}/>
 
@@ -1965,38 +1978,48 @@ function BestSellersSection() {
   const [liked, setLiked]     = React.useState<Record<string, boolean>>({});
 
   const waNumber = import.meta.env.VITE_WHATSAPP_NUMBER || '818089227375';
+  const bsRef = React.useRef<HTMLElement>(null);
 
+  // Defer data fetch until section is near the viewport
   React.useEffect(() => {
-    supabase
-      .from('cars')
-      .select('*')
-      .order('created_at', { ascending: false })
-      .limit(12)
-      .then(async ({ data }) => {
-        if (!data) { setLoading(false); return; }
-        const ids = data.map((c: Car) => c.id);
-        const { data: imgs } = await supabase
-          .from('car_images')
-          .select('*')
-          .in('car_id', ids);
-        const map: Record<string, string> = {};
-        for (const row of (imgs ?? []) as Record<string, unknown>[]) {
-          const cid = String(row.car_id ?? '');
-          if (!cid || map[cid]) continue;
-          const url = String(row.image_url ?? row.url ?? row.src ?? '');
-          if (url) map[cid] = url;
-        }
-        setCars(data as Car[]);
-        setImgMap(map);
-        setLoading(false);
-      });
+    const el = bsRef.current;
+    if (!el) return;
+    const obs = new IntersectionObserver(([entry]) => {
+      if (!entry.isIntersecting) return;
+      obs.disconnect();
+      supabase
+        .from('cars')
+        .select('*')
+        .order('created_at', { ascending: false })
+        .limit(12)
+        .then(async ({ data }) => {
+          if (!data) { setLoading(false); return; }
+          const ids = data.map((c: Car) => c.id);
+          const { data: imgs } = await supabase
+            .from('car_images')
+            .select('*')
+            .in('car_id', ids);
+          const map: Record<string, string> = {};
+          for (const row of (imgs ?? []) as Record<string, unknown>[]) {
+            const cid = String(row.car_id ?? '');
+            if (!cid || map[cid]) continue;
+            const url = String(row.image_url ?? row.url ?? row.src ?? '');
+            if (url) map[cid] = url;
+          }
+          setCars(data as Car[]);
+          setImgMap(map);
+          setLoading(false);
+        });
+    }, { rootMargin: '400px' });
+    obs.observe(el);
+    return () => obs.disconnect();
   }, []);
 
   const toggleLike = (id: string) =>
     setLiked(prev => ({ ...prev, [id]: !prev[id] }));
 
   return (
-    <section className="py-20 relative" style={{ background: '#fff' }}>
+    <section ref={bsRef} className="py-20 relative" style={{ background: '#fff' }}>
       {/* Top accent line */}
       <div className="absolute top-0 inset-x-0 h-px"
         style={{ background: 'linear-gradient(to right, transparent 0%, rgba(200,16,46,0.3) 30%, rgba(200,16,46,0.3) 70%, transparent 100%)' }}/>
@@ -2328,19 +2351,6 @@ export default function HomePage() {
     fetchAll();
   }, []);
 
-  const fadeIn = {
-    hidden: { opacity: 0, y: 30 },
-    visible: { opacity: 1, y: 0, transition: { duration: 0.8, ease: "easeOut" } }
-  };
-
-  const staggerContainer = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: { staggerChildren: 0.2 }
-    }
-  };
-
   /* ── Per-stat count-up refs (called at top level) ── */
   const stock    = useCountUp(stockCount,   1800);
   const countries = useCountUp(130,         2000);
@@ -2381,39 +2391,28 @@ export default function HomePage() {
 
 
           {/* Headline */}
-          <motion.h1
-            initial={{ opacity: 0, y: 24 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.22 }}
-            className="font-serif font-bold text-white leading-[1.1] mb-3"
+          <h1
+            className="hero-anim-1 font-serif font-bold text-white leading-[1.1] mb-3"
             style={{ fontSize: 'clamp(1.75rem, 4.5vw, 3.4rem)' }}
           >
             Import Your Dream Car
             <br />
             <span style={{ color: '#F87171' }}>Direct from Japan</span>
-          </motion.h1>
+          </h1>
 
           {/* Subtext */}
-          <motion.p
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.36 }}
-            className="text-white/70 font-light leading-relaxed mb-6 max-w-xl"
+          <p
+            className="hero-anim-2 text-white/70 font-light leading-relaxed mb-6 max-w-xl"
             style={{ fontSize: 'clamp(0.82rem, 1.6vw, 0.95rem)' }}
           >
             We source premium, quality-graded vehicles straight from Japan's auction halls
             and ship them to{' '}
             <span className="text-white font-medium">130+ countries worldwide</span>
             {' '}— at unbeatable auction prices, with zero middlemen and full transparency.
-          </motion.p>
+          </p>
 
           {/* CTA buttons */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7, delay: 0.48 }}
-            className="flex flex-col sm:flex-row justify-center gap-2.5 mb-6 w-full sm:w-auto"
-          >
+          <div className="hero-anim-3 flex flex-col sm:flex-row justify-center gap-2.5 mb-6 w-full sm:w-auto">
             <Link
               href="/cars"
               className="group inline-flex items-center justify-center gap-2 px-6 py-2.5 font-bold tracking-wide text-white rounded-[3px] transition-all duration-200"
@@ -2437,15 +2436,10 @@ export default function HomePage() {
               <WhatsAppIcon size={15} className="text-[#25D366]" />
               Contact on WhatsApp
             </a>
-          </motion.div>
+          </div>
 
           {/* ── STATS ── */}
-          <motion.div
-            initial={{ opacity: 0, y: 24 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.62 }}
-            className="grid grid-cols-2 md:grid-cols-4 gap-px bg-white/10 rounded-[4px] overflow-hidden mb-4 w-full max-w-2xl"
-          >
+          <div className="hero-anim-4 grid grid-cols-2 md:grid-cols-4 gap-px bg-white/10 rounded-[4px] overflow-hidden mb-4 w-full max-w-2xl">
             {STATS.map(({ countObj, suffix, label, note }, i) => (
               <div
                 key={i}
@@ -2459,15 +2453,10 @@ export default function HomePage() {
                 <span className="text-[8px] text-white/40 tracking-widest uppercase">{note}</span>
               </div>
             ))}
-          </motion.div>
+          </div>
 
           {/* ── TRUST BADGES ── */}
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.8, delay: 0.78 }}
-            className="flex flex-wrap justify-center gap-1.5"
-          >
+          <div className="hero-anim-5 flex flex-wrap justify-center gap-1.5">
             {TRUST.map(({ text }, i) => (
               <span
                 key={i}
@@ -2478,7 +2467,7 @@ export default function HomePage() {
                 {text}
               </span>
             ))}
-          </motion.div>
+          </div>
         </div>
 
         {/* Bottom fade into page */}

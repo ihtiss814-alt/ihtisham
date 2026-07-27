@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/lib/supabase';
-import { ChevronLeft, ChevronRight, X, Maximize2, Download, Images, Camera } from 'lucide-react';
+import { ChevronLeft, ChevronRight, X, Maximize2, Download, Images, Camera, Map } from 'lucide-react';
 
 interface ImageGalleryProps {
   carId: string;
@@ -11,10 +11,23 @@ interface ImageGalleryProps {
 
 type ImgStatus = 'pending' | 'loaded' | 'error';
 
+/** Returns true when a URL's filename ends in _map (e.g. ref-1_map.jpg) */
+function isMapImage(url: string) {
+  const path = url.split('?')[0];
+  const filename = path.split('/').pop() ?? '';
+  return /_map(\.[^.]+)?$/i.test(filename);
+}
+
 export default function ImageGallery({ carId, refNumber, make, model }: ImageGalleryProps) {
+  // Regular gallery images
   const [candidates, setCandidates] = useState<string[]>([]);
   const [statuses, setStatuses] = useState<ImgStatus[]>([]);
   const [fetching, setFetching] = useState(true);
+
+  // Damage / inspection map image (separate)
+  const [mapUrl, setMapUrl] = useState<string | null>(null);
+  const [mapStatus, setMapStatus] = useState<ImgStatus>('pending');
+  const [mapZoom, setMapZoom] = useState(false);
 
   // activeIndex is an index into the `valid` array (loaded images only)
   const [activeIdx, setActiveIdx] = useState(0);
@@ -29,6 +42,8 @@ export default function ImageGallery({ carId, refNumber, make, model }: ImageGal
       setCandidates([]);
       setStatuses([]);
       setActiveIdx(0);
+      setMapUrl(null);
+      setMapStatus('pending');
 
       try {
         const { data, error } = await supabase
@@ -40,9 +55,17 @@ export default function ImageGallery({ carId, refNumber, make, model }: ImageGal
         if (cancelled) return;
 
         if (!error && data && data.length > 0) {
-          const urls = data.map((r: { image_url: string }) => r.image_url);
-          setCandidates(urls);
-          setStatuses(urls.map(() => 'pending' as ImgStatus));
+          const allUrls = data.map((r: { image_url: string }) => r.image_url);
+          const regular = allUrls.filter((u: string) => !isMapImage(u));
+          const maps    = allUrls.filter((u: string) => isMapImage(u));
+          setCandidates(regular);
+          setStatuses(regular.map(() => 'pending' as ImgStatus));
+          if (maps.length > 0) {
+            setMapUrl(maps[0]);
+            setMapStatus('pending');
+          } else {
+            setMapStatus('error');
+          }
         } else {
           // Cloudinary fallback — try up to 12 images
           const cloudName = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME || 'txb1wiw1';
@@ -51,9 +74,10 @@ export default function ImageGallery({ carId, refNumber, make, model }: ImageGal
           );
           setCandidates(urls);
           setStatuses(urls.map(() => 'pending' as ImgStatus));
+          setMapStatus('error');
         }
       } catch {
-        if (!cancelled) { setCandidates([]); setStatuses([]); }
+        if (!cancelled) { setCandidates([]); setStatuses([]); setMapStatus('error'); }
       } finally {
         if (!cancelled) setFetching(false);
       }
@@ -80,7 +104,6 @@ export default function ImageGallery({ carId, refNumber, make, model }: ImageGal
   }, []);
 
   /* ── derived ── */
-  // Only images that loaded successfully
   const valid = candidates
     .map((url, i) => ({ url, origIdx: i }))
     .filter((_, i) => statuses[i] === 'loaded');
@@ -89,7 +112,6 @@ export default function ImageGallery({ carId, refNumber, make, model }: ImageGal
   const allResolved = totalResolved === candidates.length;
   const noImages = allResolved && valid.length === 0;
 
-  // Clamp activeIdx
   const safeActive = valid.length > 0 ? Math.min(activeIdx, valid.length - 1) : 0;
 
   /* ── navigation ── */
@@ -100,7 +122,7 @@ export default function ImageGallery({ carId, refNumber, make, model }: ImageGal
 
   const openLightbox = (idx: number) => { setLightboxIdx(idx); setLightboxOpen(true); };
 
-  /* ── keyboard ── */
+  /* ── keyboard (gallery lightbox) ── */
   useEffect(() => {
     if (!lightboxOpen) return;
     const h = (e: KeyboardEvent) => {
@@ -111,6 +133,14 @@ export default function ImageGallery({ carId, refNumber, make, model }: ImageGal
     window.addEventListener('keydown', h);
     return () => window.removeEventListener('keydown', h);
   }, [lightboxOpen, lbPrev, lbNext]);
+
+  /* ── keyboard (map zoom) ── */
+  useEffect(() => {
+    if (!mapZoom) return;
+    const h = (e: KeyboardEvent) => { if (e.key === 'Escape') setMapZoom(false); };
+    window.addEventListener('keydown', h);
+    return () => window.removeEventListener('keydown', h);
+  }, [mapZoom]);
 
   /* ── download ── */
   const handleDownloadAll = () => {
@@ -136,6 +166,16 @@ export default function ImageGallery({ carId, refNumber, make, model }: ImageGal
           onError={() => markError(i)}
         />
       ))}
+      {/* Preload map image too */}
+      {mapUrl && mapStatus === 'pending' && (
+        <img
+          key={mapUrl}
+          src={mapUrl}
+          alt=""
+          onLoad={() => setMapStatus('loaded')}
+          onError={() => setMapStatus('error')}
+        />
+      )}
     </div>
   );
 
@@ -220,7 +260,7 @@ export default function ImageGallery({ carId, refNumber, make, model }: ImageGal
             </>
           )}
 
-          {/* View All / Fullscreen */}
+          {/* View Fullscreen */}
           <button
             onClick={() => openLightbox(safeActive)}
             className="absolute bottom-3 right-3 z-10 bg-black/60 hover:bg-black/85 text-white text-xs font-medium px-3 py-1.5 flex items-center gap-1.5 rounded-sm backdrop-blur-sm transition-all opacity-0 group-hover:opacity-100"
@@ -285,9 +325,47 @@ export default function ImageGallery({ carId, refNumber, make, model }: ImageGal
             </button>
           </div>
         )}
+
+        {/* ── Auction Inspection Map ── */}
+        {mapStatus === 'loaded' && mapUrl && (
+          <div className="border border-amber-200 rounded-sm overflow-hidden bg-amber-50/40">
+            {/* Header */}
+            <div className="flex items-center justify-between px-4 py-2.5 bg-amber-50 border-b border-amber-200">
+              <div className="flex items-center gap-2">
+                <Map size={14} className="text-amber-600" />
+                <span className="text-xs font-bold text-amber-800 tracking-wide uppercase">
+                  Auction Inspection Map
+                </span>
+              </div>
+              <button
+                onClick={() => setMapZoom(true)}
+                className="flex items-center gap-1.5 text-xs font-semibold text-amber-700 hover:text-amber-900 transition-colors px-2 py-1 rounded hover:bg-amber-100"
+              >
+                <Maximize2 size={12} /> Zoom
+              </button>
+            </div>
+
+            {/* Map image — click anywhere to zoom */}
+            <button
+              className="block w-full cursor-zoom-in group"
+              onClick={() => setMapZoom(true)}
+              aria-label="View inspection map fullscreen"
+            >
+              <img
+                src={mapUrl}
+                alt={`${make} ${model} auction inspection damage map`}
+                className="w-full max-h-[480px] object-contain bg-white transition-opacity group-hover:opacity-90"
+              />
+            </button>
+
+            <p className="text-[10px] text-amber-600/70 text-center py-1.5">
+              Click image to zoom · Japan auction inspection report
+            </p>
+          </div>
+        )}
       </div>
 
-      {/* ══ Lightbox ══ */}
+      {/* ══ Gallery Lightbox ══ */}
       {lightboxOpen && valid.length > 0 && (
         <div
           className="fixed inset-0 z-50 bg-black/96 flex items-center justify-center"
@@ -359,6 +437,37 @@ export default function ImageGallery({ carId, refNumber, make, model }: ImageGal
                 <img src={url} alt="" className="w-full h-full object-cover" />
               </button>
             ))}
+          </div>
+        </div>
+      )}
+
+      {/* ══ Inspection Map Zoom Lightbox ══ */}
+      {mapZoom && mapUrl && (
+        <div
+          className="fixed inset-0 z-50 bg-black/96 flex items-center justify-center p-4"
+          onClick={() => setMapZoom(false)}
+        >
+          <button
+            onClick={() => setMapZoom(false)}
+            className="absolute top-4 right-4 z-50 w-10 h-10 bg-white/10 hover:bg-white/20 text-white flex items-center justify-center rounded-full transition-colors"
+            aria-label="Close"
+          >
+            <X size={20} />
+          </button>
+
+          <div className="absolute top-4 left-1/2 -translate-x-1/2 z-50 flex items-center gap-2 text-amber-300 text-xs font-semibold tracking-wide">
+            <Map size={13} /> Auction Inspection Map — {make} {model}
+          </div>
+
+          <div
+            className="relative max-w-4xl w-full max-h-[90vh] overflow-auto"
+            onClick={e => e.stopPropagation()}
+          >
+            <img
+              src={mapUrl}
+              alt={`${make} ${model} auction inspection map`}
+              className="w-full object-contain mx-auto block rounded-sm"
+            />
           </div>
         </div>
       )}

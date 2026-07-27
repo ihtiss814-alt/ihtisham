@@ -15,7 +15,39 @@ type ExtendedCar = Car & {
   engine_code?: string;
   model_code?: string;
   features?: Record<string, boolean> | null;
+  exterior_grade?: string;
+  interior_grade?: string;
+  lot_number?: string;
+  manufacture_month?: string | number;
 };
+
+/* ── helpers ── */
+const MONTH_ABBR = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+
+function fmtManufactureDate(month: string | number | null | undefined, year: number): string {
+  if (!month) return String(year);
+  const m = typeof month === 'number' ? month : parseInt(String(month), 10);
+  if (!isNaN(m) && m >= 1 && m <= 12) return `${MONTH_ABBR[m - 1]} ${year}`;
+  return `${month} ${year}`;
+}
+
+function gradeClasses(grade: string | undefined): string {
+  const g = (grade ?? '').toUpperCase().charAt(0);
+  if (g === 'A') return 'text-green-700 bg-green-50 border-green-300';
+  if (g === 'B') return 'text-blue-700 bg-blue-50 border-blue-300';
+  if (g === 'C') return 'text-orange-700 bg-orange-50 border-orange-300';
+  if (g === 'D') return 'text-red-700 bg-red-50 border-red-300';
+  return 'text-gray-600 bg-gray-50 border-gray-200';
+}
+
+function GradeBadge({ grade }: { grade?: string }) {
+  if (!grade) return <span className="text-sm font-bold text-[#0D1B3E]">—</span>;
+  return (
+    <span className={`inline-flex items-center px-2.5 py-0.5 rounded text-xs font-bold border ${gradeClasses(grade)}`}>
+      {grade}
+    </span>
+  );
+}
 
 type SimilarCar = Car & {
   primaryImage?: string;
@@ -531,32 +563,42 @@ export default function CarDetailPage() {
                 </span>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2">
-                {[
-                  ['Reference #', car.ref_number],
-                  ['Chassis No.', car.chassis_number],
-                  ['Mileage', `${fmtNum(car.mileage_km)} km`],
-                  ['Year', car.year],
-                  ['Engine', `${car.engine_cc} CC`],
-                  ['Fuel', car.fuel_type],
-                  ['Seats', car.seats],
-                  ['Engine Code', (car as ExtendedCar).engine_code || '—'],
-                  ['Color', car.color],
-                  ['Drive', car.drive],
-                  ['Doors', car.doors],
-                  ['Transmission', car.transmission],
-                  ['Model Code', (car as ExtendedCar).model_code || '—'],
-                  ['Steering', car.steering],
-                  ['Auction Grade', car.auction_grade],
-                  ['Body Type', car.body_type],
-                ].map(([label, value], i) => (
-                  <div
-                    key={i}
-                    className={`flex justify-between items-center px-6 py-3 border-b border-gray-100 ${i % 2 === 0 ? 'bg-white' : 'bg-gray-50/70'}`}
-                  >
-                    <span className="text-sm text-gray-400 font-medium">{label}</span>
-                    <span className="text-sm font-bold text-[#0D1B3E] text-right">{String(value ?? '—')}</span>
-                  </div>
-                ))}
+                {(() => {
+                  const xcar = car as ExtendedCar;
+                  // Each row: [label, text value, optional custom node]
+                  const rows: [string, string | number | null | undefined, React.ReactNode?][] = [
+                    ['Reference #',    car.ref_number],
+                    ['Chassis No.',    car.chassis_number],
+                    ['Lot Number',     xcar.lot_number],
+                    ['Mileage',        `${fmtNum(car.mileage_km)} km`],
+                    ['Year',           fmtManufactureDate(xcar.manufacture_month, car.year)],
+                    ['Engine',         `${car.engine_cc} CC`],
+                    ['Fuel',           car.fuel_type],
+                    ['Seats',          car.seats],
+                    ['Engine Code',    xcar.engine_code],
+                    ['Color',          car.color],
+                    ['Drive',          car.drive],
+                    ['Doors',          car.doors],
+                    ['Transmission',   car.transmission],
+                    ['Model Code',     xcar.model_code],
+                    ['Steering',       car.steering],
+                    ['Auction Grade',  car.auction_grade, <GradeBadge grade={car.auction_grade} />],
+                    ['Exterior Grade', xcar.exterior_grade, <GradeBadge grade={xcar.exterior_grade} />],
+                    ['Interior Grade', xcar.interior_grade, <GradeBadge grade={xcar.interior_grade} />],
+                    ['Body Type',      car.body_type],
+                  ];
+                  return rows.map(([label, value, node], i) => (
+                    <div
+                      key={i}
+                      className={`flex justify-between items-center px-6 py-3 border-b border-gray-100 ${i % 2 === 0 ? 'bg-white' : 'bg-gray-50/70'}`}
+                    >
+                      <span className="text-sm text-gray-400 font-medium">{label}</span>
+                      {node ?? (
+                        <span className="text-sm font-bold text-[#0D1B3E] text-right">{String(value ?? '—')}</span>
+                      )}
+                    </div>
+                  ));
+                })()}
               </div>
             </div>
 
