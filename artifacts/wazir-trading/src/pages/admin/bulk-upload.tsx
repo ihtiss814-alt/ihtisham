@@ -239,7 +239,23 @@ function CsvUploadTab() {
     setStatus('inserting');
     setInsertMsg('');
 
-    const records = rows.map(r => ({
+    // 1. Find the highest existing ref_number
+    const { data: latest } = await supabase
+      .from('cars')
+      .select('ref_number')
+      .order('ref_number', { ascending: false })
+      .limit(1);
+
+    // 2. Extract the numeric part (e.g. "WTL-000042" → 42), default to 0
+    let nextNum = 1;
+    if (latest && latest.length > 0 && latest[0].ref_number) {
+      const match = String(latest[0].ref_number).match(/(\d+)$/);
+      if (match) nextNum = parseInt(match[1], 10) + 1;
+    }
+
+    // 3 & 4. Generate a ref_number for each row
+    const records = rows.map((r, i) => ({
+      ref_number:          `WTL-${String(nextNum + i).padStart(6, '0')}`,
       lot_number:          r.lot_number      || null,
       model_code:          r.model_code      || null,
       chassis_number:      r.chassis_number  || null,
@@ -269,7 +285,7 @@ function CsvUploadTab() {
       setInsertMsg(error.message);
     } else {
       setStatus('done');
-      setInsertMsg(`${records.length} cars inserted successfully.`);
+      setInsertMsg(`${records.length} cars inserted (${records[0].ref_number} → ${records[records.length - 1].ref_number}).`);
     }
   };
 
