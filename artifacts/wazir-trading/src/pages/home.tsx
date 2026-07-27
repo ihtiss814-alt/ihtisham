@@ -770,7 +770,7 @@ function FcCarCard({ car, imgMap, waNumber, navigate }: {
   const [hov, setHov] = React.useState(false);
   const { pkr: pkrPerUsd } = useExchangeRate();
   const primaryImg = imgMap[car.id] ?? null;
-  const pkrPrice   = Math.round(car.fob_price_usd * pkrPerUsd).toLocaleString('en-PK');
+  const pkrPrice   = Math.round((car.fob_price_usd ?? 0) * pkrPerUsd).toLocaleString('en-PK');
   const waMsg      = encodeURIComponent(
     `Hi Wazir Trading, I'm interested in the ${car.year} ${car.make} ${car.model}${car.variant ? ' ' + car.variant : ''} (Ref: ${car.ref_number}). Please share details and availability.`
   );
@@ -883,7 +883,7 @@ function FcCarCard({ car, imgMap, waNumber, navigate }: {
             FOB Price · Japan
           </div>
           <div style={{ fontSize: 22, fontWeight: 900, color: '#0F172A', lineHeight: 1, letterSpacing: '-0.02em' }}>
-            ${car.fob_price_usd.toLocaleString()}
+            ${(car.fob_price_usd ?? 0).toLocaleString()}
           </div>
           <div style={{ fontSize: 11, fontWeight: 600, color: '#C8102E', marginTop: 3 }}>
             ≈ PKR {pkrPrice}
@@ -2050,7 +2050,7 @@ function BestSellersSection() {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
             {cars.map(car => {
               const img       = imgMap[car.id] ?? null;
-              const pkrPrice  = Math.round(car.fob_price_usd * pkrPerUsd).toLocaleString('en-PK');
+              const pkrPrice  = Math.round((car.fob_price_usd ?? 0) * pkrPerUsd).toLocaleString('en-PK');
               const isSold    = car.status === 'sold';
               const isNew     = !!car.is_new_arrival;
               const isLiked   = !!liked[car.id];
@@ -2154,7 +2154,7 @@ function BestSellersSection() {
                     <div className="flex-1">
                       <p className="text-[9px] uppercase tracking-[0.2em] text-gray-400 font-semibold">FOB Price · Japan</p>
                       <p className="text-[20px] font-extrabold leading-tight tracking-tight" style={{ color: '#C8102E' }}>
-                        ${car.fob_price_usd.toLocaleString()}
+                        ${(car.fob_price_usd ?? 0).toLocaleString()}
                       </p>
                       <p className="text-[11px] font-semibold text-gray-500">≈ PKR {pkrPrice}</p>
                     </div>

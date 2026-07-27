@@ -63,6 +63,12 @@ function parseRow(row: unknown[]): Record<string, unknown> {
     const num = parseFloat(String(v));
     return isNaN(num) ? null : num;
   };
+  // JPY prices have comma-thousands separators (e.g. "1,500,000") — strip before parsing
+  const jpy = (i: number) => {
+    const v = row[i];
+    const num = parseFloat(String(v).replace(/,/g, ''));
+    return isNaN(num) ? null : num;
+  };
 
   return {
     lot_number:       c(2),
@@ -84,7 +90,7 @@ function parseRow(row: unknown[]): Record<string, unknown> {
     mileage_km:       n(18),
     fuel_type:        c(20),
     features:         parseEquipment(c(21)),
-    wholesale_price_jpy: n(22),
+    wholesale_price_jpy: jpy(22),
   };
 }
 
@@ -220,8 +226,14 @@ function CsvUploadTab() {
       const wb = XLSX.read(data, { type: 'array' });
       const ws = wb.Sheets[wb.SheetNames[0]];
       const raw: unknown[][] = XLSX.utils.sheet_to_json(ws, { header: 1, defval: '' });
-      // Skip first row (header) – adjust if your file has no header by removing slice(1)
-      const parsed = raw.slice(1).filter(r => r[4] && String(r[4]).trim()); // must have chassis_number
+      // Skip header rows. The sheet has multi-line headers so we filter out any row where:
+      // (a) chassis_number column (4) is empty, OR
+      // (b) year column (8) is not a valid 4-digit year — which catches second-header rows
+      const parsed = raw.slice(1).filter(r => {
+        const chassis = r[4] && String(r[4]).trim();
+        const year = parseFloat(String(r[8]));
+        return chassis && !isNaN(year) && year > 1900;
+      });
       setRows(parsed.map(parseRow));
       setStatus('idle');
     };
@@ -239,21 +251,33 @@ function CsvUploadTab() {
     setStatus('inserting');
     setInsertMsg('');
 
-    // 1. Find the highest existing ref_number
+    // 1. Fetch live JPY/USD rate for FOB price calculation
+    let jpyRate = 162; // conservative fallback
+    try {
+      const rateRes = await fetch('https://open.er-api.com/v6/latest/USD', { credentials: 'omit' });
+      if (rateRes.ok) {
+        const rateJson = await rateRes.json();
+        if (rateJson.result === 'success' && rateJson.rates?.JPY) {
+          jpyRate = rateJson.rates.JPY;
+        }
+      }
+    } catch { /* use fallback */ }
+
+    // 2. Find the highest existing ref_number
     const { data: latest } = await supabase
       .from('cars')
       .select('ref_number')
       .order('ref_number', { ascending: false })
       .limit(1);
 
-    // 2. Extract the numeric part (e.g. "WTL-000042" → 42), default to 0
+    // 3. Extract the numeric part (e.g. "WTL-000042" → 42), default to 0
     let nextNum = 1;
     if (latest && latest.length > 0 && latest[0].ref_number) {
       const match = String(latest[0].ref_number).match(/(\d+)$/);
       if (match) nextNum = parseInt(match[1], 10) + 1;
     }
 
-    // 3 & 4. Generate a ref_number for each row
+    // 4. Generate a ref_number for each row
     const records = rows.map((r, i) => ({
       ref_number:          `WTL-${String(nextNum + i).padStart(6, '0')}`,
       lot_number:          r.lot_number      || null,
@@ -276,6 +300,10 @@ function CsvUploadTab() {
       fuel_type:           r.fuel_type       || null,
       features:            r.features        || {},
       wholesale_price_jpy: r.wholesale_price_jpy ?? null,
+      // fob_price_usd = wholesale JPY / live JPY rate (rounded to nearest dollar)
+      fob_price_usd: r.wholesale_price_jpy != null
+        ? Math.round((r.wholesale_price_jpy as number) / jpyRate)
+        : null,
       status:              'available',
     }));
 

@@ -1101,10 +1101,10 @@ function SimilarCarCard({ car }: { car: SimilarCar }) {
         </Link>
         <p className="text-[10px] text-gray-400 mb-2">REF #{car.ref_number}</p>
         <p className="text-base font-serif font-bold text-[#C8102E]">
-          ${car.fob_price_usd.toLocaleString()}
+          ${(car.fob_price_usd ?? 0).toLocaleString()}
         </p>
         <p className="text-[10px] text-gray-400 mb-3">
-          PKR {(car.fob_price_usd * pkrRate).toLocaleString()}
+          PKR {((car.fob_price_usd ?? 0) * pkrRate).toLocaleString()}
         </p>
         <div className="flex gap-1.5">
           <Link
