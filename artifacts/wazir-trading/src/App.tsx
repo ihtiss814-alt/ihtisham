@@ -19,6 +19,7 @@ const ContactPage             = React.lazy(() => import('@/pages/contact'));
 const FaqsPage                = React.lazy(() => import('@/pages/faqs'));
 const PaymentInformationPage  = React.lazy(() => import('@/pages/payment-information'));
 const NotFound                = React.lazy(() => import('@/pages/not-found'));
+const AdminBulkUpload         = React.lazy(() => import('@/pages/admin/bulk-upload'));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -58,6 +59,7 @@ function Router() {
         <Route path="/contact" component={ContactPage} />
         <Route path="/faqs" component={FaqsPage} />
         <Route path="/payment-information" component={PaymentInformationPage} />
+        <Route path="/admin/bulk-upload" component={AdminBulkUpload} />
         <Route component={NotFound} />
       </Switch>
     </Suspense>

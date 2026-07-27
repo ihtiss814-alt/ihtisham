@@ -56,6 +56,14 @@ export default defineConfig({
     port: parseInt(process.env.PORT || '3000'),
     host: '0.0.0.0',
     allowedHosts: true,
+    proxy: {
+      // In Replit, /api is path-routed to the api-server (port 8080).
+      // This proxy makes it work the same way in local Vite dev mode.
+      '/api': {
+        target: 'http://localhost:8080',
+        changeOrigin: true,
+      },
+    },
   },
   preview: {
     port: parseInt(process.env.PORT || '3000'),

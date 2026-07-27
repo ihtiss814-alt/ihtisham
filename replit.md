@@ -42,6 +42,23 @@ The app is available at the Replit preview pane (proxied to port 24102).
 | `/shipping-information` | `src/pages/shipping-information.tsx` |
 | `/payment-information` | `src/pages/payment-information.tsx` |
 | `/faqs` | `src/pages/faqs.tsx` |
+| `/admin/bulk-upload` | `src/pages/admin/bulk-upload.tsx` (**secret, no public link**) |
+
+## Admin panel (`/admin/bulk-upload`)
+
+Password-protected admin tool (session: 24 h, stored in `localStorage`). No link from the public site.
+
+Features:
+1. **CSV/Excel Upload** — parse columns 3-23 from auction sheets, preview parsed data, confirm-insert to `cars` table
+2. **Image Matching** — enter Cloudinary date folder (e.g. `23-july-2026`), auto-match subfolders by `chassis_number`, insert into `car_images` table (primary = `_01a`, last = `_map` with `display_order 99`)
+3. **Review Dashboard** — list all cars with image counts (✅/❌), featured toggle, bulk delete, export to XLSX
+
+Additional env vars needed for Image Matching:
+
+| Variable | Purpose |
+|---|---|
+| `VITE_CLOUDINARY_API_KEY` | Cloudinary API key (for admin folder listing) |
+| `VITE_CLOUDINARY_API_SECRET` | Cloudinary API secret (for admin folder listing) |
 
 ## Performance approach
 
