@@ -3,15 +3,16 @@ import { createHash } from "node:crypto";
 
 const router: IRouter = Router();
 
-// Secrets live server-side only — never sent to the browser
-const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "WazirAdmin2024";
-const CLOUD_NAME     = process.env.CLOUDINARY_CLOUD_NAME || "txb1wiw1";
-const API_KEY        = process.env.CLOUDINARY_API_KEY    || "";
-const API_SECRET     = process.env.CLOUDINARY_API_SECRET || "";
+// Secrets read at request time — never at module load — so they are always
+// current even if the process started before the secrets were injected.
+const ADMIN_PASSWORD = () => process.env.ADMIN_PASSWORD     || "WazirAdmin2024";
+const CLOUD_NAME     = () => process.env.CLOUDINARY_CLOUD_NAME || "txb1wiw1";
+const API_KEY        = () => process.env.CLOUDINARY_API_KEY ?? "";
+const API_SECRET     = () => process.env.CLOUDINARY_API_SECRET ?? "";
 
 function checkAdmin(req: Request, res: Response): boolean {
   const pw = req.headers["x-admin-password"];
-  if (pw !== ADMIN_PASSWORD) {
+  if (pw !== ADMIN_PASSWORD()) {
     res.status(401).json({ error: "Unauthorized" });
     return false;
   }
@@ -19,13 +20,15 @@ function checkAdmin(req: Request, res: Response): boolean {
 }
 
 async function cloudinaryFetch(path: string): Promise<unknown> {
-  if (!API_KEY || !API_SECRET) {
+  const apiKey = API_KEY();
+  const apiSecret = API_SECRET();
+  if (!apiKey || !apiSecret) {
     throw new Error(
       "CLOUDINARY_API_KEY and CLOUDINARY_API_SECRET must be set as server environment variables."
     );
   }
-  const creds = Buffer.from(`${API_KEY}:${API_SECRET}`).toString("base64");
-  const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}${path}`, {
+  const creds = Buffer.from(`${apiKey}:${apiSecret}`).toString("base64");
+  const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME()}${path}`, {
     headers: { Authorization: `Basic ${creds}` },
   });
   if (!res.ok) {
@@ -86,7 +89,10 @@ router.get(
 router.post("/admin/cloudinary/sign", (req, res) => {
   if (!checkAdmin(req, res)) return;
 
-  if (!API_KEY || !API_SECRET) {
+  const apiKey    = API_KEY();
+  const apiSecret = API_SECRET();
+
+  if (!apiKey || !apiSecret) {
     res.status(500).json({
       error:
         "CLOUDINARY_API_KEY and CLOUDINARY_API_SECRET must be set as server environment variables.",
@@ -105,14 +111,14 @@ router.post("/admin/cloudinary/sign", (req, res) => {
   // Cloudinary signed upload: SHA-1("public_id=X&timestamp=T" + API_SECRET)
   const paramsToSign = `public_id=${public_id}&timestamp=${timestamp}`;
   const signature = createHash("sha1")
-    .update(paramsToSign + API_SECRET)
+    .update(paramsToSign + apiSecret)
     .digest("hex");
 
   res.json({
     signature,
     timestamp,
-    api_key: API_KEY,
-    cloud_name: CLOUD_NAME,
+    api_key: apiKey,
+    cloud_name: CLOUD_NAME(),
     public_id,
   });
 });

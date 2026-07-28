@@ -6,6 +6,20 @@ import { logger } from "./lib/logger";
 
 const app: Express = express();
 
+const corsOptions: cors.CorsOptions = {
+  // Allow any origin (Replit proxy, deployed domain, local dev)
+  origin: true,
+  methods: ["GET", "HEAD", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+  // Must explicitly list custom headers or the preflight OPTIONS will be rejected
+  allowedHeaders: ["Content-Type", "Authorization", "X-Admin-Password"],
+  optionsSuccessStatus: 204,
+};
+
+// Handle OPTIONS preflight for every route BEFORE other middleware
+// Express 5 + path-to-regexp@8 reject bare "*" — use a regex instead
+app.options(/(.*)/, cors(corsOptions));
+app.use(cors(corsOptions));
+
 app.use(
   pinoHttp({
     logger,
@@ -25,7 +39,6 @@ app.use(
     },
   }),
 );
-app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
