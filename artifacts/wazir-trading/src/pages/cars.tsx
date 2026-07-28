@@ -23,6 +23,8 @@ const RED  = '#C8102E';
 const WA_NUMBER = import.meta.env.VITE_WHATSAPP_NUMBER || '818089227375';
 const PAGE_SIZE = 20;
 
+type FilterOption = { value: string; count: number };
+
 const MAKE_NAMES = [
   'Toyota', 'Nissan', 'Honda', 'Mazda', 'Mitsubishi', 'Subaru',
   'Suzuki', 'Daihatsu', 'Lexus', 'Isuzu', 'Audi', 'BMW',
@@ -321,7 +323,7 @@ function FilterItem({
 /* SIDEBAR                                                          */
 /* ─────────────────────────────────────────────────────────────── */
 function Sidebar({
-  makeCounts,
+  makeOptions, bodyOptions, transOptions, fuelOptions, driveOptions, locationOptions,
   activeMake, setActiveMake, activePrice, setActivePrice,
   activeBody, setActiveBody, activeCategory, setActiveCategory,
   activeLocation, setActiveLocation, activeYear, setActiveYear,
@@ -329,7 +331,12 @@ function Sidebar({
   activeEngine, setActiveEngine, activeFuel, setActiveFuel,
   activeMileage, setActiveMileage,
 }: {
-  makeCounts: Record<string, number>;
+  makeOptions: FilterOption[];
+  bodyOptions: FilterOption[];
+  transOptions: FilterOption[];
+  fuelOptions: FilterOption[];
+  driveOptions: FilterOption[];
+  locationOptions: FilterOption[];
   activeMake: string;     setActiveMake: (v: string) => void;
   activePrice: string;    setActivePrice: (v: string) => void;
   activeBody: string;     setActiveBody: (v: string) => void;
@@ -344,41 +351,37 @@ function Sidebar({
 }) {
   const base = import.meta.env.BASE_URL.replace(/\/$/, '');
 
-  const CATEGORY_ICONS: Record<string, React.ReactNode> = {
-    Gasoline:    <Fuel size={13} />,
-    Hybrid:      <Zap size={13} />,
-    Diesel:      <Droplets size={13} />,
-    'Light Oil': <Droplet size={13} />,
-  };
-
-  const LOCATION_FLAGS: Record<string, string> = {
-    Japan: '🇯🇵', Chile: '🇨🇱', UK: '🇬🇧', UAE: '🇦🇪', Thailand: '🇹🇭', China: '🇨🇳',
-  };
-
   const FUEL_ICONS: Record<string, React.ReactNode> = {
     Diesel:              <Droplets size={13} />,
     Electric:            <Zap size={13} />,
     Gasoline:            <Fuel size={13} />,
     'Gasoline E Power':  <Zap size={13} />,
     'Gasoline Hybrid':   <Zap size={13} />,
+    Hybrid:              <Zap size={13} />,
+    'Light Oil':         <Droplet size={13} />,
+    Petrol:              <Fuel size={13} />,
+  };
+
+  const LOCATION_FLAGS: Record<string, string> = {
+    Japan: '🇯🇵', Chile: '🇨🇱', UK: '🇬🇧', UAE: '🇦🇪', Thailand: '🇹🇭', China: '🇨🇳',
   };
 
   return (
     <div className="border border-gray-200 overflow-hidden shadow-sm" style={{ width: 210, flexShrink: 0 }}>
-      {/* Make */}
+      {/* Make — sorted by count, logos shown when brand is known */}
       <AccordionSection title="Shop By Make" defaultOpen>
-        {MAKE_NAMES.map(name => {
-          const brand = MAKE_BRANDS.find(b => b.name === name)!;
+        {makeOptions.map(({ value: name, count }) => {
+          const brand = MAKE_BRANDS.find(b => b.name === name);
           return (
-            <FilterItem key={name} label={name} count={makeCounts[name]}
+            <FilterItem key={name} label={name} count={count}
               active={activeMake === name}
               onClick={() => setActiveMake(activeMake === name ? '' : name)}
-              icon={<MakeSidebarIcon name={name} slug={brand.slug} />} />
+              icon={brand ? <MakeSidebarIcon name={name} slug={brand.slug} /> : <CarIcon size={13} />} />
           );
         })}
       </AccordionSection>
 
-      {/* Price */}
+      {/* Price — ranges stay hardcoded */}
       <AccordionSection title="Shop By Price" defaultOpen>
         {PRICE_RANGES.map(p => (
           <FilterItem key={p} label={p}
@@ -388,42 +391,43 @@ function Sidebar({
         ))}
       </AccordionSection>
 
-      {/* Body Type */}
+      {/* Body Type — live from DB */}
       <AccordionSection title="Shop By Body Type" defaultOpen>
-        {BODY_TYPE_ITEMS.map(b => {
-          const icon = b.icon
-            ? <img src={`${base}${b.icon}`} alt="" className="w-3.5 h-3.5 object-contain" />
-            : (['Truck', 'Van', 'SUV', 'Bus'].includes(b.name) ? <Truck size={13} /> : <CarIcon size={13} />);
+        {bodyOptions.map(({ value: name, count }) => {
+          const item = BODY_TYPE_ITEMS.find(b => b.name === name);
+          const icon = item?.icon
+            ? <img src={`${base}${item.icon}`} alt="" className="w-3.5 h-3.5 object-contain" />
+            : (['Truck', 'Van', 'SUV', 'Bus'].includes(name) ? <Truck size={13} /> : <CarIcon size={13} />);
           return (
-            <FilterItem key={b.name} label={b.name}
-              active={activeBody === b.name}
-              onClick={() => setActiveBody(activeBody === b.name ? '' : b.name)}
+            <FilterItem key={name} label={name} count={count}
+              active={activeBody === name}
+              onClick={() => setActiveBody(activeBody === name ? '' : name)}
               icon={icon} />
           );
         })}
       </AccordionSection>
 
-      {/* Category */}
-      <AccordionSection title="Shop By Category" defaultOpen>
-        {CATEGORIES.map(c => (
-          <FilterItem key={c} label={c}
-            active={activeCategory === c}
-            onClick={() => setActiveCategory(activeCategory === c ? '' : c)}
-            icon={CATEGORY_ICONS[c]} />
+      {/* Fuel — live from DB (merges old Category + Fuel sections) */}
+      <AccordionSection title="Shop By Fuel" defaultOpen>
+        {fuelOptions.map(({ value: f, count }) => (
+          <FilterItem key={f} label={f} count={count}
+            active={activeFuel === f || activeCategory === f}
+            onClick={() => { setActiveFuel(activeFuel === f ? '' : f); setActiveCategory(''); }}
+            icon={FUEL_ICONS[f] ?? <Fuel size={13} />} />
         ))}
       </AccordionSection>
 
-      {/* Location */}
+      {/* Location — live from DB */}
       <AccordionSection title="Shop By Location" defaultOpen>
-        {LOCATIONS.map(l => (
-          <FilterItem key={l} label={l}
+        {locationOptions.map(({ value: l, count }) => (
+          <FilterItem key={l} label={l} count={count}
             active={activeLocation === l}
             onClick={() => setActiveLocation(activeLocation === l ? '' : l)}
-            icon={<span className="text-[14px] leading-none">{LOCATION_FLAGS[l]}</span>} />
+            icon={<span className="text-[14px] leading-none">{LOCATION_FLAGS[l] ?? '📍'}</span>} />
         ))}
       </AccordionSection>
 
-      {/* Year */}
+      {/* Year — ranges stay hardcoded */}
       <AccordionSection title="Shop By Year" defaultOpen>
         {YEAR_RANGES.map(y => (
           <FilterItem key={y} label={y}
@@ -433,27 +437,27 @@ function Sidebar({
         ))}
       </AccordionSection>
 
-      {/* Drive */}
+      {/* Drive — live from DB */}
       <AccordionSection title="Shop By Drive" defaultOpen>
-        {DRIVES.map(d => (
-          <FilterItem key={d} label={d}
+        {driveOptions.map(({ value: d, count }) => (
+          <FilterItem key={d} label={d} count={count}
             active={activeDrive === d}
             onClick={() => setActiveDrive(activeDrive === d ? '' : d)}
             icon={d === '4WD' ? <Truck size={13} /> : <CarIcon size={13} />} />
         ))}
       </AccordionSection>
 
-      {/* Transmission */}
+      {/* Transmission — live from DB */}
       <AccordionSection title="Shop By Transmission" defaultOpen>
-        {TRANSMISSIONS.map(t => (
-          <FilterItem key={t} label={t}
+        {transOptions.map(({ value: t, count }) => (
+          <FilterItem key={t} label={t} count={count}
             active={activeTrans === t}
             onClick={() => setActiveTrans(activeTrans === t ? '' : t)}
             icon={<Cog size={13} />} />
         ))}
       </AccordionSection>
 
-      {/* Engine Size */}
+      {/* Engine Size — ranges stay hardcoded */}
       <AccordionSection title="Shop By Engine Size" defaultOpen>
         {ENGINE_SIZES.map(e => (
           <FilterItem key={e} label={e}
@@ -463,17 +467,7 @@ function Sidebar({
         ))}
       </AccordionSection>
 
-      {/* Fuel */}
-      <AccordionSection title="Shop By Fuel" defaultOpen>
-        {FUELS.map(f => (
-          <FilterItem key={f} label={f}
-            active={activeFuel === f}
-            onClick={() => setActiveFuel(activeFuel === f ? '' : f)}
-            icon={FUEL_ICONS[f]} />
-        ))}
-      </AccordionSection>
-
-      {/* Mileage */}
+      {/* Mileage — ranges stay hardcoded */}
       <AccordionSection title="Shop By Mileage" defaultOpen>
         {MILEAGES.map(m => (
           <FilterItem key={m} label={m}
@@ -1154,6 +1148,12 @@ export default function CarsPage() {
   const [sortBy, setSortBy]             = useState('Newest First');
   const [activeTab, setActiveTab]       = useState('');
   const [makeCounts, setMakeCounts]     = useState<Record<string, number>>({});
+  const [makeOptions,     setMakeOptions]     = useState<FilterOption[]>([]);
+  const [bodyOptions,     setBodyOptions]     = useState<FilterOption[]>([]);
+  const [transOptions,    setTransOptions]    = useState<FilterOption[]>([]);
+  const [fuelOptions,     setFuelOptions]     = useState<FilterOption[]>([]);
+  const [driveOptions,    setDriveOptions]    = useState<FilterOption[]>([]);
+  const [locationOptions, setLocationOptions] = useState<FilterOption[]>([]);
   const [tabCounts, setTabCounts]       = useState<Record<string, number>>({});
   const { pkr: pkrRate }                = useExchangeRate();
   const [showMobileFilter, setShowMobileFilter] = useState(false);
@@ -1236,20 +1236,43 @@ export default function CarsPage() {
     }
   }, []);
 
-  // ── Fetch make counts (parallel HEAD queries) ──
-  const fetchMakeCounts = useCallback(async () => {
+  // ── Fetch all filter options dynamically from the DB (single query) ──
+  const fetchFilterOptions = useCallback(async () => {
     try {
-      const results = await Promise.all(
-        MAKE_NAMES.map(name =>
-          supabase.from('cars').select('*', { count: 'exact', head: true }).eq('make', name)
-            .then(({ count }) => ({ name, count: count || 0 }))
-        )
-      );
+      const { data } = await supabase
+        .from('cars')
+        .select('make, body_type, transmission, fuel_type, drive, stock_location')
+        .limit(10000);
+
+      if (!data) return;
+
+      // Count distinct values for a given column, sorted by count descending
+      const countBy = (col: string): FilterOption[] => {
+        const map = new Map<string, number>();
+        for (const row of data as Record<string, string>[]) {
+          const val = row[col];
+          if (val) map.set(val, (map.get(val) ?? 0) + 1);
+        }
+        return [...map.entries()]
+          .sort((a, b) => b[1] - a[1])
+          .map(([value, count]) => ({ value, count }));
+      };
+
+      setMakeOptions(countBy('make'));
+      setBodyOptions(countBy('body_type'));
+      setTransOptions(countBy('transmission'));
+      setFuelOptions(countBy('fuel_type'));
+      setDriveOptions(countBy('drive'));
+      setLocationOptions(countBy('stock_location'));
+
+      // Keep makeCounts as a plain Record for the MakeCarousel
       const counts: Record<string, number> = {};
-      results.forEach(({ name, count }) => { counts[name] = count; });
+      for (const row of data as Record<string, string>[]) {
+        if (row.make) counts[row.make] = (counts[row.make] ?? 0) + 1;
+      }
       setMakeCounts(counts);
     } catch (err) {
-      console.error('Failed to fetch make counts:', err);
+      console.error('Failed to fetch filter options:', err);
     }
   }, []);
 
@@ -1292,9 +1315,9 @@ export default function CarsPage() {
 
   // ── Initial data load ──
   useEffect(() => {
-    fetchMakeCounts();
+    fetchFilterOptions();
     fetchTabCounts();
-  }, [fetchMakeCounts, fetchTabCounts]);
+  }, [fetchFilterOptions, fetchTabCounts]);
 
   // ── Re-fetch cars when filters/page/sort/tab change ──
   useEffect(() => {
@@ -1390,7 +1413,7 @@ export default function CarsPage() {
 
   // ── Sidebar props ──
   const sidebarProps = {
-    makeCounts,
+    makeOptions, bodyOptions, transOptions, fuelOptions, driveOptions, locationOptions,
     activeMake:       filters.make,      setActiveMake:       (v: string) => setFilter('make', v),
     activePrice:      filters.price,     setActivePrice:      (v: string) => setFilter('price', v),
     activeBody:       filters.body,      setActiveBody:       (v: string) => setFilter('body', v),
