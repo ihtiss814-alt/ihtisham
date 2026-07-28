@@ -156,7 +156,79 @@ router.post("/admin/cloudinary/search-by-chassis", async (req, res) => {
       for (const batch of nestedResults) addResources(batch);
     }
 
+    // 3. Flat filename structure: wazir-trading/<chassis>-NN_suffix
+    //    Search for public_ids matching "wazir-trading/<chassis>-*" using the Search API
+    try {
+      const creds = Buffer.from(`${API_KEY()}:${API_SECRET()}`).toString("base64");
+      const searchRes = await fetch(
+        `https://api.cloudinary.com/v1_1/${CLOUD_NAME()}/resources/search`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Basic ${creds}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            expression: `public_id:wazir-trading/${chassis_number}-*`,
+            max_results: 100,
+          }),
+        }
+      );
+      if (searchRes.ok) {
+        const searchData = (await searchRes.json()) as { resources?: CldResource[] };
+        addResources(searchData.resources ?? []);
+      }
+    } catch { /* continue with results so far */ }
+
     res.json({ resources: allResources });
+  } catch (err) {
+    res.status(500).json({ error: err instanceof Error ? err.message : "Unknown error" });
+  }
+});
+
+/**
+ * POST /api/admin/cloudinary/fetch-flat-folder
+ * Fetches ALL images from the flat wazir-trading/ folder (root level only).
+ * Uses the Search API with expression "folder:wazir-trading".
+ * Returns: { resources: [{ public_id, secure_url }] }
+ */
+router.post("/admin/cloudinary/fetch-flat-folder", async (req, res) => {
+  if (!checkAdmin(req, res)) return;
+  const apiKey    = API_KEY();
+  const apiSecret = API_SECRET();
+  if (!apiKey || !apiSecret) {
+    res.status(500).json({
+      error: "CLOUDINARY_API_KEY and CLOUDINARY_API_SECRET must be set as server environment variables.",
+    });
+    return;
+  }
+  try {
+    const creds = Buffer.from(`${apiKey}:${apiSecret}`).toString("base64");
+    const searchRes = await fetch(
+      `https://api.cloudinary.com/v1_1/${CLOUD_NAME()}/resources/search`,
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Basic ${creds}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          expression: "folder:wazir-trading",
+          max_results: 500,
+          sort_by: [{ public_id: "asc" }],
+        }),
+      }
+    );
+    if (!searchRes.ok) {
+      const body = await searchRes.text();
+      res.status(502).json({ error: `Cloudinary search ${searchRes.status}: ${body}` });
+      return;
+    }
+    const data = (await searchRes.json()) as {
+      resources?: { public_id: string; secure_url: string }[];
+      total_count?: number;
+    };
+    res.json({ resources: data.resources ?? [], total_count: data.total_count ?? 0 });
   } catch (err) {
     res.status(500).json({ error: err instanceof Error ? err.message : "Unknown error" });
   }

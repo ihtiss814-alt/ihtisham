@@ -82,13 +82,9 @@ export default function ImageGallery({ carId, refNumber, make, model }: ImageGal
             setMapStatus('error');
           }
         } else {
-          // Cloudinary fallback — try up to 12 images
-          const cloudName = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME || 'txb1wiw1';
-          const urls = Array.from({ length: 12 }, (_, i) =>
-            `https://res.cloudinary.com/${cloudName}/image/upload/f_auto,q_auto,w_1200/cars/${refNumber.toLowerCase()}-${i + 1}`
-          );
-          setCandidates(urls);
-          setStatuses(urls.map(() => 'pending' as ImgStatus));
+          // No images in car_images table — show placeholder
+          setCandidates([]);
+          setStatuses([]);
           setMapStatus('error');
         }
       } catch {
