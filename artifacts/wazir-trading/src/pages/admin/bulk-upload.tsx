@@ -1088,7 +1088,19 @@ function FlatFolderSyncSection({ onDone }: { onDone?: () => void }) {
 ═══════════════════════════════════════════════════════════════ */
 function SyncImagesTab() {
   return (
-    <div className="max-w-3xl mx-auto space-y-4">
+    <div className="max-w-3xl mx-auto space-y-8">
+      {/* ── Section 1: CSV Upload ── */}
+      <div>
+        <h2 className="text-lg font-bold text-[#0D1B3E]">Upload Cars from CSV</h2>
+        <p className="text-sm text-gray-500 mt-1">
+          Import car listings from a CSV or Excel file. Each row becomes a car record in the database.
+        </p>
+      </div>
+      <CsvUploadTab />
+
+      <hr className="border-gray-200" />
+
+      {/* ── Section 2: Cloudinary Image Sync ── */}
       <div>
         <h2 className="text-lg font-bold text-[#0D1B3E]">Sync Images from Cloudinary</h2>
         <p className="text-sm text-gray-500 mt-1">
