@@ -188,9 +188,15 @@ router.post("/admin/cloudinary/search-by-chassis", async (req, res) => {
 
 /**
  * POST /api/admin/cloudinary/fetch-flat-folder
- * Fetches ALL images from the flat wazir-trading/ folder (root level only).
- * Uses the Search API with expression "folder:wazir-trading".
- * Returns: { resources: [{ public_id, secure_url }] }
+ * Fetches ONE PAGE of images from the flat wazir-trading/ folder via the
+ * Cloudinary Search API.  Supports cursor-based pagination: pass
+ * { next_cursor: "<value>" } in the request body to fetch the next page.
+ *
+ * Returns:
+ *   { resources: [{ public_id, secure_url }], next_cursor?: string, total_count?: number }
+ *
+ * The caller should keep requesting with the returned next_cursor until it is
+ * absent, then combine all pages.
  */
 router.post("/admin/cloudinary/fetch-flat-folder", async (req, res) => {
   if (!checkAdmin(req, res)) return;
@@ -203,6 +209,15 @@ router.post("/admin/cloudinary/fetch-flat-folder", async (req, res) => {
     return;
   }
   try {
+    const { next_cursor } = req.body as { next_cursor?: string };
+
+    const requestBody: Record<string, unknown> = {
+      expression: "folder:wazir-trading",
+      max_results: 500,
+      sort_by: [{ public_id: "asc" }],
+    };
+    if (next_cursor) requestBody["next_cursor"] = next_cursor;
+
     const creds = Buffer.from(`${apiKey}:${apiSecret}`).toString("base64");
     const searchRes = await fetch(
       `https://api.cloudinary.com/v1_1/${CLOUD_NAME()}/resources/search`,
@@ -212,11 +227,7 @@ router.post("/admin/cloudinary/fetch-flat-folder", async (req, res) => {
           Authorization: `Basic ${creds}`,
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({
-          expression: "folder:wazir-trading",
-          max_results: 500,
-          sort_by: [{ public_id: "asc" }],
-        }),
+        body: JSON.stringify(requestBody),
       }
     );
     if (!searchRes.ok) {
@@ -226,9 +237,14 @@ router.post("/admin/cloudinary/fetch-flat-folder", async (req, res) => {
     }
     const data = (await searchRes.json()) as {
       resources?: { public_id: string; secure_url: string }[];
+      next_cursor?: string;
       total_count?: number;
     };
-    res.json({ resources: data.resources ?? [], total_count: data.total_count ?? 0 });
+    res.json({
+      resources:   data.resources   ?? [],
+      total_count: data.total_count ?? 0,
+      ...(data.next_cursor ? { next_cursor: data.next_cursor } : {}),
+    });
   } catch (err) {
     res.status(500).json({ error: err instanceof Error ? err.message : "Unknown error" });
   }

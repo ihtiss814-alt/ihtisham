@@ -171,18 +171,36 @@ function extractChassisFromPublicId(publicId: string): string {
 }
 
 /* ─── CLOUDINARY FLAT FOLDER FETCH ──────────────────────────── */
-async function fetchFlatFolder(): Promise<{ public_id: string; secure_url: string }[]> {
-  const res = await fetch('/api/admin/cloudinary/fetch-flat-folder', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'X-Admin-Password': ADMIN_PASSWORD,
-    },
-    body: JSON.stringify({}),
-  });
-  const body = await res.json().catch(() => ({}));
-  if (!res.ok) throw new Error((body as { error?: string }).error ?? `Server ${res.status}`);
-  return ((body as { resources?: { public_id: string; secure_url: string }[] }).resources) ?? [];
+async function fetchFlatFolder(
+  onPage?: (page: number, count: number) => void,
+): Promise<{ public_id: string; secure_url: string }[]> {
+  const allResources: { public_id: string; secure_url: string }[] = [];
+  let nextCursor: string | undefined;
+  let page = 0;
+
+  do {
+    page++;
+    const res = await fetch('/api/admin/cloudinary/fetch-flat-folder', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Admin-Password': ADMIN_PASSWORD,
+      },
+      body: JSON.stringify(nextCursor ? { next_cursor: nextCursor } : {}),
+    });
+    const body = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error((body as { error?: string }).error ?? `Server ${res.status}`);
+    const typed = body as {
+      resources?: { public_id: string; secure_url: string }[];
+      next_cursor?: string;
+    };
+    const pageResources = typed.resources ?? [];
+    allResources.push(...pageResources);
+    onPage?.(page, pageResources.length);
+    nextCursor = typed.next_cursor;
+  } while (nextCursor);
+
+  return allResources;
 }
 
 /* ─── CLOUDINARY SEARCH BY CHASSIS ──────────────────────────── */
@@ -877,8 +895,10 @@ function FlatFolderSyncSection({ onDone }: { onDone?: () => void }) {
 
     try {
       addLog('Fetching images from Cloudinary…', 'info');
-      const resources = await fetchFlatFolder();
-      addLog(`Found ${resources.length} images total`, 'info');
+      const resources = await fetchFlatFolder((page, count) => {
+        addLog(`Fetching page ${page} from Cloudinary... (${count} images)`, 'info');
+      });
+      addLog(`Total fetched: ${resources.length} images, now processing…`, 'info');
 
       if (!resources.length) {
         addLog('No images found in the wazir-trading folder.', 'warn');
