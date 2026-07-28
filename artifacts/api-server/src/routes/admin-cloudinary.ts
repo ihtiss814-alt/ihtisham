@@ -81,16 +81,22 @@ router.get(
 );
 
 /**
- * POST /api/admin/cloudinary/sign
- * Body: { public_id: string }
- * Generates a signed timestamp so the browser can upload directly to Cloudinary.
- * The API secret is never sent to the browser — only the resulting HMAC signature.
+ * POST /api/admin/cloudinary/upload
+ * Body: { image_base64: string, mime_type: string, public_id: string }
+ *
+ * The browser sends raw image bytes (base64-encoded) to this server endpoint.
+ * The server generates the Cloudinary signature and POSTs the file directly
+ * to Cloudinary — the API secret never touches the browser, and we avoid all
+ * browser-side signature/CORS issues entirely.
+ *
+ * Returns: { secure_url: string }
  */
-router.post("/admin/cloudinary/sign", (req, res) => {
+router.post("/admin/cloudinary/upload", async (req, res) => {
   if (!checkAdmin(req, res)) return;
 
-  const apiKey    = API_KEY();
-  const apiSecret = API_SECRET();
+  const apiKey    = API_KEY().trim();
+  const apiSecret = API_SECRET().trim();
+  const cloudName = CLOUD_NAME().trim();
 
   if (!apiKey || !apiSecret) {
     res.status(500).json({
@@ -100,27 +106,64 @@ router.post("/admin/cloudinary/sign", (req, res) => {
     return;
   }
 
-  const { public_id } = req.body as { public_id?: string };
-  if (!public_id) {
-    res.status(400).json({ error: "public_id is required" });
+  const { image_base64, mime_type, public_id } = req.body as {
+    image_base64?: string;
+    mime_type?: string;
+    public_id?: string;
+  };
+
+  if (!image_base64 || !public_id) {
+    res.status(400).json({ error: "image_base64 and public_id are required" });
     return;
   }
 
-  const timestamp = Math.round(Date.now() / 1000);
+  try {
+    const timestamp = Math.round(Date.now() / 1000);
 
-  // Cloudinary signed upload: SHA-1("public_id=X&timestamp=T" + API_SECRET)
-  const paramsToSign = `public_id=${public_id}&timestamp=${timestamp}`;
-  const signature = createHash("sha1")
-    .update(paramsToSign + apiSecret)
-    .digest("hex");
+    // Cloudinary signed upload signature:
+    // SHA-1( "public_id=X&timestamp=T" + API_SECRET )
+    // Parameters sorted alphabetically; values NOT URL-encoded.
+    const paramsToSign = `public_id=${public_id}&timestamp=${timestamp}`;
+    const signature = createHash("sha1")
+      .update(paramsToSign + apiSecret)
+      .digest("hex");
 
-  res.json({
-    signature,
-    timestamp,
-    api_key: apiKey,
-    cloud_name: CLOUD_NAME(),
-    public_id,
-  });
+    // Build the multipart request from the server directly to Cloudinary
+    const imageBuffer = Buffer.from(image_base64, "base64");
+    const mimeType    = mime_type ?? "image/jpeg";
+
+    const fd = new FormData();
+    fd.append(
+      "file",
+      new Blob([imageBuffer], { type: mimeType }),
+      public_id.split("/").pop() ?? "image",
+    );
+    fd.append("api_key",   apiKey);
+    fd.append("timestamp", String(timestamp));
+    fd.append("signature", signature);
+    fd.append("public_id", public_id);
+
+    const upRes = await fetch(
+      `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`,
+      { method: "POST", body: fd },
+    );
+
+    const upBody = await upRes.json() as Record<string, unknown>;
+
+    if (!upRes.ok) {
+      const msg =
+        (upBody?.error as { message?: string } | undefined)?.message ??
+        `Cloudinary ${upRes.status}`;
+      res.status(502).json({ error: msg, cloudinary: upBody });
+      return;
+    }
+
+    res.json({ secure_url: upBody.secure_url });
+  } catch (err) {
+    res.status(500).json({
+      error: err instanceof Error ? err.message : "Upload failed",
+    });
+  }
 });
 
 export default router;

@@ -909,50 +909,34 @@ function sortZipImages(imgs: ZipImage[]): ZipImage[] {
   });
 }
 
-/* ─── Cloudinary direct upload via server-generated signature ─── */
+/* ─── Cloudinary upload — proxied through api-server ─── */
 async function cloudinarySignedUpload(
   imageData: ArrayBuffer,
   mimeType: string,
   publicId: string,
 ): Promise<string> {
-  // 1. Get signature from api-server (secret never leaves server)
-  const signRes = await fetch('/api/admin/cloudinary/sign', {
+  // Convert binary to base64 so it can travel as JSON to the api-server.
+  // The server generates the Cloudinary signature and does the actual upload,
+  // keeping the API secret entirely server-side.
+  const bytes  = new Uint8Array(imageData);
+  let binary   = '';
+  for (let i = 0; i < bytes.byteLength; i++) binary += String.fromCharCode(bytes[i]);
+  const image_base64 = btoa(binary);
+
+  const res = await fetch('/api/admin/cloudinary/upload', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
       'X-Admin-Password': ADMIN_PASSWORD,
     },
-    body: JSON.stringify({ public_id: publicId }),
+    body: JSON.stringify({ image_base64, mime_type: mimeType, public_id: publicId }),
   });
-  if (!signRes.ok) {
-    const body = await signRes.json().catch(() => ({}));
-    throw new Error((body as { error?: string }).error ?? `Sign failed: ${signRes.status}`);
-  }
-  const { signature, timestamp, api_key, cloud_name } = await signRes.json() as {
-    signature: string; timestamp: number; api_key: string; cloud_name: string;
-  };
 
-  // 2. Upload directly to Cloudinary (browser → Cloudinary CDN)
-  const fd = new FormData();
-  fd.append('file', new Blob([imageData], { type: mimeType }));
-  fd.append('api_key', api_key);
-  fd.append('timestamp', String(timestamp));
-  fd.append('signature', signature);
-  fd.append('public_id', publicId);
-
-  const upRes = await fetch(
-    `https://api.cloudinary.com/v1_1/${cloud_name}/image/upload`,
-    { method: 'POST', body: fd },
-  );
-  if (!upRes.ok) {
-    const err = await upRes.json().catch(() => ({}));
-    throw new Error(
-      (err as { error?: { message?: string } }).error?.message ??
-      `Cloudinary ${upRes.status}`,
-    );
+  const body = await res.json().catch(() => ({})) as { secure_url?: string; error?: string };
+  if (!res.ok) {
+    throw new Error(body.error ?? `Upload failed: ${res.status}`);
   }
-  const data = await upRes.json() as { secure_url: string };
-  return data.secure_url;
+  return body.secure_url!;
 }
 
 /* ─── parse CSV (shared logic) ─── */
