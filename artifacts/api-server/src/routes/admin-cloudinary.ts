@@ -1,4 +1,5 @@
 import { Router, type IRouter, type Request, type Response } from "express";
+import { createHash } from "node:crypto";
 
 const router: IRouter = Router();
 
@@ -75,5 +76,45 @@ router.get(
     }
   }
 );
+
+/**
+ * POST /api/admin/cloudinary/sign
+ * Body: { public_id: string }
+ * Generates a signed timestamp so the browser can upload directly to Cloudinary.
+ * The API secret is never sent to the browser — only the resulting HMAC signature.
+ */
+router.post("/admin/cloudinary/sign", (req, res) => {
+  if (!checkAdmin(req, res)) return;
+
+  if (!API_KEY || !API_SECRET) {
+    res.status(500).json({
+      error:
+        "CLOUDINARY_API_KEY and CLOUDINARY_API_SECRET must be set as server environment variables.",
+    });
+    return;
+  }
+
+  const { public_id } = req.body as { public_id?: string };
+  if (!public_id) {
+    res.status(400).json({ error: "public_id is required" });
+    return;
+  }
+
+  const timestamp = Math.round(Date.now() / 1000);
+
+  // Cloudinary signed upload: SHA-1("public_id=X&timestamp=T" + API_SECRET)
+  const paramsToSign = `public_id=${public_id}&timestamp=${timestamp}`;
+  const signature = createHash("sha1")
+    .update(paramsToSign + API_SECRET)
+    .digest("hex");
+
+  res.json({
+    signature,
+    timestamp,
+    api_key: API_KEY,
+    cloud_name: CLOUD_NAME,
+    public_id,
+  });
+});
 
 export default router;

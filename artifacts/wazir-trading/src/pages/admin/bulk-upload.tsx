@@ -1,9 +1,11 @@
 import React, { useState, useRef, useCallback } from 'react';
 import * as XLSX from 'xlsx';
+import JSZip from 'jszip';
 import { supabase } from '@/lib/supabase';
 import {
   Upload, Eye, CheckCircle2, XCircle, Loader2, Image, LayoutDashboard,
   Star, Trash2, Download, ChevronDown, ChevronUp, Lock, LogOut, Search,
+  PackageOpen, FileSpreadsheet, FolderArchive,
 } from 'lucide-react';
 
 /* ─── CONSTANTS ──────────────────────────────────────────────── */
@@ -867,18 +869,567 @@ function ReviewDashboardTab() {
 }
 
 /* ═══════════════════════════════════════════════════════════════
+   FEATURE 4 — COMBINED CSV + ZIP UPLOAD
+═══════════════════════════════════════════════════════════════ */
+
+/* ─── types ─── */
+type ZipImage = {
+  nameNoExt: string;   // e.g. "14961968_01a"
+  ext: string;         // e.g. "jpg"
+  entry: JSZip.JSZipObject;
+  isPrimary: boolean;  // ends with _01a
+  isMap: boolean;      // ends with _map
+};
+
+type JobStatus = 'pending' | 'uploading' | 'inserting' | 'done' | 'no_images' | 'error';
+
+type CarJob = {
+  car: ParsedCar;
+  chassis: string;
+  images: ZipImage[];
+  status: JobStatus;
+  uploadedCount: number;
+  error?: string;
+  refNumber?: string;
+};
+
+/* ─── helpers ─── */
+function normaliseDateFolder(raw: string): string {
+  // "23 JULY 2026" → "23-july-2026"
+  return raw.trim().toLowerCase().replace(/\s+/g, '-');
+}
+
+function sortZipImages(imgs: ZipImage[]): ZipImage[] {
+  return [...imgs].sort((a, b) => {
+    if (a.isPrimary) return -1;
+    if (b.isPrimary) return 1;
+    if (a.isMap)     return  1;
+    if (b.isMap)     return -1;
+    return a.nameNoExt.localeCompare(b.nameNoExt, undefined, { numeric: true });
+  });
+}
+
+/* ─── Cloudinary direct upload via server-generated signature ─── */
+async function cloudinarySignedUpload(
+  imageData: ArrayBuffer,
+  mimeType: string,
+  publicId: string,
+): Promise<string> {
+  // 1. Get signature from api-server (secret never leaves server)
+  const signRes = await fetch('/api/admin/cloudinary/sign', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-Admin-Password': ADMIN_PASSWORD,
+    },
+    body: JSON.stringify({ public_id: publicId }),
+  });
+  if (!signRes.ok) {
+    const body = await signRes.json().catch(() => ({}));
+    throw new Error((body as { error?: string }).error ?? `Sign failed: ${signRes.status}`);
+  }
+  const { signature, timestamp, api_key, cloud_name } = await signRes.json() as {
+    signature: string; timestamp: number; api_key: string; cloud_name: string;
+  };
+
+  // 2. Upload directly to Cloudinary (browser → Cloudinary CDN)
+  const fd = new FormData();
+  fd.append('file', new Blob([imageData], { type: mimeType }));
+  fd.append('api_key', api_key);
+  fd.append('timestamp', String(timestamp));
+  fd.append('signature', signature);
+  fd.append('public_id', publicId);
+
+  const upRes = await fetch(
+    `https://api.cloudinary.com/v1_1/${cloud_name}/image/upload`,
+    { method: 'POST', body: fd },
+  );
+  if (!upRes.ok) {
+    const err = await upRes.json().catch(() => ({}));
+    throw new Error(
+      (err as { error?: { message?: string } }).error?.message ??
+      `Cloudinary ${upRes.status}`,
+    );
+  }
+  const data = await upRes.json() as { secure_url: string };
+  return data.secure_url;
+}
+
+/* ─── parse CSV (shared logic) ─── */
+function parseCsvFile(file: File): Promise<ParsedCar[]> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      try {
+        const data = new Uint8Array(e.target!.result as ArrayBuffer);
+        const wb = XLSX.read(data, { type: 'array' });
+        const ws = wb.Sheets[wb.SheetNames[0]];
+        const raw: unknown[][] = XLSX.utils.sheet_to_json(ws, { header: 1, defval: '' });
+        const parsed = raw.slice(1).filter(r => {
+          const chassis = r[4] && String(r[4]).trim();
+          const year = parseFloat(String(r[8]));
+          return chassis && !isNaN(year) && year > 1900;
+        });
+        resolve(parsed.map(parseRow));
+      } catch (err) { reject(err); }
+    };
+    reader.onerror = () => reject(new Error('FileReader failed'));
+    reader.readAsArrayBuffer(file);
+  });
+}
+
+/* ─── parse ZIP ─── */
+async function parseZipFile(
+  file: File,
+): Promise<{ dateFolder: string; groups: Map<string, ZipImage[]> }> {
+  const zip = await JSZip.loadAsync(file);
+  const groups = new Map<string, ZipImage[]>();
+  let rawDateFolder = '';
+
+  for (const [path, entry] of Object.entries(zip.files)) {
+    if (entry.dir) continue;
+    // Skip Mac metadata
+    if (path.startsWith('__MACOSX') || path.includes('.DS_Store')) continue;
+
+    const parts = path.split('/').filter(Boolean);
+    let chassis: string, filename: string;
+
+    if (parts.length === 3) {
+      // date-folder / chassis / image.jpg
+      if (!rawDateFolder) rawDateFolder = parts[0];
+      chassis  = parts[1];
+      filename = parts[2];
+    } else if (parts.length === 2) {
+      // chassis / image.jpg  (no date wrapper)
+      chassis  = parts[0];
+      filename = parts[1];
+    } else {
+      continue;
+    }
+
+    const dotIdx = filename.lastIndexOf('.');
+    const ext = dotIdx >= 0 ? filename.slice(dotIdx + 1).toLowerCase() : '';
+    if (!['jpg', 'jpeg', 'png', 'webp'].includes(ext)) continue;
+
+    const nameNoExt = dotIdx >= 0 ? filename.slice(0, dotIdx) : filename;
+    const lname = nameNoExt.toLowerCase();
+    const isPrimary = lname.endsWith('_01a');
+    const isMap     = lname.endsWith('_map');
+
+    if (!groups.has(chassis)) groups.set(chassis, []);
+    groups.get(chassis)!.push({ nameNoExt, ext, entry, isPrimary, isMap });
+  }
+
+  return { dateFolder: normaliseDateFolder(rawDateFolder), groups };
+}
+
+/* ─── component ─── */
+function CombinedUploadTab() {
+  const [csvFile, setCsvFile] = useState<File | null>(null);
+  const [zipFile, setZipFile] = useState<File | null>(null);
+  const [jobs, setJobs]       = useState<CarJob[]>([]);
+  const [dateFolder, setDateFolder] = useState('');
+  const [phase, setPhase]     = useState<'idle' | 'parsing' | 'preview' | 'running' | 'done'>('idle');
+  const [parseErr, setParseErr] = useState('');
+  const [overallPct, setOverallPct] = useState(0);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  /* accept files from drop or picker — detect by extension */
+  const acceptFiles = useCallback((files: FileList | File[]) => {
+    for (const f of Array.from(files)) {
+      const name = f.name.toLowerCase();
+      if (name.endsWith('.csv') || name.endsWith('.xlsx') || name.endsWith('.xls')) {
+        setCsvFile(f);
+      } else if (name.endsWith('.zip')) {
+        setZipFile(f);
+      }
+    }
+  }, []);
+
+  const onDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    acceptFiles(e.dataTransfer.files);
+  };
+
+  /* parse both files → build job list */
+  const parse = useCallback(async () => {
+    if (!csvFile) return;
+    setPhase('parsing');
+    setParseErr('');
+    try {
+      const cars = await parseCsvFile(csvFile);
+      let zipGroups = new Map<string, ZipImage[]>();
+      let detectedFolder = '';
+
+      if (zipFile) {
+        const result = await parseZipFile(zipFile);
+        zipGroups = result.groups;
+        detectedFolder = result.dateFolder;
+        if (detectedFolder) setDateFolder(detectedFolder);
+      }
+
+      const built: CarJob[] = cars.map(car => {
+        const chassis = String(car.chassis_number || '');
+        const images  = zipGroups.get(chassis) ?? [];
+        return {
+          car,
+          chassis,
+          images,
+          status:        'pending',
+          uploadedCount: 0,
+        };
+      });
+      setJobs(built);
+      setPhase('preview');
+    } catch (err) {
+      setParseErr(err instanceof Error ? err.message : 'Parse failed');
+      setPhase('idle');
+    }
+  }, [csvFile, zipFile]);
+
+  /* immutable job updater */
+  const updateJob = useCallback((idx: number, patch: Partial<CarJob>) => {
+    setJobs(js => js.map((j, i) => (i === idx ? { ...j, ...patch } : j)));
+  }, []);
+
+  /* ─── main upload loop ─── */
+  const runAll = useCallback(async () => {
+    if (!jobs.length) return;
+    setPhase('running');
+    setOverallPct(0);
+
+    // Live JPY rate
+    let jpyRate = 162;
+    try {
+      const r = await fetch('https://open.er-api.com/v6/latest/USD', { credentials: 'omit' });
+      if (r.ok) {
+        const j = await r.json();
+        if (j.result === 'success' && j.rates?.JPY) jpyRate = j.rates.JPY;
+      }
+    } catch { /* use fallback */ }
+
+    // Next ref number
+    const { data: latest } = await supabase
+      .from('cars').select('ref_number')
+      .order('ref_number', { ascending: false }).limit(1);
+    let nextNum = 1;
+    if (latest?.length && latest[0].ref_number) {
+      const m = String(latest[0].ref_number).match(/(\d+)$/);
+      if (m) nextNum = parseInt(m[1], 10) + 1;
+    }
+
+    for (let i = 0; i < jobs.length; i++) {
+      const job   = jobs[i];
+      const refNo = `WTL-${String(nextNum + i).padStart(6, '0')}`;
+      updateJob(i, { refNumber: refNo });
+
+      try {
+        /* ── upload images to Cloudinary ── */
+        const imageUrls: { url: string; isPrimary: boolean; isMap: boolean; order: number }[] = [];
+
+        if (job.images.length > 0) {
+          updateJob(i, { status: 'uploading' });
+          const sorted = sortZipImages(job.images);
+
+          for (let k = 0; k < sorted.length; k++) {
+            const img      = sorted[k];
+            const publicId = `wazir-trading/${dateFolder}/${job.chassis}/${img.nameNoExt}`;
+            const mimeType = img.ext === 'jpg' ? 'image/jpeg'
+                           : img.ext === 'png' ? 'image/png'
+                           : img.ext === 'webp' ? 'image/webp'
+                           : 'image/jpeg';
+
+            const data = await img.entry.async('arraybuffer');
+            const url  = await cloudinarySignedUpload(data, mimeType, publicId);
+            imageUrls.push({
+              url,
+              isPrimary: img.isPrimary,
+              isMap:     img.isMap,
+              order:     img.isMap ? 99 : k + 1,
+            });
+            updateJob(i, { uploadedCount: k + 1 });
+          }
+        } else {
+          updateJob(i, { status: 'no_images' });
+        }
+
+        /* ── insert car record ── */
+        updateJob(i, { status: 'inserting' });
+        const r = job.car;
+        const carRecord = {
+          ref_number:          refNo,
+          lot_number:          r.lot_number       || null,
+          model_code:          r.model_code       || null,
+          chassis_number:      r.chassis_number   || null,
+          make:                r.make             || null,
+          model:               r.model            || null,
+          variant:             r.variant          || null,
+          year:                r.year             ?? null,
+          manufacture_month:   r.manufacture_month || null,
+          engine_cc:           r.engine_cc        ?? null,
+          seats:               r.seats            ?? null,
+          auction_grade:       r.auction_grade    || null,
+          exterior_grade:      r.exterior_grade   || null,
+          interior_grade:      r.interior_grade   || null,
+          transmission:        r.transmission     || null,
+          color:               r.color            || null,
+          doors:               r.doors            ?? null,
+          mileage_km:          r.mileage_km       ?? null,
+          fuel_type:           r.fuel_type        || null,
+          features:            r.features         || {},
+          wholesale_price_jpy: r.wholesale_price_jpy ?? null,
+          fob_price_usd:       r.wholesale_price_jpy != null
+                                 ? Math.round((r.wholesale_price_jpy as number) / jpyRate)
+                                 : null,
+          status: 'available',
+        };
+
+        const { data: carData, error: carErr } = await supabase
+          .from('cars').insert([carRecord]).select('id').single();
+        if (carErr) throw carErr;
+
+        /* ── insert car images ── */
+        if (imageUrls.length > 0) {
+          const imgRows = imageUrls.map(img => ({
+            car_id:        carData.id,
+            image_url:     img.url,
+            is_primary:    img.isPrimary,
+            display_order: img.order,
+          }));
+          const { error: imgErr } = await supabase.from('car_images').insert(imgRows);
+          if (imgErr) throw imgErr;
+        }
+
+        updateJob(i, { status: 'done' });
+      } catch (err) {
+        updateJob(i, {
+          status: 'error',
+          error:  err instanceof Error ? err.message : String(err),
+        });
+      }
+
+      setOverallPct(Math.round(((i + 1) / jobs.length) * 100));
+    }
+
+    setPhase('done');
+  }, [jobs, dateFolder, updateJob]);
+
+  /* ── stats ── */
+  const totalImages   = jobs.reduce((s, j) => s + j.images.length, 0);
+  const matchedCars   = jobs.filter(j => j.images.length > 0).length;
+  const doneCars      = jobs.filter(j => j.status === 'done').length;
+  const errorCars     = jobs.filter(j => j.status === 'error').length;
+
+  const statusIcon = (j: CarJob) => {
+    if (j.status === 'done')      return <span className="text-green-600 font-bold">✅</span>;
+    if (j.status === 'error')     return <span className="text-red-600 font-bold">❌</span>;
+    if (j.status === 'uploading') return <span className="text-blue-600 flex items-center gap-1"><Loader2 size={12} className="animate-spin"/>{j.uploadedCount}/{j.images.length}</span>;
+    if (j.status === 'inserting') return <span className="text-amber-600 flex items-center gap-1"><Loader2 size={12} className="animate-spin"/>Saving…</span>;
+    if (j.status === 'no_images') return <span className="text-gray-400">No images</span>;
+    return <span className="text-gray-300">—</span>;
+  };
+
+  return (
+    <div className="space-y-6">
+
+      {/* ── File drop zone ── */}
+      {(phase === 'idle' || phase === 'parsing') && (
+        <div
+          onDrop={onDrop}
+          onDragOver={e => e.preventDefault()}
+          onClick={() => fileInputRef.current?.click()}
+          className="border-2 border-dashed border-gray-300 hover:border-[#C8102E] rounded-xl p-10 flex flex-col items-center gap-3 cursor-pointer transition-colors group"
+        >
+          <PackageOpen className="text-gray-400 group-hover:text-[#C8102E] transition-colors" size={40} />
+          <p className="font-semibold text-gray-600 group-hover:text-[#C8102E] transition-colors text-center">
+            Drop your <strong>CSV</strong> and <strong>ZIP</strong> files here, or click to select
+          </p>
+          <p className="text-xs text-gray-400">Both files are detected automatically by extension</p>
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept=".csv,.xlsx,.xls,.zip"
+            multiple
+            className="hidden"
+            onChange={e => { if (e.target.files) acceptFiles(e.target.files); }}
+          />
+
+          {/* File badges */}
+          <div className="flex gap-3 mt-2 flex-wrap justify-center">
+            <div className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium border ${csvFile ? 'bg-green-50 border-green-300 text-green-700' : 'bg-gray-50 border-gray-200 text-gray-400'}`}>
+              <FileSpreadsheet size={15} />
+              {csvFile ? csvFile.name : 'CSV / Excel — not selected'}
+              {csvFile && <CheckCircle2 size={14} />}
+            </div>
+            <div className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium border ${zipFile ? 'bg-green-50 border-green-300 text-green-700' : 'bg-gray-50 border-gray-200 text-gray-400'}`}>
+              <FolderArchive size={15} />
+              {zipFile ? zipFile.name : 'ZIP with images — not selected (optional)'}
+              {zipFile && <CheckCircle2 size={14} />}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {parseErr && (
+        <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700">{parseErr}</div>
+      )}
+
+      {/* ── Parse button ── */}
+      {phase === 'idle' && csvFile && (
+        <div className="flex justify-center">
+          <button
+            onClick={parse}
+            className="flex items-center gap-2 bg-[#0D1B3E] hover:bg-[#162d5e] text-white font-semibold px-8 py-3 rounded-lg transition-colors"
+          >
+            <Eye size={16} /> Parse Files
+          </button>
+        </div>
+      )}
+
+      {phase === 'parsing' && (
+        <div className="flex items-center justify-center gap-3 py-6 text-gray-500">
+          <Loader2 className="animate-spin" size={20} /> Parsing files…
+        </div>
+      )}
+
+      {/* ── Preview ── */}
+      {(phase === 'preview' || phase === 'running' || phase === 'done') && jobs.length > 0 && (
+        <div className="space-y-4">
+
+          {/* Summary cards */}
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+            {[
+              { label: 'Cars from CSV',     value: jobs.length,   color: 'bg-[#0D1B3E] text-white' },
+              { label: 'Image groups (ZIP)', value: matchedCars,   color: 'bg-blue-50 border border-blue-200 text-blue-700' },
+              { label: 'Total images',       value: totalImages,   color: 'bg-purple-50 border border-purple-200 text-purple-700' },
+              { label: 'Done',               value: `${doneCars}/${jobs.length}`, color: 'bg-green-50 border border-green-200 text-green-700' },
+            ].map(c => (
+              <div key={c.label} className={`rounded-xl p-4 ${c.color}`}>
+                <div className="text-2xl font-bold">{c.value}</div>
+                <div className="text-xs mt-1 opacity-70">{c.label}</div>
+              </div>
+            ))}
+          </div>
+
+          {/* Date folder */}
+          {zipFile && (
+            <div className="flex items-center gap-3">
+              <label className="text-xs font-semibold text-gray-500 uppercase tracking-wider whitespace-nowrap">
+                Cloudinary folder
+              </label>
+              <input
+                type="text"
+                value={dateFolder}
+                onChange={e => setDateFolder(e.target.value)}
+                placeholder="e.g. 23-july-2026"
+                className="flex-1 border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#C8102E]"
+                disabled={phase === 'running'}
+              />
+              <span className="text-xs text-gray-400 whitespace-nowrap">auto-detected from ZIP</span>
+            </div>
+          )}
+
+          {/* Progress bar */}
+          {(phase === 'running' || phase === 'done') && (
+            <div>
+              <div className="flex justify-between text-xs text-gray-500 mb-1">
+                <span>{phase === 'done' ? 'Complete!' : `Processing car ${doneCars + errorCars} of ${jobs.length}…`}</span>
+                <span>{overallPct}%</span>
+              </div>
+              <div className="h-2.5 bg-gray-200 rounded-full overflow-hidden">
+                <div
+                  className="h-full bg-[#C8102E] transition-all duration-300 rounded-full"
+                  style={{ width: `${overallPct}%` }}
+                />
+              </div>
+              {phase === 'done' && (
+                <div className="mt-2 flex gap-4 text-sm font-medium">
+                  <span className="text-green-700">✅ {doneCars} done</span>
+                  {errorCars > 0 && <span className="text-red-700">❌ {errorCars} errors</span>}
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Upload button */}
+          {phase === 'preview' && (
+            <div className="flex items-center gap-4">
+              <button
+                onClick={runAll}
+                className="flex items-center gap-2 bg-[#C8102E] hover:bg-[#a00d24] text-white font-semibold px-8 py-3 rounded-lg transition-colors"
+              >
+                <Upload size={16} />
+                {zipFile
+                  ? `Upload All & Create ${jobs.length} Listings`
+                  : `Create ${jobs.length} Listings`}
+              </button>
+              <button
+                onClick={() => { setCsvFile(null); setZipFile(null); setJobs([]); setPhase('idle'); setDateFolder(''); }}
+                className="text-sm text-gray-400 hover:text-gray-600 transition-colors"
+              >
+                Start over
+              </button>
+            </div>
+          )}
+
+          {/* Per-car job table */}
+          <div className="overflow-x-auto rounded-xl border border-gray-200 shadow-sm max-h-[520px] overflow-y-auto">
+            <table className="min-w-full text-xs">
+              <thead className="bg-[#0D1B3E] text-white sticky top-0">
+                <tr>
+                  <th className="px-3 py-2 text-left font-semibold">#</th>
+                  <th className="px-3 py-2 text-left font-semibold">Chassis</th>
+                  <th className="px-3 py-2 text-left font-semibold">Make / Model</th>
+                  <th className="px-3 py-2 text-left font-semibold">Year</th>
+                  <th className="px-3 py-2 text-left font-semibold">Images</th>
+                  <th className="px-3 py-2 text-left font-semibold">Ref</th>
+                  <th className="px-3 py-2 text-left font-semibold">Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                {jobs.map((j, i) => (
+                  <tr key={i} className={`${i % 2 === 0 ? 'bg-white' : 'bg-gray-50'} ${j.status === 'error' ? 'bg-red-50' : ''}`}>
+                    <td className="px-3 py-2 text-gray-400">{i + 1}</td>
+                    <td className="px-3 py-2 font-mono text-gray-700">{j.chassis}</td>
+                    <td className="px-3 py-2 text-gray-700">{String(j.car.make || '')} {String(j.car.model || '')}</td>
+                    <td className="px-3 py-2 text-gray-500">{String(j.car.year ?? '')}</td>
+                    <td className="px-3 py-2 text-gray-500">
+                      {j.images.length > 0
+                        ? <span className="text-blue-700 font-semibold">{j.images.length}</span>
+                        : <span className="text-gray-300">—</span>}
+                    </td>
+                    <td className="px-3 py-2 font-mono text-gray-400">{j.refNumber ?? '—'}</td>
+                    <td className="px-3 py-2">
+                      {statusIcon(j)}
+                      {j.status === 'error' && j.error && (
+                        <div className="text-red-500 text-[10px] mt-0.5 max-w-[200px] truncate" title={j.error}>{j.error}</div>
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+/* ═══════════════════════════════════════════════════════════════
    MAIN ADMIN PAGE
 ═══════════════════════════════════════════════════════════════ */
 const TABS = [
-  { id: 'upload',    label: 'CSV / Excel Upload', icon: Upload },
-  { id: 'cloudinary', label: 'Image Matching',    icon: Image },
-  { id: 'dashboard', label: 'Review Dashboard',   icon: LayoutDashboard },
+  { id: 'combined',   label: 'CSV + Images',       icon: PackageOpen },
+  { id: 'upload',     label: 'CSV Only',            icon: Upload },
+  { id: 'cloudinary', label: 'Image Matching',      icon: Image },
+  { id: 'dashboard',  label: 'Review Dashboard',    icon: LayoutDashboard },
 ] as const;
 type TabId = typeof TABS[number]['id'];
 
 export default function AdminBulkUpload() {
-  const [authed, setAuthed]   = useState(isSessionValid);
-  const [activeTab, setActiveTab] = useState<TabId>('upload');
+  const [authed, setAuthed]       = useState(isSessionValid);
+  const [activeTab, setActiveTab] = useState<TabId>('combined');
 
   const logout = () => { clearSession(); setAuthed(false); };
 
@@ -906,13 +1457,13 @@ export default function AdminBulkUpload() {
       </header>
 
       {/* Tabs */}
-      <div className="bg-white border-b border-gray-200 px-6">
-        <div className="flex gap-0">
+      <div className="bg-white border-b border-gray-200 px-6 overflow-x-auto">
+        <div className="flex gap-0 min-w-max">
           {TABS.map(({ id, label, icon: Icon }) => (
             <button
               key={id}
               onClick={() => setActiveTab(id)}
-              className={`flex items-center gap-2 px-5 py-3.5 text-sm font-medium border-b-2 transition-colors ${
+              className={`flex items-center gap-2 px-5 py-3.5 text-sm font-medium border-b-2 transition-colors whitespace-nowrap ${
                 activeTab === id
                   ? 'border-[#C8102E] text-[#C8102E]'
                   : 'border-transparent text-gray-500 hover:text-gray-800'
@@ -927,6 +1478,7 @@ export default function AdminBulkUpload() {
 
       {/* Content */}
       <main className="max-w-6xl mx-auto px-6 py-8">
+        {activeTab === 'combined'   && <CombinedUploadTab />}
         {activeTab === 'upload'     && <CsvUploadTab />}
         {activeTab === 'cloudinary' && <CloudinaryTab />}
         {activeTab === 'dashboard'  && <ReviewDashboardTab />}
