@@ -1,0 +1,72 @@
+Build an image sync tool in the admin panel.
+
+All car images are uploaded to Cloudinary in a flat 
+folder called "wazir-trading".
+
+The Public IDs look like this (Cloudinary adds random 
+suffix automatically):
+GFC27-193807-01_jyfkq9
+NHP130-2001288-02_abc123
+HFC27-121240-03_ahi0go
+
+To extract chassis number from Public ID:
+1. Split on underscore, take the part BEFORE the underscore
+   GFC27-193807-01_jyfkq9 → GFC27-193807-01
+2. Remove the last -XX part (sequence number)
+   GFC27-193807-01 → GFC27-193807
+3. Result is the chassis number
+
+Add a "Sync Images from Cloudinary" button on the 
+admin dashboard. When clicked:
+
+1. Fetch ALL images from Cloudinary folder wazir-trading:
+   GET https://api.cloudinary.com/v1_1/txb1wiw1/resources/search
+   Authorization: Basic base64(CLOUDINARY_API_KEY:CLOUDINARY_API_SECRET)
+   Body: { "expression": "folder:wazir-trading", "max_results": 500 }
+
+2. For each image, extract chassis number using the 
+   method above
+
+3. Group images by chassis number
+
+4. For each chassis number:
+   - Find car in Supabase:
+     SELECT id FROM cars WHERE chassis_number = '[chassis_number]'
+   - If car found, insert into car_images table:
+     - Sequence -01: is_primary = true, display_order = 1
+     - Sequence -02: is_primary = false, display_order = 2
+     - And so on
+   - Skip if image URL already exists (no duplicates)
+   - If car not found, log it in the summary
+
+5. Show live progress:
+   "Fetching images from Cloudinary..."
+   "Found X images total"
+   "GFC27-193807 - 5 images linked"
+   "NHP130-2001288 - car not found in database"
+
+6. Show final summary:
+   Total images processed: X
+   Cars updated with images: X
+   Cars not found in database: X
+   Already existed (skipped): X
+
+Also add a small camera icon button on each row 
+in the manage cars table. Clicking it syncs images 
+for just that one car using its chassis number.
+
+Also fix the car detail page:
+- Remove ALL code trying to construct image URLs 
+  from ref_number or any pattern
+- Only fetch images from Supabase car_images table:
+  SELECT image_url, is_primary, display_order 
+  FROM car_images 
+  WHERE car_id = [car.id]
+  ORDER BY display_order ASC
+- If no images found show a clean placeholder:
+  light gray background, car icon, text "Images Coming Soon"
+
+Cloudinary credentials are in environment variables:
+CLOUDINARY_CLOUD_NAME = txb1wiw1
+CLOUDINARY_API_KEY = already set
+CLOUDINARY_API_SECRET = already set
