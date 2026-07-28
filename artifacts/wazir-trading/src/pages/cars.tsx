@@ -36,7 +36,7 @@ const PRICE_RANGES = [
   '$500 - $1500', '$1500 - $2000', '$2000 - $2500', '$2500 - $3000',
   '$3000 - $3500', '$3500 - $4000', '$4000 - $4500', '$4500 - $5000',
   '$5000 - $6000', '$6000 - $7000', '$7000 - $8000', '$8000 - $9000',
-  '$9000 - $10000',
+  '$9000 - $10000', '$10000 - $15000', '$15000 - $20000', '$20000 - $25000',
 ];
 
 const BODY_TYPE_ITEMS = [
@@ -64,7 +64,7 @@ const BODY_TYPE_ITEMS = [
 const BODY_TYPES    = BODY_TYPE_ITEMS.map(b => b.name);
 const CATEGORIES    = ['Gasoline', 'Hybrid', 'Diesel', 'Light Oil'];
 const LOCATIONS     = ['Japan', 'Chile', 'UK', 'UAE', 'Thailand', 'China'];
-const YEAR_RANGES   = ['2021-2023', '2018-2020', '2015-2017', '2012-2014', '2009-2011', '2006-2008', '2003-2005', '2000-2002'];
+const YEAR_RANGES   = ['2024-2025', '2021-2023', '2018-2020', '2015-2017', '2012-2014', '2009-2011', '2006-2008', '2003-2005', '2000-2002'];
 const DRIVES        = ['2WD', '4WD'];
 const TRANSMISSIONS = ['AT', 'MT', 'FAT', 'IAT', 'CVT', 'CAT', 'I5', 'DAT'];
 const ENGINE_SIZES  = ['660CC-1000CC', '1000CC-1500CC', '1500CC-1800CC', '1800CC-2000CC', '2000CC-2500CC', '2500CC-3000CC', '3000CC-3500CC'];
@@ -96,6 +96,17 @@ const MAKE_BRANDS = [
   { name: 'Shibaura',        slug: 'shibaura',        accent: '#0047AB' },
   { name: 'Yanmar',          slug: 'yanmar',          accent: '#C8102E' },
 ];
+
+// ── Module-level lookup tables for normalising raw DB values to display-friendly title case ──
+const MAKE_LOOKUP: Record<string, string> = Object.fromEntries(
+  MAKE_BRANDS.map(b => [b.name.toUpperCase(), b.name])
+);
+const FUEL_LOOKUP: Record<string, string> = {
+  GASOLINE: 'Gasoline', HYBRID: 'Hybrid', DIESEL: 'Diesel',
+  ELECTRIC: 'Electric', 'LIGHT OIL': 'Light Oil',
+  'GASOLINE E POWER': 'Gasoline E Power', 'GASOLINE HYBRID': 'Gasoline Hybrid',
+  PETROL: 'Petrol',
+};
 
 const COLLECTION_TABS: Array<{ label: string; key: string }> = [
   { label: 'All Cars',    key: '' },
@@ -371,11 +382,12 @@ function Sidebar({
       {/* Make — sorted by count, logos shown when brand is known */}
       <AccordionSection title="Shop By Make" defaultOpen>
         {makeOptions.map(({ value: name, count }) => {
-          const brand = MAKE_BRANDS.find(b => b.name === name);
+          const brand = MAKE_BRANDS.find(b => b.name.toLowerCase() === name.toLowerCase());
+          const isActive = activeMake.toLowerCase() === name.toLowerCase();
           return (
             <FilterItem key={name} label={name} count={count}
-              active={activeMake === name}
-              onClick={() => setActiveMake(activeMake === name ? '' : name)}
+              active={isActive}
+              onClick={() => setActiveMake(isActive ? '' : name)}
               icon={brand ? <MakeSidebarIcon name={name} slug={brand.slug} /> : <CarIcon size={13} />} />
           );
         })}
@@ -409,12 +421,15 @@ function Sidebar({
 
       {/* Fuel — live from DB (merges old Category + Fuel sections) */}
       <AccordionSection title="Shop By Fuel" defaultOpen>
-        {fuelOptions.map(({ value: f, count }) => (
-          <FilterItem key={f} label={f} count={count}
-            active={activeFuel === f || activeCategory === f}
-            onClick={() => { setActiveFuel(activeFuel === f ? '' : f); setActiveCategory(''); }}
-            icon={FUEL_ICONS[f] ?? <Fuel size={13} />} />
-        ))}
+        {fuelOptions.map(({ value: f, count }) => {
+          const isFuelActive = activeFuel.toLowerCase() === f.toLowerCase() || activeCategory.toLowerCase() === f.toLowerCase();
+          return (
+            <FilterItem key={f} label={f} count={count}
+              active={isFuelActive}
+              onClick={() => { setActiveFuel(isFuelActive ? '' : f); setActiveCategory(''); }}
+              icon={FUEL_ICONS[f] ?? <Fuel size={13} />} />
+          );
+        })}
       </AccordionSection>
 
       {/* Location — live from DB */}
@@ -1025,7 +1040,7 @@ function applyFiltersToQuery(query: any, filters: Filters, activeTab: string, so
   if (filters.steering) query = query.eq('steering', filters.steering);
 
   const fuelFilter = filters.fuel || filters.category;
-  if (fuelFilter)       query = query.eq('fuel_type', fuelFilter);
+  if (fuelFilter)       query = query.ilike('fuel_type', fuelFilter);
 
   if (filters.price) {
     const pr = parsePriceRange(filters.price);
@@ -1048,7 +1063,7 @@ function applyFiltersToQuery(query: any, filters: Filters, activeTab: string, so
   if (filters.advMake)     query = query.ilike('make', filters.advMake);
   if (filters.advModel)    query = query.ilike('model', filters.advModel);
   if (filters.advBody)     query = query.eq('body_type', filters.advBody);
-  if (filters.advFuel)     query = query.eq('fuel_type', filters.advFuel);
+  if (filters.advFuel)     query = query.ilike('fuel_type', filters.advFuel);
   if (filters.advDrive)    query = query.eq('drive', filters.advDrive);
   if (filters.advTrans)    query = query.eq('transmission', filters.advTrans);
   if (filters.advColor)    query = query.ilike('color', filters.advColor);
@@ -1077,11 +1092,11 @@ function applyFiltersToQuery(query: any, filters: Filters, activeTab: string, so
   // Collection tab
   switch (activeTab) {
     case 'new_arrivals': query = query.eq('is_new_arrival', true); break;
-    case 'clearance':    query = query.eq('collection', 'clearance'); break;
-    case 'japan':        query = query.eq('stock_location', 'Japan'); break;
-    case 'hybrid':       query = query.eq('fuel_type', 'Hybrid'); break;
-    case 'suv':          query = query.eq('body_type', 'SUV'); break;
-    case 'budget':       query = query.lt('fob_price_usd', 2000); break;
+    case 'clearance':    query = query.ilike('collection', 'clearance'); break;
+    case 'japan':        query = query.ilike('stock_location', 'Japan'); break;
+    case 'hybrid':       query = query.ilike('fuel_type', 'Hybrid'); break;
+    case 'suv':          query = query.ilike('body_type', 'SUV'); break;
+    case 'budget':       query = query.lte('fob_price_usd', 5000); break;
   }
 
   // Sorting
@@ -1246,29 +1261,38 @@ export default function CarsPage() {
 
       if (!data) return;
 
-      // Count distinct values for a given column, sorted by count descending
-      const countBy = (col: string): FilterOption[] => {
+      // Count distinct values for a given column, sorted by count descending.
+      // Optional normalise fn maps raw DB value → display key.
+      const countBy = (col: string, normalise?: (v: string) => string): FilterOption[] => {
         const map = new Map<string, number>();
         for (const row of data as Record<string, string>[]) {
           const val = row[col];
-          if (val) map.set(val, (map.get(val) ?? 0) + 1);
+          if (val) {
+            const key = normalise ? normalise(val) : val;
+            map.set(key, (map.get(key) ?? 0) + 1);
+          }
         }
         return [...map.entries()]
           .sort((a, b) => b[1] - a[1])
           .map(([value, count]) => ({ value, count }));
       };
 
-      setMakeOptions(countBy('make'));
+      // Normalise make → title case (Toyota, Nissan …) so carousel counts & active states work
+      setMakeOptions(countBy('make', v => MAKE_LOOKUP[v.toUpperCase()] ?? v));
       setBodyOptions(countBy('body_type'));
       setTransOptions(countBy('transmission'));
-      setFuelOptions(countBy('fuel_type'));
+      // Normalise fuel → title case (Gasoline, Hybrid …) so FUEL_ICONS & active states work
+      setFuelOptions(countBy('fuel_type', v => FUEL_LOOKUP[v.toUpperCase()] ?? v));
       setDriveOptions(countBy('drive'));
       setLocationOptions(countBy('stock_location'));
 
-      // Keep makeCounts as a plain Record for the MakeCarousel
+      // makeCounts for the MakeCarousel — keyed by normalised title-case name
       const counts: Record<string, number> = {};
       for (const row of data as Record<string, string>[]) {
-        if (row.make) counts[row.make] = (counts[row.make] ?? 0) + 1;
+        if (row.make) {
+          const key = MAKE_LOOKUP[row.make.toUpperCase()] ?? row.make;
+          counts[key] = (counts[key] ?? 0) + 1;
+        }
       }
       setMakeCounts(counts);
     } catch (err) {
@@ -1281,11 +1305,11 @@ export default function CarsPage() {
     try {
       const tabConfigs = [
         { key: 'new_arrivals', apply: (q: any) => q.eq('is_new_arrival', true) },
-        { key: 'clearance',    apply: (q: any) => q.eq('collection', 'clearance') },
-        { key: 'japan',        apply: (q: any) => q.eq('stock_location', 'Japan') },
-        { key: 'hybrid',       apply: (q: any) => q.eq('fuel_type', 'Hybrid') },
-        { key: 'suv',          apply: (q: any) => q.eq('body_type', 'SUV') },
-        { key: 'budget',       apply: (q: any) => q.lt('fob_price_usd', 2000) },
+        { key: 'clearance',    apply: (q: any) => q.ilike('collection', 'clearance') },
+        { key: 'japan',        apply: (q: any) => q.ilike('stock_location', 'Japan') },
+        { key: 'hybrid',       apply: (q: any) => q.ilike('fuel_type', 'Hybrid') },
+        { key: 'suv',          apply: (q: any) => q.ilike('body_type', 'SUV') },
+        { key: 'budget',       apply: (q: any) => q.lte('fob_price_usd', 5000) },
       ];
       const results = await Promise.all(
         tabConfigs.map(({ key, apply }) =>
@@ -1584,15 +1608,15 @@ export default function CarsPage() {
                 <Sel value={advModelCode}  onChange={setAdvModelCode}  placeholder="Model Code" options={[]} />
                 <Sel value={advSteering}   onChange={setAdvSteering}   placeholder="Steering"   options={['RHD', 'LHD']} />
                 <Sel value={advBodyType}   onChange={setAdvBodyType}   placeholder="Body Type"  options={BODY_TYPES} />
-                <Sel value={advFuel}       onChange={setAdvFuel}       placeholder="Fuel"       options={FUELS} />
+                <Sel value={advFuel}       onChange={setAdvFuel}       placeholder="Fuel"       options={fuelOptions.map(o => o.value)} />
               </div>
               <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2 mb-2">
                 <Sel value={advDrive}    onChange={setAdvDrive}    placeholder="Drive"        options={DRIVES} />
                 <Sel value={advTrans}    onChange={setAdvTrans}    placeholder="Transmission" options={TRANSMISSIONS} />
-                <Sel value={advColor}    onChange={setAdvColor}    placeholder="Color"        options={['White', 'Black', 'Silver', 'Red', 'Blue', 'Grey', 'Brown', 'Gold']} />
+                <Sel value={advColor}    onChange={setAdvColor}    placeholder="Color"        options={['White', 'Black', 'Gray', 'Blue', 'Red', 'W Red', 'Silver', 'Gold', 'Brown', 'Green']} />
                 <Sel value={advLocation} onChange={setAdvLocation} placeholder="Location"     options={LOCATIONS} />
-                <Sel value={advYearFrom} onChange={setAdvYearFrom} placeholder="Year From"    options={Array.from({ length: 26 }, (_, i) => `${2025 - i}`)} />
-                <Sel value={advYearTo}   onChange={setAdvYearTo}   placeholder="Year To"      options={Array.from({ length: 26 }, (_, i) => `${2025 - i}`)} />
+                <Sel value={advYearFrom} onChange={setAdvYearFrom} placeholder="Year From"    options={Array.from({ length: 27 }, (_, i) => `${2026 - i}`)} />
+                <Sel value={advYearTo}   onChange={setAdvYearTo}   placeholder="Year To"      options={Array.from({ length: 27 }, (_, i) => `${2026 - i}`)} />
               </div>
               <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2">
                 <Sel value={advMinPrice} onChange={setAdvMinPrice} placeholder="Min Price ($)"  options={['1000', '2000', '3000', '5000', '8000', '10000', '15000', '20000']} />
