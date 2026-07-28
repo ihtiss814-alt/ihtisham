@@ -852,6 +852,7 @@ type FlatSyncSummary = {
   totalImages: number;
   carsUpdated: number;
   carsNotFound: number;
+  notFoundChassis: string[];
   alreadyExisted: number;
 };
 
@@ -882,7 +883,7 @@ function FlatFolderSyncSection({ onDone }: { onDone?: () => void }) {
       if (!resources.length) {
         addLog('No images found in the wazir-trading folder.', 'warn');
         setPhase('done');
-        setSummary({ totalImages: 0, carsUpdated: 0, carsNotFound: 0, alreadyExisted: 0 });
+        setSummary({ totalImages: 0, carsUpdated: 0, carsNotFound: 0, notFoundChassis: [], alreadyExisted: 0 });
         return;
       }
 
@@ -899,6 +900,7 @@ function FlatFolderSyncSection({ onDone }: { onDone?: () => void }) {
 
       let carsUpdated = 0;
       let carsNotFound = 0;
+      const notFoundChassis: string[] = [];
       let alreadyExisted = 0;
 
       for (const [chassis, images] of byChassisMap) {
@@ -912,6 +914,7 @@ function FlatFolderSyncSection({ onDone }: { onDone?: () => void }) {
         if (!cars || cars.length === 0) {
           addLog(`${chassis} — car not found in database`, 'warn');
           carsNotFound++;
+          notFoundChassis.push(chassis);
           continue;
         }
 
@@ -960,6 +963,7 @@ function FlatFolderSyncSection({ onDone }: { onDone?: () => void }) {
         totalImages:    resources.length,
         carsUpdated,
         carsNotFound,
+        notFoundChassis,
         alreadyExisted,
       });
       setPhase('done');
@@ -1020,25 +1024,59 @@ function FlatFolderSyncSection({ onDone }: { onDone?: () => void }) {
 
       {/* Final summary */}
       {summary && (
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-sm">
-          <div className="bg-white rounded-lg border border-indigo-100 p-2.5 text-center">
-            <div className="font-bold text-indigo-900">{summary.totalImages}</div>
-            <div className="text-xs text-indigo-600 mt-0.5">Images Processed</div>
+        <div className="space-y-3">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-sm">
+            <div className="bg-white rounded-lg border border-indigo-100 p-2.5 text-center">
+              <div className="font-bold text-indigo-900">{summary.totalImages}</div>
+              <div className="text-xs text-indigo-600 mt-0.5">Total Images Found</div>
+            </div>
+            <div className="bg-white rounded-lg border border-green-100 p-2.5 text-center">
+              <div className="font-bold text-green-700">{summary.carsUpdated}</div>
+              <div className="text-xs text-green-600 mt-0.5">Cars Matched & Updated</div>
+            </div>
+            <div className="bg-white rounded-lg border border-amber-100 p-2.5 text-center">
+              <div className="font-bold text-amber-700">{summary.carsNotFound}</div>
+              <div className="text-xs text-amber-600 mt-0.5">Cars Not Found in DB</div>
+            </div>
+            <div className="bg-white rounded-lg border border-gray-100 p-2.5 text-center">
+              <div className="font-bold text-gray-600">{summary.alreadyExisted}</div>
+              <div className="text-xs text-gray-500 mt-0.5">Images Skipped (existed)</div>
+            </div>
           </div>
-          <div className="bg-white rounded-lg border border-green-100 p-2.5 text-center">
-            <div className="font-bold text-green-700">{summary.carsUpdated}</div>
-            <div className="text-xs text-green-600 mt-0.5">Cars Updated</div>
-          </div>
-          <div className="bg-white rounded-lg border border-amber-100 p-2.5 text-center">
-            <div className="font-bold text-amber-700">{summary.carsNotFound}</div>
-            <div className="text-xs text-amber-600 mt-0.5">Cars Not Found</div>
-          </div>
-          <div className="bg-white rounded-lg border border-gray-100 p-2.5 text-center">
-            <div className="font-bold text-gray-600">{summary.alreadyExisted}</div>
-            <div className="text-xs text-gray-500 mt-0.5">Already Existed</div>
-          </div>
+          {summary.notFoundChassis.length > 0 && (
+            <div className="bg-amber-50 border border-amber-200 rounded-lg p-3">
+              <p className="text-xs font-semibold text-amber-800 mb-1.5">
+                ⚠️ {summary.notFoundChassis.length} chassis number{summary.notFoundChassis.length !== 1 ? 's' : ''} not found in database:
+              </p>
+              <div className="flex flex-wrap gap-1.5">
+                {summary.notFoundChassis.map(c => (
+                  <span key={c} className="font-mono text-xs bg-white border border-amber-200 text-amber-800 px-2 py-0.5 rounded">
+                    {c}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       )}
+    </div>
+  );
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   SYNC IMAGES TAB — dedicated tab for Cloudinary flat-folder sync
+═══════════════════════════════════════════════════════════════ */
+function SyncImagesTab() {
+  return (
+    <div className="max-w-3xl mx-auto space-y-4">
+      <div>
+        <h2 className="text-lg font-bold text-[#0D1B3E]">Sync Images from Cloudinary</h2>
+        <p className="text-sm text-gray-500 mt-1">
+          Fetches all images from the <code className="bg-gray-100 px-1 rounded text-xs">wazir-trading/</code> folder,
+          extracts chassis numbers from filenames, and links them to matching cars in the database.
+        </p>
+      </div>
+      <FlatFolderSyncSection />
     </div>
   );
 }
@@ -1813,16 +1851,17 @@ function CombinedUploadTab() {
    MAIN ADMIN PAGE
 ═══════════════════════════════════════════════════════════════ */
 const TABS = [
-  { id: 'combined',   label: 'CSV + Images',       icon: PackageOpen },
-  { id: 'upload',     label: 'CSV Only',            icon: Upload },
-  { id: 'cloudinary', label: 'Image Matching',      icon: Image },
-  { id: 'dashboard',  label: 'Review Dashboard',    icon: LayoutDashboard },
+  { id: 'sync',       label: 'Sync Images',         icon: RefreshCw },
+  { id: 'combined',   label: 'CSV + Images',         icon: PackageOpen },
+  { id: 'upload',     label: 'CSV Only',             icon: Upload },
+  { id: 'cloudinary', label: 'Image Matching',       icon: Image },
+  { id: 'dashboard',  label: 'Review Dashboard',     icon: LayoutDashboard },
 ] as const;
 type TabId = typeof TABS[number]['id'];
 
 export default function AdminBulkUpload() {
   const [authed, setAuthed]       = useState(isSessionValid);
-  const [activeTab, setActiveTab] = useState<TabId>('combined');
+  const [activeTab, setActiveTab] = useState<TabId>('sync');
 
   const logout = () => { clearSession(); setAuthed(false); };
 
@@ -1871,6 +1910,7 @@ export default function AdminBulkUpload() {
 
       {/* Content */}
       <main className="max-w-6xl mx-auto px-6 py-8">
+        {activeTab === 'sync'       && <SyncImagesTab />}
         {activeTab === 'combined'   && <CombinedUploadTab />}
         {activeTab === 'upload'     && <CsvUploadTab />}
         {activeTab === 'cloudinary' && <CloudinaryTab />}
