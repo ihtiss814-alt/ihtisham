@@ -81,6 +81,88 @@ router.get(
 );
 
 /**
+ * POST /api/admin/cloudinary/search-by-chassis
+ * Body: { chassis_number: string }
+ *
+ * Searches for all images for a given chassis number across two folder structures:
+ *   1. wazir-trading/<chassis_number>/         (flat — images uploaded directly by chassis)
+ *   2. wazir-trading/<dateFolder>/<chassis_number>/  (nested — images from bulk upload flow)
+ *
+ * Lists all date subfolders under wazir-trading/, then probes each one for the chassis
+ * subfolder in parallel. Results are deduplicated by public_id.
+ */
+router.post("/admin/cloudinary/search-by-chassis", async (req, res) => {
+  if (!checkAdmin(req, res)) return;
+  const { chassis_number } = req.body as { chassis_number?: string };
+  if (!chassis_number) {
+    res.status(400).json({ error: "chassis_number is required" });
+    return;
+  }
+  if (!API_KEY() || !API_SECRET()) {
+    res.status(500).json({
+      error: "CLOUDINARY_API_KEY and CLOUDINARY_API_SECRET must be set as server environment variables.",
+    });
+    return;
+  }
+
+  try {
+    type CldResource = { public_id: string; secure_url: string; [k: string]: unknown };
+    const seen = new Set<string>();
+    const allResources: CldResource[] = [];
+
+    const addResources = (resources: CldResource[]) => {
+      for (const r of resources) {
+        if (!seen.has(r.public_id)) {
+          seen.add(r.public_id);
+          allResources.push(r);
+        }
+      }
+    };
+
+    // Helper: list all images under a given folder prefix (non-throwing)
+    const listByPrefix = async (prefix: string): Promise<CldResource[]> => {
+      try {
+        const data = await cloudinaryFetch(
+          `/resources/image?type=upload&prefix=${encodeURIComponent(prefix)}&max_results=100`
+        ) as { resources?: CldResource[] };
+        return data.resources ?? [];
+      } catch {
+        return [];
+      }
+    };
+
+    // 1. Flat structure: wazir-trading/<chassis>/
+    const flatResults = await listByPrefix(`wazir-trading/${chassis_number}/`);
+    addResources(flatResults);
+
+    // 2. Nested structure: wazir-trading/<dateFolder>/<chassis>/
+    //    First discover all date subfolders under wazir-trading/
+    let dateFolders: string[] = [];
+    try {
+      const foldersData = await cloudinaryFetch(`/folders/wazir-trading`) as {
+        folders?: { path?: string; name?: string }[];
+      };
+      dateFolders = (foldersData.folders ?? []).map(f => f.path ?? f.name ?? "").filter(Boolean);
+    } catch {
+      // If listing folders fails we still return any flat results already found
+    }
+
+    if (dateFolders.length > 0) {
+      const nestedResults = await Promise.all(
+        dateFolders.map(dateFolder =>
+          listByPrefix(`${dateFolder}/${chassis_number}/`)
+        )
+      );
+      for (const batch of nestedResults) addResources(batch);
+    }
+
+    res.json({ resources: allResources });
+  } catch (err) {
+    res.status(500).json({ error: err instanceof Error ? err.message : "Unknown error" });
+  }
+});
+
+/**
  * POST /api/admin/cloudinary/upload
  * Body: { image_base64: string, mime_type: string, public_id: string }
  *

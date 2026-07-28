@@ -5,7 +5,7 @@ import { supabase } from '@/lib/supabase';
 import {
   Upload, Eye, CheckCircle2, XCircle, Loader2, Image, LayoutDashboard,
   Star, Trash2, Download, ChevronDown, ChevronUp, Lock, LogOut, Search,
-  PackageOpen, FileSpreadsheet, FolderArchive,
+  PackageOpen, FileSpreadsheet, FolderArchive, RefreshCw,
 } from 'lucide-react';
 
 /* ─── CONSTANTS ──────────────────────────────────────────────── */
@@ -130,6 +130,69 @@ async function listFolderImages(dateFolder: string, subfolder: string): Promise<
   }));
 }
 
+/* ─── IMAGE ORDER HELPERS ────────────────────────────────────── */
+function getDisplayOrder(publicId: string): number {
+  const filename = publicId.split('/').pop() ?? '';
+  if (/_map$/i.test(filename)) return 99;
+  const match = filename.match(/_(\d+)a?$/i);
+  if (match) return parseInt(match[1], 10);
+  return 50;
+}
+
+function isPrimaryImage(publicId: string): boolean {
+  const filename = publicId.split('/').pop() ?? '';
+  return /_0*1a?$/i.test(filename);
+}
+
+/* ─── CLOUDINARY SEARCH BY CHASSIS ──────────────────────────── */
+async function searchCloudinaryByChassis(
+  chassisNumber: string,
+): Promise<{ url: string; public_id: string }[]> {
+  const res = await fetch('/api/admin/cloudinary/search-by-chassis', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-Admin-Password': ADMIN_PASSWORD,
+    },
+    body: JSON.stringify({ chassis_number: chassisNumber }),
+  });
+  const body = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error((body as { error?: string }).error ?? `Server ${res.status}`);
+  return ((body as { resources?: { secure_url: string; public_id: string }[] }).resources || [])
+    .map(r => ({ url: r.secure_url, public_id: r.public_id }));
+}
+
+/* ─── SAVE IMAGES TO SUPABASE (shared logic) ─────────────────── */
+async function saveCloudinaryImagesToDb(
+  carId: string,
+  images: { url: string; public_id: string }[],
+): Promise<{ saved: number; error?: string }> {
+  if (!images.length) return { saved: 0 };
+
+  const sorted = [...images].sort((a, b) => {
+    const aP = isPrimaryImage(a.public_id);
+    const bP = isPrimaryImage(b.public_id);
+    const aM = /_map$/i.test(a.public_id.split('/').pop() ?? '');
+    const bM = /_map$/i.test(b.public_id.split('/').pop() ?? '');
+    if (aP) return -1;
+    if (bP) return 1;
+    if (aM) return 1;
+    if (bM) return -1;
+    return a.public_id.localeCompare(b.public_id);
+  });
+
+  const rows = sorted.map(img => ({
+    car_id:        carId,
+    image_url:     img.url,
+    is_primary:    isPrimaryImage(img.public_id),
+    display_order: getDisplayOrder(img.public_id),
+  }));
+
+  const { error } = await supabase.from('car_images').insert(rows);
+  if (error) return { saved: 0, error: error.message };
+  return { saved: rows.length };
+}
+
 /* ─── SESSION ────────────────────────────────────────────────── */
 function isSessionValid(): boolean {
   try {
@@ -217,6 +280,7 @@ function CsvUploadTab() {
   const [fileName, setFileName] = useState('');
   const [status, setStatus] = useState<'idle' | 'inserting' | 'done' | 'error'>('idle');
   const [insertMsg, setInsertMsg] = useState('');
+  const [progress, setProgress] = useState({ current: 0, total: 0, images: 0 });
   const [expanded, setExpanded] = useState<Record<number, boolean>>({});
   const fileRef = useRef<HTMLInputElement>(null);
 
@@ -252,6 +316,7 @@ function CsvUploadTab() {
     if (!rows.length) return;
     setStatus('inserting');
     setInsertMsg('');
+    setProgress({ current: 0, total: rows.length, images: 0 });
 
     // 1. Fetch live JPY/USD rate for FOB price calculation
     let jpyRate = 162; // conservative fallback
@@ -279,43 +344,75 @@ function CsvUploadTab() {
       if (match) nextNum = parseInt(match[1], 10) + 1;
     }
 
-    // 4. Generate a ref_number for each row
-    const records = rows.map((r, i) => ({
-      ref_number:          `WTL-${String(nextNum + i).padStart(6, '0')}`,
-      lot_number:          r.lot_number      || null,
-      model_code:          r.model_code      || null,
-      chassis_number:      r.chassis_number  || null,
-      make:                r.make            || null,
-      model:               r.model           || null,
-      variant:             r.variant         || null,
-      year:                r.year            ?? null,
-      manufacture_month:   r.manufacture_month || null,
-      engine_cc:           r.engine_cc       ?? null,
-      seats:               r.seats           ?? null,
-      auction_grade:       r.auction_grade   || null,
-      exterior_grade:      r.exterior_grade  || null,
-      interior_grade:      r.interior_grade  || null,
-      transmission:        r.transmission    || null,
-      color:               r.color           || null,
-      doors:               r.doors           ?? null,
-      mileage_km:          r.mileage_km      ?? null,
-      fuel_type:           r.fuel_type       || null,
-      features:            r.features        || {},
-      wholesale_price_jpy: r.wholesale_price_jpy ?? null,
-      // fob_price_usd = wholesale JPY / live JPY rate (rounded to nearest dollar)
-      fob_price_usd: r.wholesale_price_jpy != null
-        ? Math.round((r.wholesale_price_jpy as number) / jpyRate)
-        : null,
-      status:              'available',
-    }));
+    // 4. Insert each car one-by-one and search Cloudinary for existing images
+    let totalImages = 0;
+    let firstRef = '';
+    let lastRef  = '';
+    let anyError = '';
 
-    const { error } = await supabase.from('cars').insert(records);
-    if (error) {
+    for (let i = 0; i < rows.length; i++) {
+      const r = rows[i];
+      const refNo = `WTL-${String(nextNum + i).padStart(6, '0')}`;
+      if (i === 0) firstRef = refNo;
+      lastRef = refNo;
+
+      const record = {
+        ref_number:          refNo,
+        lot_number:          r.lot_number      || null,
+        model_code:          r.model_code      || null,
+        chassis_number:      r.chassis_number  || null,
+        make:                r.make            || null,
+        model:               r.model           || null,
+        variant:             r.variant         || null,
+        year:                r.year            ?? null,
+        manufacture_month:   r.manufacture_month || null,
+        engine_cc:           r.engine_cc       ?? null,
+        seats:               r.seats           ?? null,
+        auction_grade:       r.auction_grade   || null,
+        exterior_grade:      r.exterior_grade  || null,
+        interior_grade:      r.interior_grade  || null,
+        transmission:        r.transmission    || null,
+        color:               r.color           || null,
+        doors:               r.doors           ?? null,
+        mileage_km:          r.mileage_km      ?? null,
+        fuel_type:           r.fuel_type       || null,
+        features:            r.features        || {},
+        wholesale_price_jpy: r.wholesale_price_jpy ?? null,
+        fob_price_usd:       r.wholesale_price_jpy != null
+          ? Math.round((r.wholesale_price_jpy as number) / jpyRate)
+          : null,
+        status: 'available',
+      };
+
+      const { data: carData, error: carErr } = await supabase
+        .from('cars').insert([record]).select('id').single();
+
+      if (carErr) { anyError = carErr.message; break; }
+
+      // Search Cloudinary for existing images for this chassis number
+      const chassis = String(r.chassis_number || '');
+      if (chassis) {
+        try {
+          const images = await searchCloudinaryByChassis(chassis);
+          if (images.length > 0) {
+            const { saved } = await saveCloudinaryImagesToDb(carData.id, images);
+            totalImages += saved;
+          }
+        } catch { /* images can be synced later */ }
+      }
+
+      setProgress({ current: i + 1, total: rows.length, images: totalImages });
+    }
+
+    if (anyError) {
       setStatus('error');
-      setInsertMsg(error.message);
+      setInsertMsg(anyError);
     } else {
       setStatus('done');
-      setInsertMsg(`${records.length} cars inserted (${records[0].ref_number} → ${records[records.length - 1].ref_number}).`);
+      setInsertMsg(
+        `${rows.length} cars inserted (${firstRef} → ${lastRef}).` +
+        (totalImages > 0 ? ` ${totalImages} images synced from Cloudinary.` : ' No existing Cloudinary images found.')
+      );
     }
   };
 
@@ -371,7 +468,9 @@ function CsvUploadTab() {
               className="flex items-center gap-2 bg-[#C8102E] hover:bg-[#a00d24] disabled:opacity-50 text-white text-sm font-semibold px-5 py-2 rounded-lg transition-colors"
             >
               {status === 'inserting' ? <Loader2 size={14} className="animate-spin" /> : <CheckCircle2 size={14} />}
-              {status === 'inserting' ? 'Inserting…' : status === 'done' ? 'Done ✓' : 'Confirm & Insert All'}
+              {status === 'inserting'
+                ? `Inserting ${progress.current}/${progress.total}…`
+                : status === 'done' ? 'Done ✓' : 'Confirm & Insert All'}
             </button>
           </div>
 
@@ -646,12 +745,68 @@ type CarRow = {
   image_count: number;
 };
 
+/** Inline per-car sync button used in each table row */
+function SyncImagesButton({
+  car,
+  onSynced,
+}: {
+  car: CarRow;
+  onSynced: (carId: string, newCount: number) => void;
+}) {
+  const [state, setState] = useState<'idle' | 'syncing' | 'done' | 'none' | 'error'>('idle');
+  const [synced, setSynced] = useState(0);
+
+  const run = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setState('syncing');
+    try {
+      const images = await searchCloudinaryByChassis(car.chassis_number);
+      if (!images.length) { setState('none'); return; }
+      const { saved, error } = await saveCloudinaryImagesToDb(car.id, images);
+      if (error) { setState('error'); return; }
+      setSynced(saved);
+      setState('done');
+      onSynced(car.id, car.image_count + saved);
+    } catch {
+      setState('error');
+    }
+  };
+
+  if (state === 'syncing') return (
+    <span className="inline-flex items-center gap-1 text-blue-500 text-xs">
+      <Loader2 size={11} className="animate-spin" /> Syncing…
+    </span>
+  );
+  if (state === 'done') return (
+    <span className="inline-flex items-center gap-1 text-green-600 text-xs font-semibold">
+      ✅ +{synced} synced
+    </span>
+  );
+  if (state === 'none') return (
+    <span className="text-gray-400 text-xs">No images found</span>
+  );
+  if (state === 'error') return (
+    <span className="text-red-500 text-xs">Error — retry?</span>
+  );
+
+  return (
+    <button
+      onClick={run}
+      className="inline-flex items-center gap-1 text-xs px-2 py-1 bg-blue-50 border border-blue-200 text-blue-700 rounded hover:bg-blue-100 transition-colors whitespace-nowrap"
+    >
+      <RefreshCw size={10} /> Sync Images
+    </button>
+  );
+}
+
 function ReviewDashboardTab() {
   const [cars, setCars]       = useState<CarRow[]>([]);
   const [loading, setLoading] = useState(false);
   const [search, setSearch]   = useState('');
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [actionStatus, setActionStatus] = useState('');
+  const [bulkSyncState, setBulkSyncState] = useState<'idle' | 'running' | 'done'>('idle');
+  const [bulkSyncProgress, setBulkSyncProgress] = useState({ current: 0, total: 0, found: 0 });
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -682,6 +837,37 @@ function ReviewDashboardTab() {
   }, []);
 
   React.useEffect(() => { load(); }, [load]);
+
+  /** Update a single car's image count after a per-car sync */
+  const onCarSynced = useCallback((carId: string, newCount: number) => {
+    setCars(prev => prev.map(c => c.id === carId ? { ...c, image_count: newCount } : c));
+  }, []);
+
+  /** Bulk: scan all cars with 0 images and search Cloudinary for each */
+  const bulkSyncMissingImages = async () => {
+    const missing = cars.filter(c => c.image_count === 0 && c.chassis_number);
+    if (!missing.length) { setActionStatus('No cars are missing images.'); return; }
+
+    setBulkSyncState('running');
+    setBulkSyncProgress({ current: 0, total: missing.length, found: 0 });
+    let totalFound = 0;
+
+    for (let i = 0; i < missing.length; i++) {
+      const car = missing[i];
+      try {
+        const images = await searchCloudinaryByChassis(car.chassis_number);
+        if (images.length > 0) {
+          const { saved } = await saveCloudinaryImagesToDb(car.id, images);
+          totalFound += saved;
+          setCars(prev => prev.map(c => c.id === car.id ? { ...c, image_count: saved } : c));
+        }
+      } catch { /* skip this car, continue */ }
+      setBulkSyncProgress({ current: i + 1, total: missing.length, found: totalFound });
+    }
+
+    setBulkSyncState('done');
+    setActionStatus(`Sync complete — scanned ${missing.length} cars, found ${totalFound} images.`);
+  };
 
   const filtered = cars.filter(c =>
     !search ||
@@ -730,8 +916,8 @@ function ReviewDashboardTab() {
     XLSX.writeFile(wb, 'wazir-cars-export.xlsx');
   };
 
-  const hasImages    = filtered.filter(c => c.image_count > 0).length;
-  const missingImages = filtered.filter(c => c.image_count === 0).length;
+  const hasImages     = cars.filter(c => c.image_count > 0).length;
+  const missingImages = cars.filter(c => c.image_count === 0).length;
 
   return (
     <div className="space-y-5">
@@ -750,6 +936,38 @@ function ReviewDashboardTab() {
           <div className="text-xs text-red-600 mt-1">❌ Missing Images</div>
         </div>
       </div>
+
+      {/* Sync Images from Cloudinary — bulk action */}
+      <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <p className="font-semibold text-blue-900 text-sm">Sync Images from Cloudinary</p>
+          <p className="text-xs text-blue-700 mt-0.5">
+            Scans all {missingImages} car{missingImages !== 1 ? 's' : ''} missing images and fetches any
+            matching images from Cloudinary using each chassis number.
+          </p>
+        </div>
+        <button
+          onClick={bulkSyncMissingImages}
+          disabled={bulkSyncState === 'running' || missingImages === 0}
+          className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white text-sm font-semibold px-5 py-2.5 rounded-lg transition-colors whitespace-nowrap"
+        >
+          {bulkSyncState === 'running'
+            ? <><Loader2 size={14} className="animate-spin" /> Syncing {bulkSyncProgress.current}/{bulkSyncProgress.total}…</>
+            : <><RefreshCw size={14} /> Sync Images from Cloudinary</>
+          }
+        </button>
+      </div>
+      {bulkSyncState === 'running' && (
+        <div>
+          <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
+            <div
+              className="h-full bg-blue-600 transition-all duration-300 rounded-full"
+              style={{ width: `${bulkSyncProgress.total ? Math.round((bulkSyncProgress.current / bulkSyncProgress.total) * 100) : 0}%` }}
+            />
+          </div>
+          <p className="text-xs text-gray-500 mt-1">{bulkSyncProgress.found} images found so far…</p>
+        </div>
+      )}
 
       {/* Toolbar */}
       <div className="flex flex-wrap items-center gap-3">
@@ -820,6 +1038,7 @@ function ReviewDashboardTab() {
                 <th className="px-3 py-2 text-left font-semibold text-xs">Year</th>
                 <th className="px-3 py-2 text-left font-semibold text-xs">Images</th>
                 <th className="px-3 py-2 text-left font-semibold text-xs">Featured</th>
+                <th className="px-3 py-2 text-left font-semibold text-xs">Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -853,11 +1072,14 @@ function ReviewDashboardTab() {
                       : <span className="text-gray-400">—</span>
                     }
                   </td>
+                  <td className="px-3 py-2" onClick={e => e.stopPropagation()}>
+                    <SyncImagesButton car={car} onSynced={onCarSynced} />
+                  </td>
                 </tr>
               ))}
               {filtered.length === 0 && (
                 <tr>
-                  <td colSpan={7} className="px-4 py-12 text-center text-gray-400">No cars found.</td>
+                  <td colSpan={8} className="px-4 py-12 text-center text-gray-400">No cars found.</td>
                 </tr>
               )}
             </tbody>
