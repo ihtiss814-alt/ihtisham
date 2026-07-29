@@ -151,6 +151,48 @@ const DESTINATIONS = [
   { name: 'Vanuatu',                       code: 'vu' },
 ];
 
+/** Converts a 2-letter ISO code to its Unicode emoji flag (e.g. 'jm' → 🇯🇲) */
+function codeToEmoji(code: string): string {
+  return [...code.toUpperCase()].map(c =>
+    String.fromCodePoint(0x1F1E6 + c.charCodeAt(0) - 65)
+  ).join('');
+}
+
+/**
+ * Tries to load the flag image from flagcdn.com.
+ * Falls back to the Unicode emoji flag when the image fails to load
+ * (territories like Guadeloupe, Martinique, Anguilla, etc. may not have
+ * their own entry on flagcdn).
+ */
+function FlagImg({ code, name }: { code: string; name: string }) {
+  const [failed, setFailed] = React.useState(false);
+  const emoji = codeToEmoji(code);
+
+  if (failed) {
+    return (
+      <div
+        className="w-full h-full flex items-center justify-center rounded-[4px] select-none"
+        style={{ background: 'rgba(255,255,255,0.06)', fontSize: 32, lineHeight: 1 }}
+      >
+        {emoji}
+      </div>
+    );
+  }
+
+  return (
+    <img
+      src={`https://flagcdn.com/w80/${code}.png`}
+      srcSet={`https://flagcdn.com/w160/${code}.png 2x`}
+      alt={`${name} flag`}
+      className="dest-flag"
+      loading="lazy"
+      width={72}
+      height={48}
+      onError={() => setFailed(true)}
+    />
+  );
+}
+
 function DestinationCountriesSection() {
   const [, navigate] = useLocation();
   // Duplicate list so the marquee loops seamlessly
@@ -184,18 +226,10 @@ function DestinationCountriesSection() {
               onClick={() => navigate(`/cars?destination=${encodeURIComponent(name)}`)}
               className="dest-card group flex-shrink-0 flex flex-col items-center gap-3 w-[108px] py-5 px-3 rounded-[8px] border border-white/10 bg-white/5 hover:bg-white/10 hover:border-[#C8102E]/60 transition-all duration-200 cursor-pointer"
             >
-              {/* Real country flag from flagcdn.com */}
+              {/* Country flag — real image with emoji fallback */}
               <div className="overflow-hidden rounded-[4px] flex-shrink-0"
                 style={{ width: 72, height: 48, boxShadow: '0 2px 8px rgba(0,0,0,0.5)' }}>
-                <img
-                  src={`https://flagcdn.com/w80/${code}.png`}
-                  srcSet={`https://flagcdn.com/w160/${code}.png 2x`}
-                  alt={`${name} flag`}
-                  className="dest-flag"
-                  loading="lazy"
-                  width={72}
-                  height={48}
-                />
+                <FlagImg code={code} name={name} />
               </div>
 
               <span className="text-[11px] font-bold text-white/90 tracking-wide text-center leading-tight">
