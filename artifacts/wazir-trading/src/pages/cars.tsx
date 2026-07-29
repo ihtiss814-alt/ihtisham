@@ -816,7 +816,7 @@ function CarRow({ car, pkrRate }: { car: CarWithImage; pkrRate: number }) {
     car.car_images?.[0]?.image_url ||
     null;
 
-  const pkrPrice = Math.round(car.fob_price_usd * pkrRate);
+  const pkrPrice = Math.round((car.fob_price_usd ?? 0) * pkrRate);
   const isNewArrival = car.is_new_arrival;
   const isClearance  = car.collection?.toLowerCase() === 'clearance';
 
@@ -918,7 +918,7 @@ function CarRow({ car, pkrRate }: { car: CarWithImage; pkrRate: number }) {
           {/* Price */}
           <div className="mr-auto">
             <div className="text-[20px] sm:text-[22px] font-black leading-none" style={{ color: RED }}>
-              ${car.fob_price_usd.toLocaleString()}
+              ${(car.fob_price_usd ?? 0).toLocaleString()}
             </div>
             {pkrRate > 0 && (
               <div className="text-[10px] font-semibold text-gray-400 mt-0.5">

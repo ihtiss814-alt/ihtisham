@@ -9,19 +9,19 @@ export interface Car {
   model: string;
   variant: string | null;
   chassis_number: string;
-  year: number;
-  engine_cc: number;
+  year: number | null;
+  engine_cc: number | null;
   fuel_type: string;
   transmission: string;
   body_type: string;
   color: string;
   drive: string;
   steering: string;
-  seats: number;
-  doors: number;
-  mileage_km: number;
+  seats: number | null;
+  doors: number | null;
+  mileage_km: number | null;
   auction_grade: string;
-  fob_price_usd: number;
+  fob_price_usd: number | null;
   stock_location: string;
   port_of_loading: string;
   shipment_method: string;
@@ -50,7 +50,8 @@ function CarCard({ car }: { car: Car }) {
     `${base}/f_auto,q_auto,w_800/cars/${ref}-1 800w`,
   ].join(', ');
 
-  const formatPrice = (price: number) => {
+  const formatPrice = (price: number | null | undefined) => {
+    if (price == null) return '—';
     return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(price);
   };
 
@@ -106,7 +107,7 @@ function CarCard({ car }: { car: Car }) {
             </div>
             <div className="flex items-center gap-2">
               <Gauge size={14} className="text-primary/70" />
-              <span>{car.mileage_km.toLocaleString()} km</span>
+              <span>{car.mileage_km != null ? car.mileage_km.toLocaleString() : '—'} km</span>
             </div>
             <div className="flex items-center gap-2">
               <Settings size={14} className="text-primary/70" />

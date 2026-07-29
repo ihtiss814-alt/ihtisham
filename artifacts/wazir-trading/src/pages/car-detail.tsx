@@ -232,7 +232,8 @@ const CURRENCY_SYMBOLS: Record<Currency, string> = {
 };
 
 /* ─────────────────────────── helpers ───────────────────────────────── */
-function fmt(n: number, currency = 'USD') {
+function fmt(n: number | null | undefined, currency = 'USD') {
+  if (n == null) return '—';
   return new Intl.NumberFormat('en-US', {
     style: 'currency',
     currency,
@@ -240,7 +241,8 @@ function fmt(n: number, currency = 'USD') {
   }).format(n);
 }
 
-function fmtNum(n: number) {
+function fmtNum(n: number | null | undefined) {
+  if (n == null) return '—';
   return new Intl.NumberFormat('en-US').format(n);
 }
 
@@ -300,7 +302,7 @@ export default function CarDetailPage() {
   useEffect(() => {
     if (!car) return;
     const title = `${car.make} ${car.model} ${car.year}${car.variant ? ' ' + car.variant : ''} | Buy from Japan | Wazir Trading LLC`;
-    const content = `${car.make} ${car.model} ${car.year}, ${fmtNum(car.mileage_km)}km, ${car.engine_cc}CC, ${car.color}, ${car.transmission}. FOB $${car.fob_price_usd}. Export from Japan. Ref ${car.ref_number}. Contact Wazir Trading.`;
+    const content = `${car.make} ${car.model} ${car.year ?? ''}, ${fmtNum(car.mileage_km)}km, ${car.engine_cc ?? ''}CC, ${car.color}, ${car.transmission}. FOB $${car.fob_price_usd ?? 0}. Export from Japan. Ref ${car.ref_number}. Contact Wazir Trading.`;
     const canonicalUrl = `https://wazirtradingllc.com/cars/${car.ref_number}`;
 
     document.title = title;
@@ -471,7 +473,7 @@ export default function CarDetailPage() {
 
   const calcTotal = (): { total: number | null; pkr: string | null } => {
     if (!car || !shippingRate) return { total: null, pkr: null };
-    const fob = car.fob_price_usd;
+    const fob = car.fob_price_usd ?? 0;
     const freight = freightType === 'Prepaid' ? shippingRate.freight_usd : 0;
     const inspection = withInspection ? shippingRate.inspection_fee : 0;
     const insurance = withInsurance ? fob * shippingRate.insurance_rate : 0;
@@ -578,12 +580,12 @@ export default function CarDetailPage() {
               <div className="flex flex-wrap gap-2 mt-4">
                 {[
                   { icon: <Gauge size={13} />, label: `${fmtNum(car.mileage_km)} KM` },
-                  { icon: <Settings size={13} />, label: `${car.engine_cc} CC` },
+                  { icon: <Settings size={13} />, label: `${car.engine_cc ?? '—'} CC` },
                   { icon: <Droplet size={13} />, label: car.fuel_type },
                   { icon: <span className="text-[11px]">⚙️</span>, label: car.transmission },
                   { icon: <Palette size={13} />, label: car.color },
-                  { icon: <Users size={13} />, label: `${car.seats} Seats` },
-                  { icon: <DoorOpen size={13} />, label: `${car.doors} Doors` },
+                  { icon: <Users size={13} />, label: car.seats != null ? `${car.seats} Seats` : null },
+                  { icon: <DoorOpen size={13} />, label: car.doors != null ? `${car.doors} Doors` : null },
                 ].map((chip, i) => (
                   <span key={i} className="inline-flex items-center gap-1.5 bg-gray-50 border border-gray-200 text-gray-600 text-xs font-medium px-2.5 py-1.5 rounded-sm">
                     <span className="text-[#C8102E]">{chip.icon}</span>
@@ -612,11 +614,11 @@ export default function CarDetailPage() {
                 <div className="flex items-end justify-between mb-3">
                   <div>
                     <p className="text-[10px] font-bold tracking-widest text-white/40 uppercase mb-1">Vehicle Price · FOB Japan</p>
-                    <div className="text-3xl font-serif font-bold text-[#C8102E]">{convertPrice(car.fob_price_usd)}</div>
+                    <div className="text-3xl font-serif font-bold text-[#C8102E]">{convertPrice(car.fob_price_usd ?? 0)}</div>
                   </div>
                   <div className="text-right">
                     <p className="text-[10px] text-white/40 mb-0.5">PKR</p>
-                    <p className="text-sm font-bold text-white/70">{fmtNum(Math.round(car.fob_price_usd * rates.pkr))}</p>
+                    <p className="text-sm font-bold text-white/70">{fmtNum(Math.round((car.fob_price_usd ?? 0) * rates.pkr))}</p>
                   </div>
                 </div>
                 <div className="grid grid-cols-2 gap-2">
@@ -679,9 +681,9 @@ export default function CarDetailPage() {
                     ['Reference #',    car.ref_number],
                     ['Chassis No.',    car.chassis_number],
                     ['Lot Number',     xcar.lot_number],
-                    ['Mileage',        `${fmtNum(car.mileage_km)} km`],
+                    ['Mileage',        car.mileage_km != null ? `${fmtNum(car.mileage_km)} km` : null],
                     ['Year',           fmtManufactureDate(xcar.manufacture_month, car.year)],
-                    ['Engine',         `${car.engine_cc} CC`],
+                    ['Engine',         car.engine_cc != null ? `${car.engine_cc} CC` : null],
                     ['Fuel',           car.fuel_type],
                     ['Seats',          car.seats],
                     ['Engine Code',    xcar.engine_code],
@@ -951,7 +953,7 @@ export default function CarDetailPage() {
                         )}
                         <div className="mt-2 space-y-1">
                           <div className="flex justify-between text-xs text-white/50">
-                            <span>FOB Price</span><span className="text-white">{fmt(car.fob_price_usd)}</span>
+                            <span>FOB Price</span><span className="text-white">{fmt(car.fob_price_usd ?? 0)}</span>
                           </div>
                           {freightType === 'Prepaid' && shippingRate && (
                             <div className="flex justify-between text-xs text-white/50">
@@ -965,7 +967,7 @@ export default function CarDetailPage() {
                           )}
                           {withInsurance && shippingRate && (
                             <div className="flex justify-between text-xs text-white/50">
-                              <span>Insurance</span><span className="text-white">{fmt(car.fob_price_usd * shippingRate.insurance_rate)}</span>
+                              <span>Insurance</span><span className="text-white">{fmt((car.fob_price_usd ?? 0) * shippingRate.insurance_rate)}</span>
                             </div>
                           )}
                         </div>
@@ -1114,7 +1116,7 @@ export default function CarDetailPage() {
         <div className="flex items-center gap-3 px-4 py-3 border-t border-white/10">
           <div className="flex-1 min-w-0">
             <p className="text-[10px] text-white/40 uppercase tracking-wider leading-none mb-0.5">FOB Price</p>
-            <p className="text-lg font-serif font-bold text-[#C8102E] truncate leading-tight">{convertPrice(car.fob_price_usd)}</p>
+            <p className="text-lg font-serif font-bold text-[#C8102E] truncate leading-tight">{convertPrice(car.fob_price_usd ?? 0)}</p>
           </div>
           <a
             href={waLink}
@@ -1153,7 +1155,7 @@ function SimilarCarCard({ car }: { car: SimilarCar }) {
       <Link href={`/cars/${car.ref_number}`}>
         <div className="relative aspect-[4/3] bg-gray-100 overflow-hidden">
           <span className="absolute top-2 left-2 z-10 bg-[#0D1B3E] text-white text-[10px] font-bold px-2 py-0.5">{car.year}</span>
-          <span className="absolute top-2 right-2 z-10 bg-black/70 text-white text-[10px] font-bold px-2 py-0.5">{car.engine_cc}CC</span>
+          {car.engine_cc != null && <span className="absolute top-2 right-2 z-10 bg-black/70 text-white text-[10px] font-bold px-2 py-0.5">{car.engine_cc}CC</span>}
           {imgUrl && !imgErr ? (
             <img src={imgUrl} alt={`${car.make} ${car.model}`} onError={() => setImgErr(true)} className="w-full h-full object-cover hover:scale-105 transition-transform duration-500" />
           ) : (
