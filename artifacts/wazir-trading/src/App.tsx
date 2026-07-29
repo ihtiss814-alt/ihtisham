@@ -66,19 +66,39 @@ function Router() {
   );
 }
 
+function AppShell() {
+  const [location] = useLocation();
+  const isAdmin = location.startsWith('/admin');
+
+  if (isAdmin) {
+    return (
+      <>
+        <ScrollToTop />
+        <Router />
+      </>
+    );
+  }
+
+  return (
+    <>
+      <ScrollToTop />
+      <div className="flex flex-col min-h-[100dvh]">
+        <Navbar />
+        <main className="flex-1">
+          <Router />
+        </main>
+        <Footer />
+      </div>
+    </>
+  );
+}
+
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
         <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, '')}>
-          <ScrollToTop />
-          <div className="flex flex-col min-h-[100dvh]">
-            <Navbar />
-            <main className="flex-1">
-              <Router />
-            </main>
-            <Footer />
-          </div>
+          <AppShell />
         </WouterRouter>
         <Toaster />
       </TooltipProvider>
