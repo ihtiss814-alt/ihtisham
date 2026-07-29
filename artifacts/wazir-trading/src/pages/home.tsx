@@ -696,7 +696,6 @@ function ShopByBudgetSection() {
 }
 
 /* ── Featured Collection ─────────────────────────────────────── */
-// PKR_PER_USD is now live via useExchangeRate() inside FcCarCard
 
 type FcCar = {
   id: string;
@@ -707,424 +706,216 @@ type FcCar = {
   year: number;
   engine_cc?: number;
   fob_price_usd: number;
-  is_featured?: boolean;
   is_new_arrival?: boolean;
+  mileage_km?: number;
+  transmission?: string;
   fuel_type?: string;
-  body_type?: string;
-  status?: string;
   [key: string]: unknown;
 };
-
-const FC_TABS = [
-  { id: 'arrivals', label: 'New Arrivals' },
-  { id: 'featured', label: 'Featured'     },
-  { id: 'hybrid',   label: 'Hybrid'       },
-  { id: 'suv',      label: 'SUV'          },
-  { id: 'budget',   label: 'Budget'       },
-] as const;
-
-type FcTabId = typeof FC_TABS[number]['id'];
-
-async function fetchFcCars(tab: FcTabId): Promise<FcCar[]> {
-  let q = supabase.from('cars').select('*');
-  if (tab === 'arrivals') {
-    q = q.order('created_at', { ascending: false }).limit(10);
-  } else if (tab === 'featured') {
-    q = q.eq('is_featured', true).limit(10);
-  } else if (tab === 'hybrid') {
-    q = q.ilike('fuel_type', '%hybrid%').limit(10);
-  } else if (tab === 'suv') {
-    q = q.ilike('body_type', '%suv%').limit(10);
-  } else if (tab === 'budget') {
-    q = q.lt('fob_price_usd', 2000).order('fob_price_usd', { ascending: true }).limit(10);
-  }
-  const { data } = await q;
-  return (data ?? []) as FcCar[];
-}
 
 async function fetchCarImages(ids: string[]): Promise<Record<string, string>> {
   if (!ids.length) return {};
   const { data } = await supabase
     .from('car_images')
-    .select('*')
+    .select('car_id,image_url,is_primary')
     .in('car_id', ids);
   if (!data) return {};
-  // Build map: car_id → first image URL found
   const map: Record<string, string> = {};
-  for (const row of data as Record<string, unknown>[]) {
-    const cid = String(row.car_id ?? '');
-    if (!cid || map[cid]) continue; // keep first (lowest position)
-    const url = String(row.image_url ?? row.url ?? row.src ?? '');
-    if (url) map[cid] = url;
+  // Prefer primary image, then fall back to first found
+  for (const row of data as { car_id: string; image_url: string; is_primary: boolean }[]) {
+    if (!row.car_id || !row.image_url) continue;
+    if (!map[row.car_id] || row.is_primary) map[row.car_id] = row.image_url;
   }
   return map;
 }
 
-function FcCarCard({ car, imgMap, waNumber, navigate }: {
+/* WhatsApp SVG path shared across cards */
+const WA_PATH = 'M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z';
+
+function FcGridCard({ car, imgMap, waNumber }: {
   car: FcCar;
   imgMap: Record<string, string>;
   waNumber: string;
-  navigate: (to: string) => void;
 }) {
-  const [hov, setHov] = React.useState(false);
   const { pkr: pkrPerUsd } = useExchangeRate();
   const primaryImg = imgMap[car.id] ?? null;
-  const pkrPrice   = Math.round((car.fob_price_usd ?? 0) * pkrPerUsd).toLocaleString('en-PK');
-  const waMsg      = encodeURIComponent(
-    `Hi Wazir Trading, I'm interested in the ${car.year} ${car.make} ${car.model}${car.variant ? ' ' + car.variant : ''} (Ref: ${car.ref_number}). Please share details and availability.`
+  const pkrPrice = pkrPerUsd > 0
+    ? 'PKR ' + Math.round((car.fob_price_usd ?? 0) * pkrPerUsd).toLocaleString('en-PK')
+    : null;
+  const title = `${car.make} ${car.model}${car.variant ? ' ' + car.variant : ''} ${car.year}`;
+  const waMsg = encodeURIComponent(
+    `Hi Wazir Trading, I'm interested in the ${car.year} ${car.make} ${car.model}${car.variant ? ' ' + car.variant : ''} (Ref: ${car.ref_number}). Please share details.`
   );
   const waLink = `https://wa.me/${waNumber}?text=${waMsg}`;
+  const ccLabel = car.engine_cc
+    ? car.engine_cc >= 1000
+      ? `${(car.engine_cc / 1000).toFixed(1).replace(/\.0$/, '')}L`
+      : `${car.engine_cc}cc`
+    : null;
 
   return (
-    <div
-      onMouseEnter={() => setHov(true)}
-      onMouseLeave={() => setHov(false)}
-      style={{
-        flexShrink:   0,
-        width:        '272px',
-        borderRadius: '16px',
-        overflow:     'hidden',
-        background:   '#fff',
-        border:       `1px solid ${hov ? 'rgba(200,16,46,0.28)' : '#E8ECF0'}`,
-        boxShadow:    hov
-          ? '0 16px 48px rgba(0,0,0,0.14), 0 4px 16px rgba(200,16,46,0.08)'
-          : '0 2px 12px rgba(0,0,0,0.06)',
-        transform:    hov ? 'translateY(-4px)' : 'translateY(0)',
-        transition:   'all 0.28s cubic-bezier(0.34, 1.56, 0.64, 1)',
-        cursor:       'default',
-      }}
-    >
-      {/* Image */}
-      <div style={{ position: 'relative', aspectRatio: '16/10', background: '#F3F4F6', overflow: 'hidden' }}>
-        {/* Gradient overlay at bottom */}
-        <div style={{
-          position: 'absolute', inset: 0, zIndex: 1,
-          background: 'linear-gradient(to top, rgba(0,0,0,0.45) 0%, transparent 55%)',
-        }}/>
-
-        {/* Year badge */}
-        <span style={{
-          position: 'absolute', top: 10, left: 10, zIndex: 2,
-          background: 'rgba(0,0,0,0.72)', backdropFilter: 'blur(6px)',
-          color: '#fff', fontSize: 10, fontWeight: 700,
-          padding: '3px 8px', borderRadius: 6, letterSpacing: '0.06em',
-        }}>
+    <div className="bg-white border border-gray-200 overflow-hidden flex flex-col group hover:border-[#C8102E]/50 hover:shadow-lg transition-all duration-200">
+      {/* ── Image ── */}
+      <Link href={`/cars/${car.ref_number}`} className="block relative flex-shrink-0" style={{ aspectRatio: '4/3', background: '#F1F5F9' }}>
+        {/* Year badge – top left */}
+        <span className="absolute top-1.5 left-1.5 z-10 text-[9px] font-bold text-white px-1.5 py-[2px] leading-none"
+          style={{ background: 'rgba(0,0,0,0.72)', letterSpacing: '0.04em' }}>
           {car.year}
         </span>
-
-        {/* CC badge */}
-        {car.engine_cc && (
-          <span style={{
-            position: 'absolute', top: 10, right: 10, zIndex: 2,
-            background: 'rgba(200,16,46,0.88)', backdropFilter: 'blur(6px)',
-            color: '#fff', fontSize: 10, fontWeight: 700,
-            padding: '3px 8px', borderRadius: 6, letterSpacing: '0.06em',
-          }}>
-            {car.engine_cc} cc
+        {/* CC badge – top right */}
+        {ccLabel && (
+          <span className="absolute top-1.5 right-1.5 z-10 text-[9px] font-bold text-white px-1.5 py-[2px] leading-none"
+            style={{ background: 'rgba(200,16,46,0.88)', letterSpacing: '0.04em' }}>
+            {ccLabel}
           </span>
         )}
-
-        {/* Ref number over image bottom */}
-        <span style={{
-          position: 'absolute', bottom: 8, left: 10, zIndex: 2,
-          color: 'rgba(255,255,255,0.65)', fontSize: 9, fontFamily: 'monospace',
-          letterSpacing: '0.1em', fontWeight: 600,
-        }}>
-          {car.ref_number}
-        </span>
-
         {primaryImg ? (
           <img
             src={primaryImg}
-            alt={`${car.make} ${car.model}`}
+            alt={title}
             loading="lazy"
             decoding="async"
-            width={272}
-            height={170}
-            style={{
-              width: '100%', height: '100%', objectFit: 'cover',
-              transform: hov ? 'scale(1.06)' : 'scale(1)',
-              transition: 'transform 0.6s ease',
-            }}
+            className="w-full h-full object-cover group-hover:scale-[1.04] transition-transform duration-500"
             onError={e => { (e.currentTarget as HTMLImageElement).style.display = 'none'; }}
           />
         ) : (
-          <div style={{
-            width: '100%', height: '100%',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            background: 'linear-gradient(135deg, #F8FAFC 0%, #EEF2F7 100%)',
-          }}>
-            <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="#CBD5E1" strokeWidth="1.2">
+          <div className="w-full h-full flex flex-col items-center justify-center gap-1 bg-gradient-to-br from-gray-50 to-gray-100">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#CBD5E1" strokeWidth="1.2">
               <rect x="1" y="3" width="22" height="16" rx="2.5"/>
               <path d="M1 9h22M7 3v6"/>
               <circle cx="12" cy="17" r="2"/>
             </svg>
+            <span className="text-[8px] text-gray-300 font-semibold uppercase tracking-wider">Photo Coming</span>
           </div>
         )}
-      </div>
+      </Link>
 
-      {/* Content */}
-      <div style={{ padding: '14px 16px', display: 'flex', flexDirection: 'column', gap: 10 }}>
-        {/* Make + Model */}
-        <div>
-          <h3 style={{
-            fontWeight: 700, color: '#111827', fontSize: 13.5,
-            lineHeight: 1.3, margin: 0,
-            overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis',
-          }}>
-            {car.make} {car.model}{car.variant ? ` ${car.variant}` : ''}
+      {/* ── Content ── */}
+      <div className="p-2 flex flex-col gap-1 flex-1">
+        {/* Title */}
+        <Link href={`/cars/${car.ref_number}`}>
+          <h3 className="text-[10.5px] font-bold text-gray-900 uppercase leading-snug tracking-wide line-clamp-2 hover:text-[#C8102E] transition-colors"
+            style={{ minHeight: '2.6em' }}>
+            {title}
           </h3>
-        </div>
+        </Link>
 
         {/* Price block */}
-        <div style={{ borderTop: '1px solid #F1F5F9', paddingTop: 10 }}>
-          <div style={{ fontSize: 9, letterSpacing: '0.2em', textTransform: 'uppercase', color: '#94A3B8', fontWeight: 700, marginBottom: 2 }}>
-            FOB Price · Japan
-          </div>
-          <div style={{ fontSize: 22, fontWeight: 900, color: '#0F172A', lineHeight: 1, letterSpacing: '-0.02em' }}>
+        <div className="border-t border-gray-100 pt-1">
+          <div className="text-[7.5px] font-bold text-gray-400 uppercase tracking-[0.18em]">For Price</div>
+          <div className="text-[16px] font-black text-gray-900 leading-tight tracking-tight">
             ${(car.fob_price_usd ?? 0).toLocaleString()}
           </div>
-          <div style={{ fontSize: 11, fontWeight: 600, color: '#C8102E', marginTop: 3 }}>
-            ≈ PKR {pkrPrice}
+          <div className="text-[8.5px] text-gray-400 font-medium mt-0.5">
+            REF # <span className="font-mono font-semibold text-gray-500">{car.ref_number}</span>
           </div>
+          {pkrPrice && (
+            <div className="text-[9px] font-bold mt-0.5" style={{ color: '#16a34a' }}>{pkrPrice}</div>
+          )}
         </div>
 
-        {/* Buttons */}
-        <div style={{ display: 'flex', gap: 8, paddingTop: 2 }}>
-          <button
-            onClick={() => navigate(`/cars/${car.ref_number}`)}
-            style={{
-              flex: 1, padding: '8px 0', borderRadius: 9,
-              background: hov ? '#A50D25' : '#C8102E',
-              color: '#fff', fontSize: 11, fontWeight: 700,
-              border: 'none', cursor: 'pointer', transition: 'background 0.2s',
-              letterSpacing: '0.03em',
-            }}
-          >
-            Inquire Now
-          </button>
-          <a
-            href={waLink}
-            target="_blank"
-            rel="noopener noreferrer"
-            aria-label="WhatsApp"
-            style={{
-              width: 36, height: 36, flexShrink: 0, borderRadius: 9,
-              background: '#25D366', display: 'flex', alignItems: 'center', justifyContent: 'center',
-              textDecoration: 'none', transition: 'background 0.2s',
-            }}
-            onMouseEnter={e => ((e.currentTarget as HTMLAnchorElement).style.background = '#128C7E')}
-            onMouseLeave={e => ((e.currentTarget as HTMLAnchorElement).style.background = '#25D366')}
-          >
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="white">
-              <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
-            </svg>
-          </a>
-        </div>
+        {/* Inquire Now button */}
+        <a
+          href={waLink}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="mt-auto flex items-center justify-center gap-1.5 py-1.5 w-full text-white text-[9.5px] font-bold uppercase tracking-wider transition-opacity hover:opacity-90"
+          style={{ background: '#25D366' }}
+        >
+          <svg width="10" height="10" viewBox="0 0 24 24" fill="white">
+            <path d={WA_PATH}/>
+          </svg>
+          Inquire Now
+        </a>
       </div>
     </div>
   );
 }
 
 function FeaturedCollectionSection() {
-  const [, navigate] = useLocation();
-
-  const [activeTab, setActiveTab] = React.useState<FcTabId>('arrivals');
-  const [cars, setCars]           = React.useState<FcCar[]>([]);
-  const [imgMap, setImgMap]       = React.useState<Record<string, string>>({});
-  const [loading, setLoading]     = React.useState(true);
-  const cache = React.useRef<Partial<Record<FcTabId, { cars: FcCar[]; imgs: Record<string, string> }>>>({});
-
+  const [cars, setCars]       = React.useState<FcCar[]>([]);
+  const [imgMap, setImgMap]   = React.useState<Record<string, string>>({});
+  const [loading, setLoading] = React.useState(true);
   const waNumber = import.meta.env.VITE_WHATSAPP_NUMBER || '818089227375';
 
-  const loadTab = React.useCallback(async (tab: FcTabId) => {
-    if (cache.current[tab]) {
-      const hit = cache.current[tab]!;
-      setCars(hit.cars);
-      setImgMap(hit.imgs);
-      setLoading(false);
-      return;
-    }
-    setLoading(true);
-    const fetched = await fetchFcCars(tab);
-    const ids     = fetched.map(c => c.id);
-    const imgs    = await fetchCarImages(ids);
-    cache.current[tab] = { cars: fetched, imgs };
-    setCars(fetched);
-    setImgMap(imgs);
-    setLoading(false);
+  React.useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      setLoading(true);
+      const { data } = await supabase
+        .from('cars')
+        .select('id,ref_number,make,model,variant,year,engine_cc,fob_price_usd,is_new_arrival,mileage_km,transmission,fuel_type')
+        .eq('is_new_arrival', true)
+        .order('created_at', { ascending: false })
+        .limit(50);
+      if (cancelled) return;
+      const fetched = (data ?? []) as FcCar[];
+      setCars(fetched);
+      const imgs = await fetchCarImages(fetched.map(c => c.id));
+      if (!cancelled) { setImgMap(imgs); setLoading(false); }
+    })();
+    return () => { cancelled = true; };
   }, []);
 
-  React.useEffect(() => { loadTab(activeTab); }, [activeTab, loadTab]);
-
-  // Duplicate for seamless marquee loop
-  const track = cars.length > 0 ? [...cars, ...cars] : [];
-  const animDuration = Math.max(cars.length * 5, 24);
-
   return (
-    <section className="py-16 relative overflow-hidden" style={{ background: '#FAFBFC' }}>
-      {/* Subtle top border accent */}
-      <div className="absolute top-0 inset-x-0 h-px"
-        style={{ background: 'linear-gradient(to right, transparent 0%, rgba(200,16,46,0.3) 30%, rgba(200,16,46,0.3) 70%, transparent 100%)' }}/>
+    <section className="py-12" style={{ background: '#F8FAFC' }}>
+      <div className="max-w-[1600px] mx-auto px-3 md:px-5">
 
-      {/* ── Centered header ── */}
-      <div className="text-center px-4 mb-10">
-        <div className="flex items-center justify-center gap-3 mb-4">
-          <div className="h-px w-10" style={{ background: 'linear-gradient(to right, transparent, #C8102E)' }}/>
-          <p className="text-[10px] tracking-[0.32em] uppercase font-bold text-[#C8102E]">Handpicked for You</p>
-          <div className="h-px w-10" style={{ background: 'linear-gradient(to left, transparent, #C8102E)' }}/>
-        </div>
-        <h2 className="text-3xl md:text-4xl font-serif font-bold text-gray-900 mb-3">
-          Featured Collection
-        </h2>
-        <p className="text-gray-400 text-sm mb-4">Premium vehicles sourced directly from Japan</p>
-        {/* Trust badges */}
-        <div className="flex items-center justify-center flex-wrap gap-2">
-          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-700 text-[11px] font-semibold">
-            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-            Quality Guaranteed
-          </span>
-          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-50 border border-blue-200 text-blue-700 text-[11px] font-semibold">
-            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-            Best Price
-          </span>
-          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-50 border border-amber-200 text-amber-700 text-[11px] font-semibold">
-            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-            Export Ready
-          </span>
-        </div>
-      </div>
-
-      {/* ── Promo Banners (centered, max-width) ── */}
-      <div className="px-4 mb-8">
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-w-3xl mx-auto">
-          <div className="flex items-center gap-4 px-5 py-4 rounded-2xl"
-            style={{ background: 'linear-gradient(135deg, #C8102E 0%, #8B0A1E 100%)', boxShadow: '0 8px 32px rgba(200,16,46,0.2)' }}>
-            <div className="w-10 h-10 rounded-xl bg-white/15 flex items-center justify-center flex-shrink-0">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>
-              </svg>
-            </div>
-            <div>
-              <div className="font-bold text-white text-sm leading-tight">Best Deals Available</div>
-              <div className="text-white/65 text-xs mt-0.5">Instant quotes · Expert advice</div>
-            </div>
+        {/* ── Section header ── */}
+        <div className="flex items-end justify-between mb-5">
+          <div>
+            <p className="text-[9px] tracking-[0.3em] uppercase font-bold mb-1" style={{ color: '#C8102E' }}>
+              Latest Stock · New Arrivals
+            </p>
+            <h2 className="text-2xl md:text-3xl font-serif font-bold text-gray-900 leading-tight">
+              Featured Collection
+            </h2>
           </div>
-          <div className="flex items-center gap-4 px-5 py-4 rounded-2xl"
-            style={{ background: 'linear-gradient(135deg, #1E293B 0%, #0F172A 100%)', boxShadow: '0 8px 32px rgba(0,0,0,0.2)' }}>
-            <div className="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center flex-shrink-0">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#FBBF24" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"/>
-                <line x1="7" y1="7" x2="7.01" y2="7"/>
-              </svg>
-            </div>
-            <div>
-              <div className="font-bold text-white text-sm leading-tight">
-                <span style={{ color: '#FBBF24' }}>20% Bulk Discount</span>
-              </div>
-              <div className="text-white/50 text-xs mt-0.5">Buy 5+ vehicles · Wholesale pricing</div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* ── Filter Tabs (centered) ── */}
-      <div className="flex justify-center gap-2 flex-wrap px-4 mb-8">
-        {FC_TABS.map(tab => (
-          <button
-            key={tab.id}
-            onClick={() => setActiveTab(tab.id)}
-            className="cursor-pointer transition-all duration-200"
-            style={activeTab === tab.id ? {
-              padding: '7px 20px', borderRadius: 999,
-              background: '#C8102E', color: '#fff',
-              border: '1px solid #C8102E',
-              fontSize: 12, fontWeight: 700, letterSpacing: '0.04em',
-              boxShadow: '0 4px 16px rgba(200,16,46,0.35)',
-            } : {
-              padding: '7px 20px', borderRadius: 999,
-              background: '#fff', color: '#64748B',
-              border: '1px solid #E2E8F0',
-              fontSize: 12, fontWeight: 600, letterSpacing: '0.04em',
-              boxShadow: '0 1px 4px rgba(0,0,0,0.06)',
-            }}
-          >
-            {tab.label}
-          </button>
-        ))}
-      </div>
-
-      {/* ── Scrolling card track ── */}
-      {loading ? (
-        /* Skeleton row */
-        <div className="flex gap-5 px-6 overflow-hidden justify-center">
-          {[1,2,3,4].map(i => (
-            <div key={i} className="flex-shrink-0 w-[272px] rounded-2xl bg-gray-100 animate-pulse" style={{ height: 380 }}/>
-          ))}
-        </div>
-      ) : cars.length === 0 ? (
-        /* Empty state */
-        <div className="mx-auto max-w-sm flex flex-col items-center py-16 text-center">
-          <div className="w-16 h-16 rounded-full bg-gray-100 flex items-center justify-center mb-4">
-            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#CBD5E1" strokeWidth="1.5">
-              <rect x="1" y="3" width="22" height="16" rx="2.5"/>
-              <path d="M1 9h22M7 3v6"/>
-              <circle cx="12" cy="17" r="2"/>
-            </svg>
-          </div>
-          <h3 className="font-serif font-bold text-lg text-gray-700 mb-1">No cars in this category</h3>
-          <p className="text-gray-400 text-sm">
-            Check back soon or{' '}
-            <Link href="/cars" className="text-[#C8102E] font-medium hover:underline">browse all stock</Link>.
-          </p>
-        </div>
-      ) : (
-        <div className="relative">
-          {/* Left fade */}
-          <div className="absolute left-0 top-0 bottom-0 w-20 z-10 pointer-events-none"
-            style={{ background: 'linear-gradient(to right, #FAFBFC, transparent)' }}/>
-          {/* Right fade */}
-          <div className="absolute right-0 top-0 bottom-0 w-20 z-10 pointer-events-none"
-            style={{ background: 'linear-gradient(to left, #FAFBFC, transparent)' }}/>
-
-          {/* Marquee track — key forces animation restart on tab change */}
-          <div key={activeTab} className="overflow-hidden">
-            <div
-              className="fc-track flex gap-5 py-3 px-4"
-              style={{ width: 'max-content', '--fc-dur': `${animDuration}s` } as React.CSSProperties}
-            >
-              {track.map((car, i) => (
-                <FcCarCard
-                  key={`${car.id}-${i}`}
-                  car={car}
-                  imgMap={imgMap}
-                  waNumber={waNumber}
-                  navigate={navigate}
-                />
-              ))}
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* ── See More button (centered below scroll) ── */}
-      {!loading && cars.length > 0 && (
-        <div className="flex justify-center mt-8">
           <Link
             href="/cars"
-            className="inline-flex items-center gap-2 px-7 py-3 rounded-full font-bold text-sm transition-all duration-200 hover:shadow-lg"
-            style={{
-              background: 'linear-gradient(135deg, #C8102E 0%, #9B0D23 100%)',
-              color: '#fff',
-              boxShadow: '0 4px 20px rgba(200,16,46,0.3)',
-              letterSpacing: '0.03em',
-            }}
+            className="hidden sm:inline-flex items-center gap-1.5 px-5 py-2 text-white text-[11px] font-bold uppercase tracking-wide transition-opacity hover:opacity-90 flex-shrink-0"
+            style={{ background: '#C8102E' }}
           >
-            See More Cars
-            <ArrowRight size={15}/>
+            View All
+            <ArrowRight size={13} />
           </Link>
         </div>
-      )}
+
+        {/* ── Grid ── */}
+        {loading ? (
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-2">
+            {Array.from({ length: 16 }).map((_, i) => (
+              <div key={i} className="bg-gray-100 animate-pulse" style={{ height: 210 }} />
+            ))}
+          </div>
+        ) : cars.length === 0 ? (
+          <div className="text-center py-16 text-gray-400">
+            <p className="font-semibold text-sm">No new arrivals at the moment.</p>
+            <Link href="/cars" className="text-[#C8102E] font-bold hover:underline text-sm mt-2 inline-block">
+              Browse all stock →
+            </Link>
+          </div>
+        ) : (
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-2">
+            {cars.map(car => (
+              <FcGridCard key={car.id} car={car} imgMap={imgMap} waNumber={waNumber} />
+            ))}
+          </div>
+        )}
+
+        {/* ── Mobile view-all ── */}
+        {!loading && cars.length > 0 && (
+          <div className="flex justify-center mt-5 sm:hidden">
+            <Link
+              href="/cars"
+              className="inline-flex items-center gap-2 px-6 py-2.5 text-white text-[11px] font-bold uppercase tracking-wide"
+              style={{ background: '#C8102E' }}
+            >
+              View All Cars <ArrowRight size={13} />
+            </Link>
+          </div>
+        )}
+      </div>
     </section>
   );
 }
