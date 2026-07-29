@@ -183,43 +183,48 @@ async function listFolderImages(dateFolder: string, subfolder: string): Promise<
 }
 
 /* ─── IMAGE ORDER HELPERS ────────────────────────────────────── */
+/**
+ * Extracts the display order from a Cloudinary public_id.
+ *
+ * Filename format: CHASSIS_NNx_suffix  (e.g. GFC27-193807_01a_zcacdv)
+ *   - _map anywhere → 99 (always last)
+ *   - _01a / _02a / _01 / _02 → sequence number (1, 2, …)
+ *   - anything else → 50
+ */
 function getDisplayOrder(publicId: string): number {
   const filename = publicId.split('/').pop() ?? '';
-  if (/_map$/i.test(filename)) return 99;
-  // Existing nested pattern: filename ends with _01a, _02, etc.
-  const matchSuffix = filename.match(/_(\d+)a?$/i);
-  if (matchSuffix) return parseInt(matchSuffix[1], 10);
-  // Flat folder pattern: e.g. GFC27-193807-01_jyfkq9 → sequence from before underscore
-  const beforeUnderscore = filename.split('_')[0] ?? '';
-  const parts = beforeUnderscore.split('-');
-  const lastPart = parts[parts.length - 1] ?? '';
-  const seq = parseInt(lastPart, 10);
-  if (!isNaN(seq) && seq > 0) return seq;
+  // Map images always displayed last
+  if (/_map(_|$)/i.test(filename)) return 99;
+  // Sequence number: _NNx_ or _NNx at end-of-string (before Cloudinary random suffix)
+  const match = filename.match(/_(\d+)[a-z]?(_|$)/i);
+  if (match) return parseInt(match[1], 10);
   return 50;
 }
 
+/**
+ * Returns true if the image is the primary (hero) photo.
+ * Primary images have sequence _01 or _01a.
+ */
 function isPrimaryImage(publicId: string): boolean {
   const filename = publicId.split('/').pop() ?? '';
-  // Existing nested pattern: ends with _01 or _01a
-  if (/_0*1a?$/i.test(filename)) return true;
-  // Flat folder pattern: e.g. GFC27-193807-01_jyfkq9 → sequence = 1 → primary
-  const beforeUnderscore = filename.split('_')[0] ?? '';
-  const parts = beforeUnderscore.split('-');
-  const lastPart = parts[parts.length - 1] ?? '';
-  const seq = parseInt(lastPart, 10);
-  return seq === 1;
+  // _01a_ or _01_ or _01 at end (sequence number 1)
+  return /_0*1[a-z]?(_|$)/i.test(filename);
 }
 
 /**
- * Extracts chassis number from a flat-folder Cloudinary public_id.
- * e.g. "wazir-trading/GFC27-193807-01_jyfkq9" → "GFC27-193807"
+ * Extracts chassis number from a Cloudinary public_id.
+ *
+ * Filename format: CHASSIS_NNx_suffix
+ * Examples:
+ *   "wazir-trading/MXPA15-0001299_01a_nag8yy" → "MXPA15-0001299"
+ *   "wazir-trading/GFC27-193807_01a_zcacdv"   → "GFC27-193807"
+ *
+ * The chassis number is everything before the first underscore — the
+ * sequence marker (_01a, _02a, _map, …) always starts at the first _.
  */
 function extractChassisFromPublicId(publicId: string): string {
   const filename = publicId.split('/').pop() ?? publicId;
-  // 1. Take the part before the underscore: GFC27-193807-01
-  const beforeUnderscore = filename.split('_')[0] ?? filename;
-  // 2. Remove the last -NN sequence number: GFC27-193807
-  return beforeUnderscore.replace(/-\d+$/, '');
+  return filename.split('_')[0] ?? filename;
 }
 
 /* ─── CLOUDINARY FLAT FOLDER FETCH ──────────────────────────── */
