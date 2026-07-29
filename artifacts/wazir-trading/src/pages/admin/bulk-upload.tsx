@@ -2218,19 +2218,19 @@ export default function AdminBulkUpload() {
       </header>
 
       {/* Tabs */}
-      <div className="bg-white border-b border-gray-200 px-6 overflow-x-auto">
-        <div className="flex gap-0 min-w-max">
+      <div className="bg-white border-b border-gray-200 px-4">
+        <div className="flex flex-wrap gap-0">
           {TABS.map(({ id, label, icon: Icon }) => (
             <button
               key={id}
               onClick={() => setActiveTab(id)}
-              className={`flex items-center gap-2 px-5 py-3.5 text-sm font-medium border-b-2 transition-colors whitespace-nowrap ${
+              className={`flex items-center gap-1.5 px-4 py-3 text-sm font-medium border-b-2 transition-colors whitespace-nowrap ${
                 activeTab === id
                   ? 'border-[#C8102E] text-[#C8102E]'
                   : 'border-transparent text-gray-500 hover:text-gray-800'
               }`}
             >
-              <Icon size={15} />
+              <Icon size={14} />
               {label}
             </button>
           ))}
