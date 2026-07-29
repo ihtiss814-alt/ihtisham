@@ -1,0 +1,81 @@
+Build an image sync tool in the admin panel.
+
+All car images are uploaded to Cloudinary 
+in a flat folder called "wazir-trading".
+
+Filenames follow this pattern:
+[chassis_number]-[sequence].jpg
+Example: MXPH15-0020576-01.jpg
+         MXPH15-0020576-02.jpg
+         NHP130-2001288-01.jpg
+
+Build a "Sync Images from Cloudinary" 
+button on the admin dashboard.
+
+When clicked do this:
+
+1. Fetch ALL images from Cloudinary folder 
+   wazir-trading using Cloudinary Search API:
+   
+   GET https://api.cloudinary.com/v1_1/txb1wiw1/resources/search
+   Body: { 
+     expression: "folder:wazir-trading",
+     max_results: 500
+   }
+
+2. Group images by chassis number.
+   Extract chassis number from filename by 
+   removing the last part after final dash:
+   MXPH15-0020576-01.jpg → MXPH15-0020576
+   MXPH15-0020576-02.jpg → MXPH15-0020576
+   NHP130-2001288-01.jpg → NHP130-2001288
+
+   Important: chassis numbers can contain 
+   dashes like MXPH15-0020576 so take 
+   everything EXCEPT the last -01, -02 part
+
+3. For each chassis number group:
+   - Search Supabase cars table:
+     SELECT id FROM cars 
+     WHERE chassis_number = [chassis_number]
+   
+   - If car found insert images to car_images:
+     - Image ending in -01: is_primary = true, display_order = 1
+     - Image ending in -02: is_primary = false, display_order = 2
+     - And so on
+   
+   - Skip if image URL already exists 
+     in car_images to avoid duplicates
+
+4. Show live progress while running:
+   "Fetching images from Cloudinary..."
+   "Found 150 images total"
+   "Processing MXPH15-0020576 - 3 images found"
+   "Processing NHP130-2001288 - 5 images found"
+   "GXPA16-0004005 - no car found in database"
+
+5. Show final summary:
+   Total images processed: X
+   Cars updated with images: X
+   Cars not found in database: X
+   Images already existed (skipped): X
+
+Also add this auto-sync to the CSV 
+bulk upload tool. After importing cars 
+from CSV automatically run the image 
+sync so images appear immediately 
+without clicking separately.
+
+Also add a per-car sync button in 
+manage cars table. Small camera icon 
+next to each car. Clicking searches 
+Cloudinary for images matching that 
+car chassis number and adds them.
+
+Cloudinary credentials in environment:
+CLOUDINARY_CLOUD_NAME = txb1wiw1
+CLOUDINARY_API_KEY = already set
+CLOUDINARY_API_SECRET = already set
+
+Use Basic Auth for Cloudinary Search API:
+Authorization: Basic base64(api_key:api_secret)

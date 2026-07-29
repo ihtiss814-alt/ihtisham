@@ -186,49 +186,56 @@ async function listFolderImages(dateFolder: string, subfolder: string): Promise<
 /**
  * Parses a Cloudinary public_id into { chassis, seq, isMap }.
  *
- * Two filename formats are supported:
+ * Cloudinary appends a random suffix after an underscore when uploading:
+ *   wazir-trading/GFC27-193807-01_jyfkq9
  *
- *   OLD  CHASSIS-SEQ_randomsuffix        e.g. GFC27-070976-01_pqmlcp
- *        Sequence is the last dash-separated token before the first _,
- *        but only if it is 1–3 digits (to avoid stripping real chassis suffixes
- *        like MXPA15-0001299 where the trailing number is 7 digits).
+ * Algorithm:
+ *   1. Remove folder prefix         → GFC27-193807-01_jyfkq9
+ *   2. Strip Cloudinary suffix      → GFC27-193807-01
+ *      (everything after the last underscore)
+ *   3. Split on last dash           → chassis: GFC27-193807, seq token: 01
+ *   4. Parse seq token as integer   → seq: 1
  *
- *   NEW  CHASSIS_SEQx_randomsuffix       e.g. MXPA15-0001299_01a_nag8yy
- *        Sequence is the second underscore-delimited token (digits + optional letter).
- *        Map images use _map_ instead of a sequence token.
- *
- * The function tries NEW format first (underscore-delimited sequence), then OLD.
+ * Examples:
+ *   GFC27-193807-01_jyfkq9   → chassis: GFC27-193807,  seq: 1,  primary: true
+ *   GFC27-193807-02_abc123   → chassis: GFC27-193807,  seq: 2,  primary: false
+ *   NHP130-2001288-01_xyz99  → chassis: NHP130-2001288, seq: 1,  primary: true
+ *   HFC27-121240-03_ahi0go   → chassis: HFC27-121240,  seq: 3,  primary: false
  */
 function parseCloudinaryFilename(publicId: string): {
   chassis: string;
   seq: number;
   isMap: boolean;
 } {
-  const filename = publicId.split('/').pop() ?? publicId;
-  const parts    = filename.split('_');
-  const base     = parts[0] ?? filename;   // always the chassis candidate
-  const second   = parts[1] ?? '';          // sequence token in NEW format
+  // Step 1: Remove folder prefix and file extension
+  const filename = (publicId.split('/').pop() ?? publicId).replace(/\.[^._]+$/, '');
 
-  // NEW format — map: CHASSIS_map_suffix
-  if (/^map$/i.test(second)) {
-    return { chassis: base, seq: 99, isMap: true };
+  // Step 2: Remove Cloudinary random suffix — drop everything after the last underscore.
+  // If there is no underscore the filename has no Cloudinary suffix; use it as-is.
+  const uParts = filename.split('_');
+  const base   = uParts.length > 1 ? uParts.slice(0, -1).join('_') : filename;
+
+  // Map images end with _map or -map
+  if (/[_-]map$/i.test(base)) {
+    return { chassis: base.replace(/[_-]map$/i, ''), seq: 99, isMap: true };
   }
 
-  // NEW format — sequence: CHASSIS_NNx_suffix  (e.g. _01a_)
-  const newSeq = second.match(/^(\d+)[a-z]?$/i);
-  if (newSeq) {
-    return { chassis: base, seq: parseInt(newSeq[1], 10), isMap: false };
+  // Step 3 & 4: Split on the last dash to separate chassis from sequence number.
+  // Sequence is 1–3 digits (optionally followed by a letter, e.g. "01a").
+  const lastDash = base.lastIndexOf('-');
+  if (lastDash !== -1) {
+    const seqStr   = base.slice(lastDash + 1);
+    const seqMatch = seqStr.match(/^(\d{1,3})[a-z]?$/i);
+    if (seqMatch) {
+      return {
+        chassis: base.slice(0, lastDash),
+        seq:     parseInt(seqMatch[1], 10),
+        isMap:   false,
+      };
+    }
   }
 
-  // OLD format — sequence encoded as trailing -NN in the base before the first _
-  // Only strip if the trailing digits are ≤ 3 chars (sequence 1–999).
-  // This preserves long chassis suffixes like -0001299 (7 digits).
-  const oldSeq = base.match(/^(.+)-(\d{1,3})$/);
-  if (oldSeq) {
-    return { chassis: oldSeq[1], seq: parseInt(oldSeq[2], 10), isMap: false };
-  }
-
-  // No sequence information found
+  // Fallback: no sequence information found
   return { chassis: base, seq: 50, isMap: false };
 }
 
