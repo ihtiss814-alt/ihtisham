@@ -195,7 +195,7 @@
 }
 
 .marquee-track {
-  animation: marquee-scroll 36s linear infinite;
+  animation: marquee-scroll 120s linear infinite;
   will-change: transform;
 }
 .marquee-track:hover { animation-play-state: paused; }
