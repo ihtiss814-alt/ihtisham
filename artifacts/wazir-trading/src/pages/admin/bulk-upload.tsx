@@ -6,6 +6,7 @@ import {
   Upload, Eye, CheckCircle2, XCircle, Loader2, Image, LayoutDashboard,
   Star, Trash2, Download, ChevronDown, ChevronUp, Lock, LogOut, Search,
   PackageOpen, FileSpreadsheet, FolderArchive, RefreshCw, Camera,
+  GripVertical, X,
 } from 'lucide-react';
 
 /* ─── CONSTANTS ──────────────────────────────────────────────── */
@@ -951,6 +952,191 @@ function SyncImagesButton({
 }
 
 /* ═══════════════════════════════════════════════════════════════
+   IMAGE MANAGEMENT MODAL — view, reorder, and change primary image
+═══════════════════════════════════════════════════════════════ */
+
+type DbImage = {
+  id: string;
+  image_url: string;
+  is_primary: boolean;
+  display_order: number;
+};
+
+function CarImagesModal({
+  car,
+  onClose,
+}: {
+  car: CarRow;
+  onClose: () => void;
+}) {
+  const [images, setImages]     = useState<DbImage[]>([]);
+  const [loading, setLoading]   = useState(true);
+  const [saving, setSaving]     = useState<string | null>(null);
+  const dragIdx                 = useRef<number | null>(null);
+  const dragOverIdx             = useRef<number | null>(null);
+
+  const loadImages = useCallback(async () => {
+    setLoading(true);
+    const { data } = await supabase
+      .from('car_images')
+      .select('id, image_url, is_primary, display_order')
+      .eq('car_id', car.id)
+      .order('display_order');
+    setImages(data ?? []);
+    setLoading(false);
+  }, [car.id]);
+
+  React.useEffect(() => { loadImages(); }, [loadImages]);
+
+  const setPrimary = async (imgId: string) => {
+    if (saving) return;
+    setSaving(imgId);
+    setImages(prev => prev.map(img => ({ ...img, is_primary: img.id === imgId })));
+    await supabase.from('car_images').update({ is_primary: false }).eq('car_id', car.id);
+    await supabase.from('car_images').update({ is_primary: true }).eq('id', imgId);
+    setSaving(null);
+  };
+
+  const handleDragStart = (e: React.DragEvent, idx: number) => {
+    dragIdx.current = idx;
+    e.dataTransfer.effectAllowed = 'move';
+  };
+
+  const handleDragOver = (e: React.DragEvent, idx: number) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+    dragOverIdx.current = idx;
+  };
+
+  const handleDrop = async (e: React.DragEvent, dropIdx: number) => {
+    e.preventDefault();
+    const fromIdx = dragIdx.current;
+    if (fromIdx === null || fromIdx === dropIdx) { dragIdx.current = null; return; }
+
+    const reordered = [...images];
+    const [moved] = reordered.splice(fromIdx, 1);
+    reordered.splice(dropIdx, 0, moved);
+    dragIdx.current = null;
+    dragOverIdx.current = null;
+
+    const updated = reordered.map((img, i) => ({ ...img, display_order: i + 1 }));
+    setImages(updated);
+    await Promise.all(
+      updated.map(img =>
+        supabase.from('car_images').update({ display_order: img.display_order }).eq('id', img.id)
+      )
+    );
+  };
+
+  return (
+    <div
+      className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4"
+      onClick={e => { if (e.target === e.currentTarget) onClose(); }}
+    >
+      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-3xl max-h-[85vh] flex flex-col">
+
+        {/* Header */}
+        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
+          <div>
+            <h2 className="font-bold text-lg text-gray-900">Manage Images</h2>
+            <p className="text-xs text-gray-500 mt-0.5 font-mono">
+              {car.chassis_number} — {car.make} {car.model} {car.year}
+            </p>
+          </div>
+          <button
+            onClick={onClose}
+            className="p-1.5 rounded-lg text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-colors"
+          >
+            <X size={18} />
+          </button>
+        </div>
+
+        {/* Body */}
+        <div className="flex-1 overflow-y-auto p-6">
+          {loading ? (
+            <div className="flex items-center justify-center py-16 text-gray-400">
+              <Loader2 className="animate-spin mr-2" size={20} /> Loading images…
+            </div>
+          ) : images.length === 0 ? (
+            <div className="text-center py-16 text-gray-400">
+              No images for this car yet. Use the Sync button to pull them from Cloudinary.
+            </div>
+          ) : (
+            <>
+              <p className="text-xs text-gray-500 mb-4">
+                <span className="text-amber-500 font-semibold">★ Star</span> = primary (shown in listings).
+                Click any photo to make it primary. Drag to reorder.
+              </p>
+              <div className="grid grid-cols-3 sm:grid-cols-4 gap-3">
+                {images.map((img, idx) => (
+                  <div
+                    key={img.id}
+                    draggable
+                    onDragStart={e => handleDragStart(e, idx)}
+                    onDragOver={e => handleDragOver(e, idx)}
+                    onDrop={e => handleDrop(e, idx)}
+                    onClick={() => !img.is_primary && setPrimary(img.id)}
+                    className={`relative group rounded-xl overflow-hidden border-2 transition-all select-none
+                      ${img.is_primary
+                        ? 'border-amber-400 ring-2 ring-amber-200'
+                        : 'border-gray-200 hover:border-[#C8102E] cursor-pointer'}
+                    `}
+                  >
+                    <img
+                      src={img.image_url}
+                      alt=""
+                      draggable={false}
+                      className="w-full aspect-[4/3] object-cover"
+                    />
+
+                    {/* Primary star */}
+                    {img.is_primary && (
+                      <div className="absolute top-1.5 left-1.5 bg-amber-400 text-white rounded-full p-1 shadow">
+                        <Star size={10} fill="white" strokeWidth={0} />
+                      </div>
+                    )}
+
+                    {/* Drag handle — visible on hover */}
+                    <div className="absolute top-1.5 right-1.5 bg-black/50 text-white rounded p-0.5 opacity-0 group-hover:opacity-100 transition-opacity cursor-grab active:cursor-grabbing">
+                      <GripVertical size={12} />
+                    </div>
+
+                    {/* Saving overlay */}
+                    {saving === img.id && (
+                      <div className="absolute inset-0 bg-white/70 flex items-center justify-center">
+                        <Loader2 size={20} className="animate-spin text-[#C8102E]" />
+                      </div>
+                    )}
+
+                    {/* Order badge */}
+                    <div className="absolute bottom-1 right-1.5 text-[10px] font-mono text-white/90 bg-black/40 px-1 rounded leading-4">
+                      #{idx + 1}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </>
+          )}
+        </div>
+
+        {/* Footer */}
+        <div className="px-6 py-3 border-t border-gray-100 bg-gray-50 rounded-b-2xl flex items-center justify-between">
+          <span className="text-xs text-gray-500">
+            {images.length} image{images.length !== 1 ? 's' : ''}
+          </span>
+          <button
+            onClick={onClose}
+            className="px-5 py-1.5 text-sm bg-[#0D1B3E] text-white rounded-lg hover:bg-[#1a2d5a] transition-colors"
+          >
+            Done
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ═══════════════════════════════════════════════════════════════
    FLAT FOLDER SYNC — fetches all images from the root wazir-trading/
    folder, extracts chassis numbers from public_ids, and links them
    to cars in Supabase.
@@ -1210,6 +1396,7 @@ function ReviewDashboardTab() {
   const [search, setSearch]   = useState('');
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [actionStatus, setActionStatus] = useState('');
+  const [managingCar, setManagingCar]   = useState<CarRow | null>(null);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -1298,6 +1485,12 @@ function ReviewDashboardTab() {
 
   return (
     <div className="space-y-5">
+      {managingCar && (
+        <CarImagesModal
+          car={managingCar}
+          onClose={() => setManagingCar(null)}
+        />
+      )}
       {/* Stats */}
       <div className="grid grid-cols-3 gap-4">
         <div className="bg-[#0D1B3E] text-white rounded-xl p-4">
@@ -1421,7 +1614,16 @@ function ReviewDashboardTab() {
                     }
                   </td>
                   <td className="px-3 py-2" onClick={e => e.stopPropagation()}>
-                    <SyncImagesButton car={car} onSynced={onCarSynced} />
+                    <div className="flex items-center gap-1.5">
+                      <button
+                        onClick={() => setManagingCar(car)}
+                        title="Manage images"
+                        className="inline-flex items-center gap-1 text-xs px-2 py-1 bg-gray-50 border border-gray-200 text-gray-600 rounded hover:bg-gray-100 transition-colors"
+                      >
+                        <Camera size={11} /> Images
+                      </button>
+                      <SyncImagesButton car={car} onSynced={onCarSynced} />
+                    </div>
                   </td>
                 </tr>
               ))}
