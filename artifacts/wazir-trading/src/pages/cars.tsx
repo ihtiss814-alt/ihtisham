@@ -33,10 +33,10 @@ const MAKE_NAMES = [
 ];
 
 const PRICE_RANGES = [
-  '$500 - $1500', '$1500 - $2000', '$2000 - $2500', '$2500 - $3000',
-  '$3000 - $3500', '$3500 - $4000', '$4000 - $4500', '$4500 - $5000',
+  '$2500 - $3000', '$3000 - $4000', '$4000 - $5000',
   '$5000 - $6000', '$6000 - $7000', '$7000 - $8000', '$8000 - $9000',
-  '$9000 - $10000', '$10000 - $15000', '$15000 - $20000', '$20000 - $25000',
+  '$9000 - $10000', '$10000 - $12000', '$12000 - $15000',
+  '$15000 - $18000', '$18000 - $22000', '$22000 - $25000',
 ];
 
 const BODY_TYPE_ITEMS = [
@@ -1018,6 +1018,8 @@ type Filters = {
   q: string; make: string; price: string; body: string; category: string;
   location: string; year: string; drive: string; trans: string; engine: string;
   fuel: string; mileage: string; steering: string;
+  // Direct numeric price bounds — used by home-page "Shop by Price Range" links (?minPrice=X&maxPrice=Y)
+  minPrice: string; maxPrice: string;
   advMake: string; advModel: string; advBody: string; advFuel: string; advDrive: string;
   advTrans: string; advYearFrom: string; advYearTo: string; advMinPrice: string; advMaxPrice: string;
   advColor: string; advLocation: string; advMinMil: string; advMaxMil: string;
@@ -1033,11 +1035,11 @@ function applyFiltersToQuery(query: any, filters: Filters, activeTab: string, so
 
   // Sidebar filters
   if (filters.make)     query = query.ilike('make', filters.make);
-  if (filters.body)     query = query.eq('body_type', filters.body);
+  if (filters.body)     query = query.ilike('body_type', filters.body);
   if (filters.location) query = query.eq('stock_location', filters.location);
-  if (filters.drive)    query = query.eq('drive', filters.drive);
+  if (filters.drive)    query = query.ilike('drive', filters.drive);
   if (filters.trans)    query = query.eq('transmission', filters.trans);
-  if (filters.steering) query = query.eq('steering', filters.steering);
+  if (filters.steering) query = query.ilike('steering', filters.steering);
 
   const fuelFilter = filters.fuel || filters.category;
   if (fuelFilter)       query = query.ilike('fuel_type', fuelFilter);
@@ -1046,6 +1048,9 @@ function applyFiltersToQuery(query: any, filters: Filters, activeTab: string, so
     const pr = parsePriceRange(filters.price);
     if (pr) query = query.gte('fob_price_usd', pr[0]).lte('fob_price_usd', pr[1]);
   }
+  // Direct numeric bounds from home-page "Shop by Price Range" links
+  if (filters.minPrice) query = query.gte('fob_price_usd', parseFloat(filters.minPrice));
+  if (filters.maxPrice) query = query.lte('fob_price_usd', parseFloat(filters.maxPrice));
   if (filters.year) {
     const yr = parseYearRange(filters.year);
     if (yr) query = query.gte('year', yr[0]).lte('year', yr[1]);
@@ -1135,6 +1140,8 @@ export default function CarsPage() {
       fuel:        p.get('fuel')        || '',
       mileage:     p.get('mileage')     || '',
       steering:    p.get('steering')    || '',
+      minPrice:    p.get('minPrice')    || '',
+      maxPrice:    p.get('maxPrice')    || '',
       advMake:     p.get('advMake')     || '',
       advModel:    p.get('advModel')    || '',
       advBody:     p.get('advBody')     || '',
@@ -1180,9 +1187,9 @@ export default function CarsPage() {
   useEffect(() => {
     const p = getParams();
     const hasFilter = ['q','make','price','body','category','location','year','drive','trans',
-      'engine','fuel','mileage','steering','minPrice','maxPrice','advMake','advModel',
-      'advBody','advFuel','advDrive','advTrans','advYearFrom','advYearTo','advMinPrice',
-      'advMaxPrice','advColor','advLocation','advMinMil','advMaxMil','advMinEng','advMaxEng',
+      'engine','fuel','mileage','steering','minPrice','maxPrice','destination',
+      'advMake','advModel','advBody','advFuel','advDrive','advTrans','advYearFrom','advYearTo',
+      'advMinPrice','advMaxPrice','advColor','advLocation','advMinMil','advMaxMil','advMinEng','advMaxEng',
     ].some(k => p.get(k));
     const delay = hasFilter ? setTimeout(() => {
       resultsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -1433,6 +1440,9 @@ export default function CarsPage() {
     advMinPrice: filters.advMinPrice && `Min $${Number(filters.advMinPrice).toLocaleString()}`,
     advMaxPrice: filters.advMaxPrice && `Max $${Number(filters.advMaxPrice).toLocaleString()}`,
     advColor:    filters.advColor && `Color: ${filters.advColor}`,
+    // Direct price bounds from home-page links
+    minPrice:    filters.minPrice && `From $${Number(filters.minPrice).toLocaleString()}`,
+    maxPrice:    filters.maxPrice && `Up to $${Number(filters.maxPrice).toLocaleString()}`,
   }).filter(([, v]) => !!v) as [string, string][];
 
   // ── Sidebar props ──
@@ -1582,7 +1592,7 @@ export default function CarsPage() {
           {/* QUICK CHIPS */}
           <div className="flex flex-wrap gap-2 mb-4">
             {[
-              { label: 'Under $2,000',    action: () => setFilter('price', '$500 - $1500') },
+              { label: 'Under $5,000',    action: () => setFilter('maxPrice', '5000') },
               { label: 'SUV & 4WD',       action: () => setFilter('body', 'SUV') },
               { label: 'Right Hand Drive', action: () => setFilter('steering', 'RHD') },
             ].map(({ label, action }) => (

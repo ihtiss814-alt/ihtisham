@@ -566,19 +566,18 @@ function ShopByBodyTypeSection() {
 
 /* ── Shop By Price Range ─────────────────────────────────────── */
 const PRICE_RANGES = [
-  { label: '$500 – $1,500',    min: 500,  max: 1500  },
-  { label: '$1,500 – $2,000',  min: 1500, max: 2000  },
-  { label: '$2,000 – $2,500',  min: 2000, max: 2500  },
-  { label: '$2,500 – $3,000',  min: 2500, max: 3000  },
-  { label: '$3,000 – $3,500',  min: 3000, max: 3500  },
-  { label: '$3,500 – $4,000',  min: 3500, max: 4000  },
-  { label: '$4,000 – $4,500',  min: 4000, max: 4500  },
-  { label: '$4,500 – $5,000',  min: 4500, max: 5000  },
-  { label: '$5,000 – $6,000',  min: 5000, max: 6000  },
-  { label: '$6,000 – $7,000',  min: 6000, max: 7000  },
-  { label: '$7,000 – $8,000',  min: 7000, max: 8000  },
-  { label: '$8,000 – $9,000',  min: 8000, max: 9000  },
-  { label: '$9,000 – $10,000', min: 9000, max: 10000 },
+  { label: '$2,500 – $3,000',   min: 2500,  max: 3000  },
+  { label: '$3,000 – $4,000',   min: 3000,  max: 4000  },
+  { label: '$4,000 – $5,000',   min: 4000,  max: 5000  },
+  { label: '$5,000 – $6,000',   min: 5000,  max: 6000  },
+  { label: '$6,000 – $7,000',   min: 6000,  max: 7000  },
+  { label: '$7,000 – $8,000',   min: 7000,  max: 8000  },
+  { label: '$8,000 – $9,000',   min: 8000,  max: 9000  },
+  { label: '$9,000 – $10,000',  min: 9000,  max: 10000 },
+  { label: '$10,000 – $12,000', min: 10000, max: 12000 },
+  { label: '$12,000 – $15,000', min: 12000, max: 15000 },
+  { label: '$15,000 – $18,000', min: 15000, max: 18000 },
+  { label: '$18,000 – $22,000', min: 18000, max: 22000 },
 ] as const;
 
 function PriceRangeCard({ label, min, max }: { label: string; min: number; max: number }) {
@@ -2484,9 +2483,9 @@ export default function HomePage() {
           {/* Quick filters */}
           <div className="flex flex-wrap justify-center gap-2.5 mt-5">
             {[
-              { label: 'Under $2,000',   href: '/cars?maxPrice=2000' },
+              { label: 'Under $5,000',   href: '/cars?maxPrice=5000' },
               { label: 'SUV & 4WD',      href: '/cars?body=SUV' },
-              { label: 'Right Hand Drive', href: '/cars?steering=Right' },
+              { label: 'Right Hand Drive', href: '/cars?steering=RHD' },
             ].map(({ label, href }) => (
               <Link
                 key={label}
