@@ -862,23 +862,13 @@ function FeaturedCollectionSection() {
       <div className="max-w-[1600px] mx-auto px-3 md:px-5">
 
         {/* ── Section header ── */}
-        <div className="flex items-end justify-between mb-5">
-          <div>
-            <p className="text-[9px] tracking-[0.3em] uppercase font-bold mb-1" style={{ color: '#C8102E' }}>
-              Latest Stock · New Arrivals
-            </p>
-            <h2 className="text-2xl md:text-3xl font-serif font-bold text-gray-900 leading-tight">
-              Featured Collection
-            </h2>
-          </div>
-          <Link
-            href="/cars"
-            className="hidden sm:inline-flex items-center gap-1.5 px-5 py-2 text-white text-[11px] font-bold uppercase tracking-wide transition-opacity hover:opacity-90 flex-shrink-0"
-            style={{ background: '#C8102E' }}
-          >
-            View All
-            <ArrowRight size={13} />
-          </Link>
+        <div className="text-center mb-5">
+          <p className="text-[9px] tracking-[0.3em] uppercase font-bold mb-1" style={{ color: '#C8102E' }}>
+            Latest Stock · New Arrivals
+          </p>
+          <h2 className="text-2xl md:text-3xl font-serif font-bold text-gray-900 leading-tight">
+            Featured Collection
+          </h2>
         </div>
 
         {/* ── Grid ── */}
@@ -903,12 +893,12 @@ function FeaturedCollectionSection() {
           </div>
         )}
 
-        {/* ── Mobile view-all ── */}
+        {/* ── View All button ── */}
         {!loading && cars.length > 0 && (
-          <div className="flex justify-center mt-5 sm:hidden">
+          <div className="flex justify-center mt-6">
             <Link
               href="/cars"
-              className="inline-flex items-center gap-2 px-6 py-2.5 text-white text-[11px] font-bold uppercase tracking-wide"
+              className="inline-flex items-center gap-2 px-6 py-2.5 text-white text-[11px] font-bold uppercase tracking-wide transition-opacity hover:opacity-90"
               style={{ background: '#C8102E' }}
             >
               View All Cars <ArrowRight size={13} />
