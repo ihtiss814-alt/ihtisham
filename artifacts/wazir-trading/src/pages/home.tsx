@@ -1072,10 +1072,27 @@ function HowToBuySection() {
 
 /* ── Can't Find Your Car ─────────────────────────────────────── */
 const SHIP_TO_COUNTRIES = [
-  'Pakistan','UAE','UK','Guyana','Jamaica','Trinidad',
-  'Kenya','Ghana','Nigeria','Russia','New Zealand',
-  'Papua New Guinea','Germany','Tanzania','Uganda',
-  'South Africa','Australia',
+  // Africa
+  'Angola','Botswana','Cameroon','Djibouti','Ethiopia','Ghana','Ivory Coast','Kenya',
+  'Madagascar','Malawi','Mauritius','Mozambique','Namibia','Nigeria','Rwanda',
+  'Senegal','South Africa','South Sudan','Tanzania','Uganda','Zambia','Zimbabwe',
+  // Americas
+  'Canada','Chile','Colombia','Ecuador','Guyana','Mexico','Panama','Peru','Suriname','USA',
+  // Caribbean
+  'Anguilla','Antigua','Aruba','Bahamas','Barbados','Belize','Bermuda',
+  'British Virgin Islands','Cayman Islands','Cuba','Curaçao','Dominica',
+  'Dominican Republic','Grenada','Guadeloupe','Haiti','Jamaica','Martinique',
+  'Montserrat','St Kitts','St Lucia','St Vincent','Sint Maarten',
+  'Trinidad','Turks and Caicos',
+  // Asia & Middle East
+  'Azerbaijan','Bahrain','Bangladesh','Cambodia','Georgia','India','Iraq',
+  'Jordan','Kuwait','Myanmar','Oman','Pakistan','Philippines','Qatar',
+  'Saudi Arabia','Sri Lanka','Thailand','UAE','Vietnam',
+  // Europe
+  'Belgium','Cyprus','France','Germany','Malta','Netherlands','Poland','Russia','UK',
+  // Pacific & Oceania
+  'Australia','Fiji','New Caledonia','New Zealand','Papua New Guinea',
+  'Samoa','Solomon Islands','Tonga','Vanuatu',
 ] as const;
 
 const CFYC_BENEFITS = [
