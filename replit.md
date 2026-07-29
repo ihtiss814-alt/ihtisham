@@ -12,13 +12,21 @@ A premium Japanese used-car export website built with React + Vite + Supabase.
 
 ## Running locally on Replit
 
-The workflow `artifacts/wazir-trading: web` starts the dev server automatically.
+Two workflows run in parallel:
 
-```
-PORT=24102 BASE_PATH=/ pnpm --filter @workspace/wazir-trading run dev
-```
+| Workflow | Command | Port |
+|---|---|---|
+| `artifacts/wazir-trading: web` | `pnpm --filter @workspace/wazir-trading run dev` | 24102 |
+| `artifacts/api-server: API Server` | `pnpm --filter @workspace/api-server run dev` | 8080 |
 
-The app is available at the Replit preview pane (proxied to port 24102).
+The frontend is available in the Replit preview pane (port 24102).  
+The Vite dev server proxies `/api/*` → `http://localhost:8080/*` so the admin panel's Cloudinary endpoints work in development.
+
+### API server notes
+- `artifacts/api-server/build.mjs` bundles the server with esbuild before starting.  
+  Required devDeps: `esbuild`, `esbuild-plugin-pino`, `pino-pretty`, `thread-stream`.
+- Workspace packages (`@workspace/api-zod` etc.) are resolved via `alias` in `build.mjs`
+  since they export TypeScript source directly (no compiled dist).
 
 ## Environment variables (already set in Replit)
 
