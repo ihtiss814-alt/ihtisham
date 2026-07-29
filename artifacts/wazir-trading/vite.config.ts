@@ -62,9 +62,8 @@ export default defineConfig({
       '/api': {
         target: 'http://localhost:8080',
         changeOrigin: true,
-        // Strip the /api prefix before forwarding — mirrors what the Replit
-        // reverse proxy does in preview/production (previewPath "/api" is stripped).
-        rewrite: (path) => path.replace(/^\/api/, ''),
+        // No rewrite — forward the full /api/* path so the server sees the
+        // same URL shape as in Replit preview (proxy does not strip the prefix).
       },
     },
   },

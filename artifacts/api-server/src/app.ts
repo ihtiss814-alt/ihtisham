@@ -56,9 +56,9 @@ app.use(
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// The Replit reverse proxy strips the /api prefix before forwarding requests
-// to this service (previewPath "/api" → stripped to "/"). Mount at root so
-// routes like /admin/cloudinary/... are reachable after the strip.
-app.use(router);
+// The Replit reverse proxy forwards /api/* to this service WITHOUT stripping
+// the prefix, so routes must be mounted under /api to match.
+// The Vite dev proxy also forwards the full /api/* path (no rewrite).
+app.use('/api', router);
 
 export default app;
