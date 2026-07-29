@@ -1,5 +1,6 @@
 import { Router, type IRouter, type Request, type Response } from "express";
 import { createHash } from "node:crypto";
+import { v2 as cloudinary } from "cloudinary";
 
 const router: IRouter = Router();
 
@@ -187,18 +188,14 @@ router.post("/admin/cloudinary/search-by-chassis", async (req, res) => {
 });
 
 /**
- * POST /api/admin/cloudinary/fetch-flat-folder
+ * GET /admin/cloudinary/fetch-flat-folder[?next_cursor=...]
  * Fetches ONE PAGE of images from the flat wazir-trading/ folder via the
- * Cloudinary Search API.  Supports cursor-based pagination: pass
- * { next_cursor: "<value>" } in the request body to fetch the next page.
+ * Cloudinary SDK Search API. Pass ?next_cursor=<value> for subsequent pages.
  *
  * Returns:
  *   { resources: [{ public_id, secure_url }], next_cursor?: string, total_count?: number }
- *
- * The caller should keep requesting with the returned next_cursor until it is
- * absent, then combine all pages.
  */
-router.post("/admin/cloudinary/fetch-flat-folder", async (req, res) => {
+router.get("/admin/cloudinary/fetch-flat-folder", async (req, res) => {
   if (!checkAdmin(req, res)) return;
   const apiKey    = API_KEY();
   const apiSecret = API_SECRET();
@@ -209,37 +206,28 @@ router.post("/admin/cloudinary/fetch-flat-folder", async (req, res) => {
     return;
   }
   try {
-    const { next_cursor } = req.body as { next_cursor?: string };
+    cloudinary.config({
+      cloud_name: CLOUD_NAME(),
+      api_key:    apiKey,
+      api_secret: apiSecret,
+    });
 
-    const requestBody: Record<string, unknown> = {
-      expression: "folder:wazir-trading",
-      max_results: 500,
-      sort_by: [{ public_id: "asc" }],
-    };
-    if (next_cursor) requestBody["next_cursor"] = next_cursor;
+    const { next_cursor } = req.query as { next_cursor?: string };
 
-    const creds = Buffer.from(`${apiKey}:${apiSecret}`).toString("base64");
-    const searchRes = await fetch(
-      `https://api.cloudinary.com/v1_1/${CLOUD_NAME()}/resources/search`,
-      {
-        method: "POST",
-        headers: {
-          Authorization: `Basic ${creds}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(requestBody),
-      }
-    );
-    if (!searchRes.ok) {
-      const body = await searchRes.text();
-      res.status(502).json({ error: `Cloudinary search ${searchRes.status}: ${body}` });
-      return;
-    }
-    const data = (await searchRes.json()) as {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    let search = (cloudinary.search as any)
+      .expression("folder:wazir-trading")
+      .sort_by("public_id", "asc")
+      .max_results(500);
+
+    if (next_cursor) search = search.next_cursor(next_cursor);
+
+    const data = await search.execute() as {
       resources?: { public_id: string; secure_url: string }[];
       next_cursor?: string;
       total_count?: number;
     };
+
     res.json({
       resources:   data.resources   ?? [],
       total_count: data.total_count ?? 0,

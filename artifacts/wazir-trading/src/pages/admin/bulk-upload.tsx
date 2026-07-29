@@ -228,10 +228,9 @@ function extractChassisFromPublicId(publicId: string): string {
 }
 
 /* ─── CLOUDINARY FLAT FOLDER FETCH ──────────────────────────── */
-// Calls the Cloudinary Search API directly from the browser — no api-server
-// proxy needed. Paginates using next_cursor until all images are fetched.
-const CLOUDINARY_API_CREDENTIALS = btoa('375813273711996:oPS-eBO9kqlSVBu9p8hw1nA1FwI');
-
+// Proxied through the api-server (GET /admin/cloudinary/fetch-flat-folder)
+// to keep Cloudinary credentials server-side and avoid CORS restrictions.
+// Paginates using next_cursor until all images are fetched.
 async function fetchFlatFolder(
   onPage?: (page: number, count: number) => void,
 ): Promise<{ public_id: string; secure_url: string }[]> {
@@ -241,30 +240,19 @@ async function fetchFlatFolder(
 
   do {
     page++;
-    const body: Record<string, unknown> = {
-      expression: 'folder:wazir-trading',
-      max_results: 500,
-      sort_by: [{ public_id: 'asc' }],
-      with_field: ['tags', 'context'],
-    };
-    if (nextCursor) body['next_cursor'] = nextCursor;
+    const url = new URL('/api/admin/cloudinary/fetch-flat-folder', window.location.origin);
+    if (nextCursor) url.searchParams.set('next_cursor', nextCursor);
 
-    const res = await fetch(
-      `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/resources/search`,
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Basic ${CLOUDINARY_API_CREDENTIALS}`,
-        },
-        body: JSON.stringify(body),
-      },
-    );
+    const res = await fetch(url.toString(), {
+      method: 'GET',
+      headers: { 'X-Admin-Password': ADMIN_PASSWORD },
+    });
     const data = await res.json().catch(() => ({})) as {
       resources?: { public_id: string; secure_url: string }[];
       next_cursor?: string;
+      error?: string;
     };
-    if (!res.ok) throw new Error(`Cloudinary ${res.status}`);
+    if (!res.ok) throw new Error(data.error ?? `Server ${res.status}`);
     const pageResources = data.resources ?? [];
     allResources.push(...pageResources);
     onPage?.(page, pageResources.length);
