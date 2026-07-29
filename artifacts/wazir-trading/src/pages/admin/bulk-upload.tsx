@@ -1447,32 +1447,33 @@ function sortZipImages(imgs: ZipImage[]): ZipImage[] {
   });
 }
 
-/* ─── Cloudinary upload — proxied through api-server ─── */
+/* ─── Cloudinary upload — unsigned preset, direct from browser ─── */
+// Uses the "wazir_trading" unsigned upload preset so no API secret is needed.
+// The preset is configured in the Cloudinary dashboard to allow uploads into
+// the wazir-trading folder with the correct transformation settings.
+const CLOUDINARY_UPLOAD_PRESET = 'wazir_trading';
+
 async function cloudinarySignedUpload(
   imageData: ArrayBuffer,
   mimeType: string,
   publicId: string,
 ): Promise<string> {
-  // Convert binary to base64 so it can travel as JSON to the api-server.
-  // The server generates the Cloudinary signature and does the actual upload,
-  // keeping the API secret entirely server-side.
-  const bytes  = new Uint8Array(imageData);
-  let binary   = '';
-  for (let i = 0; i < bytes.byteLength; i++) binary += String.fromCharCode(bytes[i]);
-  const image_base64 = btoa(binary);
+  const fd = new FormData();
+  fd.append('file', new Blob([imageData], { type: mimeType }));
+  fd.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
+  fd.append('public_id', publicId);
 
-  const res = await fetch('/api/admin/cloudinary/upload', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'X-Admin-Password': ADMIN_PASSWORD,
-    },
-    body: JSON.stringify({ image_base64, mime_type: mimeType, public_id: publicId }),
-  });
+  const res = await fetch(
+    `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`,
+    { method: 'POST', body: fd },
+  );
 
-  const body = await res.json().catch(() => ({})) as { secure_url?: string; error?: string };
+  const body = await res.json().catch(() => ({})) as {
+    secure_url?: string;
+    error?: { message?: string };
+  };
   if (!res.ok) {
-    throw new Error(body.error ?? `Upload failed: ${res.status}`);
+    throw new Error(body.error?.message ?? `Cloudinary upload failed: ${res.status}`);
   }
   return body.secure_url!;
 }

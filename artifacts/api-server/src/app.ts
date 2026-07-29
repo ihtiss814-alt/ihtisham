@@ -6,9 +6,23 @@ import { logger } from "./lib/logger";
 
 const app: Express = express();
 
+const ALLOWED_ORIGINS = [
+  /^https?:\/\/localhost(:\d+)?$/,
+  /^https?:\/\/127\.0\.0\.1(:\d+)?$/,
+  /^https:\/\/wazirtradingllc\.com$/,
+  /^https:\/\/www\.wazirtradingllc\.com$/,
+  // Replit preview domains (.replit.dev and .repl.co)
+  /\.replit\.dev$/,
+  /\.repl\.co$/,
+];
+
 const corsOptions: cors.CorsOptions = {
-  // Allow any origin (Replit proxy, deployed domain, local dev)
-  origin: true,
+  origin: (origin, callback) => {
+    // Allow server-to-server requests (no Origin header)
+    if (!origin) return callback(null, true);
+    const allowed = ALLOWED_ORIGINS.some((pattern) => pattern.test(origin));
+    callback(allowed ? null : new Error(`CORS: origin not allowed — ${origin}`), allowed);
+  },
   methods: ["GET", "HEAD", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
   // Must explicitly list custom headers or the preflight OPTIONS will be rejected
   allowedHeaders: ["Content-Type", "Authorization", "X-Admin-Password"],
@@ -42,6 +56,9 @@ app.use(
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-app.use("/api", router);
+// The Replit reverse proxy strips the /api prefix before forwarding requests
+// to this service (previewPath "/api" → stripped to "/"). Mount at root so
+// routes like /admin/cloudinary/... are reachable after the strip.
+app.use(router);
 
 export default app;
