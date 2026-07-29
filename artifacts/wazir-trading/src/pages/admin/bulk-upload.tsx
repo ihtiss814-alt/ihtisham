@@ -184,47 +184,65 @@ async function listFolderImages(dateFolder: string, subfolder: string): Promise<
 
 /* ─── IMAGE ORDER HELPERS ────────────────────────────────────── */
 /**
- * Extracts the display order from a Cloudinary public_id.
+ * Parses a Cloudinary public_id into { chassis, seq, isMap }.
  *
- * Filename format: CHASSIS_NNx_suffix  (e.g. GFC27-193807_01a_zcacdv)
- *   - _map anywhere → 99 (always last)
- *   - _01a / _02a / _01 / _02 → sequence number (1, 2, …)
- *   - anything else → 50
- */
-function getDisplayOrder(publicId: string): number {
-  const filename = publicId.split('/').pop() ?? '';
-  // Map images always displayed last
-  if (/_map(_|$)/i.test(filename)) return 99;
-  // Sequence number: _NNx_ or _NNx at end-of-string (before Cloudinary random suffix)
-  const match = filename.match(/_(\d+)[a-z]?(_|$)/i);
-  if (match) return parseInt(match[1], 10);
-  return 50;
-}
-
-/**
- * Returns true if the image is the primary (hero) photo.
- * Primary images have sequence _01 or _01a.
- */
-function isPrimaryImage(publicId: string): boolean {
-  const filename = publicId.split('/').pop() ?? '';
-  // _01a_ or _01_ or _01 at end (sequence number 1)
-  return /_0*1[a-z]?(_|$)/i.test(filename);
-}
-
-/**
- * Extracts chassis number from a Cloudinary public_id.
+ * Two filename formats are supported:
  *
- * Filename format: CHASSIS_NNx_suffix
- * Examples:
- *   "wazir-trading/MXPA15-0001299_01a_nag8yy" → "MXPA15-0001299"
- *   "wazir-trading/GFC27-193807_01a_zcacdv"   → "GFC27-193807"
+ *   OLD  CHASSIS-SEQ_randomsuffix        e.g. GFC27-070976-01_pqmlcp
+ *        Sequence is the last dash-separated token before the first _,
+ *        but only if it is 1–3 digits (to avoid stripping real chassis suffixes
+ *        like MXPA15-0001299 where the trailing number is 7 digits).
  *
- * The chassis number is everything before the first underscore — the
- * sequence marker (_01a, _02a, _map, …) always starts at the first _.
+ *   NEW  CHASSIS_SEQx_randomsuffix       e.g. MXPA15-0001299_01a_nag8yy
+ *        Sequence is the second underscore-delimited token (digits + optional letter).
+ *        Map images use _map_ instead of a sequence token.
+ *
+ * The function tries NEW format first (underscore-delimited sequence), then OLD.
  */
-function extractChassisFromPublicId(publicId: string): string {
+function parseCloudinaryFilename(publicId: string): {
+  chassis: string;
+  seq: number;
+  isMap: boolean;
+} {
   const filename = publicId.split('/').pop() ?? publicId;
-  return filename.split('_')[0] ?? filename;
+  const parts    = filename.split('_');
+  const base     = parts[0] ?? filename;   // always the chassis candidate
+  const second   = parts[1] ?? '';          // sequence token in NEW format
+
+  // NEW format — map: CHASSIS_map_suffix
+  if (/^map$/i.test(second)) {
+    return { chassis: base, seq: 99, isMap: true };
+  }
+
+  // NEW format — sequence: CHASSIS_NNx_suffix  (e.g. _01a_)
+  const newSeq = second.match(/^(\d+)[a-z]?$/i);
+  if (newSeq) {
+    return { chassis: base, seq: parseInt(newSeq[1], 10), isMap: false };
+  }
+
+  // OLD format — sequence encoded as trailing -NN in the base before the first _
+  // Only strip if the trailing digits are ≤ 3 chars (sequence 1–999).
+  // This preserves long chassis suffixes like -0001299 (7 digits).
+  const oldSeq = base.match(/^(.+)-(\d{1,3})$/);
+  if (oldSeq) {
+    return { chassis: oldSeq[1], seq: parseInt(oldSeq[2], 10), isMap: false };
+  }
+
+  // No sequence information found
+  return { chassis: base, seq: 50, isMap: false };
+}
+
+function getDisplayOrder(publicId: string): number {
+  const { seq, isMap } = parseCloudinaryFilename(publicId);
+  return isMap ? 99 : seq;
+}
+
+function isPrimaryImage(publicId: string): boolean {
+  return parseCloudinaryFilename(publicId).seq === 1;
+}
+
+function extractChassisFromPublicId(publicId: string): string {
+  return parseCloudinaryFilename(publicId).chassis;
 }
 
 /* ─── CLOUDINARY FLAT FOLDER FETCH ──────────────────────────── */

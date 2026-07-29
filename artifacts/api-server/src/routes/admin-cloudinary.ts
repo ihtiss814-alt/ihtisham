@@ -189,11 +189,12 @@ router.post("/admin/cloudinary/search-by-chassis", async (req, res) => {
 
 /**
  * GET /admin/cloudinary/fetch-flat-folder[?next_cursor=...]
- * Fetches ONE PAGE of images from the flat wazir-trading/ folder via the
- * Cloudinary SDK Search API. Pass ?next_cursor=<value> for subsequent pages.
  *
- * Returns:
- *   { resources: [{ public_id, secure_url }], next_cursor?: string, total_count?: number }
+ * Lists one page (≤500) of images from the wazir-trading folder.
+ * Primary: search(folder:wazir-trading) — works for named-folder assets.
+ * Fallback: api.resources(prefix) — works for prefix-uploaded assets.
+ *
+ * Returns: { resources: [{ public_id, secure_url }], next_cursor?, total_count? }
  */
 router.get("/admin/cloudinary/fetch-flat-folder", async (req, res) => {
   if (!checkAdmin(req, res)) return;
@@ -205,37 +206,52 @@ router.get("/admin/cloudinary/fetch-flat-folder", async (req, res) => {
     });
     return;
   }
+
+  cloudinary.config({
+    cloud_name: CLOUD_NAME(),
+    api_key:    apiKey,
+    api_secret: apiSecret,
+  });
+
+  const { next_cursor } = req.query as { next_cursor?: string };
+
+  type Resource = { public_id: string; secure_url: string };
+  type PageResult = { resources?: Resource[]; next_cursor?: string; total_count?: number };
+
+  // ── Primary: Search API with named-folder expression ───────────────────
   try {
-    cloudinary.config({
-      cloud_name: CLOUD_NAME(),
-      api_key:    apiKey,
-      api_secret: apiSecret,
-    });
-
-    const { next_cursor } = req.query as { next_cursor?: string };
-
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let search = (cloudinary.search as any)
       .expression("folder:wazir-trading")
       .sort_by("public_id", "asc")
       .max_results(500);
-
     if (next_cursor) search = search.next_cursor(next_cursor);
 
-    const data = await search.execute() as {
-      resources?: { public_id: string; secure_url: string }[];
-      next_cursor?: string;
-      total_count?: number;
-    };
+    const data = await search.execute() as PageResult;
+    const resources = data.resources ?? [];
+    if (resources.length > 0 || !next_cursor) {
+      return res.json({
+        resources,
+        total_count: data.total_count ?? resources.length,
+        ...(data.next_cursor ? { next_cursor: data.next_cursor } : {}),
+      });
+    }
+  } catch { /* fall through to backup */ }
 
-    res.json({
-      resources:   data.resources   ?? [],
-      total_count: data.total_count ?? 0,
-      ...(data.next_cursor ? { next_cursor: data.next_cursor } : {}),
-    });
-  } catch (err) {
-    res.status(500).json({ error: err instanceof Error ? err.message : "Unknown error" });
-  }
+  // ── Fallback: api.resources with prefix (prefix-uploaded assets) ────────
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const opts: Record<string, any> = {
+    type: "upload", prefix: "wazir-trading/", max_results: 500,
+  };
+  if (next_cursor) opts["next_cursor"] = next_cursor;
+
+  const data = await cloudinary.api.resources(opts) as PageResult;
+  const resources = data.resources ?? [];
+  res.json({
+    resources,
+    total_count: data.total_count ?? resources.length,
+    ...(data.next_cursor ? { next_cursor: data.next_cursor } : {}),
+  });
 });
 
 /**
