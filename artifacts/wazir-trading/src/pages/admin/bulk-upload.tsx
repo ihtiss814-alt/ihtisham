@@ -54,45 +54,97 @@ function parseEquipment(raw: string): Record<string, boolean> {
   return result;
 }
 
+/* ─── COLUMN MAP ─────────────────────────────────────────────── */
+type ColMap = {
+  lot_number: number;       model_code: number;      chassis_number: number;
+  make: number;             model: number;            variant: number;
+  year: number;             manufacture_month: number;
+  engine_cc: number;        seats: number;
+  auction_grade: number;    exterior_grade: number;   interior_grade: number;
+  transmission: number;     body_type: number | null; color: number;
+  doors: number;            mileage_km: number;
+  fuel_type: number;        features: number;         wholesale_price_jpy: number;
+};
+
+/**
+ * Reads the raw header row and returns the correct column indices.
+ * Supports both sheet formats:
+ *   • Legacy (no Body Type): 23 columns — Color at 16, Doors 17, …, Price 22
+ *   • New    (with Body Type): 24 columns — Body Type at 16, Color 17, …, Price 23
+ */
+function buildColMap(headerRow: unknown[]): ColMap {
+  const hasBodyType = headerRow.some(
+    cell => String(cell ?? '').trim().toLowerCase() === 'body type',
+  );
+
+  if (hasBodyType) {
+    return {
+      lot_number: 2,    model_code: 3,      chassis_number: 4,
+      make: 5,          model: 6,            variant: 7,
+      year: 8,          manufacture_month: 9,
+      engine_cc: 10,    seats: 11,
+      auction_grade: 12, exterior_grade: 13, interior_grade: 14,
+      transmission: 15, body_type: 16,       color: 17,
+      doors: 18,        mileage_km: 19,
+      fuel_type: 21,    features: 22,        wholesale_price_jpy: 23,
+    };
+  }
+  // Legacy format — no Body Type column
+  return {
+    lot_number: 2,    model_code: 3,      chassis_number: 4,
+    make: 5,          model: 6,            variant: 7,
+    year: 8,          manufacture_month: 9,
+    engine_cc: 10,    seats: 11,
+    auction_grade: 12, exterior_grade: 13, interior_grade: 14,
+    transmission: 15, body_type: null,     color: 16,
+    doors: 17,        mileage_km: 18,
+    fuel_type: 20,    features: 21,        wholesale_price_jpy: 22,
+  };
+}
+
 /* ─── COLUMN PARSER ──────────────────────────────────────────── */
-function parseRow(row: unknown[]): Record<string, unknown> {
-  const c = (i: number) => {
+function parseRow(row: unknown[], colMap: ColMap): Record<string, unknown> {
+  const c = (i: number | null) => {
+    if (i === null) return '';
     const v = row[i];
     return v === undefined || v === null ? '' : String(v).trim();
   };
-  const n = (i: number) => {
+  const n = (i: number | null) => {
+    if (i === null) return null;
     const v = row[i];
     const num = parseFloat(String(v));
     return isNaN(num) ? null : num;
   };
   // JPY prices have comma-thousands separators (e.g. "1,500,000") — strip before parsing
-  const jpy = (i: number) => {
+  const jpy = (i: number | null) => {
+    if (i === null) return null;
     const v = row[i];
     const num = parseFloat(String(v).replace(/,/g, ''));
     return isNaN(num) ? null : num;
   };
 
   return {
-    lot_number:       c(2),
-    model_code:       c(3),
-    chassis_number:   c(4),
-    make:             c(5),
-    model:            c(6),
-    variant:          c(7),
-    year:             n(8),
-    manufacture_month:c(9),
-    engine_cc:        n(10),
-    seats:            n(11),
-    auction_grade:    c(12),
-    exterior_grade:   c(13),
-    interior_grade:   c(14),
-    transmission:     c(15),
-    color:            c(16),
-    doors:            n(17),
-    mileage_km:       n(18),
-    fuel_type:        c(20),
-    features:         parseEquipment(c(21)),
-    wholesale_price_jpy: jpy(22),
+    lot_number:          c(colMap.lot_number),
+    model_code:          c(colMap.model_code),
+    chassis_number:      c(colMap.chassis_number),
+    make:                c(colMap.make),
+    model:               c(colMap.model),
+    variant:             c(colMap.variant),
+    year:                n(colMap.year),
+    manufacture_month:   c(colMap.manufacture_month),
+    engine_cc:           n(colMap.engine_cc),
+    seats:               n(colMap.seats),
+    auction_grade:       c(colMap.auction_grade),
+    exterior_grade:      c(colMap.exterior_grade),
+    interior_grade:      c(colMap.interior_grade),
+    transmission:        c(colMap.transmission),
+    body_type:           c(colMap.body_type),
+    color:               c(colMap.color),
+    doors:               n(colMap.doors),
+    mileage_km:          n(colMap.mileage_km),
+    fuel_type:           c(colMap.fuel_type),
+    features:            parseEquipment(c(colMap.features)),
+    wholesale_price_jpy: jpy(colMap.wholesale_price_jpy),
   };
 }
 
@@ -354,12 +406,14 @@ function CsvUploadTab() {
       // Skip header rows. The sheet has multi-line headers so we filter out any row where:
       // (a) chassis_number column (4) is empty, OR
       // (b) year column (8) is not a valid 4-digit year — which catches second-header rows
+      const headerRow = raw[0] ?? [];
+      const colMap = buildColMap(headerRow);
       const parsed = raw.slice(1).filter(r => {
-        const chassis = r[4] && String(r[4]).trim();
-        const year = parseFloat(String(r[8]));
+        const chassis = r[colMap.chassis_number] && String(r[colMap.chassis_number]).trim();
+        const year = parseFloat(String(r[colMap.year]));
         return chassis && !isNaN(year) && year > 1900;
       });
-      setRows(parsed.map(parseRow));
+      setRows(parsed.map(r => parseRow(r, colMap)));
       setStatus('idle');
     };
     reader.readAsArrayBuffer(file);
@@ -431,6 +485,7 @@ function CsvUploadTab() {
         exterior_grade:      r.exterior_grade  || null,
         interior_grade:      r.interior_grade  || null,
         transmission:        r.transmission    || null,
+        body_type:           r.body_type       || null,
         color:               r.color           || null,
         doors:               r.doors           ?? null,
         mileage_km:          r.mileage_km      ?? null,
@@ -481,11 +536,15 @@ function CsvUploadTab() {
     { label: 'Model',        key: 'model' },
     { label: 'Variant',      key: 'variant' },
     { label: 'Year',         key: 'year' },
+    { label: 'Body Type',    key: 'body_type' },
     { label: 'CC',           key: 'engine_cc' },
     { label: 'Trans',        key: 'transmission' },
-    { label: 'KM',           key: 'mileage_km' },
-    { label: 'Grade',        key: 'auction_grade' },
     { label: 'Color',        key: 'color' },
+    { label: 'KM',           key: 'mileage_km' },
+    { label: 'Seats',        key: 'seats' },
+    { label: 'Grade',        key: 'auction_grade' },
+    { label: 'Ext',          key: 'exterior_grade' },
+    { label: 'Int',          key: 'interior_grade' },
     { label: 'Fuel',         key: 'fuel_type' },
     { label: 'Price JPY',    key: 'wholesale_price_jpy' },
   ] as const;
@@ -1428,12 +1487,14 @@ function parseCsvFile(file: File): Promise<ParsedCar[]> {
         const wb = XLSX.read(data, { type: 'array' });
         const ws = wb.Sheets[wb.SheetNames[0]];
         const raw: unknown[][] = XLSX.utils.sheet_to_json(ws, { header: 1, defval: '' });
+        const headerRow = raw[0] ?? [];
+        const colMap = buildColMap(headerRow);
         const parsed = raw.slice(1).filter(r => {
-          const chassis = r[4] && String(r[4]).trim();
-          const year = parseFloat(String(r[8]));
+          const chassis = r[colMap.chassis_number] && String(r[colMap.chassis_number]).trim();
+          const year = parseFloat(String(r[colMap.year]));
           return chassis && !isNaN(year) && year > 1900;
         });
-        resolve(parsed.map(parseRow));
+        resolve(parsed.map(r => parseRow(r, colMap)));
       } catch (err) { reject(err); }
     };
     reader.onerror = () => reject(new Error('FileReader failed'));
@@ -1635,6 +1696,7 @@ function CombinedUploadTab() {
           exterior_grade:      r.exterior_grade   || null,
           interior_grade:      r.interior_grade   || null,
           transmission:        r.transmission     || null,
+          body_type:           r.body_type        || null,
           color:               r.color            || null,
           doors:               r.doors            ?? null,
           mileage_km:          r.mileage_km       ?? null,
