@@ -1886,14 +1886,17 @@ function BestSellersSection() {
           const ids = data.map((c: Car) => c.id);
           const { data: imgs } = await supabase
             .from('car_images')
-            .select('*')
-            .in('car_id', ids);
+            .select('car_id, image_url, is_primary, display_order')
+            .in('car_id', ids)
+            .order('display_order');
           const map: Record<string, string> = {};
           for (const row of (imgs ?? []) as Record<string, unknown>[]) {
             const cid = String(row.car_id ?? '');
-            if (!cid || map[cid]) continue;
-            const url = String(row.image_url ?? row.url ?? row.src ?? '');
-            if (url) map[cid] = url;
+            if (!cid) continue;
+            const url = String(row.image_url ?? '');
+            if (!url) continue;
+            // Always prefer the primary image; fall back to first image seen
+            if (!map[cid] || row.is_primary) map[cid] = url;
           }
           setCars(data as Car[]);
           setImgMap(map);
