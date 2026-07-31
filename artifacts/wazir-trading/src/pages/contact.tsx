@@ -1,8 +1,14 @@
 import React, { useState } from 'react';
 import { supabase } from '@/lib/supabase';
 import { Mail, MapPin, Phone, Check } from 'lucide-react';
+import { useMeta } from '@/lib/use-meta';
 
 export default function ContactPage() {
+  useMeta({
+    title: 'Contact Us | Wazir Trading LLC',
+    description: 'Get in touch with Wazir Trading LLC. Contact us via WhatsApp, email, or our inquiry form for Japanese used car exports, pricing, and shipping questions.',
+    canonical: 'https://wazirtradingllc.com/contact',
+  });
   const [status, setStatus] = useState<'idle' | 'submitting' | 'success' | 'error'>('idle');
   const [inquiryType, setInquiryType] = useState('');
   const waNumber = import.meta.env.VITE_WHATSAPP_NUMBER || '818089227375';

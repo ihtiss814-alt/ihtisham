@@ -3,6 +3,7 @@ import {
   Copy, Check, Shield, Mail, FileText, Ban,
   Landmark, AlertTriangle, Phone, ChevronRight,
 } from 'lucide-react';
+import { useMeta } from '@/lib/use-meta';
 
 /* ─── Brand ──────────────────────────────────────────────────────── */
 const NAVY = '#0D1B3E';
@@ -56,6 +57,11 @@ function CopyBtn({ text }: { text: string }) {
 
 /* ─── Page ───────────────────────────────────────────────────────── */
 export default function PaymentInformationPage() {
+  useMeta({
+    title: 'Payment Information — Bank Transfer Details | Wazir Trading LLC',
+    description: 'Secure bank-to-bank TT payment details for Wazir Trading LLC. Full banking information for purchasing Japanese used cars internationally.',
+    canonical: 'https://wazirtradingllc.com/payment-information',
+  });
   const [allCopied, setAllCopied] = useState(false);
 
   const handleCopyAll = useCallback(async () => {

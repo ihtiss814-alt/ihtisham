@@ -2194,6 +2194,15 @@ export default function AdminBulkUpload() {
 
   const logout = () => { clearSession(); setAuthed(false); };
 
+  // Block search engines from indexing the admin panel
+  React.useEffect(() => {
+    let el = document.querySelector<HTMLMetaElement>('meta[name="robots"]');
+    const prev = el?.getAttribute('content') ?? 'index, follow';
+    if (!el) { el = document.createElement('meta'); el.name = 'robots'; document.head.appendChild(el); }
+    el.setAttribute('content', 'noindex, nofollow');
+    return () => { document.querySelector<HTMLMetaElement>('meta[name="robots"]')?.setAttribute('content', prev); };
+  }, []);
+
   if (!authed) return <PasswordGate onAuth={() => setAuthed(true)} />;
 
   return (

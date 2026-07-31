@@ -1,5 +1,6 @@
 import { useState, useRef } from 'react';
 import { MessageCircle, Mail, ChevronRight, ArrowRight, Ship, Info } from 'lucide-react';
+import { useMeta } from '@/lib/use-meta';
 
 /* ─── Brand ──────────────────────────────────────────────────────── */
 const NAVY = '#0D1B3E';
@@ -520,6 +521,11 @@ function ShippingTable({ route }: { route: RouteConfig }) {
 
 /* ─── Main Page ──────────────────────────────────────────────────── */
 export default function ShippingInformationPage() {
+  useMeta({
+    title: 'Shipping Information — Japan Car Export Routes & Costs | Wazir Trading LLC',
+    description: 'Shipping routes, RO-RO and container options, estimated transit times and costs for importing Japanese used cars to Africa, Middle East, Europe, and Asia.',
+    canonical: 'https://wazirtradingllc.com/shipping-information',
+  });
   const [activeRoute, setActiveRoute] = useState('europe-roro');
   const current = ROUTES.find(r => r.id === activeRoute) ?? ROUTES[0];
 

@@ -327,11 +327,56 @@ export default function CarDetailPage() {
     setMeta('og:description', content);
     setMeta('og:url', canonicalUrl);
 
+    // JSON-LD Vehicle schema for rich search results
+    const jsonLd = {
+      '@context': 'https://schema.org',
+      '@type': 'Vehicle',
+      name: `${car.make} ${car.model} ${car.year}`,
+      brand: { '@type': 'Brand', name: car.make },
+      model: car.model,
+      vehicleModelDate: String(car.year ?? ''),
+      color: car.color ?? undefined,
+      vehicleTransmission: car.transmission ?? undefined,
+      ...(car.mileage_km != null && {
+        mileageFromOdometer: {
+          '@type': 'QuantitativeValue',
+          value: car.mileage_km,
+          unitCode: 'KMT',
+        },
+      }),
+      ...(car.engine_cc != null && {
+        vehicleEngine: {
+          '@type': 'EngineSpecification',
+          engineDisplacement: {
+            '@type': 'QuantitativeValue',
+            value: car.engine_cc,
+            unitCode: 'CMQ',
+          },
+        },
+      }),
+      offers: {
+        '@type': 'Offer',
+        price: car.fob_price_usd ?? undefined,
+        priceCurrency: 'USD',
+        availability: 'https://schema.org/InStock',
+        seller: { '@type': 'Organization', name: 'Wazir Trading LLC', url: 'https://wazirtradingllc.com' },
+      },
+      url: canonicalUrl,
+    };
+    let ldScript = document.getElementById('vehicle-jsonld') as HTMLScriptElement | null;
+    if (!ldScript) {
+      ldScript = document.createElement('script');
+      ldScript.id = 'vehicle-jsonld';
+      ldScript.type = 'application/ld+json';
+      document.head.appendChild(ldScript);
+    }
+    ldScript.textContent = JSON.stringify(jsonLd);
+
     return () => {
       document.title = 'Wazir Trading LLC';
-      // Restore canonical to home
       const c = document.querySelector<HTMLLinkElement>('link[rel="canonical"]');
       if (c) c.href = 'https://wazirtradingllc.com/';
+      document.getElementById('vehicle-jsonld')?.remove();
     };
   }, [car]);
 

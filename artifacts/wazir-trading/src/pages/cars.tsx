@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
+import { useMeta } from '@/lib/use-meta';
 import { Link, useLocation } from 'wouter';
 import {
   Search, ChevronDown, ChevronUp, ChevronLeft, ChevronRight,
@@ -1204,6 +1205,11 @@ function applyFiltersToQuery(query: any, filters: Filters, activeTab: string, so
 /* MAIN PAGE                                                        */
 /* ─────────────────────────────────────────────────────────────── */
 export default function CarsPage() {
+  useMeta({
+    title: 'Browse Japanese Used Cars for Export | Wazir Trading LLC',
+    description: 'Browse 40+ quality-graded Japanese used cars available for export worldwide. Filter by make, model, price, and body type. FOB prices direct from Japan.',
+    canonical: 'https://wazirtradingllc.com/cars',
+  });
   const [, navigate] = useLocation();
 
   // ── Read URL params ──

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Link } from 'wouter';
+import { useMeta } from '@/lib/use-meta';
 import {
   Search, FileText, Landmark, Ship, MapPin,
   Car, ChevronDown, ChevronRight, CheckCircle,
@@ -158,6 +159,11 @@ const REGION_COLORS: Record<string, string> = {
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
 export default function HowItWorksPage() {
+  useMeta({
+    title: 'How It Works — Buy a Car from Japan | Wazir Trading LLC',
+    description: 'Step-by-step guide to importing a Japanese used car through Wazir Trading LLC — browse, bid, pay, ship, receive. Simple, transparent, trusted.',
+    canonical: 'https://wazirtradingllc.com/how-it-works',
+  });
   const waLink = `https://wa.me/818089227375?text=${encodeURIComponent('Hello, I am interested in purchasing a Japanese used car from Wazir Trading LLC.')}`;
 
   return (

@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { ChevronDown, Search, Phone, Mail, MessageCircle } from 'lucide-react';
+import { useMeta } from '@/lib/use-meta';
 
 // ─── Data ────────────────────────────────────────────────────────────────────
 
@@ -321,6 +322,11 @@ function AccordionFaq({
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
 export default function FaqsPage() {
+  useMeta({
+    title: 'FAQs — Japanese Car Import Questions Answered | Wazir Trading LLC',
+    description: 'Answers to the most common questions about buying, shipping, and paying for Japanese used cars through Wazir Trading LLC.',
+    canonical: 'https://wazirtradingllc.com/faqs',
+  });
   const [activeCategory, setActiveCategory] = useState<Category>('All');
   const [searchQuery, setSearchQuery] = useState('');
   const [openId, setOpenId] = useState<number | null>(null);

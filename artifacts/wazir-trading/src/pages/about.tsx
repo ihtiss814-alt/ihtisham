@@ -1,8 +1,14 @@
 import React from 'react';
 import { Shield, Award, Clock, Globe } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { useMeta } from '@/lib/use-meta';
 
 export default function AboutPage() {
+  useMeta({
+    title: 'About Us | Wazir Trading LLC — Japanese Car Exporters',
+    description: 'Wazir Trading LLC has been exporting premium quality Japanese used cars to 130+ countries for over 5 years. Learn about our team, process, and commitment to transparency.',
+    canonical: 'https://wazirtradingllc.com/about',
+  });
   return (
     <div className="min-h-screen bg-background pt-[130px]">
       {/* Hero Section */}
