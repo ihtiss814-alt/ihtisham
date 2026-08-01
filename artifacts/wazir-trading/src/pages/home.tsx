@@ -2130,6 +2130,61 @@ const HERO_SLIDES = [
   },
 ];
 
+function HeroSearch() {
+  const [query, setQuery] = useState('');
+  const [, navigate] = useLocation();
+
+  const submit = () => {
+    const q = query.trim();
+    if (q) navigate(`/cars?q=${encodeURIComponent(q)}`);
+    else navigate('/cars');
+  };
+
+  const QUICK_MAKES = ['Toyota', 'Nissan', 'Honda', 'Mazda', 'Suzuki', 'Mitsubishi'];
+
+  return (
+    <div className="hero-anim-2 w-full max-w-2xl mb-8">
+      {/* Search input */}
+      <div className="flex items-center rounded-xl overflow-hidden shadow-2xl border border-white/15 backdrop-blur-md"
+        style={{ background: 'rgba(255,255,255,0.08)' }}>
+        <Search size={18} className="absolute left-4 text-white/50 pointer-events-none hidden" />
+        <div className="relative flex-1 flex items-center">
+          <Search size={17} className="absolute left-4 text-white/40 pointer-events-none flex-shrink-0" />
+          <input
+            type="text"
+            value={query}
+            onChange={e => setQuery(e.target.value)}
+            onKeyDown={e => e.key === 'Enter' && submit()}
+            placeholder="Search make, model, or reference…"
+            className="w-full h-14 pl-11 pr-4 bg-transparent text-white placeholder:text-white/40 outline-none text-[15px] font-light"
+          />
+        </div>
+        <button
+          onClick={submit}
+          className="h-14 px-7 text-white text-[12px] font-bold tracking-[0.18em] uppercase transition-all duration-150 hover:opacity-90 flex items-center gap-2 flex-shrink-0"
+          style={{ background: 'linear-gradient(135deg, #C8102E 0%, #A50D25 100%)' }}
+        >
+          <Search size={14} />
+          Search
+        </button>
+      </div>
+
+      {/* Quick make pills */}
+      <div className="flex flex-wrap justify-center gap-2 mt-3.5">
+        {QUICK_MAKES.map(make => (
+          <button
+            key={make}
+            onClick={() => navigate(`/cars?make=${encodeURIComponent(make)}`)}
+            className="px-3.5 py-1.5 rounded-full text-[12px] font-semibold border border-white/20 text-white/65 hover:border-white/55 hover:text-white hover:bg-white/10 transition-all duration-150 backdrop-blur-sm"
+          >
+            {make}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 function HeroBackground() {
   const [current, setCurrent] = useState(0);
   const [prev, setPrev]       = useState<number | null>(null);
@@ -2292,43 +2347,8 @@ export default function HomePage() {
             <span style={{ color: '#F87171' }}>Direct from Japan</span>
           </h1>
 
-          {/* Subtext */}
-          <p
-            className="hero-anim-2 text-white/70 font-light leading-relaxed mb-6 max-w-xl"
-            style={{ fontSize: 'clamp(0.93rem, 2vw, 1.05rem)' }}
-          >
-            We source premium, quality-graded vehicles straight from Japan's auction halls
-            and ship them to{' '}
-            <span className="text-white font-medium">130+ countries worldwide</span>
-            {' '}— at unbeatable auction prices, with zero middlemen and full transparency.
-          </p>
-
-          {/* CTA buttons */}
-          <div className="hero-anim-3 flex flex-col sm:flex-row justify-center gap-2.5 mb-6 w-full sm:w-auto">
-            <Link
-              href="/cars"
-              className="group inline-flex items-center justify-center gap-2 px-6 py-2.5 font-bold tracking-wide text-white rounded-[3px] transition-all duration-200"
-              style={{
-                background: 'linear-gradient(135deg, #C8102E 0%, #A50D25 100%)',
-                boxShadow: '0 4px 16px rgba(200,16,46,0.4)',
-                fontSize: '0.8rem',
-                letterSpacing: '0.1em',
-              }}
-            >
-              Browse Cars
-              <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform duration-200" />
-            </Link>
-            <a
-              href={waLink}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="group inline-flex items-center justify-center gap-2 px-6 py-2.5 font-semibold rounded-[3px] border border-white/25 text-white hover:bg-white/10 hover:border-white/50 transition-all duration-200 backdrop-blur-sm"
-              style={{ fontSize: '0.8rem', letterSpacing: '0.1em' }}
-            >
-              <WhatsAppIcon size={15} className="text-[#25D366]" />
-              Contact on WhatsApp
-            </a>
-          </div>
+          {/* ── HERO SEARCH BAR ── */}
+          <HeroSearch />
 
           {/* ── STATS ── */}
           <div className="hero-anim-4 grid grid-cols-2 md:grid-cols-4 gap-px bg-white/10 rounded-[4px] overflow-hidden mb-4 w-full max-w-2xl">
