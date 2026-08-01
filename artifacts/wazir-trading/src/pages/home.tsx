@@ -883,26 +883,26 @@ function FcGridCard({ car, imgMap, waNumber }: {
       </Link>
 
       {/* ── Content ── */}
-      <div className="p-2 flex flex-col gap-1 flex-1">
+      <div className="p-3 flex flex-col gap-1.5 flex-1">
         {/* Title */}
         <Link href={`/cars/${car.ref_number}`}>
-          <h3 className="text-[10.5px] font-bold text-gray-900 uppercase leading-snug tracking-wide line-clamp-2 hover:text-[#C8102E] transition-colors"
-            style={{ minHeight: '2.6em' }}>
+          <h3 className="text-[12px] font-bold text-gray-900 uppercase leading-snug tracking-wide line-clamp-2 hover:text-[#C8102E] transition-colors"
+            style={{ minHeight: '2.8em' }}>
             {title}
           </h3>
         </Link>
 
         {/* Price block */}
-        <div className="border-t border-gray-100 pt-1">
-          <div className="text-[7.5px] font-bold text-gray-400 uppercase tracking-[0.18em]">For Price</div>
-          <div className="text-[16px] font-black text-gray-900 leading-tight tracking-tight">
+        <div className="border-t border-gray-100 pt-1.5">
+          <div className="text-[9px] font-bold text-gray-400 uppercase tracking-[0.15em]">FOB Price</div>
+          <div className="text-[18px] font-black text-[#C8102E] leading-tight tracking-tight">
             ${(car.fob_price_usd ?? 0).toLocaleString()}
           </div>
-          <div className="text-[8.5px] text-gray-400 font-medium mt-0.5">
+          <div className="text-[10px] text-gray-400 font-medium mt-0.5">
             REF # <span className="font-mono font-semibold text-gray-500">{car.ref_number}</span>
           </div>
           {pkrPrice && (
-            <div className="text-[9px] font-bold mt-0.5" style={{ color: '#16a34a' }}>{pkrPrice}</div>
+            <div className="text-[10px] font-bold mt-0.5" style={{ color: '#16a34a' }}>{pkrPrice}</div>
           )}
         </div>
 
@@ -911,7 +911,7 @@ function FcGridCard({ car, imgMap, waNumber }: {
           href={waLink}
           target="_blank"
           rel="noopener noreferrer"
-          className="mt-auto flex items-center justify-center gap-1.5 py-1.5 w-full text-white text-[9.5px] font-bold uppercase tracking-wider transition-opacity hover:opacity-90"
+          className="mt-auto flex items-center justify-center gap-1.5 py-2 w-full text-white text-[11px] font-bold uppercase tracking-wider transition-opacity hover:opacity-90 rounded-sm"
           style={{ background: '#25D366' }}
         >
           <svg width="10" height="10" viewBox="0 0 24 24" fill="white">
@@ -965,9 +965,9 @@ function FeaturedCollectionSection() {
 
         {/* ── Grid ── */}
         {loading ? (
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-2">
-            {Array.from({ length: 16 }).map((_, i) => (
-              <div key={i} className="bg-gray-100 animate-pulse" style={{ height: 210 }} />
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
+            {Array.from({ length: 10 }).map((_, i) => (
+              <div key={i} className="bg-gray-100 animate-pulse rounded-lg" style={{ height: 260 }} />
             ))}
           </div>
         ) : cars.length === 0 ? (
@@ -978,7 +978,7 @@ function FeaturedCollectionSection() {
             </Link>
           </div>
         ) : (
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-2">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
             {cars.map(car => (
               <FcGridCard key={car.id} car={car} imgMap={imgMap} waNumber={waNumber} />
             ))}
@@ -2295,7 +2295,7 @@ export default function HomePage() {
           {/* Subtext */}
           <p
             className="hero-anim-2 text-white/70 font-light leading-relaxed mb-6 max-w-xl"
-            style={{ fontSize: 'clamp(0.82rem, 1.6vw, 0.95rem)' }}
+            style={{ fontSize: 'clamp(0.93rem, 2vw, 1.05rem)' }}
           >
             We source premium, quality-graded vehicles straight from Japan's auction halls
             and ship them to{' '}
@@ -2342,7 +2342,7 @@ export default function HomePage() {
                   {countObj.value}{suffix}
                 </span>
                 <span className="text-[10px] font-semibold text-white/80 tracking-wide uppercase mb-0">{label}</span>
-                <span className="text-[8px] text-white/40 tracking-widest uppercase">{note}</span>
+                <span className="text-[10px] text-white/50 tracking-widest uppercase">{note}</span>
               </div>
             ))}
           </div>
@@ -2352,10 +2352,10 @@ export default function HomePage() {
             {TRUST.map(({ text }, i) => (
               <span
                 key={i}
-                className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[9px] font-semibold tracking-wide text-white/75 border border-white/15 backdrop-blur-sm"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-semibold tracking-wide text-white/80 border border-white/20 backdrop-blur-sm"
                 style={{ background: 'rgba(255,255,255,0.06)' }}
               >
-                <CheckCircle2 size={11} className="text-[#4ade80] flex-shrink-0" />
+                <CheckCircle2 size={13} className="text-[#4ade80] flex-shrink-0" />
                 {text}
               </span>
             ))}
