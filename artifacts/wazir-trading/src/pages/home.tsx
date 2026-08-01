@@ -2374,33 +2374,6 @@ export default function HomePage() {
         <div className="absolute bottom-0 inset-x-0 h-24 bg-gradient-to-t from-background to-transparent z-10 pointer-events-none" />
       </section>
 
-      {/* ── SEARCH SECTION ────────────────────────────────────────── */}
-      <section className="bg-white py-10 border-b border-gray-100 shadow-sm">
-        <div className="max-w-4xl mx-auto px-4 md:px-8">
-
-          {/* Search bar */}
-          <SearchBar />
-
-          {/* Quick filters */}
-          <div className="flex flex-wrap justify-center gap-2.5 mt-5">
-            {[
-              { label: 'Under $5,000',   href: '/cars?maxPrice=5000' },
-              { label: 'SUV & 4WD',      href: '/cars?body=SUV' },
-              { label: 'Right Hand Drive', href: '/cars?steering=RHD' },
-            ].map(({ label, href }) => (
-              <Link
-                key={label}
-                href={href}
-                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full border border-gray-200 text-[12px] font-semibold text-gray-600 hover:border-[#C8102E] hover:text-[#C8102E] hover:bg-red-50 transition-all duration-150"
-              >
-                <span className="w-1.5 h-1.5 rounded-full bg-[#C8102E] opacity-60" />
-                {label}
-              </Link>
-            ))}
-          </div>
-        </div>
-      </section>
-
       {/* ── DESTINATION COUNTRIES ─────────────────────────────────── */}
       <DestinationCountriesSection />
 
