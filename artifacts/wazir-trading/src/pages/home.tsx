@@ -2169,18 +2169,6 @@ function HeroSearch() {
         </button>
       </div>
 
-      {/* Quick make pills */}
-      <div className="flex flex-wrap justify-center gap-2 mt-3.5">
-        {QUICK_MAKES.map(make => (
-          <button
-            key={make}
-            onClick={() => navigate(`/cars?make=${encodeURIComponent(make)}`)}
-            className="px-3.5 py-1.5 rounded-full text-[12px] font-semibold border border-white/20 text-white/65 hover:border-white/55 hover:text-white hover:bg-white/10 transition-all duration-150 backdrop-blur-sm"
-          >
-            {make}
-          </button>
-        ))}
-      </div>
     </div>
   );
 }
