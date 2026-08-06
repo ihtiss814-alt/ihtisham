@@ -1104,9 +1104,9 @@ type Filters = {
   fuel: string; mileage: string; steering: string;
   // Direct numeric price bounds — used by home-page "Shop by Price Range" links (?minPrice=X&maxPrice=Y)
   minPrice: string; maxPrice: string;
-  advMake: string; advModel: string; advBody: string; advFuel: string; advDrive: string;
-  advTrans: string; advYearFrom: string; advYearTo: string; advMinPrice: string; advMaxPrice: string;
-  advColor: string; advLocation: string; advMinMil: string; advMaxMil: string;
+  // Advanced-panel-only fields (no sidebar equivalent)
+  advModel: string; advYearFrom: string; advYearTo: string; advMinPrice: string; advMaxPrice: string;
+  advColor: string; advMinMil: string; advMaxMil: string;
   advMinEng: string; advMaxEng: string;
 };
 
@@ -1148,15 +1148,9 @@ function applyFiltersToQuery(query: any, filters: Filters, activeTab: string, so
     if (mr) query = query.gte('mileage_km', mr[0]).lte('mileage_km', mr[1]);
   }
 
-  // Advanced filters
-  if (filters.advMake)     query = query.ilike('make', filters.advMake);
+  // Advanced-panel-only filters (model, color, year bounds, price bounds)
   if (filters.advModel)    query = query.ilike('model', filters.advModel);
-  if (filters.advBody)     query = query.eq('body_type', filters.advBody);
-  if (filters.advFuel)     query = query.ilike('fuel_type', filters.advFuel);
-  if (filters.advDrive)    query = query.eq('drive', filters.advDrive);
-  if (filters.advTrans)    query = query.eq('transmission', filters.advTrans);
   if (filters.advColor)    query = query.ilike('color', filters.advColor);
-  if (filters.advLocation) query = query.eq('stock_location', filters.advLocation);
   if (filters.advYearFrom) query = query.gte('year', parseInt(filters.advYearFrom));
   if (filters.advYearTo)   query = query.lte('year', parseInt(filters.advYearTo));
   if (filters.advMinPrice) query = query.gte('fob_price_usd', parseFloat(filters.advMinPrice));
@@ -1231,18 +1225,12 @@ export default function CarsPage() {
       steering:    p.get('steering')    || '',
       minPrice:    p.get('minPrice')    || '',
       maxPrice:    p.get('maxPrice')    || '',
-      advMake:     p.get('advMake')     || '',
       advModel:    p.get('advModel')    || '',
-      advBody:     p.get('advBody')     || '',
-      advFuel:     p.get('advFuel')     || '',
-      advDrive:    p.get('advDrive')    || '',
-      advTrans:    p.get('advTrans')    || '',
       advYearFrom: p.get('advYearFrom') || '',
       advYearTo:   p.get('advYearTo')   || '',
       advMinPrice: p.get('advMinPrice') || '',
       advMaxPrice: p.get('advMaxPrice') || '',
       advColor:    p.get('advColor')    || '',
-      advLocation: p.get('advLocation') || '',
       advMinMil:   p.get('advMinMil')   || '',
       advMaxMil:   p.get('advMaxMil')   || '',
       advMinEng:   p.get('advMinEng')   || '',
@@ -1277,8 +1265,8 @@ export default function CarsPage() {
     const p = getParams();
     const hasFilter = ['q','make','price','body','category','location','year','drive','trans',
       'engine','fuel','mileage','steering','minPrice','maxPrice','destination',
-      'advMake','advModel','advBody','advFuel','advDrive','advTrans','advYearFrom','advYearTo',
-      'advMinPrice','advMaxPrice','advColor','advLocation','advMinMil','advMaxMil','advMinEng','advMaxEng',
+      'advModel','advYearFrom','advYearTo',
+      'advMinPrice','advMaxPrice','advColor','advMinMil','advMaxMil','advMinEng','advMaxEng',
     ].some(k => p.get(k));
     const delay = hasFilter ? setTimeout(() => {
       resultsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -1289,17 +1277,11 @@ export default function CarsPage() {
   // ── Search input state ──
   const [searchInput, setSearchInput] = useState(filters.q);
 
-  // ── Advanced filter draft state ──
-  const [advMake,      setAdvMake]      = useState(filters.advMake);
+  // ── Advanced filter state ──
+  const [showAdvanced, setShowAdvanced] = useState(false);
   const [advModel,     setAdvModel]     = useState(filters.advModel);
-  const [advModelCode, setAdvModelCode] = useState('');
   const [advSteering,  setAdvSteering]  = useState(filters.steering);
-  const [advBodyType,  setAdvBodyType]  = useState(filters.advBody);
-  const [advFuel,      setAdvFuel]      = useState(filters.advFuel);
-  const [advDrive,     setAdvDrive]     = useState(filters.advDrive);
-  const [advTrans,     setAdvTrans]     = useState(filters.advTrans);
   const [advColor,     setAdvColor]     = useState(filters.advColor);
-  const [advLocation,  setAdvLocation]  = useState(filters.advLocation);
   const [advYearFrom,  setAdvYearFrom]  = useState(filters.advYearFrom);
   const [advYearTo,    setAdvYearTo]    = useState(filters.advYearTo);
   const [advMinPrice,  setAdvMinPrice]  = useState(filters.advMinPrice);
@@ -1423,15 +1405,15 @@ export default function CarsPage() {
 
   // PKR rate is now live via useExchangeRate() — no Supabase fetch needed
 
-  // ── Fetch models for advanced filter ──
+  // ── Fetch models for advanced filter (follows the sidebar make) ──
   useEffect(() => {
-    if (!advMake) { setAvailableModels([]); return; }
-    supabase.from('cars').select('model').eq('make', advMake).limit(500)
+    if (!filters.make) { setAvailableModels([]); return; }
+    supabase.from('cars').select('model').ilike('make', filters.make).limit(500)
       .then(({ data }) => {
         const models = [...new Set((data || []).map((r: any) => r.model).filter(Boolean))].sort() as string[];
         setAvailableModels(models);
       });
-  }, [advMake]);
+  }, [filters.make]);
 
   // ── Initial data load ──
   useEffect(() => {
@@ -1474,13 +1456,11 @@ export default function CarsPage() {
   const commitAdvanced = () => {
     const p = getParams();
     const set = (k: string, v: string) => { if (v) p.set(k, v); else p.delete(k); };
-    set('advMake', advMake); set('advModel', advModel); set('advBody', advBodyType);
-    set('advFuel', advFuel); set('advDrive', advDrive); set('advTrans', advTrans);
+    set('advModel', advModel); set('steering', advSteering); set('advColor', advColor);
     set('advYearFrom', advYearFrom); set('advYearTo', advYearTo);
     set('advMinPrice', advMinPrice); set('advMaxPrice', advMaxPrice);
-    set('steering', advSteering); set('advColor', advColor);
-    set('advLocation', advLocation); set('advMinMil', advMinMil);
-    set('advMaxMil', advMaxMil); set('advMinEng', advMinEng); set('advMaxEng', advMaxEng);
+    set('advMinMil', advMinMil); set('advMaxMil', advMaxMil);
+    set('advMinEng', advMinEng); set('advMaxEng', advMaxEng);
     p.set('page', '1');
     const qs = p.toString();
     window.history.replaceState({}, '', qs ? `?${qs}` : window.location.pathname);
@@ -1489,14 +1469,12 @@ export default function CarsPage() {
   };
 
   const resetAdv = () => {
-    setAdvMake(''); setAdvModel(''); setAdvModelCode(''); setAdvSteering('');
-    setAdvBodyType(''); setAdvFuel(''); setAdvDrive(''); setAdvTrans('');
-    setAdvColor(''); setAdvLocation(''); setAdvYearFrom(''); setAdvYearTo('');
+    setAdvModel(''); setAdvSteering(''); setAdvColor('');
+    setAdvYearFrom(''); setAdvYearTo('');
     setAdvMinPrice(''); setAdvMaxPrice(''); setAdvMinMil(''); setAdvMaxMil('');
     setAdvMinEng(''); setAdvMaxEng('');
-    ['advMake', 'advModel', 'advBody', 'advFuel', 'advDrive', 'advTrans',
-     'advYearFrom', 'advYearTo', 'advMinPrice', 'advMaxPrice', 'steering',
-     'advColor', 'advLocation', 'advMinMil', 'advMaxMil', 'advMinEng', 'advMaxEng']
+    ['advModel', 'steering', 'advYearFrom', 'advYearTo', 'advMinPrice', 'advMaxPrice',
+     'advColor', 'advMinMil', 'advMaxMil', 'advMinEng', 'advMaxEng']
       .forEach(k => setParam(k, ''));
     setParam('page', '1');
     setPage(1);
@@ -1507,6 +1485,13 @@ export default function CarsPage() {
 
   // ── Active filter count ──
   const filterCount = Object.values(filters).filter(Boolean).length;
+
+  // ── Active advanced-filter count (badge on the toggle) ──
+  const advActiveCount = [
+    filters.advModel, filters.advColor, filters.steering,
+    filters.advYearFrom, filters.advYearTo, filters.advMinPrice, filters.advMaxPrice,
+    filters.advMinMil, filters.advMaxMil, filters.advMinEng, filters.advMaxEng,
+  ].filter(Boolean).length;
 
   // ── Active filter chips ──
   const activeChips = Object.entries({
@@ -1522,7 +1507,7 @@ export default function CarsPage() {
     mileage:     filters.mileage,
     engine:      filters.engine,
     location:    filters.location,
-    advMake:     filters.advMake && `Make: ${filters.advMake}`,
+    steering:    filters.steering && `Steering: ${filters.steering}`,
     advModel:    filters.advModel && `Model: ${filters.advModel}`,
     advYearFrom: filters.advYearFrom && `Year ≥ ${filters.advYearFrom}`,
     advYearTo:   filters.advYearTo   && `Year ≤ ${filters.advYearTo}`,
@@ -1550,25 +1535,46 @@ export default function CarsPage() {
     activeMileage:    filters.mileage,   setActiveMileage:    (v: string) => setFilter('mileage', v),
   };
 
-  /* Select helper for advanced panel */
+  /* Select helper for advanced panel — light theme */
   const Sel = ({ value, onChange, placeholder, options }: {
     value: string; onChange: (v: string) => void; placeholder: string; options: string[];
   }) => (
     <select value={value} onChange={e => onChange(e.target.value)}
-      className="w-full text-white text-[12px] px-3 py-2 outline-none border border-white/20 focus:border-[#C8102E] rounded-sm"
-      style={{ background: 'rgba(255,255,255,0.1)' }}>
-      <option value="" className="bg-[#0D1B3E]">{placeholder}</option>
-      {options.map(o => <option key={o} value={o} className="bg-[#0D1B3E]">{o}</option>)}
+      className="w-full text-gray-700 text-[12px] px-3 py-2 outline-none border border-gray-200 focus:border-[#C8102E] rounded-sm bg-white">
+      <option value="">{placeholder}</option>
+      {options.map(o => <option key={o} value={o}>{o}</option>)}
     </select>
   );
 
   const totalDisplay = totalCount.toLocaleString();
 
   return (
-    <div className="min-h-screen bg-gray-50 pt-[175px] md:pt-[148px]">
+    <div className="min-h-screen bg-gray-50 pt-[115px] md:pt-[148px]">
 
-      {/* ── HERO SEARCH BANNER ─────────────────────────────── */}
-      <div className="w-full py-10 px-4" style={{ background: NAVY }}>
+      {/* ── Compact Mobile Search ─────────────────────────── (mobile only) */}
+      <div className="md:hidden w-full px-4 py-3 bg-white border-b border-gray-200">
+        <div className="flex rounded-sm overflow-hidden border border-gray-200 shadow-sm">
+          <div className="relative flex-1 min-w-0">
+            <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+            <input
+              type="text"
+              value={searchInput}
+              onChange={e => setSearchInput(e.target.value)}
+              onKeyDown={e => e.key === 'Enter' && runSearch()}
+              placeholder="Search make, model, ref #"
+              className="w-full pl-9 pr-3 py-2.5 text-sm text-gray-800 placeholder:text-gray-400 outline-none bg-white"
+            />
+          </div>
+          <button onClick={runSearch}
+            className="px-4 text-white text-[11px] font-bold uppercase flex-shrink-0 hover:opacity-90 transition-opacity"
+            style={{ background: RED }}>
+            Search
+          </button>
+        </div>
+      </div>
+
+      {/* ── HERO SEARCH BANNER ─────────────────────────────── (desktop only) */}
+      <div className="hidden md:block w-full py-10 px-4" style={{ background: NAVY }}>
         <div className="max-w-3xl mx-auto text-center">
           {/* Stock count badge */}
           <div className="inline-flex items-center gap-2 mb-4 px-3 py-1 rounded-full border border-white/10"
@@ -1698,55 +1704,48 @@ export default function CarsPage() {
             </button>
           </div>
 
-          {/* ADVANCED FILTER PANEL */}
-          <div className="mb-5 rounded-sm overflow-hidden shadow-sm" style={{ background: NAVY }}>
-            <div className="p-4">
-              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2 mb-2">
-                <Sel value={advMake}       onChange={v => { setAdvMake(v); setAdvModel(''); }} placeholder="Make"       options={MAKE_NAMES} />
-                <Sel value={advModel}      onChange={setAdvModel}      placeholder="Model"      options={availableModels} />
-                <Sel value={advModelCode}  onChange={setAdvModelCode}  placeholder="Model Code" options={[]} />
-                <Sel value={advSteering}   onChange={setAdvSteering}   placeholder="Steering"   options={['RHD', 'LHD']} />
-                <Sel value={advBodyType}   onChange={setAdvBodyType}   placeholder="Body Type"  options={BODY_TYPES} />
-                <Sel value={advFuel}       onChange={setAdvFuel}       placeholder="Fuel"       options={fuelOptions.map(o => o.value)} />
+          {/* ADVANCED FILTER PANEL — collapsed by default */}
+          <div className="mb-4">
+            <button
+              onClick={() => setShowAdvanced(v => !v)}
+              className="flex items-center gap-2 px-3 py-2 border border-gray-200 bg-white rounded-sm text-[12px] font-semibold text-gray-600 hover:border-[#C8102E] hover:text-[#C8102E] transition-all">
+              {showAdvanced ? <ChevronUp size={13} /> : <ChevronDown size={13} />}
+              More Filters
+              {advActiveCount > 0 && (
+                <span className="ml-0.5 px-1.5 py-0.5 rounded-full text-[10px] font-bold text-white leading-none" style={{ background: RED }}>
+                  {advActiveCount}
+                </span>
+              )}
+            </button>
+            {showAdvanced && (
+              <div className="mt-2 rounded-sm border border-gray-200 bg-white p-4 shadow-sm">
+                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 mb-3">
+                  <Sel value={advModel}     onChange={setAdvModel}     placeholder={filters.make ? `Model (${filters.make})` : 'Model'} options={availableModels} />
+                  <Sel value={advColor}     onChange={setAdvColor}     placeholder="Color"        options={['White', 'Black', 'Gray', 'Blue', 'Red', 'W Red', 'Silver', 'Gold', 'Brown', 'Green']} />
+                  <Sel value={advSteering}  onChange={setAdvSteering}  placeholder="Steering"     options={['RHD', 'LHD']} />
+                  <Sel value={advYearFrom}  onChange={setAdvYearFrom}  placeholder="Year From"    options={Array.from({ length: 27 }, (_, i) => `${2026 - i}`)} />
+                  <Sel value={advYearTo}    onChange={setAdvYearTo}    placeholder="Year To"      options={Array.from({ length: 27 }, (_, i) => `${2026 - i}`)} />
+                  <Sel value={advMinPrice}  onChange={setAdvMinPrice}  placeholder="Min Price ($)" options={['1000', '2000', '3000', '5000', '8000', '10000', '15000', '20000']} />
+                  <Sel value={advMaxPrice}  onChange={setAdvMaxPrice}  placeholder="Max Price ($)" options={['3000', '5000', '8000', '10000', '15000', '20000', '30000', '50000']} />
+                  <Sel value={advMinMil}    onChange={setAdvMinMil}    placeholder="Min Mileage"  options={MILEAGES} />
+                  <Sel value={advMaxMil}    onChange={setAdvMaxMil}    placeholder="Max Mileage"  options={MILEAGES} />
+                  <Sel value={advMinEng}    onChange={setAdvMinEng}    placeholder="Min Engine"   options={ENGINE_SIZES} />
+                  <Sel value={advMaxEng}    onChange={setAdvMaxEng}    placeholder="Max Engine"   options={ENGINE_SIZES} />
+                </div>
+                <div className="flex gap-3 justify-end">
+                  <button onClick={resetAdv}
+                    className="px-5 py-2 text-gray-600 border border-gray-200 text-[12px] font-semibold rounded-sm hover:border-gray-400 transition-all">
+                    Reset
+                  </button>
+                  <button onClick={commitAdvanced}
+                    className="px-7 py-2 text-white text-[12px] font-bold uppercase tracking-[0.1em] rounded-sm hover:opacity-90 transition-opacity"
+                    style={{ background: RED }}>
+                    Apply
+                  </button>
+                </div>
               </div>
-              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2 mb-2">
-                <Sel value={advDrive}    onChange={setAdvDrive}    placeholder="Drive"        options={DRIVES} />
-                <Sel value={advTrans}    onChange={setAdvTrans}    placeholder="Transmission" options={TRANSMISSIONS} />
-                <Sel value={advColor}    onChange={setAdvColor}    placeholder="Color"        options={['White', 'Black', 'Gray', 'Blue', 'Red', 'W Red', 'Silver', 'Gold', 'Brown', 'Green']} />
-                <Sel value={advLocation} onChange={setAdvLocation} placeholder="Location"     options={LOCATIONS} />
-                <Sel value={advYearFrom} onChange={setAdvYearFrom} placeholder="Year From"    options={Array.from({ length: 27 }, (_, i) => `${2026 - i}`)} />
-                <Sel value={advYearTo}   onChange={setAdvYearTo}   placeholder="Year To"      options={Array.from({ length: 27 }, (_, i) => `${2026 - i}`)} />
-              </div>
-              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2">
-                <Sel value={advMinPrice} onChange={setAdvMinPrice} placeholder="Min Price ($)"  options={['1000', '2000', '3000', '5000', '8000', '10000', '15000', '20000']} />
-                <Sel value={advMaxPrice} onChange={setAdvMaxPrice} placeholder="Max Price ($)"  options={['3000', '5000', '8000', '10000', '15000', '20000', '30000', '50000']} />
-                <Sel value={advMinMil}   onChange={setAdvMinMil}   placeholder="Min Mileage"    options={MILEAGES} />
-                <Sel value={advMaxMil}   onChange={setAdvMaxMil}   placeholder="Max Mileage"    options={MILEAGES} />
-                <Sel value={advMinEng}   onChange={setAdvMinEng}   placeholder="Min Engine"     options={ENGINE_SIZES} />
-                <Sel value={advMaxEng}   onChange={setAdvMaxEng}   placeholder="Max Engine"     options={ENGINE_SIZES} />
-              </div>
-              <div className="flex gap-3 mt-3 justify-end">
-                <button onClick={resetAdv}
-                  className="px-5 py-2 text-white/70 border border-white/20 text-[12px] font-semibold rounded-sm hover:border-white/50 hover:text-white transition-all">
-                  Reset
-                </button>
-                <button onClick={commitAdvanced}
-                  className="px-7 py-2 text-white text-[12px] font-bold uppercase tracking-[0.1em] rounded-sm hover:opacity-90 transition-opacity"
-                  style={{ background: RED }}>
-                  Search
-                </button>
-              </div>
-            </div>
+            )}
           </div>
-
-          {/* SHOP BY MAKE CAROUSEL */}
-          <MakeCarousel setActiveMake={(v) => setFilter('make', v)} makeCounts={makeCounts} />
-
-          {/* SHOP BY BODY TYPE CAROUSEL */}
-          <BodyTypeCarousel setActiveBody={(v) => setFilter('body', v)} />
-
-          {/* TOTAL PRICE CALCULATOR */}
-          <TotalPriceCalculator />
 
           {/* COLLECTION TABS */}
           <div className="flex flex-wrap gap-2 mb-5">
@@ -1831,8 +1830,8 @@ export default function CarsPage() {
           {/* BOTTOM PAGINATION */}
           <Pagination page={page} total={totalCount} onPage={handlePageChange} />
 
-          {/* REVIEWS */}
-          <ReviewsSection />
+          {/* TOTAL PRICE CALCULATOR — below results so users see cars first */}
+          <TotalPriceCalculator />
         </div>
       </div>
 

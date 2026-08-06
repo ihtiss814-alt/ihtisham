@@ -1,0 +1,68 @@
+1. The /cars page is doing too much — this is your #1 problem
+Right now, when a user lands on /cars, they see all of this stacked in one column:
+
+Navy hero with search + stock badge
+Active filter chips
+Quick-pill chips ("Under $5,000", "SUV & 4WD", "RHD")
+A 6-column × 3-row advanced filter panel (18 dropdowns, navy background)
+Shop By Make carousel (auto-scrolling brand logos)
+Shop By Body Type carousel (auto-scrolling body types)
+Total Price Calculator (navy card, 6 inputs)
+Collection tabs (All / New Arrivals / Clearance / Japan / Hybrid / SUV / Budget)
+Sort + result count
+Top pagination
+Stock list
+Bottom pagination
+Reviews section
+All above the stock list. A user has to scroll past ~7 sections before seeing a single car. That's the opposite of "clear and easy."
+
+Fix — restructure to inverted funnel:
+
+Position	Keep	Rationale
+Top	Hero (compact) + quick chips + active filter chips	Immediate context
+Then	Cars grid starts here	Users came to see cars
+Right/left	Sidebar filters (already there — good)	Persistent filtering
+Move to home only	Shop By Make carousel	It belongs on home, not on cars page
+Move to home only	Shop By Body Type carousel	Same — this is discovery, not filtering
+Move below results	Total Price Calculator	Not needed before choosing a car
+Collapse by default	Advanced filter panel (18 selects)	Show as "▸ Advanced filters"
+Move to footer/home	Reviews carousel	Not needed on stock list
+After this, users see cars within one scroll on mobile.
+
+2. The Advanced Filter Panel has 18 dropdowns — this is a wall
+Currently visible on /cars: Make · Model · Model Code · Steering · Body Type · Fuel · Drive · Transmission · Color · Location · Year From · Year To · Min Price · Max Price · Min Mileage · Max Mileage · Min Engine · Max Engine — all in a navy box.
+
+Problems:
+
+"Model Code" dropdown is empty (options={[]}) — dead UI element
+Dark navy background with white text on a light page = jarring color break
+Users don't know what "Model Code" means, or the difference between "Body Type" here vs sidebar
+Duplicates almost everything in the sidebar
+Fix:
+
+Copy[ ▸ Advanced filters ]   ← collapsed by default
+Only expand on click. Remove Model Code, Model (until Make is picked show a text search instead of empty select). Match the light theme of the rest of the page.
+
+3. Filter duplication — sidebar and advanced panel do the same thing
+Your sidebar already has: Make, Price, Body Type, Fuel, Location, Year, Drive, Transmission, Engine Size, Mileage.
+
+Your advanced panel has: Make, Model, Body, Fuel, Drive, Trans, Color, Location, Year From/To, Price Min/Max, Mileage Min/Max, Engine Min/Max.
+
+That's the same filter system twice, with different UIs, different state variables (filters.make vs filters.advMake), and both stored separately in the URL as ?make=...&advMake=.... A user could set contradicting values.
+
+Fix: One filter model. Sidebar for common filters (visible), one collapsed "More filters" drawer for the rest — but they all write to the same URL params.
+
+4. Mobile: the sticky-header stack pushes content way down
+pt-[175px] md:pt-[148px] on the cars page. You have:
+
+Info strip (JST, stock, rate) — 32px
+Red accent — 3px
+Main nav — 80px
+Then the navy hero adds another ~180px before any content
+On a phone, users see: strip → strip → red line → giant logo → nav → hero → chips → panel → carousel → carousel → calculator → finally filter icon and cars. That's 4-5 phone scrolls.
+
+Fix:
+
+Collapse the top info strip into the main nav on mobile (put JST + Stock as tiny pills next to the logo)
+Shrink the logo on mobile (76px → 48px)
+Remove the navy hero on /cars mobile view — just show a compact search bar
