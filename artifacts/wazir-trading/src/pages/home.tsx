@@ -2423,6 +2423,31 @@ export default function HomePage() {
       {/* ── BEST SELLERS ──────────────────────────────────────────── */}
       <BestSellersSection />
 
+      {/* ── OUR JAPAN OFFICE ──────────────────────────────────────── */}
+      <section className="py-16 bg-gray-50 border-t border-gray-100">
+        <div className="container mx-auto px-4 md:px-8">
+          <div className="text-center mb-10">
+            <p className="text-[11px] tracking-[0.28em] uppercase font-bold text-[#C8102E] mb-2">Find Us</p>
+            <h2 className="text-2xl md:text-3xl font-serif font-bold text-gray-900 mb-3">Our Japan Office</h2>
+            <p className="text-gray-500 text-sm max-w-md mx-auto">
+              Heights Mizutani 1C, 158-1 Jizou, Kuwana-City, Mie-Pref, Japan
+            </p>
+          </div>
+          <div className="max-w-5xl mx-auto rounded-xl overflow-hidden shadow-lg border border-gray-200">
+            <iframe
+              src="https://www.google.com/maps/embed?pb=!1m17!1m12!1m3!1d3265.8895035567575!2d136.6993446757601!3d35.05950157279439!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m2!1m1!2zMzXCsDAzJzM0LjIiTiAxMzbCsDQyJzA2LjkiRQ!5e0!3m2!1sen!2sus!4v1785990086147!5m2!1sen!2sus"
+              width="100%"
+              height="420"
+              style={{ border: 0, display: 'block' }}
+              allowFullScreen
+              loading="lazy"
+              referrerPolicy="strict-origin-when-cross-origin"
+              title="Wazir Trading LLC — Japan Office Location"
+            />
+          </div>
+        </div>
+      </section>
+
     </div>
   );
 }

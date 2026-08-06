@@ -208,6 +208,27 @@ export default function ContactPage() {
             </div>
 
           </div>
+
+          {/* ── Google Maps ── */}
+          <div className="mt-16">
+            <h2 className="text-2xl font-serif font-bold mb-2 text-center">Find Our Japan Office</h2>
+            <p className="text-center text-muted-foreground text-sm mb-6">
+              Heights Mizutani 1C, 158-1 Jizou, Kuwana-City, Mie-Pref, Japan
+            </p>
+            <div className="rounded-xl overflow-hidden shadow-lg border border-border">
+              <iframe
+                src="https://www.google.com/maps/embed?pb=!1m17!1m12!1m3!1d3265.8895035567575!2d136.6993446757601!3d35.05950157279439!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m2!1m1!2zMzXCsDAzJzM0LjIiTiAxMzbCsDQyJzA2LjkiRQ!5e0!3m2!1sen!2sus!4v1785990086147!5m2!1sen!2sus"
+                width="100%"
+                height="420"
+                style={{ border: 0, display: 'block' }}
+                allowFullScreen
+                loading="lazy"
+                referrerPolicy="strict-origin-when-cross-origin"
+                title="Wazir Trading LLC — Japan Office Location"
+              />
+            </div>
+          </div>
+
         </div>
       </div>
     </div>

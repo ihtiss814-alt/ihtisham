@@ -277,10 +277,9 @@ export default function PaymentInformationPage() {
               <div>
                 <h3 className="font-bold text-[#0D1B3E] text-sm mb-1">Avoid Fake Emails and Scams</h3>
                 <p className="text-gray-500 text-sm leading-relaxed">
-                  Beware of fraudulent emails impersonating Wazir Trading LLC. Always confirm the sender email
-                  ends with <strong className="text-[#0D1B3E]">@wazirtrading.com</strong> or check{' '}
-                  <strong className="text-[#0D1B3E]">wazirtrading-pc@outlook.jp</strong> before acting on any payment
-                  instructions.
+                  Beware of fraudulent emails impersonating Wazir Trading LLC. Our only official email address is{' '}
+                  <strong className="text-[#0D1B3E]">wazirtrading-pc@outlook.jp</strong>. Do not act on payment
+                  instructions from any other email address.
                 </p>
               </div>
             </div>

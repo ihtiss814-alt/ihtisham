@@ -94,9 +94,10 @@ export default function AboutPage() {
       <section className="py-24">
         <div className="container mx-auto px-4 md:px-8 text-center">
           <h2 className="text-3xl font-serif font-bold mb-12">Japan Headquarters</h2>
-          <div className="max-w-4xl mx-auto bg-card border border-border p-8 md:p-12 shadow-sm">
-            <h3 className="text-xl font-bold mb-2">Wazir Trading LLC</h3>
-            <p className="text-muted-foreground mb-8">Tokyo, Japan</p>
+          <div className="max-w-4xl mx-auto bg-card border border-border p-8 md:p-12 shadow-sm mb-10">
+            <h3 className="text-xl font-bold mb-1">Wazir Trading LLC</h3>
+            <p className="text-muted-foreground mb-1 text-sm">Heights Mizutani 1C, 158-1 Jizou, Kuwana-City, Mie-Pref, Japan</p>
+            <p className="text-xs text-muted-foreground/60 mb-8">Visits by appointment only</p>
             
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-sm">
               <div>
@@ -112,6 +113,20 @@ export default function AboutPage() {
                 <p className="text-muted-foreground">Strategic partnerships with major shipping lines from Yokohama, Nagoya, and Kobe ports.</p>
               </div>
             </div>
+          </div>
+
+          {/* Google Maps */}
+          <div className="max-w-4xl mx-auto rounded-xl overflow-hidden shadow-lg border border-border">
+            <iframe
+              src="https://www.google.com/maps/embed?pb=!1m17!1m12!1m3!1d3265.8895035567575!2d136.6993446757601!3d35.05950157279439!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m2!1m1!2zMzXCsDAzJzM0LjIiTiAxMzbCsDQyJzA2LjkiRQ!5e0!3m2!1sen!2sus!4v1785990086147!5m2!1sen!2sus"
+              width="100%"
+              height="420"
+              style={{ border: 0, display: 'block' }}
+              allowFullScreen
+              loading="lazy"
+              referrerPolicy="strict-origin-when-cross-origin"
+              title="Wazir Trading LLC — Japan Office Location"
+            />
           </div>
         </div>
       </section>

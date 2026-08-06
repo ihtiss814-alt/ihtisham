@@ -508,8 +508,8 @@ export default function Navbar() {
 
           {/* Contact links */}
           <div className="flex items-center justify-center gap-4 pt-1">
-            <a href="mailto:info@wazirtrading.com" className="flex items-center gap-1 text-[10px] text-gray-400 hover:text-gray-600 transition-colors">
-              <Mail size={10} /> info@wazirtrading.com
+            <a href="mailto:wazirtrading-pc@outlook.jp" className="flex items-center gap-1 text-[10px] text-gray-400 hover:text-gray-600 transition-colors">
+              <Mail size={10} /> wazirtrading-pc@outlook.jp
             </a>
           </div>
         </div>
