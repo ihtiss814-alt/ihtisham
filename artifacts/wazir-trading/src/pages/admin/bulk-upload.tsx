@@ -69,15 +69,47 @@ type ColMap = {
 
 /**
  * Reads the raw header row and returns the correct column indices.
- * Supports both sheet formats:
- *   • Legacy (no Body Type): 23 columns — Color at 16, Doors 17, …, Price 22
- *   • New    (with Body Type): 24 columns — Body Type at 16, Color 17, …, Price 23
+ * Supports three sheet formats:
+ *
+ *   • "Listing 2" (DATE at col 0):
+ *       DATE | Lot No. | Chassis code | Chassis no | Make | Model | GRADE |
+ *       Year | Month/Year | CC | SEAT | Score | Exterior | INTERIOR |
+ *       Transimission | Body Type | Color | Doors | Odometer(km) | A/C |
+ *       Fuel | Equipment | WHOLESALE PRICE(JPY)
+ *
+ *   • New (with Body Type, no DATE):
+ *       [skip] [skip] lot | model_code | chassis | make | model | variant |
+ *       year | month | cc | seats | grade | ext | int | trans | body | color |
+ *       doors | mileage | … | fuel | features | price
+ *
+ *   • Legacy (no Body Type, no DATE): same as above but body type absent
  */
 function buildColMap(headerRow: unknown[]): ColMap {
+  const h = (i: number) => String(headerRow[i] ?? '').trim().toLowerCase();
+
+  // ── Format: DATE column at position 0 (Listing 2 style) ──────────
+  // Columns: DATE(0) LotNo(1) ChassisCode(2) ChassisNo(3) Make(4)
+  //          Model(5) GRADE/variant(6) Year(7) Month(8) CC(9) Seats(10)
+  //          Score/grade(11) Exterior(12) Interior(13) Transmission(14)
+  //          BodyType(15) Color(16) Doors(17) Odometer(18) A/C(19)
+  //          Fuel(20) Equipment(21) WholesalePrice(22)
+  if (h(0) === 'date') {
+    return {
+      lot_number: 1,    model_code: 2,      chassis_number: 3,
+      make: 4,          model: 5,            variant: 6,
+      year: 7,          manufacture_month: 8,
+      engine_cc: 9,     seats: 10,
+      auction_grade: 11, exterior_grade: 12, interior_grade: 13,
+      transmission: 14, body_type: 15,       color: 16,
+      doors: 17,        mileage_km: 18,
+      fuel_type: 20,    features: 21,        wholesale_price_jpy: 22,
+    };
+  }
+
+  // ── Format: Body Type present but no DATE ────────────────────────
   const hasBodyType = headerRow.some(
     cell => String(cell ?? '').trim().toLowerCase() === 'body type',
   );
-
   if (hasBodyType) {
     return {
       lot_number: 2,    model_code: 3,      chassis_number: 4,
@@ -90,7 +122,8 @@ function buildColMap(headerRow: unknown[]): ColMap {
       fuel_type: 21,    features: 22,        wholesale_price_jpy: 23,
     };
   }
-  // Legacy format — no Body Type column
+
+  // ── Legacy format — no Body Type column ──────────────────────────
   return {
     lot_number: 2,    model_code: 3,      chassis_number: 4,
     make: 5,          model: 6,            variant: 7,
