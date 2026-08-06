@@ -419,26 +419,83 @@ function PasswordGate({ onAuth }: { onAuth: () => void }) {
 ═══════════════════════════════════════════════════════════════ */
 type ParsedCar = ReturnType<typeof parseRow>;
 
+/* Step indicator shown at the top of the CSV tab */
+function StepBar({ step }: { step: 1 | 2 | 3 }) {
+  const steps = [
+    { n: 1, label: 'Upload File' },
+    { n: 2, label: 'Review Data' },
+    { n: 3, label: 'Import to Database' },
+  ];
+  return (
+    <div className="flex items-center gap-0 mb-6">
+      {steps.map((s, idx) => (
+        <React.Fragment key={s.n}>
+          <div className="flex items-center gap-2">
+            <div
+              className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0 transition-colors ${
+                step > s.n
+                  ? 'bg-green-500 text-white'
+                  : step === s.n
+                  ? 'bg-[#C8102E] text-white'
+                  : 'bg-gray-200 text-gray-400'
+              }`}
+            >
+              {step > s.n ? '✓' : s.n}
+            </div>
+            <span
+              className={`text-xs font-semibold whitespace-nowrap ${
+                step === s.n ? 'text-[#C8102E]' : step > s.n ? 'text-green-600' : 'text-gray-400'
+              }`}
+            >
+              {s.label}
+            </span>
+          </div>
+          {idx < steps.length - 1 && (
+            <div className={`flex-1 h-0.5 mx-2 min-w-[20px] transition-colors ${step > s.n ? 'bg-green-400' : 'bg-gray-200'}`} />
+          )}
+        </React.Fragment>
+      ))}
+    </div>
+  );
+}
+
 function CsvUploadTab() {
-  const [rows, setRows]     = useState<ParsedCar[]>([]);
-  const [fileName, setFileName] = useState('');
-  const [status, setStatus] = useState<'idle' | 'inserting' | 'done' | 'error'>('idle');
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [rows, setRows]       = useState<ParsedCar[]>([]);
+  const [parsing, setParsing] = useState(false);
+  const [status, setStatus]   = useState<'idle' | 'inserting' | 'done' | 'error'>('idle');
   const [insertMsg, setInsertMsg] = useState('');
-  const [progress, setProgress] = useState({ current: 0, total: 0, images: 0 });
-  const [expanded, setExpanded] = useState<Record<number, boolean>>({});
+  const [progress, setProgress]   = useState({ current: 0, total: 0, images: 0 });
+  const [expanded, setExpanded]   = useState<Record<number, boolean>>({});
   const fileRef = useRef<HTMLInputElement>(null);
 
-  const handleFile = (file: File) => {
-    setFileName(file.name);
+  /* Determine which step the UI is on */
+  const step: 1 | 2 | 3 = rows.length > 0 ? (status === 'idle' || status === 'error' ? 2 : 3) : 1;
+
+  /* ── Store file; don't parse yet ── */
+  const onFileChosen = (file: File) => {
+    setSelectedFile(file);
+    setRows([]);
+    setStatus('idle');
+    setInsertMsg('');
+  };
+
+  const onDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    const f = e.dataTransfer.files[0];
+    if (f) onFileChosen(f);
+  };
+
+  /* ── Step 2: parse on button click ── */
+  const parseFile = () => {
+    if (!selectedFile) return;
+    setParsing(true);
     const reader = new FileReader();
     reader.onload = (e) => {
       const data = new Uint8Array(e.target!.result as ArrayBuffer);
       const wb = XLSX.read(data, { type: 'array' });
       const ws = wb.Sheets[wb.SheetNames[0]];
       const raw: unknown[][] = XLSX.utils.sheet_to_json(ws, { header: 1, defval: '' });
-      // Skip header rows. The sheet has multi-line headers so we filter out any row where:
-      // (a) chassis_number column (4) is empty, OR
-      // (b) year column (8) is not a valid 4-digit year — which catches second-header rows
       const headerRow = raw[0] ?? [];
       const colMap = buildColMap(headerRow);
       const parsed = raw.slice(1).filter(r => {
@@ -448,16 +505,12 @@ function CsvUploadTab() {
       });
       setRows(parsed.map(r => parseRow(r, colMap)));
       setStatus('idle');
+      setParsing(false);
     };
-    reader.readAsArrayBuffer(file);
+    reader.readAsArrayBuffer(selectedFile);
   };
 
-  const onDrop = (e: React.DragEvent) => {
-    e.preventDefault();
-    const f = e.dataTransfer.files[0];
-    if (f) handleFile(f);
-  };
-
+  /* ── Step 3: insert to database ── */
   const insertAll = async () => {
     if (!rows.length) return;
     setStatus('inserting');
@@ -465,7 +518,7 @@ function CsvUploadTab() {
     setProgress({ current: 0, total: rows.length, images: 0 });
 
     // 1. Fetch live JPY/USD rate for FOB price calculation
-    let jpyRate = 162; // conservative fallback
+    let jpyRate = 162;
     try {
       const rateRes = await fetch('https://open.er-api.com/v6/latest/USD', { credentials: 'omit' });
       if (rateRes.ok) {
@@ -483,14 +536,12 @@ function CsvUploadTab() {
       .order('ref_number', { ascending: false })
       .limit(1);
 
-    // 3. Extract the numeric part (e.g. "WTL-000042" → 42), default to 0
     let nextNum = 1;
     if (latest && latest.length > 0 && latest[0].ref_number) {
       const match = String(latest[0].ref_number).match(/(\d+)$/);
       if (match) nextNum = parseInt(match[1], 10) + 1;
     }
 
-    // 4. Insert each car one-by-one and search Cloudinary for existing images
     let totalImages = 0;
     let firstRef = '';
     let lastRef  = '';
@@ -536,7 +587,6 @@ function CsvUploadTab() {
 
       if (carErr) { anyError = carErr.message; break; }
 
-      // Search Cloudinary for existing images for this chassis number
       const chassis = String(r.chassis_number || '');
       if (chassis) {
         try {
@@ -584,54 +634,85 @@ function CsvUploadTab() {
 
   return (
     <div className="space-y-6">
-      {/* Drop zone */}
+
+      {/* ── Step bar ── */}
+      <StepBar step={step} />
+
+      {/* ── STEP 1: Drop zone ── */}
       <div
         onDrop={onDrop}
         onDragOver={e => e.preventDefault()}
         onClick={() => fileRef.current?.click()}
-        className="border-2 border-dashed border-gray-300 hover:border-[#C8102E] rounded-xl p-10 flex flex-col items-center gap-3 cursor-pointer transition-colors group"
+        className={`border-2 border-dashed rounded-xl p-10 flex flex-col items-center gap-3 cursor-pointer transition-colors group ${
+          selectedFile
+            ? 'border-[#C8102E]/40 bg-red-50/30'
+            : 'border-gray-300 hover:border-[#C8102E]'
+        }`}
       >
-        <Upload className="text-gray-400 group-hover:text-[#C8102E] transition-colors" size={36} />
-        <p className="font-semibold text-gray-600 group-hover:text-[#C8102E] transition-colors">
-          {fileName ? fileName : 'Drop CSV or Excel file here, or click to select'}
+        <Upload
+          className={`transition-colors ${selectedFile ? 'text-[#C8102E]' : 'text-gray-400 group-hover:text-[#C8102E]'}`}
+          size={36}
+        />
+        <p className={`font-semibold transition-colors ${selectedFile ? 'text-[#C8102E]' : 'text-gray-600 group-hover:text-[#C8102E]'}`}>
+          {selectedFile ? selectedFile.name : 'Drop CSV or Excel file here, or click to select'}
         </p>
-        <p className="text-xs text-gray-400">.csv or .xlsx accepted</p>
+        <p className="text-xs text-gray-400">
+          {selectedFile
+            ? `${(selectedFile.size / 1024).toFixed(1)} KB — click to change file`
+            : '.csv or .xlsx accepted'}
+        </p>
         <input
           ref={fileRef}
           type="file"
           accept=".csv,.xlsx,.xls"
           className="hidden"
-          onChange={e => { if (e.target.files?.[0]) handleFile(e.target.files[0]); }}
+          onChange={e => { if (e.target.files?.[0]) onFileChosen(e.target.files[0]); }}
         />
       </div>
 
-      {/* Preview */}
+      {/* ── STEP 1 → 2: Parse button ── */}
+      {selectedFile && rows.length === 0 && (
+        <button
+          onClick={parseFile}
+          disabled={parsing}
+          className="w-full flex items-center justify-center gap-2 bg-[#0D1B3E] hover:bg-[#162d5e] disabled:opacity-60 text-white font-bold py-4 rounded-xl text-sm tracking-wide transition-colors shadow-md"
+        >
+          {parsing
+            ? <><Loader2 size={18} className="animate-spin" /> Parsing file…</>
+            : <><Eye size={18} /> Parse & Preview Listings</>
+          }
+        </button>
+      )}
+
+      {/* ── STEP 2: Preview table ── */}
       {rows.length > 0 && (
         <div>
+          {/* Header */}
           <div className="flex items-center justify-between mb-3">
             <p className="font-semibold text-[#0D1B3E] flex items-center gap-2">
               <Eye size={16} />
-              Preview — {rows.length} rows parsed
+              {rows.length} listings ready to import
             </p>
             <button
-              onClick={insertAll}
-              disabled={status === 'inserting' || status === 'done'}
-              className="flex items-center gap-2 bg-[#C8102E] hover:bg-[#a00d24] disabled:opacity-50 text-white text-sm font-semibold px-5 py-2 rounded-lg transition-colors"
+              onClick={() => { setSelectedFile(null); setRows([]); setStatus('idle'); setInsertMsg(''); }}
+              className="text-xs text-gray-400 hover:text-gray-600 flex items-center gap-1 transition-colors"
             >
-              {status === 'inserting' ? <Loader2 size={14} className="animate-spin" /> : <CheckCircle2 size={14} />}
-              {status === 'inserting'
-                ? `Inserting ${progress.current}/${progress.total}…`
-                : status === 'done' ? 'Done ✓' : 'Confirm & Insert All'}
+              <X size={12} /> Change file
             </button>
           </div>
 
+          {/* Result message */}
           {insertMsg && (
-            <div className={`mb-3 p-3 rounded-lg text-sm font-medium ${status === 'done' ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'}`}>
+            <div className={`mb-4 p-4 rounded-xl text-sm font-medium flex items-start gap-2 ${
+              status === 'done' ? 'bg-green-50 text-green-700 border border-green-200' : 'bg-red-50 text-red-700 border border-red-200'
+            }`}>
+              {status === 'done' ? <CheckCircle2 size={16} className="flex-shrink-0 mt-0.5" /> : <XCircle size={16} className="flex-shrink-0 mt-0.5" />}
               {insertMsg}
             </div>
           )}
 
-          <div className="overflow-x-auto rounded-xl border border-gray-200 shadow-sm">
+          {/* Data table */}
+          <div className="overflow-x-auto rounded-xl border border-gray-200 shadow-sm mb-6">
             <table className="min-w-full text-xs">
               <thead className="bg-[#0D1B3E] text-white">
                 <tr>
@@ -670,6 +751,54 @@ function CsvUploadTab() {
               </tbody>
             </table>
           </div>
+
+          {/* ── STEP 2 → 3: BIG import button ── */}
+          {status !== 'done' && (
+            <div className="rounded-2xl border-2 border-[#C8102E]/20 bg-red-50/40 p-6 flex flex-col sm:flex-row items-center gap-5">
+              <div className="flex-1 min-w-0">
+                <p className="font-bold text-[#0D1B3E] text-base mb-1">
+                  Ready to import {rows.length} {rows.length === 1 ? 'listing' : 'listings'}
+                </p>
+                <p className="text-xs text-gray-500 leading-relaxed">
+                  Each car will be assigned a <strong>WTL-xxxxxx</strong> reference number and any matching
+                  Cloudinary images will be linked automatically. This cannot be undone.
+                </p>
+              </div>
+              <button
+                onClick={insertAll}
+                disabled={status === 'inserting'}
+                className="flex-shrink-0 flex items-center justify-center gap-2 bg-[#C8102E] hover:bg-[#a00d24] disabled:opacity-60 text-white font-bold px-8 py-4 rounded-xl text-sm tracking-wide transition-colors shadow-lg w-full sm:w-auto"
+              >
+                {status === 'inserting' ? (
+                  <>
+                    <Loader2 size={18} className="animate-spin" />
+                    Importing {progress.current} / {progress.total}…
+                  </>
+                ) : (
+                  <>
+                    <CheckCircle2 size={18} />
+                    Start Import — {rows.length} Cars
+                  </>
+                )}
+              </button>
+            </div>
+          )}
+
+          {/* Progress bar while inserting */}
+          {status === 'inserting' && (
+            <div className="mt-4">
+              <div className="flex justify-between text-xs text-gray-500 mb-1">
+                <span>{progress.current} of {progress.total} cars saved</span>
+                {progress.images > 0 && <span>{progress.images} images linked</span>}
+              </div>
+              <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
+                <div
+                  className="h-full bg-[#C8102E] rounded-full transition-all duration-300"
+                  style={{ width: `${progress.total > 0 ? (progress.current / progress.total) * 100 : 0}%` }}
+                />
+              </div>
+            </div>
+          )}
         </div>
       )}
     </div>
