@@ -1,0 +1,39 @@
+5. Filtering has real correctness bugs
+Reading pages/cars.tsx applyFiltersToQuery:
+
+Bug A — case sensitivity is inconsistent:
+
+Copyif (filters.make)     query = query.ilike('make', filters.make);        // case-insensitive
+if (filters.location) query = query.eq('stock_location', filters.location); // case-sensitive
+if (filters.trans)    query = query.eq('transmission', filters.trans);  // case-sensitive
+If a car's DB row has stock_location = 'japan' (lowercase) and the user picks "Japan" from the sidebar, it won't match. Use ilike everywhere or normalise on write.
+
+Bug B — sidebar Price range and home-page minPrice/maxPrice can both apply:
+
+Copy?price=$5000-$6000&minPrice=8000
+The query will add both .gte/.lte clauses → returns zero cars, and the user can't tell why. Add mutual exclusion when setting one.
+
+**Bug C — the destination query param is read by useEffect on line 1279 but never applied to the query. Home page pushes users here with ?destination=Kenya and nothing happens. Add destination handling to applyFiltersToQuery (or remove the click on destination cards).
+
+**Bug D — active-chip "clear" for advMake sets filters.advMake='' via setFilter, but the advanced draft state (advMake) doesn't reset. Next time the user clicks "Search" in the advanced panel, the old value comes back. Sync draft-state with committed state.
+
+6. Fake stats on the site
+On /cars and /cars/:ref, you show:
+
+Copy500+ Customers · 5.0 Star · 100% Satisfaction
+The 4 reviews in REVIEWS are hardcoded (Muhammad Asif, James Thompson, David Osei, Sarah Williams). If someone Googles those names + your site they'll figure out they're placeholders — and it damages trust more than not having reviews at all.
+
+Fix — one of these:
+
+(a) Wire real customer reviews from Supabase table reviews (add an admin form to collect them)
+(b) Show a "Client testimonials — add yours" CTA with just the WhatsApp deep link
+(c) At minimum, remove specific numbers and put "Trusted by clients in 130+ countries" — vague but honest
+Also, the "100,000+ auction vehicles" and "120+ auction houses" claim in About / Can't Find Your Car — these should be verifiable or slightly softened ("Over 100 auction houses across Japan").
+
+⚠️ Part 2 — High-Impact UX Issues
+7. Two totally different car card styles
+<CarRow> in pages/cars.tsx (lines 814-950) — horizontal, image left, 4-color badges
+<CarCard> in components/CarCard.tsx — vertical grid card with hover lift
+<FcGridCard> in pages/home.tsx — different card style again
+<SimilarCarCard> in pages/car-detail.tsx — another card style
+Fix: One <CarCard variant="row" | "grid" | "compact"> component. This will save ~600 lines of code, ensure consistent hover/interaction, and make site-wide restyles trivial. Currently changing "how a car card looks" means editing 4 files.

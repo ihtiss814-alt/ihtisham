@@ -1007,16 +1007,9 @@ function ReviewsSection() {
     <section className="py-12 border-t border-gray-100" style={{ background: '#F8FAFC' }}>
       <div className="text-center mb-8">
         <h2 className="text-2xl font-bold text-gray-900 mb-3" style={{ fontFamily: "'Playfair Display',serif" }}>
-          What Our Happy Customers Say
+          What Our Customers Say
         </h2>
-        <div className="flex flex-wrap justify-center gap-8 mb-4">
-          {[['500+', 'Customers'], ['5.0', 'Star'], ['100%', 'Satisfaction']].map(([v, l]) => (
-            <div key={l} className="text-center">
-              <div className="text-2xl font-black text-gray-900">{v}</div>
-              <div className="text-[11px] font-semibold text-gray-400 uppercase tracking-wider">{l}</div>
-            </div>
-          ))}
-        </div>
+        <p className="text-sm text-gray-500 mb-4">Trusted by clients in 130+ countries</p>
       </div>
       <div className="relative max-w-4xl mx-auto px-8">
         <button onClick={() => setActive(a => Math.max(a - 1, 0))} disabled={active === 0}
@@ -1120,9 +1113,9 @@ function applyFiltersToQuery(query: any, filters: Filters, activeTab: string, so
   // Sidebar filters
   if (filters.make)     query = query.ilike('make', filters.make);
   if (filters.body)     query = query.ilike('body_type', filters.body);
-  if (filters.location) query = query.eq('stock_location', filters.location);
+  if (filters.location) query = query.ilike('stock_location', filters.location);
   if (filters.drive)    query = query.ilike('drive', filters.drive);
-  if (filters.trans)    query = query.eq('transmission', filters.trans);
+  if (filters.trans)    query = query.ilike('transmission', filters.trans);
   if (filters.steering) query = query.ilike('steering', filters.steering);
 
   const fuelFilter = filters.fuel || filters.category;
@@ -1263,8 +1256,10 @@ export default function CarsPage() {
   // ── Scroll to results when arriving from a filtered link ──
   useEffect(() => {
     const p = getParams();
+    // Bug C fix: 'destination' is never applied to the query (it's the shipping destination,
+    // not a car stock attribute), so remove it from the hasFilter check to avoid false scrolls.
     const hasFilter = ['q','make','price','body','category','location','year','drive','trans',
-      'engine','fuel','mileage','steering','minPrice','maxPrice','destination',
+      'engine','fuel','mileage','steering','minPrice','maxPrice',
       'advModel','advYearFrom','advYearTo',
       'advMinPrice','advMaxPrice','advColor','advMinMil','advMaxMil','advMinEng','advMaxEng',
     ].some(k => p.get(k));
@@ -1405,6 +1400,26 @@ export default function CarsPage() {
 
   // PKR rate is now live via useExchangeRate() — no Supabase fetch needed
 
+  // ── Bug D fix: sync advanced draft state when committed filters change externally ──
+  // (e.g. when the user clicks an active-chip "×" to clear an adv filter, the draft
+  //  must reset too — otherwise the old value comes back on the next "Apply" click)
+  useEffect(() => {
+    setAdvModel(filters.advModel);
+    setAdvSteering(filters.steering);
+    setAdvColor(filters.advColor);
+    setAdvYearFrom(filters.advYearFrom);
+    setAdvYearTo(filters.advYearTo);
+    setAdvMinPrice(filters.advMinPrice);
+    setAdvMaxPrice(filters.advMaxPrice);
+    setAdvMinMil(filters.advMinMil);
+    setAdvMaxMil(filters.advMaxMil);
+    setAdvMinEng(filters.advMinEng);
+    setAdvMaxEng(filters.advMaxEng);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [filters.advModel, filters.steering, filters.advColor, filters.advYearFrom,
+      filters.advYearTo, filters.advMinPrice, filters.advMaxPrice,
+      filters.advMinMil, filters.advMaxMil, filters.advMinEng, filters.advMaxEng]);
+
   // ── Fetch models for advanced filter (follows the sidebar make) ──
   useEffect(() => {
     if (!filters.make) { setAvailableModels([]); return; }
@@ -1427,11 +1442,25 @@ export default function CarsPage() {
   }, [filters, activeTab, sortBy, page, fetchCars]);
 
   // ── Write a filter change to state + URL (resets page to 1) ──
+  // Bug B fix: price range (sidebar) and direct min/max bounds (home-page links) are mutually
+  // exclusive — both active at once produces contradictory Supabase clauses that return 0 rows.
   const setFilter = (key: string, value: string) => {
     setParam(key, value);
+    // Mutual exclusion: sidebar price range vs direct numeric bounds
+    if (key === 'price' && value) {
+      setParam('minPrice', ''); setParam('maxPrice', '');
+    }
+    if ((key === 'minPrice' || key === 'maxPrice') && value) {
+      setParam('price', '');
+    }
     setParam('page', '1');
     setPage(1);
-    setFilters(prev => ({ ...prev, [key]: value }));
+    setFilters(prev => {
+      const next = { ...prev, [key]: value };
+      if (key === 'price' && value)                             { next.minPrice = ''; next.maxPrice = ''; }
+      if ((key === 'minPrice' || key === 'maxPrice') && value)  { next.price = ''; }
+      return next;
+    });
   };
 
   const handlePageChange = (p: number) => {
