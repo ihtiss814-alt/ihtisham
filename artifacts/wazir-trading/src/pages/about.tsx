@@ -106,7 +106,7 @@ export default function AboutPage() {
               </div>
               <div>
                 <div className="uppercase tracking-widest text-xs text-primary font-bold mb-2">Auction Operations</div>
-                <p className="text-muted-foreground">Direct bidding access to 120+ auction houses across all prefectures in Japan.</p>
+                <p className="text-muted-foreground">Direct bidding access to major auction houses across Japan, including USS, TAA, CAA and JAA.</p>
               </div>
               <div>
                 <div className="uppercase tracking-widest text-xs text-primary font-bold mb-2">Logistics</div>

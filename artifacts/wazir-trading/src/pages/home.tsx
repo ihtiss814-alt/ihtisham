@@ -1632,76 +1632,48 @@ function TrustBadgesSection() {
   );
 }
 
-/* ── Customer Reviews ────────────────────────────────────────── */
-const REVIEWS = [
+/* ── Why Buyers Choose Us ────────────────────────────────────── */
+const TRUST_POINTS = [
   {
-    name:    'Muhammad Asif',
-    country: 'Pakistan 🇵🇰',
-    rating:  5,
-    text:    'Excellent service from Wazir Trading. My Toyota Aqua arrived in perfect condition. The whole process was smooth and transparent. Highly recommended for anyone importing from Japan.',
+    title: 'Transparent FOB Pricing',
+    desc:  'Every price you see is the real FOB cost direct from Japan — no hidden markups or surprise fees.',
+    icon: (
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+        <line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+      </svg>
+    ),
   },
   {
-    name:    'James Thompson',
-    country: 'Guyana 🇬🇾',
-    rating:  5,
-    text:    'Very professional company. They found exactly the car I wanted within my budget. Communication was excellent throughout the entire shipping process.',
+    title: 'Quality-Graded Vehicles',
+    desc:  'Each car lists its Japanese auction inspection grade and condition sheet, so you know exactly what you are buying.',
+    icon: (
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M9 12l2 2 4-4"/><path d="M12 3l7 4v5c0 4.5-3 7.5-7 9-4-1.5-7-4.5-7-9V7l7-4z"/>
+      </svg>
+    ),
   },
   {
-    name:    'David Osei',
-    country: 'Ghana 🇬🇭',
-    rating:  5,
-    text:    'Best Japanese car exporter I have dealt with. Quality vehicles at great prices. My Nissan Note arrived on time and exactly as described. Will buy again.',
+    title: 'Worldwide Shipping',
+    desc:  'RoRo and container shipping arranged to major ports across Africa, the Caribbean, Asia, Europe and the Pacific.',
+    icon: (
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+        <circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/>
+        <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+      </svg>
+    ),
   },
   {
-    name:    'Sarah Williams',
-    country: 'UK 🇬🇧',
-    rating:  5,
-    text:    'Wazir Trading made importing a Japanese car to UK very easy. They handled all the paperwork and kept me updated at every step.',
+    title: 'Direct Communication',
+    desc:  'Talk to us directly on WhatsApp at every step — from choosing a vehicle to tracking its delivery to your port.',
+    icon: (
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/>
+      </svg>
+    ),
   },
 ] as const;
-
-const REVIEW_STATS = [
-  { value: '500+',  label: 'Happy Customers' },
-  { value: '5.0',   label: 'Star Average Rating' },
-  { value: '100%',  label: 'Satisfaction Rate' },
-] as const;
-
-function StarRow({ count }: { count: number }) {
-  return (
-    <div className="flex gap-0.5">
-      {Array.from({ length: 5 }).map((_, i) => (
-        <svg key={i} width="14" height="14" viewBox="0 0 24 24"
-          fill={i < count ? '#F59E0B' : 'none'}
-          stroke={i < count ? '#F59E0B' : '#D1D5DB'}
-          strokeWidth="1.8">
-          <polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26"/>
-        </svg>
-      ))}
-    </div>
-  );
-}
 
 function CustomerReviewsSection() {
-  const [active, setActive]     = React.useState(0);
-  const [paused, setPaused]     = React.useState(false);
-  const timerRef                = React.useRef<ReturnType<typeof setInterval> | null>(null);
-
-  const perPage  = 2;
-  const maxIndex = Math.ceil(REVIEWS.length / perPage) - 1; // 0..1 for 4 reviews/2 per page
-
-  const prev = () => setActive(a => Math.max(a - 1, 0));
-  const next = () => setActive(a => Math.min(a + 1, maxIndex));
-
-  React.useEffect(() => {
-    if (paused) return;
-    timerRef.current = setInterval(() => {
-      setActive(a => (a >= maxIndex ? 0 : a + 1));
-    }, 5000);
-    return () => { if (timerRef.current) clearInterval(timerRef.current); };
-  }, [paused, maxIndex]);
-
-  const visible = REVIEWS.slice(active * perPage, active * perPage + perPage);
-
   return (
     <section className="section-lazy py-20 relative overflow-hidden" style={{ background: '#F8FAFC' }}>
       <div className="absolute top-0 inset-x-0 h-px"
@@ -1710,144 +1682,33 @@ function CustomerReviewsSection() {
       <div className="container mx-auto px-4 md:px-8">
 
         {/* Heading */}
-        <div className="text-center mb-10">
+        <div className="text-center mb-12">
           <div className="flex items-center justify-center gap-3 mb-4">
             <div className="h-px w-10" style={{ background: 'linear-gradient(to right, transparent, #C8102E)' }}/>
-            <p className="text-[10px] tracking-[0.32em] uppercase font-bold text-[#C8102E]">Customer Stories</p>
+            <p className="text-[10px] tracking-[0.32em] uppercase font-bold text-[#C8102E]">Why Wazir Trading</p>
             <div className="h-px w-10" style={{ background: 'linear-gradient(to left, transparent, #C8102E)' }}/>
           </div>
           <h2 className="text-3xl md:text-4xl font-serif font-bold text-gray-900 mb-3">
-            What Our Happy Customers Say
+            Why Buyers Import With Us
           </h2>
           <p className="text-gray-400 text-sm md:text-base max-w-xl mx-auto">
-            Join thousands of satisfied car importers who chose Wazir Trading for quality and reliability
+            A registered Japanese vehicle exporter shipping quality-graded cars to buyers worldwide.
           </p>
         </div>
 
-        {/* Stats row */}
-        <div className="flex flex-wrap justify-center gap-6 md:gap-12 mb-12">
-          {REVIEW_STATS.map(s => (
-            <div key={s.label} className="flex flex-col items-center gap-1">
-              <span className="text-3xl md:text-4xl font-black text-gray-900 leading-none" style={{ letterSpacing: '-0.03em' }}>
-                {s.value}
-              </span>
-              <span className="text-[11px] font-semibold text-gray-400 uppercase tracking-wider">{s.label}</span>
-            </div>
-          ))}
-        </div>
-
-        {/* Slider */}
-        <div className="relative max-w-4xl mx-auto"
-          onMouseEnter={() => setPaused(true)}
-          onMouseLeave={() => setPaused(false)}>
-
-          {/* Nav — prev */}
-          <button
-            onClick={prev} disabled={active === 0}
-            className="absolute -left-4 md:-left-6 top-1/2 -translate-y-1/2 z-10 w-10 h-10 rounded-full flex items-center justify-center transition-all duration-200 cursor-pointer"
-            style={{
-              background: active === 0 ? '#F1F5F9' : '#fff',
-              border:     '1px solid #E2E8F0',
-              boxShadow:  active === 0 ? 'none' : '0 2px 12px rgba(0,0,0,0.1)',
-              color:      active === 0 ? '#CBD5E1' : '#374151',
-            }}
-            aria-label="Previous reviews"
-          >
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-              <polyline points="15 18 9 12 15 6"/>
-            </svg>
-          </button>
-
-          {/* Nav — next */}
-          <button
-            onClick={next} disabled={active === maxIndex}
-            className="absolute -right-4 md:-right-6 top-1/2 -translate-y-1/2 z-10 w-10 h-10 rounded-full flex items-center justify-center transition-all duration-200 cursor-pointer"
-            style={{
-              background: active === maxIndex ? '#F1F5F9' : '#C8102E',
-              border:     '1px solid transparent',
-              boxShadow:  active === maxIndex ? 'none' : '0 4px 16px rgba(200,16,46,0.3)',
-              color:      '#fff',
-            }}
-            aria-label="Next reviews"
-          >
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-              <polyline points="9 18 15 12 9 6"/>
-            </svg>
-          </button>
-
-          {/* Cards */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 px-1">
-            {visible.map(review => (
-              <div key={review.name}
-                className="flex flex-col rounded-2xl p-6 transition-all duration-300"
-                style={{
-                  background:  '#fff',
-                  border:      '1px solid #EEF2F7',
-                  boxShadow:   '0 4px 20px rgba(0,0,0,0.06)',
-                }}>
-
-                {/* Quote mark */}
-                <div className="text-5xl leading-none font-serif mb-2 select-none" style={{ color: 'rgba(200,16,46,0.15)', lineHeight: 1 }}>
-                  "
-                </div>
-
-                {/* Review text */}
-                <p className="text-gray-600 text-sm leading-relaxed italic flex-1 mb-5">
-                  {review.text}
-                </p>
-
-                {/* Stars */}
-                <StarRow count={review.rating} />
-
-                {/* Divider */}
-                <div className="my-4 h-px" style={{ background: '#F1F5F9' }}/>
-
-                {/* Reviewer */}
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    {/* Avatar placeholder */}
-                    <div className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0"
-                      style={{ background: 'linear-gradient(135deg, #C8102E 0%, #9B0D23 100%)' }}>
-                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
-                        <circle cx="12" cy="7" r="4"/>
-                      </svg>
-                    </div>
-                    <div>
-                      <div className="font-bold text-gray-900 text-sm leading-tight">{review.name}</div>
-                      <div className="text-gray-400 text-xs mt-0.5">{review.country}</div>
-                    </div>
-                  </div>
-
-                  {/* Verified badge */}
-                  <span className="flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold tracking-wider uppercase"
-                    style={{ background: 'rgba(16,185,129,0.1)', color: '#059669', border: '1px solid rgba(16,185,129,0.2)' }}>
-                    <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                      <polyline points="20 6 9 17 4 12"/>
-                    </svg>
-                    Verified
-                  </span>
-                </div>
+        {/* Trust cards */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 max-w-5xl mx-auto">
+          {TRUST_POINTS.map(point => (
+            <div key={point.title}
+              className="flex flex-col rounded-2xl p-6 transition-all duration-300"
+              style={{ background: '#fff', border: '1px solid #EEF2F7', boxShadow: '0 4px 20px rgba(0,0,0,0.06)' }}>
+              <div className="w-11 h-11 rounded-xl flex items-center justify-center mb-4 text-[#C8102E]"
+                style={{ background: 'rgba(200,16,46,0.08)' }}>
+                {point.icon}
               </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Dot pagination */}
-        <div className="flex justify-center gap-2 mt-8">
-          {Array.from({ length: maxIndex + 1 }).map((_, i) => (
-            <button
-              key={i}
-              onClick={() => setActive(i)}
-              className="transition-all duration-300 rounded-full cursor-pointer border-0"
-              style={{
-                width:      i === active ? 24 : 8,
-                height:     8,
-                background: i === active ? '#C8102E' : '#D1D5DB',
-                padding:    0,
-              }}
-              aria-label={`Go to page ${i + 1}`}
-            />
+              <h3 className="font-bold text-gray-900 text-base mb-2 leading-tight">{point.title}</h3>
+              <p className="text-gray-500 text-sm leading-relaxed">{point.desc}</p>
+            </div>
           ))}
         </div>
 
@@ -2405,7 +2266,7 @@ export default function HomePage() {
       {/* ── SHOP BY BUDGET ────────────────────────────────────────── */}
       <ShopByBudgetSection />
 
-      {/* ── FEATURED COLLECTION ───────────────────────────────────── */}
+      {/* ── FEATURED COLLECTION ─────────────────────────���─────────── */}
       <FeaturedCollectionSection />
 
       {/* ── HOW TO BUY ────────────────────────────────────────────── */}

@@ -7,7 +7,7 @@ import ImageGallery from '@/components/ImageGallery';
 import {
   Heart, Share2, Check, ChevronRight, Phone, Send,
   Gauge, Settings, Droplet, Palette, Users, DoorOpen,
-  Star, ChevronLeft, MessageCircle, Loader2,
+  ShieldCheck, ChevronLeft, MessageCircle, Loader2,
 } from 'lucide-react';
 
 /* ─────────────────────────────── types ─────────────────────────────── */
@@ -796,20 +796,17 @@ export default function CarDetailPage() {
               </div>
             )}
 
-            {/* ── Section 6: Reviews compact ── */}
+            {/* ── Section 6: Buyer assurances ── */}
             <div className="bg-white border border-gray-200 rounded-sm shadow-sm">
               <div className="grid grid-cols-3 divide-x divide-gray-100">
                 {[
-                  { value: '500+', label: 'Happy Customers' },
-                  { value: '5.0', label: 'Star Rating', icon: <Star size={14} className="text-yellow-400 fill-yellow-400" /> },
-                  { value: '100%', label: 'Satisfaction' },
-                ].map((stat, i) => (
-                  <div key={i} className="flex flex-col items-center justify-center py-6 px-4 text-center">
-                    <div className="flex items-center gap-1">
-                      {stat.icon}
-                      <span className="text-2xl font-serif font-bold text-[#0D1B3E]">{stat.value}</span>
-                    </div>
-                    <p className="text-xs text-gray-400 mt-1 font-medium">{stat.label}</p>
+                  { label: 'Transparent FOB pricing' },
+                  { label: 'Auction-graded condition' },
+                  { label: 'Worldwide shipping' },
+                ].map((item, i) => (
+                  <div key={i} className="flex flex-col items-center justify-center py-6 px-4 text-center gap-2">
+                    <ShieldCheck size={20} className="text-[#C8102E]" />
+                    <p className="text-xs text-gray-500 font-semibold leading-snug">{item.label}</p>
                   </div>
                 ))}
               </div>
