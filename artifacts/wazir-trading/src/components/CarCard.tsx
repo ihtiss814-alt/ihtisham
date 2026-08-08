@@ -88,12 +88,14 @@ interface CarCardProps {
   /** grid variant only — favorite heart is shown only when a handler is supplied */
   isFavorite?: boolean;
   onToggleFavorite?: (id: string) => void;
+  /** grid variant only — drop the image overlay badges (new arrival / year, engine cc) */
+  hideBadges?: boolean;
 }
 
 function CarCard({
   car, variant, primaryImage = null, pkrRate = 0,
   waNumber = import.meta.env.VITE_WHATSAPP_NUMBER || '818089227375',
-  onOfferPrice, isFavorite, onToggleFavorite,
+  onOfferPrice, isFavorite, onToggleFavorite, hideBadges = false,
 }: CarCardProps) {
   const [imgError, setImgError] = useState(false);
   const href = `/cars/${car.ref_number}`;
@@ -262,7 +264,7 @@ function CarCard({
           </div>
         )}
 
-        {car.is_new_arrival && !isSold ? (
+        {!hideBadges && (car.is_new_arrival && !isSold ? (
           <span className="absolute top-2.5 left-2.5 z-10 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider text-white"
             style={{ background: '#16A34A' }}>
             New Arrival
@@ -271,9 +273,9 @@ function CarCard({
           <span className="absolute top-2.5 left-2.5 z-10 bg-black/70 text-white text-[10px] font-bold px-2 py-0.5 rounded-md backdrop-blur-sm tracking-wider">
             {car.year}
           </span>
-        )}
+        ))}
 
-        {car.engine_cc != null && (
+        {!hideBadges && car.engine_cc != null && (
           <span className="absolute top-2.5 right-2.5 z-10 text-white text-[10px] font-bold px-2 py-0.5 rounded-md backdrop-blur-sm tracking-wider"
             style={{ background: 'rgba(200,16,46,0.88)', marginTop: showFavorite ? '2.25rem' : 0 }}>
             {car.engine_cc} cc

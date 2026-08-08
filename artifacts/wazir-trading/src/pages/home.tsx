@@ -732,7 +732,7 @@ function FeaturedCollectionSection() {
         ) : (
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
             {cars.map(car => (
-              <CarCard key={car.id} car={car} variant="grid"
+              <CarCard key={car.id} car={car} variant="grid" hideBadges
                 primaryImage={imgMap[car.id] ?? null} pkrRate={pkrPerUsd} waNumber={waNumber} />
             ))}
           </div>
