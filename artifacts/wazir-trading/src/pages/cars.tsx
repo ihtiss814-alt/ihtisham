@@ -1375,7 +1375,7 @@ export default function CarsPage() {
   const totalDisplay = totalCount.toLocaleString();
 
   return (
-    <div className="min-h-screen bg-gray-50 pt-[151px] md:pt-[184px]">
+    <div className="min-h-screen bg-gray-50" style={{ paddingTop: 'var(--header-h)' }}>
 
       {/* ── Compact Mobile Search ─────────────────────────── (mobile only) */}
       <div className="md:hidden w-full px-4 py-3 bg-white border-b border-gray-200">
@@ -1399,65 +1399,6 @@ export default function CarsPage() {
         </div>
       </div>
 
-      {/* ── HERO SEARCH BANNER ─────────────────────────────── (desktop only) */}
-      <div className="hidden md:block w-full py-10 px-4" style={{ background: NAVY }}>
-        <div className="max-w-3xl mx-auto text-center">
-          {/* Stock count badge */}
-          <div className="inline-flex items-center gap-2 mb-4 px-3 py-1 rounded-full border border-white/10"
-            style={{ background: 'rgba(212,175,55,0.12)' }}>
-            <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: '#D4AF37' }} />
-            <span className="text-[11px] tracking-[0.25em] uppercase font-bold" style={{ color: '#D4AF37' }}>
-              {totalCount > 0 ? `${totalDisplay} Vehicles In Stock` : 'Loading Inventory…'}
-            </span>
-          </div>
-
-          <h1 className="text-2xl sm:text-3xl font-bold text-white mb-2 leading-tight"
-            style={{ fontFamily: "'Playfair Display',serif" }}>
-            Find Your Perfect Vehicle
-          </h1>
-          <p className="text-white/50 text-sm mb-6">
-            Quality Japanese imports — exported worldwide
-          </p>
-
-          {/* Search bar */}
-          <div className="flex w-full max-w-2xl mx-auto rounded-sm overflow-hidden shadow-2xl">
-            <div className="relative flex-1 min-w-0">
-              <Search size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
-              <input
-                type="text"
-                value={searchInput}
-                onChange={e => setSearchInput(e.target.value)}
-                onKeyDown={e => e.key === 'Enter' && runSearch()}
-                placeholder="Search make, model, or reference #"
-                className="w-full pl-10 pr-3 text-sm text-gray-800 placeholder:text-gray-400 outline-none bg-white"
-                style={{ height: 50 }}
-              />
-            </div>
-            <button
-              onClick={runSearch}
-              className="h-[50px] px-5 sm:px-7 text-white text-[12px] font-bold tracking-[0.08em] uppercase flex items-center gap-1.5 flex-shrink-0 hover:opacity-90 transition-opacity whitespace-nowrap"
-              style={{ background: RED }}>
-              <Search size={13} className="hidden sm:block" /> Search
-            </button>
-          </div>
-
-          {/* Quick make pills */}
-          <div className="flex flex-wrap justify-center gap-2 mt-5">
-            {['Toyota', 'Nissan', 'Honda', 'Mazda'].map(label => (
-              <button
-                key={label}
-                onClick={() => setFilter('make', label)}
-                className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-[12px] font-semibold border border-white/20 text-white/70 hover:border-white/60 hover:text-white hover:bg-white/10 transition-all duration-150">
-                {label}
-                {makeCounts[label] ? (
-                  <span className="text-white/40 text-[10px]">{makeCounts[label].toLocaleString()}</span>
-                ) : null}
-              </button>
-            ))}
-          </div>
-        </div>
-      </div>
-
       {/* ── Mobile Filter Drawer ─────────────────────────────── */}
       {showMobileFilter && (
         <div className="fixed inset-0 z-50 flex flex-col justify-end md:hidden">
@@ -1472,9 +1413,17 @@ export default function CarsPage() {
         </div>
       )}
 
-      <div ref={resultsRef} className="flex gap-0">
+      <div className="flex gap-0">
         {/* ── Desktop Sidebar ────────────────────────────────── */}
-        <div className="hidden md:block sticky top-[148px] self-start overflow-y-auto max-h-[calc(100vh-148px)] border-r border-gray-200 bg-white shadow-sm" style={{ minWidth: 220, width: 220 }}>
+        <div
+          className="hidden md:block sticky self-start overflow-y-auto border-r border-gray-200 bg-white shadow-sm"
+          style={{
+            minWidth: 220,
+            width: 220,
+            top: 'var(--header-h)',
+            maxHeight: 'calc(100vh - var(--header-h))',
+          }}
+        >
           <div className="px-3 py-3 border-b border-gray-100" style={{ background: NAVY }}>
             <p className="text-white text-[11px] font-bold tracking-[0.15em] uppercase">Filter Vehicles</p>
             <p className="text-white/50 text-[10px] mt-0.5">{totalDisplay} cars in stock</p>
@@ -1482,8 +1431,68 @@ export default function CarsPage() {
           <Sidebar {...sidebarProps} />
         </div>
 
-        {/* ── Main Content ───────────────────────────────────── */}
-        <div className="flex-1 min-w-0 p-3 md:p-5">
+        {/* ── Results column: hero + content ─────────────────── */}
+        <div className="flex-1 min-w-0">
+          {/* ── HERO SEARCH BANNER — lives in the results column so the sidebar
+                 starts level with it rather than below it ── (desktop only) */}
+          <div className="hidden md:block w-full py-10 px-4" style={{ background: NAVY }}>
+            <div className="max-w-3xl mx-auto text-center">
+              {/* Stock count badge */}
+              <div className="inline-flex items-center gap-2 mb-4 px-3 py-1 rounded-full border border-white/10"
+                style={{ background: 'rgba(212,175,55,0.12)' }}>
+                <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: '#D4AF37' }} />
+                <span className="text-[11px] tracking-[0.25em] uppercase font-bold" style={{ color: '#D4AF37' }}>
+                  {totalCount > 0 ? `${totalDisplay} Vehicles In Stock` : 'Loading Inventory…'}
+                </span>
+              </div>
+
+              <h1 className="text-2xl sm:text-3xl font-bold text-white mb-2 leading-tight"
+                style={{ fontFamily: "'Playfair Display',serif" }}>
+                Find Your Perfect Vehicle
+              </h1>
+              <p className="text-white/50 text-sm mb-6">
+                Quality Japanese imports — exported worldwide
+              </p>
+
+              {/* Search bar */}
+              <div className="flex w-full max-w-2xl mx-auto rounded-sm overflow-hidden shadow-2xl">
+                <div className="relative flex-1 min-w-0">
+                  <Search size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+                  <input
+                    type="text"
+                    value={searchInput}
+                    onChange={e => setSearchInput(e.target.value)}
+                    onKeyDown={e => e.key === 'Enter' && runSearch()}
+                    placeholder="Search make, model, or reference #"
+                    className="w-full pl-10 pr-3 text-sm text-gray-800 placeholder:text-gray-400 outline-none bg-white"
+                    style={{ height: 50 }}
+                  />
+                </div>
+                <button
+                  onClick={runSearch}
+                  className="h-[50px] px-5 sm:px-7 text-white text-[12px] font-bold tracking-[0.08em] uppercase flex items-center gap-1.5 flex-shrink-0 hover:opacity-90 transition-opacity whitespace-nowrap"
+                  style={{ background: RED }}>
+                  <Search size={13} className="hidden sm:block" /> Search
+                </button>
+              </div>
+
+              {/* Quick make pills */}
+              <div className="flex flex-wrap justify-center gap-2 mt-5">
+                {['Toyota', 'Nissan', 'Honda', 'Mazda'].map(label => (
+                  <button
+                    key={label}
+                    onClick={() => setFilter('make', label)}
+                    className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-[12px] font-semibold border border-white/20 text-white/70 hover:border-white/60 hover:text-white hover:bg-white/10 transition-all duration-150">
+                    {label}
+                    {makeCounts[label] ? (
+                      <span className="text-white/40 text-[10px]">{makeCounts[label].toLocaleString()}</span>
+                    ) : null}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+          <div ref={resultsRef} className="p-3 md:p-5">
 
           {/* ACTIVE FILTER CHIPS */}
           {activeChips.length > 0 && (
@@ -1505,21 +1514,11 @@ export default function CarsPage() {
             </div>
           )}
 
-          {/* QUICK CHIPS */}
-          <div className="flex flex-wrap gap-2 mb-4">
-            {[
-              { label: 'Under $5,000',    action: () => setFilter('maxPrice', '5000') },
-              { label: 'SUV & 4WD',       action: () => setFilter('body', 'SUV') },
-              { label: 'Right Hand Drive', action: () => setFilter('steering', 'RHD') },
-            ].map(({ label, action }) => (
-              <button key={label} onClick={action}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-gray-200 text-[12px] font-semibold text-gray-600 hover:border-[#C8102E] hover:text-[#C8102E] hover:bg-red-50 transition-all">
-                <span className="w-1.5 h-1.5 rounded-full opacity-60" style={{ background: RED }} />
-                {label}
-              </button>
-            ))}
+          {/* MOBILE FILTER TRIGGER — the sidebar is desktop-only, so this is
+              the only way into the filters on a phone. */}
+          <div className="md:hidden flex flex-wrap gap-2 mb-4">
             <button onClick={() => setShowMobileFilter(true)}
-              className="md:hidden inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-gray-200 text-[12px] font-semibold text-gray-600 hover:border-[#C8102E] hover:text-[#C8102E] transition-all">
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-gray-200 text-[12px] font-semibold text-gray-600 hover:border-[#C8102E] hover:text-[#C8102E] transition-all">
               <SlidersHorizontal size={12} />
               Filters {filterCount > 0 && `(${filterCount})`}
             </button>
@@ -1651,11 +1650,12 @@ export default function CarsPage() {
           <Pagination page={page} total={totalCount} onPage={handlePageChange} />
 
           {/* TOTAL PRICE CALCULATOR — below results so users see cars first */}
-          <div ref={calcRef}>
-            <TotalPriceCalculator initialCountry={destination} />
-          </div>
-        </div>
-      </div>
+            <div ref={calcRef}>
+              <TotalPriceCalculator initialCountry={destination} />
+            </div>
+          </div>{/* /results content */}
+        </div>{/* /results column */}
+      </div>{/* /sidebar + results row */}
 
       <OfferPriceDialog car={offerCar} onClose={() => setOfferCar(null)} />
 

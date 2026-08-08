@@ -99,6 +99,13 @@
      near-identical hexes (#0D1B3E, #0D1B2A) were scattered across pages, so the
      shade shifted section to section. Change it here, not in a component. */
   --brand-navy: #0D1B3E;
+
+  /* Height of the fixed header, so pages can clear it without hand-tuned
+     magic numbers that drift out of sync:
+       payment notice 36 + info strip 32 (+1 border) + accent 3 + nav 80 (+1)
+     Identical at every breakpoint — the header rewrites its content on mobile
+     rather than changing height. */
+  --header-h: 153px;
 }
 
 .dark {

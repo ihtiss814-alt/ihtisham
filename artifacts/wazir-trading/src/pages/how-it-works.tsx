@@ -170,7 +170,7 @@ export default function HowItWorksPage() {
   const benefits = useReveal<HTMLDivElement>();
 
   return (
-    <div className="min-h-screen bg-white pt-[166px]">
+    <div className="min-h-screen bg-white" style={{ paddingTop: 'var(--header-h)' }}>
 
       {/* ── Hero ──────────────────────────────────────────────────────────── */}
       <section

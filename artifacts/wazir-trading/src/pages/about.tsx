@@ -14,7 +14,7 @@ export default function AboutPage() {
   const values = useReveal<HTMLDivElement>();
 
   return (
-    <div className="min-h-screen bg-background pt-[166px]">
+    <div className="min-h-screen bg-background" style={{ paddingTop: 'var(--header-h)' }}>
       {/* Hero Section */}
       <section className="text-white py-24 relative overflow-hidden" style={{ background: 'var(--brand-navy)' }}>
         {/* Live chart of our export routes out of Japan — replaces a stock photo

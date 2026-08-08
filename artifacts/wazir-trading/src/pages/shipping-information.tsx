@@ -530,7 +530,7 @@ export default function ShippingInformationPage() {
   const current = ROUTES.find(r => r.id === activeRoute) ?? ROUTES[0];
 
   return (
-    <div className="min-h-screen bg-gray-50 pt-[146px] md:pt-[166px]">
+    <div className="min-h-screen bg-gray-50" style={{ paddingTop: 'var(--header-h)' }}>
 
       {/* ── Hero ───────────────────────────────────────────────── */}
       <section className="relative overflow-hidden" style={{ background: NAVY }}>
