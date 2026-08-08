@@ -46,6 +46,7 @@ function WhatsAppIcon({ size = 16, className = '' }: { size?: number; className?
 }
 import { supabase } from '@/lib/supabase';
 import CarCard, { Car } from '@/components/CarCard';
+import { TESTIMONIALS } from '@/lib/testimonials';
 
 /* ── Destination Countries Section ──────────────────────────── */
 const DESTINATIONS = [
@@ -789,22 +790,6 @@ function ShopByBudgetSection() {
 
 /* ── Featured Collection ─────────────────────────────────────── */
 
-type FcCar = {
-  id: string;
-  ref_number: string;
-  make: string;
-  model: string;
-  variant?: string;
-  year: number;
-  engine_cc?: number;
-  fob_price_usd: number;
-  is_new_arrival?: boolean;
-  mileage_km?: number;
-  transmission?: string;
-  fuel_type?: string;
-  [key: string]: unknown;
-};
-
 async function fetchCarImages(ids: string[]): Promise<Record<string, string>> {
   if (!ids.length) return {};
   const { data } = await supabase
@@ -821,114 +806,12 @@ async function fetchCarImages(ids: string[]): Promise<Record<string, string>> {
   return map;
 }
 
-/* WhatsApp SVG path shared across cards */
-const WA_PATH = 'M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z';
-
-function FcGridCard({ car, imgMap, waNumber }: {
-  car: FcCar;
-  imgMap: Record<string, string>;
-  waNumber: string;
-}) {
-  const { pkr: pkrPerUsd } = useExchangeRate();
-  const primaryImg = imgMap[car.id] ?? null;
-  const pkrPrice = pkrPerUsd > 0
-    ? 'PKR ' + Math.round((car.fob_price_usd ?? 0) * pkrPerUsd).toLocaleString('en-PK')
-    : null;
-  const title = `${car.make} ${car.model}${car.variant ? ' ' + car.variant : ''} ${car.year}`;
-  const waMsg = encodeURIComponent(
-    `Hi Wazir Trading, I'm interested in the ${car.year} ${car.make} ${car.model}${car.variant ? ' ' + car.variant : ''} (Ref: ${car.ref_number}). Please share details.`
-  );
-  const waLink = `https://wa.me/${waNumber}?text=${waMsg}`;
-  const ccLabel = car.engine_cc
-    ? car.engine_cc >= 1000
-      ? `${(car.engine_cc / 1000).toFixed(1).replace(/\.0$/, '')}L`
-      : `${car.engine_cc}cc`
-    : null;
-
-  return (
-    <div className="bg-white border border-gray-200 overflow-hidden flex flex-col group hover:border-[#C8102E]/50 hover:shadow-lg transition-all duration-200">
-      {/* ── Image ── */}
-      <Link href={`/cars/${car.ref_number}`} className="block relative flex-shrink-0" style={{ aspectRatio: '4/3', background: '#F1F5F9' }}>
-        {/* Year badge – top left */}
-        <span className="absolute top-1.5 left-1.5 z-10 text-[9px] font-bold text-white px-1.5 py-[2px] leading-none"
-          style={{ background: 'rgba(0,0,0,0.72)', letterSpacing: '0.04em' }}>
-          {car.year}
-        </span>
-        {/* CC badge – top right */}
-        {ccLabel && (
-          <span className="absolute top-1.5 right-1.5 z-10 text-[9px] font-bold text-white px-1.5 py-[2px] leading-none"
-            style={{ background: 'rgba(200,16,46,0.88)', letterSpacing: '0.04em' }}>
-            {ccLabel}
-          </span>
-        )}
-        {primaryImg ? (
-          <img
-            src={primaryImg}
-            alt={title}
-            loading="lazy"
-            decoding="async"
-            className="w-full h-full object-cover group-hover:scale-[1.04] transition-transform duration-500"
-            onError={e => { (e.currentTarget as HTMLImageElement).style.display = 'none'; }}
-          />
-        ) : (
-          <div className="w-full h-full flex flex-col items-center justify-center gap-1 bg-gradient-to-br from-gray-50 to-gray-100">
-            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#CBD5E1" strokeWidth="1.2">
-              <rect x="1" y="3" width="22" height="16" rx="2.5"/>
-              <path d="M1 9h22M7 3v6"/>
-              <circle cx="12" cy="17" r="2"/>
-            </svg>
-            <span className="text-[8px] text-gray-300 font-semibold uppercase tracking-wider">Photo Coming</span>
-          </div>
-        )}
-      </Link>
-
-      {/* ── Content ── */}
-      <div className="p-3 flex flex-col gap-1.5 flex-1">
-        {/* Title */}
-        <Link href={`/cars/${car.ref_number}`}>
-          <h3 className="text-[12px] font-bold text-gray-900 uppercase leading-snug tracking-wide line-clamp-2 hover:text-[#C8102E] transition-colors"
-            style={{ minHeight: '2.8em' }}>
-            {title}
-          </h3>
-        </Link>
-
-        {/* Price block */}
-        <div className="border-t border-gray-100 pt-1.5">
-          <div className="text-[9px] font-bold text-gray-400 uppercase tracking-[0.15em]">FOB Price</div>
-          <div className="text-[18px] font-black text-[#C8102E] leading-tight tracking-tight">
-            ${(car.fob_price_usd ?? 0).toLocaleString()}
-          </div>
-          <div className="text-[10px] text-gray-400 font-medium mt-0.5">
-            REF # <span className="font-mono font-semibold text-gray-500">{car.ref_number}</span>
-          </div>
-          {pkrPrice && (
-            <div className="text-[10px] font-bold mt-0.5" style={{ color: '#16a34a' }}>{pkrPrice}</div>
-          )}
-        </div>
-
-        {/* Inquire Now button */}
-        <a
-          href={waLink}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="mt-auto flex items-center justify-center gap-1.5 py-2 w-full text-white text-[11px] font-bold uppercase tracking-wider transition-opacity hover:opacity-90 rounded-sm"
-          style={{ background: '#25D366' }}
-        >
-          <svg width="10" height="10" viewBox="0 0 24 24" fill="white">
-            <path d={WA_PATH}/>
-          </svg>
-          Inquire Now
-        </a>
-      </div>
-    </div>
-  );
-}
-
 function FeaturedCollectionSection() {
-  const [cars, setCars]       = React.useState<FcCar[]>([]);
+  const [cars, setCars]       = React.useState<Car[]>([]);
   const [imgMap, setImgMap]   = React.useState<Record<string, string>>({});
   const [loading, setLoading] = React.useState(true);
   const waNumber = import.meta.env.VITE_WHATSAPP_NUMBER || '818089227375';
+  const { pkr: pkrPerUsd } = useExchangeRate();
 
   React.useEffect(() => {
     let cancelled = false;
@@ -941,7 +824,7 @@ function FeaturedCollectionSection() {
         .order('created_at', { ascending: false })
         .limit(50);
       if (cancelled) return;
-      const fetched = (data ?? []) as FcCar[];
+      const fetched = (data ?? []) as Car[];
       setCars(fetched);
       const imgs = await fetchCarImages(fetched.map(c => c.id));
       if (!cancelled) { setImgMap(imgs); setLoading(false); }
@@ -980,7 +863,8 @@ function FeaturedCollectionSection() {
         ) : (
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
             {cars.map(car => (
-              <FcGridCard key={car.id} car={car} imgMap={imgMap} waNumber={waNumber} />
+              <CarCard key={car.id} car={car} variant="grid"
+                primaryImage={imgMap[car.id] ?? null} pkrRate={pkrPerUsd} waNumber={waNumber} />
             ))}
           </div>
         )}
@@ -1632,48 +1516,13 @@ function TrustBadgesSection() {
   );
 }
 
-/* ── Why Buyers Choose Us ────────────────────────────────────── */
-const TRUST_POINTS = [
-  {
-    title: 'Transparent FOB Pricing',
-    desc:  'Every price you see is the real FOB cost direct from Japan — no hidden markups or surprise fees.',
-    icon: (
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-        <line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
-      </svg>
-    ),
-  },
-  {
-    title: 'Quality-Graded Vehicles',
-    desc:  'Each car lists its Japanese auction inspection grade and condition sheet, so you know exactly what you are buying.',
-    icon: (
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M9 12l2 2 4-4"/><path d="M12 3l7 4v5c0 4.5-3 7.5-7 9-4-1.5-7-4.5-7-9V7l7-4z"/>
-      </svg>
-    ),
-  },
-  {
-    title: 'Worldwide Shipping',
-    desc:  'RoRo and container shipping arranged to major ports across Africa, the Caribbean, Asia, Europe and the Pacific.',
-    icon: (
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-        <circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/>
-        <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
-      </svg>
-    ),
-  },
-  {
-    title: 'Direct Communication',
-    desc:  'Talk to us directly on WhatsApp at every step — from choosing a vehicle to tracking its delivery to your port.',
-    icon: (
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/>
-      </svg>
-    ),
-  },
-] as const;
-
 function CustomerReviewsSection() {
+  const waNumber = import.meta.env.VITE_WHATSAPP_NUMBER || '818089227375';
+  const shareLink = `https://wa.me/${waNumber}?text=${encodeURIComponent(
+    'Hello Wazir Trading, I recently imported a car with you and would like to share my experience.'
+  )}`;
+  const hasReviews = TESTIMONIALS.length > 0;
+
   return (
     <section className="section-lazy py-20 relative overflow-hidden" style={{ background: '#F8FAFC' }}>
       <div className="absolute top-0 inset-x-0 h-px"
@@ -1685,32 +1534,57 @@ function CustomerReviewsSection() {
         <div className="text-center mb-12">
           <div className="flex items-center justify-center gap-3 mb-4">
             <div className="h-px w-10" style={{ background: 'linear-gradient(to right, transparent, #C8102E)' }}/>
-            <p className="text-[10px] tracking-[0.32em] uppercase font-bold text-[#C8102E]">Why Wazir Trading</p>
+            <p className="text-[10px] tracking-[0.32em] uppercase font-bold text-[#C8102E]">Customer Reviews</p>
             <div className="h-px w-10" style={{ background: 'linear-gradient(to left, transparent, #C8102E)' }}/>
           </div>
           <h2 className="text-3xl md:text-4xl font-serif font-bold text-gray-900 mb-3">
-            Why Buyers Import With Us
+            {hasReviews ? 'What Our Buyers Say' : 'Be Our First Reviewer'}
           </h2>
           <p className="text-gray-400 text-sm md:text-base max-w-xl mx-auto">
-            A registered Japanese vehicle exporter shipping quality-graded cars to buyers worldwide.
+            {hasReviews
+              ? 'Words from buyers who have imported with us.'
+              : 'We are a growing exporter and we would rather show you nothing than show you reviews we made up. If you have imported with us, we would genuinely like to hear how it went.'}
           </p>
         </div>
 
-        {/* Trust cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 max-w-5xl mx-auto">
-          {TRUST_POINTS.map(point => (
-            <div key={point.title}
-              className="flex flex-col rounded-2xl p-6 transition-all duration-300"
-              style={{ background: '#fff', border: '1px solid #EEF2F7', boxShadow: '0 4px 20px rgba(0,0,0,0.06)' }}>
-              <div className="w-11 h-11 rounded-xl flex items-center justify-center mb-4 text-[#C8102E]"
-                style={{ background: 'rgba(200,16,46,0.08)' }}>
-                {point.icon}
-              </div>
-              <h3 className="font-bold text-gray-900 text-base mb-2 leading-tight">{point.title}</h3>
-              <p className="text-gray-500 text-sm leading-relaxed">{point.desc}</p>
-            </div>
-          ))}
-        </div>
+        {hasReviews ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 max-w-5xl mx-auto">
+            {TESTIMONIALS.map(t => (
+              <figure key={`${t.name}-${t.country}`}
+                className="flex flex-col rounded-2xl p-6"
+                style={{ background: '#fff', border: '1px solid #EEF2F7', boxShadow: '0 4px 20px rgba(0,0,0,0.06)' }}>
+                {t.rating != null && (
+                  <div className="flex gap-0.5 mb-3" aria-label={`${t.rating} out of 5`}>
+                    {Array.from({ length: 5 }).map((_, i) => (
+                      <span key={i} className={i < t.rating! ? 'text-[#C8102E]' : 'text-gray-200'}>★</span>
+                    ))}
+                  </div>
+                )}
+                <blockquote className="text-gray-600 text-sm leading-relaxed flex-1">“{t.quote}”</blockquote>
+                <figcaption className="mt-4 pt-4 border-t border-gray-100">
+                  <p className="font-bold text-gray-900 text-sm">{t.name}</p>
+                  <p className="text-gray-400 text-xs mt-0.5">
+                    {t.country}{t.vehicle ? ` · ${t.vehicle}` : ''}
+                  </p>
+                </figcaption>
+              </figure>
+            ))}
+          </div>
+        ) : (
+          <div className="max-w-xl mx-auto text-center rounded-2xl p-8"
+            style={{ background: '#fff', border: '1px dashed #D8E0EA' }}>
+            <p className="text-gray-500 text-sm leading-relaxed mb-5">
+              Already bought a car from us? Send us a message and we will publish your review here —
+              in your own words, with your name on it.
+            </p>
+            <a href={shareLink} target="_blank" rel="noopener noreferrer"
+              className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-lg text-white text-[12px] font-bold uppercase tracking-wider transition-opacity hover:opacity-90"
+              style={{ background: '#25D366' }}>
+              <WhatsAppIcon size={14} />
+              Share Your Experience
+            </a>
+          </div>
+        )}
 
       </div>
     </section>
@@ -1801,144 +1675,11 @@ function BestSellersSection() {
           <div className="text-center py-20 text-gray-400">No cars available right now.</div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-            {cars.map(car => {
-              const img       = imgMap[car.id] ?? null;
-              const pkrPrice  = Math.round((car.fob_price_usd ?? 0) * pkrPerUsd).toLocaleString('en-PK');
-              const isSold    = car.status === 'sold';
-              const isNew     = !!car.is_new_arrival;
-              const isLiked   = !!liked[car.id];
-              const waMsg     = encodeURIComponent(
-                `Hi Wazir Trading, I'm interested in the ${car.year} ${car.make} ${car.model}` +
-                `${car.variant ? ' ' + car.variant : ''} (Ref: ${car.ref_number}). Please share details and availability.`
-              );
-              const waLink = `https://wa.me/${waNumber}?text=${waMsg}`;
-
-              return (
-                <div key={car.id}
-                  className="group flex flex-col rounded-2xl overflow-hidden bg-white transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
-                  style={{ border: '1px solid #EEF2F7', boxShadow: '0 2px 10px rgba(0,0,0,0.05)' }}>
-
-                  {/* ── Image area ── */}
-                  <div className="relative overflow-hidden bg-gray-100" style={{ aspectRatio: '4/3' }}>
-                    {img ? (
-                      <img src={img} alt={`${car.make} ${car.model}`}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                        onError={e => { (e.currentTarget as HTMLImageElement).style.display = 'none'; }}/>
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center"
-                        style={{ background: 'linear-gradient(135deg, #F8FAFC 0%, #EEF2F7 100%)' }}>
-                        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#CBD5E1" strokeWidth="1.2">
-                          <rect x="1" y="3" width="22" height="16" rx="2.5"/>
-                          <path d="M1 9h22M7 3v6"/><circle cx="12" cy="17" r="2"/>
-                        </svg>
-                      </div>
-                    )}
-
-                    {/* Sold overlay */}
-                    {isSold && (
-                      <div className="absolute inset-0 flex items-center justify-center"
-                        style={{ background: 'rgba(0,0,0,0.45)' }}>
-                        <span className="px-4 py-1.5 rounded-full text-xs font-black tracking-widest uppercase text-white"
-                          style={{ background: '#16A34A', letterSpacing: '0.18em' }}>Sold</span>
-                      </div>
-                    )}
-
-                    {/* New Arrival badge */}
-                    {isNew && !isSold && (
-                      <span className="absolute top-2.5 left-2.5 z-10 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider text-white"
-                        style={{ background: '#16A34A' }}>
-                        New Arrival
-                      </span>
-                    )}
-
-                    {/* Year badge (only if no New Arrival badge) */}
-                    {!isNew && (
-                      <span className="absolute top-2.5 left-2.5 z-10 bg-black/70 text-white text-[10px] font-bold px-2 py-0.5 rounded-md backdrop-blur-sm tracking-wider">
-                        {car.year}
-                      </span>
-                    )}
-
-                    {/* Year badge alongside New Arrival */}
-                    {isNew && (
-                      <span className="absolute top-2.5 left-[calc(theme(spacing.2)+4.5rem)] z-10 bg-black/70 text-white text-[10px] font-bold px-2 py-0.5 rounded-md backdrop-blur-sm tracking-wider hidden">
-                        {car.year}
-                      </span>
-                    )}
-
-                    {/* Engine CC badge */}
-                    {car.engine_cc && (
-                      <span className="absolute top-2.5 right-10 z-10 text-white text-[10px] font-bold px-2 py-0.5 rounded-md backdrop-blur-sm tracking-wider"
-                        style={{ background: 'rgba(200,16,46,0.88)' }}>
-                        {car.engine_cc} cc
-                      </span>
-                    )}
-
-                    {/* Heart / favourite */}
-                    <button
-                      onClick={() => toggleLike(car.id)}
-                      className="absolute top-2 right-2 z-10 w-7 h-7 rounded-full flex items-center justify-center transition-all duration-200 cursor-pointer border-0"
-                      style={{
-                        background: isLiked ? '#C8102E' : 'rgba(255,255,255,0.85)',
-                        backdropFilter: 'blur(4px)',
-                        boxShadow: '0 1px 6px rgba(0,0,0,0.15)',
-                      }}
-                      aria-label="Save to favourites"
-                    >
-                      <svg width="13" height="13" viewBox="0 0 24 24"
-                        fill={isLiked ? 'white' : 'none'}
-                        stroke={isLiked ? 'white' : '#9CA3AF'}
-                        strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
-                      </svg>
-                    </button>
-                  </div>
-
-                  {/* ── Card body ── */}
-                  <div className="flex flex-col flex-1 p-4 gap-2.5">
-                    {/* Make + Model */}
-                    <div>
-                      <h3 className="font-bold text-gray-900 text-[13.5px] leading-snug line-clamp-1">
-                        {car.make} {car.model}{car.variant ? ` ${car.variant}` : ''}
-                      </h3>
-                      <p className="text-[10px] font-mono text-gray-400 mt-0.5 tracking-wider">{car.ref_number}</p>
-                    </div>
-
-                    {/* Price */}
-                    <div className="flex-1">
-                      <p className="text-[9px] uppercase tracking-[0.2em] text-gray-400 font-semibold">FOB Price · Japan</p>
-                      <p className="text-[20px] font-extrabold leading-tight tracking-tight" style={{ color: '#C8102E' }}>
-                        ${(car.fob_price_usd ?? 0).toLocaleString()}
-                      </p>
-                      <p className="text-[11px] font-semibold text-gray-500">≈ PKR {pkrPrice}</p>
-                    </div>
-
-                    {/* Buttons */}
-                    <div className="flex gap-2 pt-1">
-                      <button
-                        onClick={() => navigate(`/cars/${car.ref_number}`)}
-                        disabled={isSold}
-                        className="flex-1 py-2 text-[11px] font-bold rounded-lg text-white transition-colors cursor-pointer border-0"
-                        style={{ background: isSold ? '#9CA3AF' : '#C8102E' }}
-                        onMouseEnter={e => { if (!isSold) (e.currentTarget as HTMLButtonElement).style.background = '#A50D25'; }}
-                        onMouseLeave={e => { if (!isSold) (e.currentTarget as HTMLButtonElement).style.background = '#C8102E'; }}
-                      >
-                        {isSold ? 'Sold Out' : 'Inquire Now'}
-                      </button>
-                      <a href={waLink} target="_blank" rel="noopener noreferrer"
-                        aria-label="WhatsApp"
-                        className="w-9 h-9 flex-shrink-0 flex items-center justify-center rounded-lg transition-colors"
-                        style={{ background: '#25D366' }}
-                        onMouseEnter={e => ((e.currentTarget as HTMLAnchorElement).style.background = '#128C7E')}
-                        onMouseLeave={e => ((e.currentTarget as HTMLAnchorElement).style.background = '#25D366')}>
-                        <svg width="15" height="15" viewBox="0 0 24 24" fill="white">
-                          <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
-                        </svg>
-                      </a>
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
+            {cars.map(car => (
+              <CarCard key={car.id} car={car} variant="grid"
+                primaryImage={imgMap[car.id] ?? null} pkrRate={pkrPerUsd} waNumber={waNumber}
+                isFavorite={!!liked[car.id]} onToggleFavorite={toggleLike} />
+            ))}
           </div>
         )}
 

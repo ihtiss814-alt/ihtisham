@@ -104,7 +104,7 @@ export default function Footer() {
               <picture>
                 <source srcSet="/logo.webp" type="image/webp" />
                 <img
-                  src="/logo.png"
+                  src="/logo-small.png"
                   alt="Wazir Trading LLC"
                   className="h-20 w-auto"
                   loading="lazy"

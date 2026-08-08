@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, Link } from 'wouter';
 import { supabase } from '@/lib/supabase';
 import { useExchangeRate } from '@/hooks/useExchangeRate';
-import { Car } from '@/components/CarCard';
+import CarCard, { Car } from '@/components/CarCard';
 import ImageGallery from '@/components/ImageGallery';
 import {
   Heart, Share2, Check, ChevronRight, Phone, Send,
@@ -24,7 +24,8 @@ type ExtendedCar = Car & {
 /* ── helpers ── */
 const MONTH_ABBR = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 
-function fmtManufactureDate(month: string | number | null | undefined, year: number): string {
+function fmtManufactureDate(month: string | number | null | undefined, year: number | null): string {
+  if (year == null) return '—';
   if (!month) return String(year);
   const m = typeof month === 'number' ? month : parseInt(String(month), 10);
   if (!isNaN(m) && m >= 1 && m <= 12) return `${MONTH_ABBR[m - 1]} ${year}`;
@@ -504,7 +505,8 @@ export default function CarDetailPage() {
   };
 
   /* ─── computed ─── */
-  const convertPrice = (usd: number): string => {
+  const convertPrice = (usd: number | null): string => {
+    if (usd == null) return '—';
     if (currency === 'USD') return fmt(usd, 'USD');
     const rateMap: Record<Currency, number> = {
       USD: 1,
@@ -789,7 +791,8 @@ export default function CarDetailPage() {
                 <div className="px-6 py-4">
                   <div className="flex gap-4 overflow-x-auto pb-2">
                     {similarCars.map(sc => (
-                      <SimilarCarCard key={sc.id} car={sc} />
+                      <CarCard key={sc.id} car={sc} variant="compact"
+                        primaryImage={sc.primaryImage ?? null} pkrRate={rates.pkr} />
                     ))}
                   </div>
                 </div>
@@ -1182,61 +1185,3 @@ export default function CarDetailPage() {
   );
 }
 
-/* ══════════════════════════════════════════════════════════════════════
-   SIMILAR CAR CARD
-══════════════════════════════════════════════════════════════════════ */
-function SimilarCarCard({ car }: { car: SimilarCar }) {
-  const [imgErr, setImgErr] = useState(false);
-  const waNum = import.meta.env.VITE_WHATSAPP_NUMBER || '818089227375';
-  const waMsg = encodeURIComponent(`Hi, I am interested in ${car.make} ${car.model} ${car.year} (Ref: ${car.ref_number}). Is it available?`);
-  const { pkr: pkrRate } = useExchangeRate();
-  const imgUrl = car.primaryImage ?? null;
-
-  return (
-    <div className="flex-shrink-0 w-52 bg-white border border-gray-200 rounded-sm overflow-hidden hover:shadow-md transition-shadow">
-      <Link href={`/cars/${car.ref_number}`}>
-        <div className="relative aspect-[4/3] bg-gray-100 overflow-hidden">
-          <span className="absolute top-2 left-2 z-10 bg-[#0D1B3E] text-white text-[10px] font-bold px-2 py-0.5">{car.year}</span>
-          {car.engine_cc != null && <span className="absolute top-2 right-2 z-10 bg-black/70 text-white text-[10px] font-bold px-2 py-0.5">{car.engine_cc}CC</span>}
-          {imgUrl && !imgErr ? (
-            <img src={imgUrl} alt={`${car.make} ${car.model}`} onError={() => setImgErr(true)} className="w-full h-full object-cover hover:scale-105 transition-transform duration-500" />
-          ) : (
-            <div className="w-full h-full flex items-center justify-center bg-gray-50">
-              <span className="text-xs text-gray-300 font-serif">{car.make} {car.model}</span>
-            </div>
-          )}
-        </div>
-      </Link>
-      <div className="p-3">
-        <Link href={`/cars/${car.ref_number}`} className="block font-serif font-bold text-[#0D1B3E] text-sm leading-tight hover:text-[#C8102E] transition-colors mb-0.5 line-clamp-1">
-          {car.make} {car.model}
-        </Link>
-        <p className="text-[10px] text-gray-400 mb-2">REF #{car.ref_number}</p>
-        <p className="text-base font-serif font-bold text-[#C8102E]">
-          ${(car.fob_price_usd ?? 0).toLocaleString()}
-        </p>
-        <p className="text-[10px] text-gray-400 mb-3">
-          PKR {((car.fob_price_usd ?? 0) * pkrRate).toLocaleString()}
-        </p>
-        <div className="flex gap-1.5">
-          <Link
-            href={`/cars/${car.ref_number}`}
-            className="flex-1 text-center text-[10px] font-bold py-1.5 text-white rounded-sm"
-            style={{ background: '#C8102E' }}
-          >
-            Inquire
-          </Link>
-          <a
-            href={`https://wa.me/${waNum}?text=${waMsg}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex-1 text-center text-[10px] font-bold py-1.5 text-white rounded-sm flex items-center justify-center gap-1"
-            style={{ background: '#25D366' }}
-          >
-            <MessageCircle size={10} /> WA
-          </a>
-        </div>
-      </div>
-    </div>
-  );
-}

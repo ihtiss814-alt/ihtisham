@@ -8,13 +8,16 @@ import {
   Navigation, Fuel, Loader2, Tag, Car as CarIcon, Truck, Tractor, Cog, Droplets, Droplet,
 } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
-import type { Car } from '@/components/CarCard';
+import CarCard, { resolvePrimaryImage, type Car } from '@/components/CarCard';
 import { useExchangeRate } from '@/hooks/useExchangeRate';
+import {
+  Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter,
+} from '@/components/ui/dialog';
 
 /* ─────────────────────────────────────────────────────────────── */
 /* TYPES                                                            */
 /* ─────────────────────────────────────────────────────────────── */
-type CarWithImage = Car & { car_images?: Array<{ image_url: string; is_primary: boolean }> };
+type CarWithImage = Car;
 
 /* ─────────────────────────────────────────────────────────────── */
 /* CONSTANTS                                                        */
@@ -377,7 +380,7 @@ function FilterItem({
   return (
     <button
       onClick={onClick}
-      className="w-full flex items-center justify-between px-4 py-1.5 text-sm text-left hover:bg-red-50 transition-colors"
+      className="w-full flex items-center justify-between px-4 py-2.5 text-sm text-left hover:bg-red-50 transition-colors"
     >
       <span className={`flex items-center gap-1.5 min-w-0 ${active ? 'text-[#C8102E] font-semibold' : 'text-gray-700'}`}>
         <span className={`flex-shrink-0 w-4 h-4 flex items-center justify-center ${active ? 'opacity-100' : 'opacity-50'}`}>
@@ -670,10 +673,11 @@ function BodyTypeCarousel({ setActiveBody }: { setActiveBody: (v: string) => voi
 /* ─────────────────────────────────────────────────────────────── */
 /* TOTAL PRICE CALCULATOR (Supabase-connected)                      */
 /* ─────────────────────────────────────────────────────────────── */
-function TotalPriceCalculator() {
+function TotalPriceCalculator({ initialCountry }: { initialCountry?: string }) {
   const { pkr: pkrRate } = useExchangeRate();
-  const [country, setCountry]       = useState('Pakistan');
-  const [port, setPort]             = useState('Karachi');
+  const startCountry = initialCountry && COUNTRY_PORTS[initialCountry] ? initialCountry : 'Pakistan';
+  const [country, setCountry]       = useState(startCountry);
+  const [port, setPort]             = useState(COUNTRY_PORTS[startCountry]?.[0] ?? 'Karachi');
   const [fob, setFob]               = useState('');
   const [inspection, setInspection] = useState('Yes');
   const [insurance, setInsurance]   = useState('Yes');
@@ -787,144 +791,60 @@ function TotalPriceCalculator() {
 }
 
 /* ─────────────────────────────────────────────────────────────── */
-/* CAR LISTING CARD                                                 */
+/* OFFER PRICE DIALOG — replaces the old window.prompt() flow        */
 /* ─────────────────────────────────────────────────────────────── */
-function CarRow({ car, pkrRate }: { car: CarWithImage; pkrRate: number }) {
-  const primaryImage =
-    car.car_images?.find(img => img.is_primary)?.image_url ||
-    car.car_images?.[0]?.image_url ||
-    null;
+function OfferPriceDialog({ car, onClose }: { car: CarWithImage | null; onClose: () => void }) {
+  const [amount, setAmount] = useState('');
 
-  const pkrPrice = Math.round((car.fob_price_usd ?? 0) * pkrRate);
-  const isNewArrival = car.is_new_arrival;
-  const isClearance  = car.collection?.toLowerCase() === 'clearance';
+  useEffect(() => { if (car) setAmount(''); }, [car]);
 
-  const waInquireMsg = encodeURIComponent(
-    `Hi, I am interested in ${car.make} ${car.model} ${car.year}\nReference: ${car.ref_number}\nPlease share more details.`
-  );
-  const waInquireLink = `https://wa.me/${WA_NUMBER}?text=${waInquireMsg}`;
-
-  const handleOfferPrice = () => {
-    const amount = window.prompt(`Enter your offer price in USD for ${car.make} ${car.model} ${car.year}:`);
-    if (!amount) return;
+  const submit = () => {
+    if (!car || !amount) return;
     const msg = encodeURIComponent(
       `Hi, I would like to offer $${amount} for ${car.make} ${car.model} ${car.year} Ref: ${car.ref_number}`
     );
     window.open(`https://wa.me/${WA_NUMBER}?text=${msg}`, '_blank');
+    onClose();
   };
 
-  const badges = [
-    car.year ? String(car.year) : null,
-    car.mileage_km ? `${car.mileage_km.toLocaleString()} km` : null,
-    car.engine_cc  ? `${car.engine_cc} cc` : null,
-    car.transmission || null,
-    car.fuel_type || null,
-    car.body_type || null,
-    car.steering || null,
-    car.drive || null,
-    car.color || null,
-  ].filter(Boolean) as string[];
-
   return (
-    <div className="bg-white border border-gray-200 shadow-sm mb-3 overflow-hidden flex flex-col sm:flex-row">
-
-      {/* ── Image ── */}
-      <Link href={`/cars/${car.ref_number}`}
-        className="relative sm:w-[220px] sm:flex-shrink-0 block">
-        <div className="relative bg-gray-100 aspect-[4/3] sm:w-[220px] sm:h-full sm:aspect-auto min-h-[160px]">
-          {(isNewArrival || isClearance) && (
-            <div
-              className="absolute top-2 left-2 z-10 px-1.5 py-0.5 text-[10px] font-bold text-white uppercase tracking-wider"
-              style={{ background: isClearance ? '#D97706' : '#16A34A' }}>
-              {isClearance ? 'CLEARANCE' : 'New Arrival'}
+    <Dialog open={!!car} onOpenChange={(open) => { if (!open) onClose(); }}>
+      <DialogContent>
+        {car && (
+          <>
+            <DialogHeader>
+              <DialogTitle>Make an Offer</DialogTitle>
+              <DialogDescription>
+                {car.make} {car.model} {car.year} · Ref #{car.ref_number}
+              </DialogDescription>
+            </DialogHeader>
+            <div>
+              <label className="text-[11px] font-semibold uppercase tracking-wide text-gray-500 block mb-1.5">
+                Your Offer (USD)
+              </label>
+              <input
+                type="number"
+                autoFocus
+                value={amount}
+                onChange={e => setAmount(e.target.value)}
+                onKeyDown={e => e.key === 'Enter' && submit()}
+                placeholder={`e.g. ${car.fob_price_usd ?? ''}`}
+                className="w-full border border-gray-300 rounded-sm px-3 py-2 text-sm outline-none focus:border-[#C8102E]"
+              />
             </div>
-          )}
-          {primaryImage ? (
-            <img
-              src={primaryImage}
-              alt={`${car.make} ${car.model}`}
-              className="absolute inset-0 w-full h-full object-cover"
-              loading="lazy"
-            />
-          ) : (
-            <div className="absolute inset-0 flex flex-col items-center justify-center gap-1.5 bg-gray-100">
-              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                <rect x="3" y="3" width="18" height="18" rx="2"/>
-                <circle cx="8.5" cy="8.5" r="1.5"/>
-                <path d="M21 15l-5-5L5 21"/>
-              </svg>
-              <span className="text-[11px] font-medium text-gray-400">Photo Coming Soon</span>
-            </div>
-          )}
-        </div>
-      </Link>
-
-      {/* ── Details ── */}
-      <div className="flex-1 flex flex-col p-3 min-w-0">
-
-        {/* Title + ref */}
-        <div className="flex items-start justify-between gap-2 mb-1">
-          <Link href={`/cars/${car.ref_number}`}>
-            <h3 className="font-bold text-[13px] sm:text-[14px] text-gray-900 leading-snug hover:text-[#C8102E] transition-colors">
-              {car.make.toUpperCase()} {car.model.toUpperCase()}{car.variant ? ` ${car.variant.toUpperCase()}` : ''}
-            </h3>
-          </Link>
-          <span className="text-[10px] text-gray-400 whitespace-nowrap flex-shrink-0 mt-px">
-            #{car.ref_number}
-          </span>
-        </div>
-
-        {/* Location */}
-        <div className="flex items-center gap-1 mb-2">
-          <span className="w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ background: RED }} />
-          <span className="text-[10px] font-semibold text-gray-500 tracking-widest uppercase">
-            {car.stock_location || 'Japan'}
-          </span>
-        </div>
-
-        {/* Spec badges */}
-        <div className="flex flex-wrap gap-1 mb-3">
-          {badges.map((b, i) => (
-            <span key={i}
-              className="px-1.5 py-0.5 text-[10px] font-medium text-gray-600 bg-gray-100 border border-gray-200">
-              {b}
-            </span>
-          ))}
-        </div>
-
-        {/* Price + Actions */}
-        <div className="mt-auto flex flex-wrap items-center gap-2">
-          {/* Price */}
-          <div className="mr-auto">
-            <div className="text-[20px] sm:text-[22px] font-black leading-none" style={{ color: RED }}>
-              ${(car.fob_price_usd ?? 0).toLocaleString()}
-            </div>
-            {pkrRate > 0 && (
-              <div className="text-[10px] font-semibold text-gray-400 mt-0.5">
-                PKR {pkrPrice.toLocaleString()}
-              </div>
-            )}
-          </div>
-
-          {/* CTA buttons */}
-          <Link href={`/cars/${car.ref_number}`}
-            className="px-3 py-1.5 text-[11px] font-bold text-white tracking-wide hover:opacity-90 transition-opacity"
-            style={{ background: NAVY }}>
-            View Details
-          </Link>
-          <a href={waInquireLink} target="_blank" rel="noopener noreferrer"
-            className="flex items-center gap-1 px-3 py-1.5 text-[11px] font-bold text-white hover:opacity-90 transition-opacity"
-            style={{ background: '#25D366' }}>
-            <WhatsAppIcon size={12} /> WhatsApp
-          </a>
-          <button onClick={handleOfferPrice}
-            className="px-3 py-1.5 text-[11px] font-bold border hover:bg-red-50 transition-colors"
-            style={{ borderColor: RED, color: RED }}>
-            Offer Price
-          </button>
-        </div>
-      </div>
-    </div>
+            <DialogFooter>
+              <button
+                onClick={submit}
+                disabled={!amount}
+                className="px-5 py-2.5 text-sm font-bold text-white rounded-sm hover:opacity-90 transition-opacity disabled:opacity-40 flex items-center justify-center gap-2"
+                style={{ background: '#25D366' }}>
+                <WhatsAppIcon size={14} /> Send Offer on WhatsApp
+              </button>
+            </DialogFooter>
+          </>
+        )}
+      </DialogContent>
+    </Dialog>
   );
 }
 
@@ -1157,6 +1077,7 @@ export default function CarsPage() {
   // ── Core state ──
   const [filters, setFilters]           = useState(readFiltersFromUrl);
   const [cars, setCars]                 = useState<CarWithImage[]>([]);
+  const [offerCar, setOfferCar]         = useState<CarWithImage | null>(null);
   const [totalCount, setTotalCount]     = useState(0);
   const [loading, setLoading]           = useState(true);
   const [page, setPage]                 = useState(() => parseInt(getParams().get('page') || '1'));
@@ -1173,21 +1094,25 @@ export default function CarsPage() {
   const { pkr: pkrRate }                = useExchangeRate();
   const [showMobileFilter, setShowMobileFilter] = useState(false);
 
-  // ── Ref for scroll-to-results ──
+  // ── Refs for scroll-on-arrival ──
   const resultsRef = useRef<HTMLDivElement>(null);
+  const calcRef    = useRef<HTMLDivElement>(null);
 
-  // ── Scroll to results when arriving from a filtered link ──
+  // ── 'destination' is a shipping destination, not a car attribute, so it can't filter
+  //    the stock list. It pre-fills the landed-cost calculator instead. ──
+  const [destination] = useState(() => getParams().get('destination') || '');
+
+  // ── Scroll to results (or the calculator) when arriving from a deep link ──
   useEffect(() => {
     const p = getParams();
-    // Bug C fix: 'destination' is never applied to the query (it's the shipping destination,
-    // not a car stock attribute), so remove it from the hasFilter check to avoid false scrolls.
     const hasFilter = ['q','make','price','body','category','location','year','drive','trans',
       'engine','fuel','mileage','steering','minPrice','maxPrice',
       'advModel','advYearFrom','advYearTo',
       'advMinPrice','advMaxPrice','advColor','advMinMil','advMaxMil','advMinEng','advMaxEng',
     ].some(k => p.get(k));
-    const delay = hasFilter ? setTimeout(() => {
-      resultsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    const target = hasFilter ? resultsRef : (p.get('destination') ? calcRef : null);
+    const delay = target ? setTimeout(() => {
+      target.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }, 400) : null;
     return () => { if (delay !== null) clearTimeout(delay); };
   }, []);
@@ -1365,23 +1290,26 @@ export default function CarsPage() {
   }, [filters, activeTab, sortBy, page, fetchCars]);
 
   // ── Write a filter change to state + URL (resets page to 1) ──
-  // Bug B fix: price range (sidebar) and direct min/max bounds (home-page links) are mutually
-  // exclusive — both active at once produces contradictory Supabase clauses that return 0 rows.
+  // The three price inputs (sidebar range, home-page numeric bounds, advanced-panel bounds)
+  // all constrain fob_price_usd, so any two active at once AND together into contradictory
+  // Supabase clauses that silently return 0 rows. Setting one clears the other two.
+  const PRICE_GROUPS: Record<string, string[]> = {
+    price:       ['minPrice', 'maxPrice', 'advMinPrice', 'advMaxPrice'],
+    minPrice:    ['price', 'advMinPrice', 'advMaxPrice'],
+    maxPrice:    ['price', 'advMinPrice', 'advMaxPrice'],
+    advMinPrice: ['price', 'minPrice', 'maxPrice'],
+    advMaxPrice: ['price', 'minPrice', 'maxPrice'],
+  };
+
   const setFilter = (key: string, value: string) => {
     setParam(key, value);
-    // Mutual exclusion: sidebar price range vs direct numeric bounds
-    if (key === 'price' && value) {
-      setParam('minPrice', ''); setParam('maxPrice', '');
-    }
-    if ((key === 'minPrice' || key === 'maxPrice') && value) {
-      setParam('price', '');
-    }
+    const conflicts = value ? (PRICE_GROUPS[key] ?? []) : [];
+    conflicts.forEach(k => setParam(k, ''));
     setParam('page', '1');
     setPage(1);
     setFilters(prev => {
       const next = { ...prev, [key]: value };
-      if (key === 'price' && value)                             { next.minPrice = ''; next.maxPrice = ''; }
-      if ((key === 'minPrice' || key === 'maxPrice') && value)  { next.price = ''; }
+      conflicts.forEach(k => { (next as Record<string, string>)[k] = ''; });
       return next;
     });
   };
@@ -1443,6 +1371,11 @@ export default function CarsPage() {
     set('advMinPrice', advMinPrice); set('advMaxPrice', advMaxPrice);
     set('advMinMil', advMinMil); set('advMaxMil', advMaxMil);
     set('advMinEng', advMinEng); set('advMaxEng', advMaxEng);
+    // Same price mutual-exclusion as setFilter — the advanced bounds win over the
+    // sidebar range and home-page bounds, which would otherwise AND into 0 results.
+    if (advMinPrice || advMaxPrice) {
+      ['price', 'minPrice', 'maxPrice'].forEach(k => p.delete(k));
+    }
     p.set('page', '1');
     const qs = p.toString();
     window.history.replaceState({}, '', qs ? `?${qs}` : window.location.pathname);
@@ -1773,7 +1706,11 @@ export default function CarsPage() {
               <Loader2 size={36} className="animate-spin text-gray-300" />
             </div>
           ) : cars.length > 0 ? (
-            cars.map(car => <CarRow key={car.id} car={car} pkrRate={pkrRate} />)
+            cars.map(car => (
+              <CarCard key={car.id} car={car} variant="row" pkrRate={pkrRate}
+                primaryImage={resolvePrimaryImage(car.car_images)}
+                onOfferPrice={setOfferCar} />
+            ))
           ) : (
             <div className="border border-gray-200 bg-white p-12 text-center mb-4">
               <Search size={40} className="mx-auto text-gray-300 mb-4" />
@@ -1803,9 +1740,13 @@ export default function CarsPage() {
           <Pagination page={page} total={totalCount} onPage={handlePageChange} />
 
           {/* TOTAL PRICE CALCULATOR — below results so users see cars first */}
-          <TotalPriceCalculator />
+          <div ref={calcRef}>
+            <TotalPriceCalculator initialCountry={destination} />
+          </div>
         </div>
       </div>
+
+      <OfferPriceDialog car={offerCar} onClose={() => setOfferCar(null)} />
 
       <style>{`
         .scrollbar-hide { scrollbar-width: none; }

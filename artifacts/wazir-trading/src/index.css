@@ -221,6 +221,38 @@
 .hero-img-in  { animation: ken-burns-in  7s ease-in-out forwards; }
 .hero-img-out { animation: ken-burns-out 7s ease-in-out forwards; }
 
+/* ─── Reduced motion ────────────────────────────────────────────────────────
+   Four marquees loop forever and the hero runs a Ken Burns pan. Honour the
+   OS-level "reduce motion" setting: hold every looping track at its start
+   frame and let entrance animations resolve to their final state instantly,
+   so nothing is left invisible.                                             */
+@media (prefers-reduced-motion: reduce) {
+  .marquee-track,
+  .brand-track,
+  .body-track,
+  .fc-track,
+  .hero-img-in,
+  .hero-img-out {
+    animation: none !important;
+    will-change: auto;
+  }
+
+  .hero-anim-1,
+  .hero-anim-2,
+  .hero-anim-3,
+  .hero-anim-4,
+  .hero-anim-5 {
+    animation-duration: 1ms !important;
+    animation-delay: 0ms !important;
+  }
+
+  .dest-card:hover .dest-flag {
+    transform: none;
+  }
+
+  html { scroll-behavior: auto; }
+}
+
 /* Destination flag card */
 .dest-flag {
   display: block;
