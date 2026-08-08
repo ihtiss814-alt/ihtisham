@@ -1,7 +1,8 @@
 import React from 'react';
 import { Shield, Award, Clock, Globe } from 'lucide-react';
-import { motion } from 'framer-motion';
 import { useMeta } from '@/lib/use-meta';
+import ShippingRouteCanvas from '@/components/ShippingRouteCanvas';
+import { useReveal } from '@/hooks/useReveal';
 
 export default function AboutPage() {
   useMeta({
@@ -9,12 +10,26 @@ export default function AboutPage() {
     description: 'Wazir Trading LLC has been exporting premium quality Japanese used cars to 130+ countries for over 5 years. Learn about our team, process, and commitment to transparency.',
     canonical: 'https://wazirtradingllc.com/about',
   });
+  const story  = useReveal<HTMLDivElement>();
+  const values = useReveal<HTMLDivElement>();
+
   return (
     <div className="min-h-screen bg-background pt-[166px]">
       {/* Hero Section */}
-      <section className="bg-secondary text-white py-24 relative overflow-hidden">
-        <div className="absolute inset-0 z-0 opacity-20 mix-blend-overlay">
-          <img src="https://images.unsplash.com/photo-1580273916550-e323be2ae537?q=80&w=2000&auto=format&fit=crop" alt="Tokyo cityscape" className="w-full h-full object-cover" />
+      <section className="text-white py-24 relative overflow-hidden" style={{ background: 'var(--brand-navy)' }}>
+        {/* Live chart of our export routes out of Japan — replaces a stock photo
+            of a city we do not operate from. */}
+        <div className="absolute inset-0 z-0">
+          <ShippingRouteCanvas className="w-full h-full" />
+          {/* Scrim over the left half only, where the headline sits. The route
+              strokes are already low-alpha, so the right side needs no cover. */}
+          <div
+            className="absolute inset-0 pointer-events-none"
+            style={{
+              background:
+                'linear-gradient(90deg, var(--brand-navy) 0%, rgba(13,27,62,0.90) 28%, rgba(13,27,62,0.45) 62%, rgba(13,27,62,0.10) 100%)',
+            }}
+          />
         </div>
         <div className="container mx-auto px-4 md:px-8 relative z-10">
           <div className="max-w-3xl">
@@ -29,7 +44,10 @@ export default function AboutPage() {
       {/* Story Section */}
       <section className="py-24">
         <div className="container mx-auto px-4 md:px-8">
-          <div className="flex flex-col md:flex-row gap-16 items-center">
+          <div
+            ref={story.ref}
+            className={`reveal ${story.revealed ? 'is-revealed' : ''} flex flex-col md:flex-row gap-16 items-center`}
+          >
             <div className="md:w-1/2">
               <img 
                 src="https://images.unsplash.com/photo-1616455579100-2ceaa4eb2d37?q=80&w=1887&auto=format&fit=crop" 
@@ -65,8 +83,11 @@ export default function AboutPage() {
             <p className="text-muted-foreground max-w-2xl mx-auto">The principles that guide every vehicle we export.</p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-            <ValueCard 
+          <div
+            ref={values.ref}
+            className={`reveal ${values.revealed ? 'is-revealed' : ''} grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8`}
+          >
+            <ValueCard
               icon={<Shield />} 
               title="Absolute Transparency" 
               desc="We provide original auction sheets and authentic condition reports. No hidden damage, no tampered odometers."

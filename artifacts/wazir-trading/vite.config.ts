@@ -37,8 +37,6 @@ export default defineConfig({
         entryFileNames: 'assets/[name]-[hash].js',
         assetFileNames: 'assets/[name]-[hash][extname]',
         manualChunks(id) {
-          // framer-motion — large, only needed by home + about + how-it-works (lazy pages)
-          if (id.includes('framer-motion')) return 'vendor-framer';
           // Recharts + d3 — only used on specific pages
           if (id.includes('recharts') || id.includes('d3-')) return 'vendor-charts';
           // Supabase — separate so it can be cached independently

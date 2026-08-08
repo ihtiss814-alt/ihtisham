@@ -228,6 +228,20 @@
 .hero-img-in  { animation: ken-burns-in  7s ease-in-out forwards; }
 .hero-img-out { animation: ken-burns-out 7s ease-in-out forwards; }
 
+/* ─── Scroll reveal (paired with hooks/useReveal.ts) ─────────────────────────
+   The hook sets `revealed` immediately under reduced-motion, so the hidden
+   state is never reachable for those visitors.                              */
+.reveal {
+  opacity: 0;
+  transform: translateY(18px);
+  transition: opacity 0.6s cubic-bezier(0.22, 1, 0.36, 1),
+              transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.reveal.is-revealed {
+  opacity: 1;
+  transform: none;
+}
+
 /* ─── Reduced motion ────────────────────────────────────────────────────────
    Four marquees loop forever and the hero runs a Ken Burns pan. Honour the
    OS-level "reduce motion" setting: hold every looping track at its start
@@ -255,6 +269,12 @@
 
   .dest-card:hover .dest-flag {
     transform: none;
+  }
+
+  .reveal {
+    opacity: 1;
+    transform: none;
+    transition: none;
   }
 
   html { scroll-behavior: auto; }

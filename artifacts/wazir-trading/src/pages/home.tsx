@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Link, useLocation } from 'wouter';
-import { useInView } from 'framer-motion';
 import { useExchangeRate } from '@/hooks/useExchangeRate';
+import { useReveal } from '@/hooks/useReveal';
 import { ArrowRight, CheckCircle2, ShieldCheck, Ship, Globe, Award, Search } from 'lucide-react';
 
 /* ── Search bar component ────────────────────────────────────── */
@@ -1794,8 +1794,9 @@ function HeroBackground() {
 /* ── Animated count-up hook ──────────────────────────────────── */
 function useCountUp(target: number, duration = 1800) {
   const [value, setValue] = useState(0);
-  const ref = useRef<HTMLDivElement>(null);
-  const inView = useInView(ref, { once: true, margin: '-80px' });
+  // useReveal is IntersectionObserver-based; it replaced framer-motion's
+  // useInView, which was the only thing pulling that library into the bundle.
+  const { ref, revealed: inView } = useReveal<HTMLDivElement>();
 
   useEffect(() => {
     if (!inView || target === 0) return;

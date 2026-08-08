@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link } from 'wouter';
 import { useMeta } from '@/lib/use-meta';
+import { useReveal } from '@/hooks/useReveal';
 import {
   Search, FileText, Landmark, Ship, MapPin,
   Car, ChevronDown, ChevronRight, CheckCircle,
@@ -165,6 +166,8 @@ export default function HowItWorksPage() {
     canonical: 'https://wazirtradingllc.com/how-it-works',
   });
   const waLink = `https://wa.me/818089227375?text=${encodeURIComponent('Hello, I am interested in purchasing a Japanese used car from Wazir Trading LLC.')}`;
+  const steps    = useReveal<HTMLDivElement>();
+  const benefits = useReveal<HTMLDivElement>();
 
   return (
     <div className="min-h-screen bg-white pt-[166px]">
@@ -281,7 +284,10 @@ export default function HowItWorksPage() {
             </p>
           </div>
 
-          <div className="relative">
+          <div
+            ref={steps.ref}
+            className={`reveal ${steps.revealed ? 'is-revealed' : ''} relative`}
+          >
             {/* Dotted connector line — desktop only */}
             <div className="hidden md:block absolute left-[39px] top-10 bottom-10 w-px border-l-2 border-dashed border-gray-200" />
 
@@ -416,7 +422,10 @@ export default function HowItWorksPage() {
       <section className="py-16 bg-gray-50 border-t border-gray-100">
         <div className="container mx-auto px-4 md:px-8 max-w-5xl">
           <h2 className="text-2xl font-bold text-[#0D1B3E] text-center mb-10">Why Choose Wazir Trading LLC?</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+          <div
+            ref={benefits.ref}
+            className={`reveal ${benefits.revealed ? 'is-revealed' : ''} grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5`}
+          >
             {BENEFITS.map((b) => (
               <div
                 key={b.title}
