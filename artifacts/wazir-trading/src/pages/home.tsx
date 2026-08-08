@@ -328,6 +328,14 @@ function accentToFilter(hex: string): string {
     '#666666': 'invert(40%) brightness(60%)',                                                   // Mercedes grey
     '#001E50': 'invert(8%) sepia(80%) saturate(2000%) hue-rotate(220deg) brightness(70%)',    // VW navy
     '#005A2B': 'invert(18%) sepia(80%) saturate(700%) hue-rotate(130deg) brightness(75%)',    // Land Rover green
+    '#A31922': 'invert(42%) sepia(100%) saturate(2877%) hue-rotate(-30deg) brightness(61%) contrast(122%)',   // Hino red
+    '#E05A00': 'invert(72%) sepia(100%) saturate(3467%) hue-rotate(-360deg) brightness(73%) contrast(168%)',  // Iseki orange
+    '#367C2B': 'invert(9%) sepia(100%) saturate(2991%) hue-rotate(-275deg) brightness(212%) contrast(66%)',   // John Deere green
+    '#D0231E': 'invert(34%) sepia(100%) saturate(2562%) hue-rotate(339deg) brightness(77%) contrast(118%)',   // Kubota red
+    '#CC1011': 'invert(44%) sepia(100%) saturate(4396%) hue-rotate(-22deg) brightness(72%) contrast(134%)',   // Massey Ferguson red
+    '#555555': 'invert(92%) sepia(100%) saturate(581%) hue-rotate(-306deg) brightness(0%) contrast(33%)',     // Mametora grey
+    '#0047AB': 'invert(46%) sepia(100%) saturate(665%) hue-rotate(-178deg) brightness(59%) contrast(181%)',   // Shibaura blue
+    '#C8102E': 'invert(35%) sepia(100%) saturate(3398%) hue-rotate(-29deg) brightness(73%) contrast(125%)',   // Yanmar red
   };
   return map[hex] ?? 'invert(20%)';
 }
@@ -398,7 +406,7 @@ function ShopByMakeSection() {
                 className="group flex-shrink-0 flex flex-col items-center gap-3 w-[120px] py-5 px-3 rounded-[8px] border border-gray-200 bg-white hover:border-[#C8102E] hover:shadow-[0_4px_20px_rgba(200,16,46,0.12)] transition-all duration-200 cursor-pointer"
               >
                 {/* Logo box */}
-                <div className="w-14 h-14 flex items-center justify-center rounded-[6px] overflow-hidden bg-gray-50 flex-shrink-0 border border-gray-100">
+                <div className="w-20 h-14 flex items-center justify-center rounded-[6px] overflow-hidden bg-gray-50 flex-shrink-0 border border-gray-100">
                   <BrandLogo slug={slug} name={name} accent={accent} />
                 </div>
 

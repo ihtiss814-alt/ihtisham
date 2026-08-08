@@ -513,7 +513,7 @@ function MakeCarousel({ setActiveMake, makeCounts }: {
           {track.map(({ name, slug, accent, count }, i) => (
             <button key={`${name}-${i}`} onClick={() => setActiveMake(name)}
               className="group flex-shrink-0 flex flex-col items-center gap-2 w-[100px] py-3 px-2 border border-gray-200 bg-white hover:border-[#C8102E] hover:shadow-[0_4px_16px_rgba(200,16,46,0.12)] transition-all cursor-pointer rounded-sm">
-              <div className="w-12 h-12 flex items-center justify-center rounded-[6px] overflow-hidden bg-gray-50 border border-gray-100 flex-shrink-0">
+              <div className="w-16 h-12 flex items-center justify-center rounded-[6px] overflow-hidden bg-gray-50 border border-gray-100 flex-shrink-0">
                 <BrandLogo slug={slug} name={name} accent={accent} />
               </div>
               <span className="text-[11px] font-bold text-gray-800 group-hover:text-[#C8102E] text-center leading-tight transition-colors">{name}</span>
