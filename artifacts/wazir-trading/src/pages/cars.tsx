@@ -1006,8 +1006,9 @@ export default function CarsPage() {
   const [showMobileFilter, setShowMobileFilter] = useState(false);
 
   // ── Refs for scroll-on-arrival ──
-  const resultsRef = useRef<HTMLDivElement>(null);
-  const calcRef    = useRef<HTMLDivElement>(null);
+  const resultsRef   = useRef<HTMLDivElement>(null);
+  const calcRef      = useRef<HTMLDivElement>(null);
+  const stockListRef = useRef<HTMLDivElement>(null);
 
   // ── 'destination' is a shipping destination, not a car attribute, so it can't filter
   //    the stock list. It pre-fills the landed-cost calculator instead. ──
@@ -1258,7 +1259,17 @@ export default function CarsPage() {
   const handlePageChange = (p: number) => {
     setParam('page', String(p));
     setPage(p);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    // Land on the stock list, not the top of the page — paging to 2 should not
+    // send you back through the hero. Offset by the fixed header so the first
+    // row is not tucked underneath it.
+    const el = stockListRef.current;
+    if (!el) { window.scrollTo({ top: 0, behavior: 'smooth' }); return; }
+    const headerH = parseInt(
+      getComputedStyle(document.documentElement).getPropertyValue('--header-h'),
+      10,
+    ) || 153;
+    const top = el.getBoundingClientRect().top + window.scrollY - headerH - 12;
+    window.scrollTo({ top: Math.max(top, 0), behavior: 'smooth' });
   };
 
   const handleTabChange = (tabKey: string) => {
@@ -1415,14 +1426,13 @@ export default function CarsPage() {
 
       <div className="flex gap-0">
         {/* ── Desktop Sidebar ────────────────────────────────── */}
+        {/* Scrolls with the page. It used to be sticky with its own inner
+            scrollbar, which pinned it mid-column and left dead space beside
+            the results, plus a second scrollbar to fight with. Stretching to
+            the row height keeps the white panel running the full length. */}
         <div
-          className="hidden md:block sticky self-start overflow-y-auto border-r border-gray-200 bg-white shadow-sm"
-          style={{
-            minWidth: 220,
-            width: 220,
-            top: 'var(--header-h)',
-            maxHeight: 'calc(100vh - var(--header-h))',
-          }}
+          className="hidden md:block border-r border-gray-200 bg-white shadow-sm"
+          style={{ minWidth: 220, width: 220 }}
         >
           <div className="px-3 py-3 border-b border-gray-100" style={{ background: NAVY }}>
             <p className="text-white text-[11px] font-bold tracking-[0.15em] uppercase">Filter Vehicles</p>
@@ -1588,8 +1598,8 @@ export default function CarsPage() {
             ))}
           </div>
 
-          {/* STOCK LIST HEADER */}
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
+          {/* STOCK LIST HEADER — also the landing point when paging */}
+          <div ref={stockListRef} className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
             <div>
               <h2 className="font-bold text-lg text-gray-900" style={{ fontFamily: "'Playfair Display',serif" }}>
                 Stock List
