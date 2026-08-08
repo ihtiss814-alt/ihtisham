@@ -90,7 +90,7 @@ export default function Footer() {
   const year = new Date().getFullYear();
 
   return (
-    <footer className="bg-[#0D1B2A] text-white/80 border-t border-white/10">
+    <footer className="bg-[#0D1B3E] text-white/80 border-t border-white/10">
       {/* ── Top accent bar ──────────────────────────────────────────── */}
       <div className="h-1 w-full bg-gradient-to-r from-transparent via-[#C8102E] to-transparent opacity-60" />
 

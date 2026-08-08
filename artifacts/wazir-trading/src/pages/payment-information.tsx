@@ -6,7 +6,7 @@ import {
 import { useMeta } from '@/lib/use-meta';
 
 /* ─── Brand ──────────────────────────────────────────────────────── */
-const NAVY = '#0D1B3E';
+const NAVY = 'var(--brand-navy)'; // token defined once in index.css
 const RED  = '#C8102E';
 
 /* ─── Bank Details Data ──────────────────────────────────────────── */

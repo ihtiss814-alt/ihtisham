@@ -11,6 +11,9 @@ import { supabase } from '@/lib/supabase';
 import CarCard, { resolvePrimaryImage, type Car } from '@/components/CarCard';
 import { useExchangeRate } from '@/hooks/useExchangeRate';
 import {
+  COUNTRY_PORTS, DEST_COUNTRIES, portsFor, fetchShippingRate, computeLandedCost,
+} from '@/lib/shipping';
+import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter,
 } from '@/components/ui/dialog';
 
@@ -22,7 +25,7 @@ type CarWithImage = Car;
 /* ─────────────────────────────────────────────────────────────── */
 /* CONSTANTS                                                        */
 /* ─────────────────────────────────────────────────────────────── */
-const NAVY = '#0D1B3E';
+const NAVY = 'var(--brand-navy)'; // token defined once in index.css
 const RED  = '#C8102E';
 const WA_NUMBER = import.meta.env.VITE_WHATSAPP_NUMBER || '818089227375';
 const PAGE_SIZE = 20;
@@ -126,110 +129,6 @@ const SORT_OPTIONS = [
   'Newest First', 'Price Low to High', 'Price High to Low',
   'Mileage Low to High', 'Year Newest', 'Year Oldest',
 ];
-
-const COUNTRY_PORTS: Record<string, string[]> = {
-  // ── Africa ──────────────────────────────────────────────────────
-  Angola:           ['Luanda'],
-  Botswana:         ['Durban (via ZA)'],
-  Cameroon:         ['Douala'],
-  Djibouti:         ['Djibouti'],
-  Ethiopia:         ['Djibouti (via DJ)'],
-  Ghana:            ['Tema', 'Takoradi'],
-  'Ivory Coast':    ['Abidjan'],
-  Kenya:            ['Mombasa'],
-  Madagascar:       ['Toamasina'],
-  Malawi:           ['Beira (via MZ)'],
-  Mauritius:        ['Port Louis'],
-  Mozambique:       ['Maputo'],
-  Namibia:          ['Walvis Bay'],
-  Nigeria:          ['Lagos (Apapa)', 'Tin Can Island'],
-  Rwanda:           ['Mombasa (via KE)'],
-  Senegal:          ['Dakar'],
-  'South Africa':   ['Durban', 'Cape Town'],
-  'South Sudan':    ['Mombasa (via KE)'],
-  Tanzania:         ['Dar es Salaam'],
-  Uganda:           ['Mombasa (via KE)'],
-  Zambia:           ['Durban (via ZA)'],
-  Zimbabwe:         ['Beira (via MZ)'],
-  // ── Americas ────────────────────────────────────────────────────
-  Canada:           ['Vancouver', 'Halifax'],
-  Chile:            ['Valparaíso', 'San Antonio'],
-  Colombia:         ['Buenaventura', 'Cartagena'],
-  Ecuador:          ['Guayaquil'],
-  Guyana:           ['Georgetown'],
-  Mexico:           ['Manzanillo', 'Veracruz'],
-  Panama:           ['Colón'],
-  Peru:             ['Callao'],
-  Suriname:         ['Paramaribo'],
-  USA:              ['Los Angeles', 'Houston', 'New York'],
-  // ── Caribbean ───────────────────────────────────────────────────
-  Anguilla:                ['Blowing Point'],
-  Antigua:                 ["St. John's"],
-  Aruba:                   ['Oranjestad'],
-  Bahamas:                 ['Nassau (Freeport)'],
-  Barbados:                ['Bridgetown'],
-  Belize:                  ['Belize City'],
-  Bermuda:                 ['Hamilton'],
-  'British Virgin Islands':['Road Town'],
-  'Cayman Islands':        ['George Town'],
-  Cuba:                    ['Havana'],
-  'Curaçao':               ['Willemstad'],
-  Dominica:                ['Roseau'],
-  'Dominican Republic':    ['Santo Domingo', 'Caucedo'],
-  Grenada:                 ["St. George's"],
-  Guadeloupe:              ['Pointe-à-Pitre'],
-  Haiti:                   ['Port-au-Prince'],
-  Jamaica:                 ['Kingston'],
-  Martinique:              ['Fort-de-France'],
-  Montserrat:              ['Little Bay'],
-  'Sint Maarten':          ['Philipsburg'],
-  'St Kitts':              ['Basseterre'],
-  'St Lucia':              ['Castries'],
-  'St Vincent':            ['Kingstown'],
-  Trinidad:                ['Port of Spain'],
-  'Turks and Caicos':      ['Providenciales'],
-  // ── Asia & Middle East ──────────────────────────────────────────
-  Azerbaijan:       ['Baku'],
-  Bahrain:          ['Manama'],
-  Bangladesh:       ['Chittagong'],
-  Cambodia:         ['Sihanoukville'],
-  Georgia:          ['Poti', 'Batumi'],
-  India:            ['Mumbai', 'Chennai', 'Nhava Sheva'],
-  Iraq:             ['Umm Qasr'],
-  Jordan:           ['Aqaba'],
-  Kuwait:           ['Kuwait City'],
-  Myanmar:          ['Yangon'],
-  Oman:             ['Muscat', 'Sohar'],
-  Pakistan:         ['Karachi', 'Gwadar'],
-  Philippines:      ['Manila', 'Cebu'],
-  Qatar:            ['Doha (Hamad Port)'],
-  'Saudi Arabia':   ['Jeddah', 'Dammam'],
-  'Sri Lanka':      ['Colombo'],
-  Thailand:         ['Bangkok (Laem Chabang)'],
-  UAE:              ['Dubai', 'Abu Dhabi', 'Sharjah'],
-  Vietnam:          ['Ho Chi Minh City', 'Hai Phong'],
-  // ── Europe ──────────────────────────────────────────────────────
-  Belgium:          ['Antwerp'],
-  Cyprus:           ['Limassol'],
-  France:           ['Le Havre', 'Marseille'],
-  Germany:          ['Hamburg', 'Bremen'],
-  Malta:            ['Valletta'],
-  Netherlands:      ['Rotterdam'],
-  Poland:           ['Gdańsk'],
-  Russia:           ['Vladivostok', 'St. Petersburg'],
-  UK:               ['Southampton', 'Tilbury'],
-  // ── Pacific & Oceania ───────────────────────────────────────────
-  Australia:        ['Melbourne', 'Sydney', 'Brisbane', 'Fremantle'],
-  Fiji:             ['Suva'],
-  'New Caledonia':  ['Nouméa'],
-  'New Zealand':    ['Auckland', 'Wellington', 'Christchurch'],
-  'Papua New Guinea':['Port Moresby', 'Lae'],
-  Samoa:            ['Apia'],
-  'Solomon Islands':['Honiara'],
-  Tonga:            ['Nukualofa'],
-  Vanuatu:          ['Port Vila'],
-};
-const DEST_COUNTRIES = Object.keys(COUNTRY_PORTS);
 
 /* ─────────────────────────────────────────────────────────────── */
 /* SMALL HELPERS                                                    */
@@ -682,38 +581,33 @@ function TotalPriceCalculator({ initialCountry }: { initialCountry?: string }) {
   const [inspection, setInspection] = useState('Yes');
   const [insurance, setInsurance]   = useState('Yes');
   const [result, setResult]         = useState<{ usd: number; pkr: number } | null>(null);
+  const [noRate, setNoRate]         = useState(false);
   const [calcLoading, setCalcLoading] = useState(false);
 
-  const ports = COUNTRY_PORTS[country] || [];
+  const ports = portsFor(country);
 
   const handleCountryChange = (c: string) => {
     setCountry(c);
-    const ps = COUNTRY_PORTS[c] || [];
-    setPort(ps[0] || '');
+    setPort(portsFor(c)[0] || '');
+    setResult(null);
+    setNoRate(false);
   };
 
   const calculate = async () => {
     setCalcLoading(true);
     setResult(null);
-    try {
-      const rateRes = await supabase.from('shipping_rates').select('freight_usd, inspection_fee, insurance_rate')
-        .eq('country', country).eq('port', port).limit(1).maybeSingle();
-
-      const fobPrice   = parseFloat(fob) || 0;
-      const freightUSD = rateRes.data?.freight_usd    ?? (country === 'Pakistan' ? 1200 : 1500);
-      const inspFee    = inspection === 'Yes' ? (rateRes.data?.inspection_fee ?? 150)  : 0;
-      const insRate    = insurance  === 'Yes' ? (rateRes.data?.insurance_rate  ?? 0.025) : 0;
-      const totalUSD   = fobPrice + freightUSD + inspFee + (fobPrice * insRate);
-
-      setResult({ usd: totalUSD, pkr: Math.round(totalUSD * pkrRate) });
-    } catch {
-      // Fallback to basic calculation
-      const fobPrice = parseFloat(fob) || 0;
-      const totalUSD = fobPrice + 1200 + (inspection === 'Yes' ? 150 : 0) + (insurance === 'Yes' ? fobPrice * 0.025 : 0);
-      setResult({ usd: totalUSD, pkr: Math.round(totalUSD * pkrRate) });
-    } finally {
-      setCalcLoading(false);
-    }
+    setNoRate(false);
+    // Uses the same rate lookup and maths as the car-detail calculator. If we have
+    // no published rate for the route we say so rather than inventing a freight
+    // figure, which is what this calculator used to do.
+    const rate = await fetchShippingRate(country, port);
+    const cost = computeLandedCost(parseFloat(fob) || 0, rate, {
+      withInspection: inspection === 'Yes',
+      withInsurance:  insurance === 'Yes',
+    });
+    if (cost) setResult({ usd: cost.total, pkr: Math.round(cost.total * pkrRate) });
+    else setNoRate(true);
+    setCalcLoading(false);
   };
 
   return (
@@ -775,6 +669,23 @@ function TotalPriceCalculator({ initialCountry }: { initialCountry?: string }) {
               <div className="text-2xl font-black" style={{ color: RED }}>${result.usd.toLocaleString(undefined, { maximumFractionDigits: 0 })}</div>
               <div className="text-sm font-semibold mt-1" style={{ color: '#D4AF37' }}>PKR {result.pkr.toLocaleString()}</div>
               <p className="text-white/30 text-[10px] mt-2">* Estimate only. Customs duties and local taxes not included.</p>
+            </div>
+          )}
+          {noRate && (
+            <div className="p-4 rounded-sm border border-white/10" style={{ background: 'rgba(255,255,255,0.05)' }}>
+              <div className="text-2xl font-black mb-1" style={{ color: RED }}>ASK</div>
+              <p className="text-white/50 text-[12px] mb-3">
+                We do not have a published rate for {port ? `${port}, ` : ''}{country} yet. Message us and we will quote it.
+              </p>
+              <a
+                href={`https://wa.me/${WA_NUMBER}?text=${encodeURIComponent(
+                  `Hi, please quote shipping to ${port ? port + ', ' : ''}${country}.`
+                )}`}
+                target="_blank" rel="noopener noreferrer"
+                className="w-full flex items-center justify-center gap-2 py-2.5 text-[12px] font-bold text-white rounded-sm transition-opacity hover:opacity-90"
+                style={{ background: '#25D366' }}>
+                <WhatsAppIcon size={13} /> Get Quote on WhatsApp
+              </a>
             </div>
           )}
         </div>

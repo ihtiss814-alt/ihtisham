@@ -33,7 +33,7 @@ const STEPS = [
     description:
       'Make a Telegraphic Transfer directly to our official Wazir Trading LLC bank account in Japan only. We accept 50% deposit to reserve the car and remaining 50% before shipment. Send us your payment receipt via WhatsApp to confirm.',
     extra: (
-      <div className="mt-4 bg-[#0D1B2A] rounded-[4px] px-4 py-3 text-sm font-mono space-y-1">
+      <div className="mt-4 bg-[#0D1B3E] rounded-[4px] px-4 py-3 text-sm font-mono space-y-1">
         <div className="text-[#C8102E] text-[11px] font-bold uppercase tracking-widest mb-2">Bank Details</div>
         {[
           ['Bank', 'Mitsui Sumitomo Ginko (0009)'],
@@ -126,7 +126,7 @@ function FaqAccordion({ q, a }: { q: string; a: string }) {
         onClick={() => setOpen((v) => !v)}
         className="w-full text-left flex items-center justify-between gap-4 px-5 py-4 bg-white hover:bg-gray-50 transition-colors"
       >
-        <span className="font-semibold text-[#0D1B2A] text-[15px] leading-snug">{q}</span>
+        <span className="font-semibold text-[#0D1B3E] text-[15px] leading-snug">{q}</span>
         <ChevronDown
           size={18}
           strokeWidth={2}
@@ -171,7 +171,7 @@ export default function HowItWorksPage() {
 
       {/* ── Hero ──────────────────────────────────────────────────────────── */}
       <section
-        className="relative bg-[#0D1B2A] text-white py-24 overflow-hidden"
+        className="relative bg-[#0D1B3E] text-white py-24 overflow-hidden"
         style={{
           backgroundImage: `
             radial-gradient(circle at 10% 60%, rgba(200,16,46,0.1) 0%, transparent 50%),
@@ -228,14 +228,14 @@ export default function HowItWorksPage() {
       {/* ── Section 1: Buying Options ──────────────────────────────────────── */}
       <section className="py-16 bg-gray-50">
         <div className="container mx-auto px-4 md:px-8 max-w-4xl">
-          <h2 className="text-2xl font-bold text-[#0D1B2A] text-center mb-10">Choose Your Buying Option</h2>
+          <h2 className="text-2xl font-bold text-[#0D1B3E] text-center mb-10">Choose Your Buying Option</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* Card 1 */}
             <div className="bg-white border-2 border-gray-200 hover:border-[#C8102E]/40 rounded-[6px] p-8 flex flex-col transition-colors duration-200">
               <div className="w-12 h-12 rounded-full bg-[#C8102E]/10 flex items-center justify-center mb-5">
                 <Car size={22} className="text-[#C8102E]" />
               </div>
-              <h3 className="font-bold text-[#0D1B2A] text-xl mb-3">Purchase from Stock</h3>
+              <h3 className="font-bold text-[#0D1B3E] text-xl mb-3">Purchase from Stock</h3>
               <p className="text-gray-500 text-sm leading-relaxed flex-1 mb-6">
                 Browse and purchase from our live inventory of quality Japanese used cars available for immediate export
                 from Japan.
@@ -254,14 +254,14 @@ export default function HowItWorksPage() {
               <div className="w-12 h-12 rounded-full bg-[#C8102E]/10 flex items-center justify-center mb-5">
                 <Search size={22} className="text-[#C8102E]" />
               </div>
-              <h3 className="font-bold text-[#0D1B2A] text-xl mb-3">Source Your Specific Car</h3>
+              <h3 className="font-bold text-[#0D1B3E] text-xl mb-3">Source Your Specific Car</h3>
               <p className="text-gray-500 text-sm leading-relaxed flex-1 mb-6">
                 Tell us exactly what you need and we will search Japanese auctions to find your perfect vehicle at the
                 best price.
               </p>
               <Link
                 href="/contact"
-                className="inline-flex items-center gap-2 px-5 py-2.5 border border-[#0D1B2A] hover:bg-[#0D1B2A] text-[#0D1B2A] hover:text-white text-[11px] tracking-[0.18em] uppercase font-bold rounded-[2px] transition-all duration-150 self-start"
+                className="inline-flex items-center gap-2 px-5 py-2.5 border border-[#0D1B3E] hover:bg-[#0D1B3E] text-[#0D1B3E] hover:text-white text-[11px] tracking-[0.18em] uppercase font-bold rounded-[2px] transition-all duration-150 self-start"
               >
                 Submit Request
                 <ChevronRight size={12} strokeWidth={2.5} />
@@ -275,7 +275,7 @@ export default function HowItWorksPage() {
       <section className="py-20 bg-white border-t border-gray-100">
         <div className="container mx-auto px-4 md:px-8 max-w-4xl">
           <div className="text-center mb-14">
-            <h2 className="text-3xl font-bold text-[#0D1B2A] mb-3">Simple 5 Step Process</h2>
+            <h2 className="text-3xl font-bold text-[#0D1B3E] mb-3">Simple 5 Step Process</h2>
             <p className="text-gray-500 max-w-md mx-auto text-sm">
               From selecting your ideal car to delivery at your destination port
             </p>
@@ -290,7 +290,7 @@ export default function HowItWorksPage() {
                 <div key={step.num} className="relative flex gap-6 md:gap-10">
                   {/* Step number + icon bubble */}
                   <div className="flex flex-col items-center flex-shrink-0">
-                    <div className="relative z-10 w-[78px] h-[78px] rounded-full bg-[#0D1B2A] border-4 border-white shadow-lg flex flex-col items-center justify-center gap-0.5">
+                    <div className="relative z-10 w-[78px] h-[78px] rounded-full bg-[#0D1B3E] border-4 border-white shadow-lg flex flex-col items-center justify-center gap-0.5">
                       <span className="text-[10px] text-white/40 font-bold tracking-widest">{step.num}</span>
                       {step.icon}
                     </div>
@@ -298,7 +298,7 @@ export default function HowItWorksPage() {
 
                   {/* Content */}
                   <div className={`flex-1 pb-12 ${idx === STEPS.length - 1 ? 'pb-0' : ''}`}>
-                    <h3 className="font-bold text-[#0D1B2A] text-xl mt-4 mb-2">{step.title}</h3>
+                    <h3 className="font-bold text-[#0D1B3E] text-xl mt-4 mb-2">{step.title}</h3>
                     <p className="text-gray-500 text-sm leading-relaxed">{step.description}</p>
                     {step.extra}
                   </div>
@@ -313,14 +313,14 @@ export default function HowItWorksPage() {
       <section className="py-16 bg-gray-50 border-t border-gray-100">
         <div className="container mx-auto px-4 md:px-8 max-w-5xl">
           <div className="text-center mb-10">
-            <h2 className="text-2xl font-bold text-[#0D1B2A] mb-2">Estimated Delivery Timelines</h2>
+            <h2 className="text-2xl font-bold text-[#0D1B3E] mb-2">Estimated Delivery Timelines</h2>
             <p className="text-gray-500 text-sm">Average shipping time from Japan to major destination ports</p>
           </div>
 
           <div className="overflow-x-auto rounded-[6px] border border-gray-200 shadow-sm">
             <table className="w-full text-sm min-w-[600px]">
               <thead>
-                <tr className="bg-[#0D1B2A] text-white">
+                <tr className="bg-[#0D1B3E] text-white">
                   {['Region', 'Destination', 'Port', 'Shipping Method', 'Est. Time'].map((h) => (
                     <th key={h} className="px-4 py-3.5 text-left text-[11px] uppercase tracking-[0.15em] font-semibold">
                       {h}
@@ -340,7 +340,7 @@ export default function HowItWorksPage() {
                         {row.region}
                       </span>
                     </td>
-                    <td className="px-4 py-3 font-semibold text-[#0D1B2A]">{row.destination}</td>
+                    <td className="px-4 py-3 font-semibold text-[#0D1B3E]">{row.destination}</td>
                     <td className="px-4 py-3 text-gray-600">{row.port}</td>
                     <td className="px-4 py-3">
                       <span className="inline-block px-2 py-0.5 bg-blue-50 text-blue-700 text-[11px] font-semibold rounded">
@@ -363,7 +363,7 @@ export default function HowItWorksPage() {
       {/* ── Section 4: Payment Terms ───────────────────────────────────────── */}
       <section className="py-16 bg-white border-t border-gray-100">
         <div className="container mx-auto px-4 md:px-8 max-w-4xl">
-          <h2 className="text-2xl font-bold text-[#0D1B2A] text-center mb-10">Payment Terms</h2>
+          <h2 className="text-2xl font-bold text-[#0D1B3E] text-center mb-10">Payment Terms</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* Standard */}
             <div className="border-2 border-[#C8102E]/20 rounded-[6px] p-7 bg-[#C8102E]/3">
@@ -371,7 +371,7 @@ export default function HowItWorksPage() {
                 <div className="w-10 h-10 rounded-full bg-[#C8102E]/15 flex items-center justify-center">
                   <Landmark size={18} className="text-[#C8102E]" />
                 </div>
-                <h3 className="font-bold text-[#0D1B2A] text-lg">Standard Payment</h3>
+                <h3 className="font-bold text-[#0D1B3E] text-lg">Standard Payment</h3>
               </div>
               <ul className="space-y-3">
                 {[
@@ -393,7 +393,7 @@ export default function HowItWorksPage() {
                 <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center">
                   <Car size={18} className="text-gray-600" />
                 </div>
-                <h3 className="font-bold text-[#0D1B2A] text-lg">For Multiple Vehicles</h3>
+                <h3 className="font-bold text-[#0D1B3E] text-lg">For Multiple Vehicles</h3>
               </div>
               <ul className="space-y-3">
                 {[
@@ -415,7 +415,7 @@ export default function HowItWorksPage() {
       {/* ── Section 5: Why Choose Us ───────────────────────────────────────── */}
       <section className="py-16 bg-gray-50 border-t border-gray-100">
         <div className="container mx-auto px-4 md:px-8 max-w-5xl">
-          <h2 className="text-2xl font-bold text-[#0D1B2A] text-center mb-10">Why Choose Wazir Trading LLC?</h2>
+          <h2 className="text-2xl font-bold text-[#0D1B3E] text-center mb-10">Why Choose Wazir Trading LLC?</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
             {BENEFITS.map((b) => (
               <div
@@ -425,7 +425,7 @@ export default function HowItWorksPage() {
                 <div className="w-10 h-10 rounded-full bg-[#C8102E]/10 flex items-center justify-center mb-4">
                   {b.icon}
                 </div>
-                <h3 className="font-bold text-[#0D1B2A] mb-2">{b.title}</h3>
+                <h3 className="font-bold text-[#0D1B3E] mb-2">{b.title}</h3>
                 <p className="text-gray-500 text-sm leading-relaxed">{b.desc}</p>
               </div>
             ))}
@@ -434,7 +434,7 @@ export default function HowItWorksPage() {
       </section>
 
       {/* ── Section 6: Calculator CTA ──────────────────────────────────────── */}
-      <section className="py-16 bg-[#0D1B2A]">
+      <section className="py-16 bg-[#0D1B3E]">
         <div className="container mx-auto px-4 md:px-8 max-w-3xl text-center">
           <div className="inline-flex items-center gap-2 mb-5">
             <span className="h-px w-8 bg-[#C8102E]" />
@@ -459,7 +459,7 @@ export default function HowItWorksPage() {
       {/* ── Section 7: FAQ Teaser ──────────────────────────────────────────── */}
       <section className="py-16 bg-gray-50 border-t border-gray-100">
         <div className="container mx-auto px-4 md:px-8 max-w-3xl">
-          <h2 className="text-2xl font-bold text-[#0D1B2A] text-center mb-8">Common Questions</h2>
+          <h2 className="text-2xl font-bold text-[#0D1B3E] text-center mb-8">Common Questions</h2>
           <div className="space-y-2.5 mb-8">
             {FAQS.map((faq) => (
               <FaqAccordion key={faq.q} q={faq.q} a={faq.a} />
@@ -478,7 +478,7 @@ export default function HowItWorksPage() {
       </section>
 
       {/* ── Section 8: Bottom CTA ──────────────────────────────────────────── */}
-      <section className="py-20 bg-[#0D1B2A]">
+      <section className="py-20 bg-[#0D1B3E]">
         <div className="container mx-auto px-4 md:px-8 max-w-3xl text-center">
           <h2 className="text-3xl font-bold text-white mb-4">Ready to Start Your Journey?</h2>
           <p className="text-white/60 mb-10 leading-relaxed">

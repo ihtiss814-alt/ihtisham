@@ -77,7 +77,7 @@ const FAQS: FaqItem[] = [
     answer: (
       <div className="space-y-4">
         <p>We accept payment via Telegraphic Transfer (TT) directly to our official bank account in Japan only.</p>
-        <div className="bg-[#0D1B2A] text-white rounded-[4px] p-4 space-y-1.5 text-sm font-mono">
+        <div className="bg-[#0D1B3E] text-white rounded-[4px] p-4 space-y-1.5 text-sm font-mono">
           <div className="text-[#C8102E] font-bold text-[11px] tracking-widest uppercase mb-2">Bank Details</div>
           {[
             ['Bank', 'Mitsui Sumitomo Ginko (0009)'],
@@ -298,7 +298,7 @@ function AccordionFaq({
         className="w-full text-left flex items-center justify-between gap-4 px-5 py-4 bg-white hover:bg-gray-50 transition-colors duration-150"
         aria-expanded={isOpen}
       >
-        <span className="font-semibold text-[#0D1B2A] text-[15px] leading-snug">{faq.question}</span>
+        <span className="font-semibold text-[#0D1B3E] text-[15px] leading-snug">{faq.question}</span>
         <ChevronDown
           size={18}
           strokeWidth={2}
@@ -364,7 +364,7 @@ export default function FaqsPage() {
 
       {/* ── Hero ──────────────────────────────────────────────────────────── */}
       <section
-        className="relative bg-[#0D1B2A] text-white py-20 overflow-hidden"
+        className="relative bg-[#0D1B3E] text-white py-20 overflow-hidden"
         style={{
           backgroundImage: `
             radial-gradient(circle at 20% 50%, rgba(200,16,46,0.08) 0%, transparent 60%),
@@ -415,7 +415,7 @@ export default function FaqsPage() {
       </section>
 
       {/* ── Search ────────────────────────────────────────────────────────── */}
-      <div className="bg-[#0D1B2A] pb-6">
+      <div className="bg-[#0D1B3E] pb-6">
         <div className="container mx-auto px-4 md:px-8 max-w-2xl">
           <div className="relative">
             <Search
@@ -430,7 +430,7 @@ export default function FaqsPage() {
                 setSearchQuery(e.target.value);
                 setOpenId(null);
               }}
-              className="w-full pl-10 pr-4 py-3.5 rounded-[4px] bg-white border border-white/10 text-[#0D1B2A] text-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#C8102E]/40 shadow-lg"
+              className="w-full pl-10 pr-4 py-3.5 rounded-[4px] bg-white border border-white/10 text-[#0D1B3E] text-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#C8102E]/40 shadow-lg"
             />
             {searchQuery && (
               <button
@@ -509,7 +509,7 @@ export default function FaqsPage() {
       </section>
 
       {/* ── Bottom Contact Section ─────────────────────────────────────────── */}
-      <section className="py-16 bg-[#0D1B2A]">
+      <section className="py-16 bg-[#0D1B3E]">
         <div className="container mx-auto px-4 md:px-8 max-w-4xl text-center">
           <h2 className="text-3xl font-bold text-white mb-3">
             Still Have Questions? Let's Talk!

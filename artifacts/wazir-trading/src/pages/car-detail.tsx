@@ -1,8 +1,12 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'wouter';
 import { supabase } from '@/lib/supabase';
 import { useExchangeRate } from '@/hooks/useExchangeRate';
 import CarCard, { Car } from '@/components/CarCard';
+import {
+  COUNTRY_PORTS as COUNTRIES_PORTS, fetchShippingRate, computeLandedCost,
+  type ShippingRate,
+} from '@/lib/shipping';
 import ImageGallery from '@/components/ImageGallery';
 import {
   Heart, Share2, Check, ChevronRight, Phone, Send,
@@ -54,14 +58,6 @@ type SimilarCar = Car & {
   primaryImage?: string;
 };
 
-interface ShippingRate {
-  country: string;
-  port: string;
-  freight_usd: number;
-  inspection_fee: number;
-  insurance_rate: number;
-}
-
 interface ExchangeRate {
   currency: string;
   rate: number; // relative to USD
@@ -69,111 +65,10 @@ interface ExchangeRate {
 
 /* ──────────────────────────── constants ─────────────────────────────── */
 const RED = '#C8102E';
-const NAVY = '#0D1B3E';
+const NAVY = 'var(--brand-navy)'; // token defined once in index.css
 const WA_NUMBER = import.meta.env.VITE_WHATSAPP_NUMBER || '818089227375';
 
-const COUNTRIES_PORTS: Record<string, string[]> = {
-  // ── Africa ──────────────────────────────────────────────────────
-  Angola:           ['Luanda'],
-  Botswana:         ['Durban (via ZA)'],
-  Cameroon:         ['Douala'],
-  Djibouti:         ['Djibouti'],
-  Ethiopia:         ['Djibouti (via DJ)'],
-  Ghana:            ['Tema', 'Takoradi'],
-  'Ivory Coast':    ['Abidjan'],
-  Kenya:            ['Mombasa'],
-  Madagascar:       ['Toamasina'],
-  Malawi:           ['Beira (via MZ)'],
-  Mauritius:        ['Port Louis'],
-  Mozambique:       ['Maputo'],
-  Namibia:          ['Walvis Bay'],
-  Nigeria:          ['Lagos (Apapa)', 'Tin Can Island'],
-  Rwanda:           ['Mombasa (via KE)'],
-  Senegal:          ['Dakar'],
-  'South Africa':   ['Durban', 'Cape Town'],
-  'South Sudan':    ['Mombasa (via KE)'],
-  Tanzania:         ['Dar es Salaam'],
-  Uganda:           ['Mombasa (via KE)'],
-  Zambia:           ['Durban (via ZA)'],
-  Zimbabwe:         ['Beira (via MZ)'],
-  // ── Americas ────────────────────────────────────────────────────
-  Canada:           ['Vancouver', 'Halifax'],
-  Chile:            ['Valparaíso', 'San Antonio'],
-  Colombia:         ['Buenaventura', 'Cartagena'],
-  Ecuador:          ['Guayaquil'],
-  Guyana:           ['Georgetown'],
-  Mexico:           ['Manzanillo', 'Veracruz'],
-  Panama:           ['Colón'],
-  Peru:             ['Callao'],
-  Suriname:         ['Paramaribo'],
-  USA:              ['Los Angeles', 'Houston', 'New York'],
-  // ── Caribbean ───────────────────────────────────────────────────
-  Anguilla:                ['Blowing Point'],
-  Antigua:                 ['St. John\'s'],
-  Aruba:                   ['Oranjestad'],
-  Bahamas:                 ['Nassau (Freeport)'],
-  Barbados:                ['Bridgetown'],
-  Belize:                  ['Belize City'],
-  Bermuda:                 ['Hamilton'],
-  'British Virgin Islands':['Road Town'],
-  'Cayman Islands':        ['George Town'],
-  Cuba:                    ['Havana'],
-  'Curaçao':               ['Willemstad'],
-  Dominica:                ['Roseau'],
-  'Dominican Republic':    ['Santo Domingo', 'Caucedo'],
-  Grenada:                 ['St. George\'s'],
-  Guadeloupe:              ['Pointe-à-Pitre'],
-  Haiti:                   ['Port-au-Prince'],
-  Jamaica:                 ['Kingston'],
-  Martinique:              ['Fort-de-France'],
-  Montserrat:              ['Little Bay'],
-  'Sint Maarten':          ['Philipsburg'],
-  'St Kitts':              ['Basseterre'],
-  'St Lucia':              ['Castries'],
-  'St Vincent':            ['Kingstown'],
-  Trinidad:                ['Port of Spain'],
-  'Turks and Caicos':      ['Providenciales'],
-  // ── Asia & Middle East ──────────────────────────────────────────
-  Azerbaijan:       ['Baku'],
-  Bahrain:          ['Manama'],
-  Bangladesh:       ['Chittagong'],
-  Cambodia:         ['Sihanoukville'],
-  Georgia:          ['Poti', 'Batumi'],
-  India:            ['Mumbai', 'Chennai', 'Nhava Sheva'],
-  Iraq:             ['Umm Qasr'],
-  Jordan:           ['Aqaba'],
-  Kuwait:           ['Kuwait City'],
-  Myanmar:          ['Yangon'],
-  Oman:             ['Muscat', 'Sohar'],
-  Pakistan:         ['Karachi', 'Gwadar'],
-  Philippines:      ['Manila', 'Cebu'],
-  Qatar:            ['Doha (Hamad Port)'],
-  'Saudi Arabia':   ['Jeddah', 'Dammam'],
-  'Sri Lanka':      ['Colombo'],
-  Thailand:         ['Bangkok (Laem Chabang)'],
-  UAE:              ['Dubai', 'Abu Dhabi', 'Sharjah'],
-  Vietnam:          ['Ho Chi Minh City', 'Hai Phong'],
-  // ── Europe ──────────────────────────────────────────────────────
-  Belgium:          ['Antwerp'],
-  Cyprus:           ['Limassol'],
-  France:           ['Le Havre', 'Marseille'],
-  Germany:          ['Hamburg', 'Bremen'],
-  Malta:            ['Valletta'],
-  Netherlands:      ['Rotterdam'],
-  Poland:           ['Gdańsk'],
-  Russia:           ['Vladivostok', 'St. Petersburg'],
-  UK:               ['Southampton', 'Tilbury'],
-  // ── Pacific & Oceania ───────────────────────────────────────────
-  Australia:        ['Melbourne', 'Sydney', 'Brisbane', 'Fremantle'],
-  Fiji:             ['Suva'],
-  'New Caledonia':  ['Nouméa'],
-  'New Zealand':    ['Auckland', 'Wellington', 'Christchurch'],
-  'Papua New Guinea':['Port Moresby', 'Lae'],
-  Samoa:            ['Apia'],
-  'Solomon Islands':['Honiara'],
-  Tonga:            ['Nukualofa'],
-  Vanuatu:          ['Port Vila'],
-};
+
 
 const ALL_FEATURES = [
   '360 Camera', 'Air Bag', 'Air Conditioner', 'Alloy Wheels', 'Anti Brake System',
@@ -430,23 +325,18 @@ export default function CarDetailPage() {
 
   // exchange rates are now provided by the useExchangeRate hook above
 
-  /* ─── shipping rate ─── */
-  const fetchShippingRate = useCallback(async (c: string, p: string) => {
+  /* ─── shipping rate (shared lookup — see lib/shipping.ts) ─── */
+  useEffect(() => {
+    let cancelled = false;
     setRateLoading(true);
     setShippingRate(null);
-    const { data } = await supabase
-      .from('shipping_rates')
-      .select('*')
-      .eq('country', c)
-      .eq('port', p)
-      .maybeSingle();
-    setShippingRate(data);
-    setRateLoading(false);
-  }, []);
-
-  useEffect(() => {
-    fetchShippingRate(country, port);
-  }, [country, port, fetchShippingRate]);
+    fetchShippingRate(country, port).then(rate => {
+      if (cancelled) return;
+      setShippingRate(rate);
+      setRateLoading(false);
+    });
+    return () => { cancelled = true; };
+  }, [country, port]);
 
   /* ─── handlers ─── */
   const handleShare = async () => {
@@ -519,14 +409,12 @@ export default function CarDetailPage() {
   };
 
   const calcTotal = (): { total: number | null; pkr: string | null } => {
-    if (!car || !shippingRate) return { total: null, pkr: null };
-    const fob = car.fob_price_usd ?? 0;
-    const freight = freightType === 'Prepaid' ? shippingRate.freight_usd : 0;
-    const inspection = withInspection ? shippingRate.inspection_fee : 0;
-    const insurance = withInsurance ? fob * shippingRate.insurance_rate : 0;
-    const total = fob + freight + inspection + insurance;
-    const pkr = `PKR ${fmtNum(Math.round(total * rates.pkr))}`;
-    return { total, pkr };
+    if (!car) return { total: null, pkr: null };
+    const cost = computeLandedCost(car.fob_price_usd, shippingRate, {
+      freightType, withInspection, withInsurance,
+    });
+    if (!cost) return { total: null, pkr: null };
+    return { total: cost.total, pkr: `PKR ${fmtNum(Math.round(cost.total * rates.pkr))}` };
   };
 
   /* ─── loading / not found ─── */
