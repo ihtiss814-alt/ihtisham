@@ -1531,7 +1531,7 @@ export default function CarsPage() {
   const totalDisplay = totalCount.toLocaleString();
 
   return (
-    <div className="min-h-screen bg-gray-50 pt-[115px] md:pt-[148px]">
+    <div className="min-h-screen bg-gray-50 pt-[151px] md:pt-[184px]">
 
       {/* ── Compact Mobile Search ─────────────────────────── (mobile only) */}
       <div className="md:hidden w-full px-4 py-3 bg-white border-b border-gray-200">

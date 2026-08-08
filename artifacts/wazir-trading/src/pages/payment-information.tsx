@@ -78,7 +78,7 @@ export default function PaymentInformationPage() {
   const waLink = `https://wa.me/${waNumber}?text=${encodeURIComponent('Hello, I have a question about making payment to Wazir Trading LLC.')}`;
 
   return (
-    <div className="min-h-screen bg-gray-50 pt-[110px] md:pt-[130px]">
+    <div className="min-h-screen bg-gray-50 pt-[146px] md:pt-[166px]">
 
       {/* ── Hero ───────────────────────────────────────────────── */}
       <section className="relative overflow-hidden" style={{ background: NAVY }}>

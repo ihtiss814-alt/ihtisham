@@ -167,7 +167,7 @@ export default function HowItWorksPage() {
   const waLink = `https://wa.me/818089227375?text=${encodeURIComponent('Hello, I am interested in purchasing a Japanese used car from Wazir Trading LLC.')}`;
 
   return (
-    <div className="min-h-screen bg-white pt-[130px]">
+    <div className="min-h-screen bg-white pt-[166px]">
 
       {/* ── Hero ──────────────────────────────────────────────────────────── */}
       <section

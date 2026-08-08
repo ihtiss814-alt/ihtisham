@@ -10,7 +10,7 @@ export default function AboutPage() {
     canonical: 'https://wazirtradingllc.com/about',
   });
   return (
-    <div className="min-h-screen bg-background pt-[130px]">
+    <div className="min-h-screen bg-background pt-[166px]">
       {/* Hero Section */}
       <section className="bg-secondary text-white py-24 relative overflow-hidden">
         <div className="absolute inset-0 z-0 opacity-20 mix-blend-overlay">

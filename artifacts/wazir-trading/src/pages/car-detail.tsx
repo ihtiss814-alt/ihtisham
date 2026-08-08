@@ -530,7 +530,7 @@ export default function CarDetailPage() {
   /* ─── loading / not found ─── */
   if (loading) {
     return (
-      <div className="min-h-screen pt-32 flex items-center justify-center bg-white">
+      <div className="min-h-screen pt-[164px] flex items-center justify-center bg-white">
         <Loader2 size={32} className="animate-spin text-[#C8102E]" />
       </div>
     );
@@ -538,7 +538,7 @@ export default function CarDetailPage() {
 
   if (!car) {
     return (
-      <div className="min-h-screen pt-32 pb-20 bg-white text-center px-4">
+      <div className="min-h-screen pt-[164px] pb-20 bg-white text-center px-4">
         <h1 className="text-3xl font-serif font-bold text-[#0D1B3E] mb-4">Car Not Found</h1>
         <p className="text-gray-500 mb-8">This car is no longer available or has been removed from our inventory.</p>
         <Link href="/cars" className="inline-flex items-center gap-2 bg-[#C8102E] text-white px-6 py-3 font-semibold hover:bg-red-700 transition-colors">
@@ -559,7 +559,7 @@ export default function CarDetailPage() {
   const { total: calcTotalVal, pkr: calcPkr } = calcTotal();
 
   return (
-    <div className="min-h-screen bg-gray-50 pt-28 pb-28 lg:pb-24">
+    <div className="min-h-screen bg-gray-50 pt-[148px] pb-28 lg:pb-24">
       <div className="max-w-[1280px] mx-auto px-4 md:px-6">
 
         {/* Breadcrumb */}

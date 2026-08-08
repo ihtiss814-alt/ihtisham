@@ -2140,7 +2140,7 @@ export default function HomePage() {
         />
 
         {/* Content */}
-        <div className="relative z-10 max-w-4xl mx-auto px-4 md:px-8 w-full pt-[210px] sm:pt-[185px] md:pt-[140px] pb-10 flex flex-col items-center text-center">
+        <div className="relative z-10 max-w-4xl mx-auto px-4 md:px-8 w-full pt-[246px] sm:pt-[221px] md:pt-[176px] pb-10 flex flex-col items-center text-center">
 
 
           {/* Headline */}

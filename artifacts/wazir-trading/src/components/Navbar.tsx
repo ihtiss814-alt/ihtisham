@@ -3,6 +3,7 @@ import { Link, useLocation } from 'wouter';
 import { Menu, X, ChevronRight, ChevronDown, Clock, Car, Mail } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import { useExchangeRate } from '@/hooks/useExchangeRate';
+import PaymentNotice from '@/components/PaymentNotice';
 
 // ─── Brand tokens ────────────────────────────────────────────────
 // Primary:   #C8102E  (crimson — extracted from logo shield)
@@ -122,6 +123,9 @@ export default function Navbar() {
         }}
         data-testid="site-header"
       >
+
+        {/* ── BAR 1: Payment notice ─────────────────────────────────── */}
+        <PaymentNotice />
 
         {/* ── BAR 2: Info strip ─────────────────────────────────────── */}
         <div className="bg-[#F9F9F9] border-b border-gray-200">
