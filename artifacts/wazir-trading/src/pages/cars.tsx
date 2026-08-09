@@ -3,7 +3,7 @@ import { useMeta } from '@/lib/use-meta';
 import { Link, useLocation } from 'wouter';
 import {
   Search, ChevronDown, ChevronUp, ChevronLeft, ChevronRight,
-  MessageCircle, X, SlidersHorizontal, MapPin,
+  MessageCircle, X, MapPin,
   Gauge, Calendar, Zap, Settings, Users, Palette, DoorOpen,
   Navigation, Fuel, Loader2, Tag, Car as CarIcon, Truck, Tractor, Cog, Droplets, Droplet,
 } from 'lucide-react';
@@ -27,6 +27,7 @@ type CarWithImage = Car;
 /* ─────────────────────────────────────────────────────────────── */
 const NAVY = 'var(--brand-navy)'; // token defined once in index.css
 const RED  = '#C8102E';
+const ACCENT = '#FB7185';
 const WA_NUMBER = import.meta.env.VITE_WHATSAPP_NUMBER || '818089227375';
 const PAGE_SIZE = 20;
 
@@ -1003,7 +1004,6 @@ export default function CarsPage() {
   const [locationOptions, setLocationOptions] = useState<FilterOption[]>([]);
   const [tabCounts, setTabCounts]       = useState<Record<string, number>>({});
   const { pkr: pkrRate }                = useExchangeRate();
-  const [showMobileFilter, setShowMobileFilter] = useState(false);
 
   // ── Refs for scroll-on-arrival ──
   const resultsRef   = useRef<HTMLDivElement>(null);
@@ -1410,20 +1410,6 @@ export default function CarsPage() {
         </div>
       </div>
 
-      {/* ── Mobile Filter Drawer ─────────────────────────────── */}
-      {showMobileFilter && (
-        <div className="fixed inset-0 z-50 flex flex-col justify-end md:hidden">
-          <div className="absolute inset-0 bg-black/50" onClick={() => setShowMobileFilter(false)} />
-          <div className="relative bg-white rounded-t-2xl max-h-[85vh] overflow-y-auto z-10">
-            <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200 sticky top-0 bg-white z-10">
-              <span className="font-bold text-gray-900">Filters</span>
-              <button onClick={() => setShowMobileFilter(false)}><X size={20} className="text-gray-500" /></button>
-            </div>
-            <Sidebar {...sidebarProps} />
-          </div>
-        </div>
-      )}
-
       <div className="flex gap-0">
         {/* ── Desktop Sidebar ────────────────────────────────── */}
         {/* Scrolls with the page. It used to be sticky with its own inner
@@ -1445,7 +1431,7 @@ export default function CarsPage() {
         <div className="flex-1 min-w-0">
           {/* ── HERO SEARCH BANNER — lives in the results column so the sidebar
                  starts level with it rather than below it ── (desktop only) */}
-          <div className="hidden md:block w-full py-10 px-4" style={{ background: NAVY }}>
+          <div className="hidden md:block w-full py-10 px-4" style={{ background: 'linear-gradient(135deg, #030712 0%, #0f172a 45%, #7c3aed 100%)' }}>
             <div className="max-w-3xl mx-auto text-center">
               {/* Stock count badge */}
               <div className="inline-flex items-center gap-2 mb-4 px-3 py-1 rounded-full border border-white/10"
@@ -1481,24 +1467,24 @@ export default function CarsPage() {
                 <button
                   onClick={runSearch}
                   className="h-[50px] px-5 sm:px-7 text-white text-[12px] font-bold tracking-[0.08em] uppercase flex items-center gap-1.5 flex-shrink-0 hover:opacity-90 transition-opacity whitespace-nowrap"
-                  style={{ background: RED }}>
+                  style={{ background: ACCENT }}>
                   <Search size={13} className="hidden sm:block" /> Search
                 </button>
               </div>
 
-              {/* Quick make pills */}
-              <div className="flex flex-wrap justify-center gap-2 mt-5">
-                {['Toyota', 'Nissan', 'Honda', 'Mazda'].map(label => (
-                  <button
-                    key={label}
-                    onClick={() => setFilter('make', label)}
-                    className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-[12px] font-semibold border border-white/20 text-white/70 hover:border-white/60 hover:text-white hover:bg-white/10 transition-all duration-150">
-                    {label}
-                    {makeCounts[label] ? (
-                      <span className="text-white/40 text-[10px]">{makeCounts[label].toLocaleString()}</span>
-                    ) : null}
-                  </button>
-                ))}
+              <div className="flex justify-center mt-6">
+                <button
+                  onClick={() => setShowAdvanced(v => !v)}
+                  className="inline-flex items-center gap-2 px-4 py-3 rounded-full bg-white/10 border border-white/20 text-white text-sm font-semibold hover:bg-white/15 transition-all"
+                  style={{ minWidth: 220 }}>
+                  {showAdvanced ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+                  More Filters
+                  {advActiveCount > 0 && (
+                    <span className="ml-1 px-2 py-0.5 rounded-full text-[10px] font-bold text-white" style={{ background: ACCENT }}>
+                      {advActiveCount}
+                    </span>
+                  )}
+                </button>
               </div>
             </div>
           </div>
@@ -1524,29 +1510,8 @@ export default function CarsPage() {
             </div>
           )}
 
-          {/* MOBILE FILTER TRIGGER — the sidebar is desktop-only, so this is
-              the only way into the filters on a phone. */}
-          <div className="md:hidden flex flex-wrap gap-2 mb-4">
-            <button onClick={() => setShowMobileFilter(true)}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-gray-200 text-[12px] font-semibold text-gray-600 hover:border-[#C8102E] hover:text-[#C8102E] transition-all">
-              <SlidersHorizontal size={12} />
-              Filters {filterCount > 0 && `(${filterCount})`}
-            </button>
-          </div>
-
           {/* ADVANCED FILTER PANEL — collapsed by default */}
           <div className="mb-4">
-            <button
-              onClick={() => setShowAdvanced(v => !v)}
-              className="flex items-center gap-2 px-3 py-2 border border-gray-200 bg-white rounded-sm text-[12px] font-semibold text-gray-600 hover:border-[#C8102E] hover:text-[#C8102E] transition-all">
-              {showAdvanced ? <ChevronUp size={13} /> : <ChevronDown size={13} />}
-              More Filters
-              {advActiveCount > 0 && (
-                <span className="ml-0.5 px-1.5 py-0.5 rounded-full text-[10px] font-bold text-white leading-none" style={{ background: RED }}>
-                  {advActiveCount}
-                </span>
-              )}
-            </button>
             {showAdvanced && (
               <div className="mt-2 rounded-sm border border-gray-200 bg-white p-4 shadow-sm">
                 <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 mb-3">
@@ -1577,37 +1542,16 @@ export default function CarsPage() {
             )}
           </div>
 
-          {/* COLLECTION TABS */}
-          <div className="flex flex-wrap gap-2 mb-5">
-            {COLLECTION_TABS.map(t => (
-              <button key={t.key} onClick={() => handleTabChange(t.key)}
-                className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-[12px] font-semibold transition-all"
-                style={activeTab === t.key
-                  ? { background: NAVY, color: '#fff', border: `1px solid ${NAVY}` }
-                  : { background: '#fff', color: '#374151', border: '1px solid #E5E7EB' }}>
-                {t.label}
-                {t.key && tabCounts[t.key] !== undefined && (
-                  <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full"
-                    style={activeTab === t.key
-                      ? { background: 'rgba(255,255,255,0.2)', color: '#fff' }
-                      : { background: '#F3F4F6', color: '#6B7280' }}>
-                    {tabCounts[t.key].toLocaleString()}
-                  </span>
-                )}
-              </button>
-            ))}
-          </div>
-
           {/* STOCK LIST HEADER — also the landing point when paging */}
-          <div ref={stockListRef} className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
+          <div ref={stockListRef} className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between mb-4">
             <div>
               <h2 className="font-bold text-lg text-gray-900" style={{ fontFamily: "'Playfair Display',serif" }}>
                 Stock List
                 <span className="inline-block ml-2 h-0.5 w-8 align-middle" style={{ background: RED }} />
               </h2>
             </div>
-            <div className="flex items-center gap-3">
-              <span className="text-gray-500 text-sm font-semibold">
+            <div className="flex flex-wrap items-center justify-between gap-3 md:justify-end">
+              <span className="text-gray-700 text-sm font-semibold">
                 {loading ? 'Loading…' : `${totalDisplay} Cars`}
               </span>
               <select value={sortBy} onChange={e => handleSortChange(e.target.value)}
