@@ -1613,7 +1613,7 @@ function HeroBackground() {
   useEffect(() => {
     const id = window.setInterval(() => {
       setCurrentSlide((current) => (current + 1) % HERO_SLIDES.length);
-    }, 1500);
+    }, 2500);
     return () => window.clearInterval(id);
   }, []);
 
@@ -1732,10 +1732,10 @@ export default function HomePage() {
             <span>Direct from Japan</span>
           </h1>
 
-          <a href="#cars" className="select-button">
+          <Link href="/cars" className="select-button">
             Select your car
             <span className="arrow">→</span>
-          </a>
+          </Link>
         </div>
       </section>
 

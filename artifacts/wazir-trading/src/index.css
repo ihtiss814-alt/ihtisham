@@ -105,7 +105,7 @@
        payment notice 36 + info strip 32 (+1 border) + accent 3 + nav 80 (+1)
      Identical at every breakpoint — the header rewrites its content on mobile
      rather than changing height. */
-  --header-h: 153px;
+  --header-h: 144px;
 }
 
 .dark {
