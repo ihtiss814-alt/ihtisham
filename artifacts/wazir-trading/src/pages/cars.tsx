@@ -862,7 +862,13 @@ function applyFiltersToQuery(query: any, filters: Filters, activeTab: string, so
   // Full-text search
   if (filters.q) {
     const q = filters.q.replace(/'/g, "''");
-    query = query.or(`make.ilike.%${q}%,model.ilike.%${q}%,ref_number.ilike.%${q}%,variant.ilike.%${q}%`);
+    query = query.or(
+      `make.ilike.%${q}%,model.ilike.%${q}%,variant.ilike.%${q}%` +
+      `,ref_number.ilike.%${q}%,body_type.ilike.%${q}%,color.ilike.%${q}%` +
+      `,stock_location.ilike.%${q}%,chassis_number.ilike.%${q}%,lot_number.ilike.%${q}%` +
+      `,auction_grade.ilike.%${q}%,fuel_type.ilike.%${q}%,transmission.ilike.%${q}%` +
+      `,drive.ilike.%${q}%,steering.ilike.%${q}%`
+    );
   }
 
   // Sidebar filters
@@ -1398,7 +1404,7 @@ export default function CarsPage() {
               value={searchInput}
               onChange={e => setSearchInput(e.target.value)}
               onKeyDown={e => e.key === 'Enter' && runSearch()}
-              placeholder="Search make, model, ref #"
+              placeholder="Search make, model, variant, color, or ref #"
               className="w-full pl-9 pr-3 py-2.5 text-sm text-gray-800 placeholder:text-gray-400 outline-none bg-white"
             />
           </div>
@@ -1473,7 +1479,7 @@ export default function CarsPage() {
                     value={searchInput}
                     onChange={e => setSearchInput(e.target.value)}
                     onKeyDown={e => e.key === 'Enter' && runSearch()}
-                    placeholder="Search make, model, or reference #"
+                    placeholder="Search make, model, variant, color, or ref #"
                     className="w-full pl-10 pr-3 text-sm text-gray-800 placeholder:text-gray-400 outline-none bg-white"
                     style={{ height: 50 }}
                   />
