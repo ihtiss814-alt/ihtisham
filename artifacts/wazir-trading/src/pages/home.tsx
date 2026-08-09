@@ -1341,55 +1341,574 @@ const TRUST_ITEMS = [
 
 function TrustBadgesSection() {
   return (
-    <section className="section-lazy py-14 relative" style={{ background: '#fff' }}>
-      <div className="absolute top-0 inset-x-0 h-px"
-        style={{ background: 'linear-gradient(to right, transparent 0%, rgba(200,16,46,0.2) 30%, rgba(200,16,46,0.2) 70%, transparent 100%)' }}/>
+    <>
+      <section className="wazir-trust">
+        <div className="wazir-container">
 
-      <div className="container mx-auto px-4 md:px-8">
-        {/* Heading */}
-        <div className="text-center mb-10">
-          <div className="flex items-center justify-center gap-3 mb-3">
-            <div className="h-px w-10" style={{ background: 'linear-gradient(to right, transparent, #C8102E)' }}/>
-            <p className="text-[10px] tracking-[0.32em] uppercase font-bold text-[#C8102E]">Trusted Worldwide</p>
-            <div className="h-px w-10" style={{ background: 'linear-gradient(to left, transparent, #C8102E)' }}/>
+          <div className="wazir-heading">
+            <div className="wazir-eyebrow">
+              <span></span>
+              TRUSTED WORLDWIDE
+              <span></span>
+            </div>
+
+            <h2>
+              Confidence Behind
+              <em>Every Shipment.</em>
+            </h2>
+
+            <p>
+              Thousands of buyers trust Wazir Trading for genuine Japanese
+              vehicles, transparent transactions, and secure worldwide delivery.
+            </p>
           </div>
-          <h2 className="text-2xl md:text-3xl font-serif font-bold text-gray-900">
-            Why Thousands of Global Buyers<br className="hidden sm:block"/> Choose Wazir Trading
-          </h2>
-        </div>
 
-        {/* Items row */}
-        <div className="max-w-4xl mx-auto flex flex-col sm:flex-row items-stretch">
-          {TRUST_ITEMS.map((item, idx) => (
-            <React.Fragment key={item.title}>
-              {/* Vertical divider (between items) */}
-              {idx > 0 && (
-                <div className="hidden sm:block w-px self-stretch mx-2"
-                  style={{ background: 'linear-gradient(to bottom, transparent, #E2E8F0 30%, #E2E8F0 70%, transparent)' }}/>
-              )}
-              {/* Horizontal divider on mobile */}
-              {idx > 0 && (
-                <div className="block sm:hidden h-px my-4 mx-6"
-                  style={{ background: 'linear-gradient(to right, transparent, #E2E8F0 30%, #E2E8F0 70%, transparent)' }}/>
-              )}
+          <div className="wazir-main">
+            <div className="wazir-image">
+              <img
+                src="https://images.unsplash.com/photo-1493238792000-8113da705763?auto=format&fit=crop&w=1400&q=85"
+                alt="Japanese vehicle export"
+              />
 
-              <div className="flex-1 flex flex-col items-center text-center px-6 py-4 group">
-                {/* Icon circle */}
-                <div className="w-14 h-14 rounded-2xl flex items-center justify-center mb-4 transition-all duration-300 group-hover:scale-110"
-                  style={{ background: 'rgba(200,16,46,0.07)', color: '#C8102E' }}>
-                  {item.icon}
+              <div className="wazir-image-overlay"></div>
+
+              <div className="wazir-badge">
+                <div className="badge-check">
+                  <svg viewBox="0 0 24 24">
+                    <path d="M5 12.5l4 4L19 7"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"/>
+                  </svg>
                 </div>
-                <div className="font-bold text-gray-900 text-[15px] mb-1">{item.title}</div>
-                <div className="text-gray-400 text-[13px] leading-snug">{item.description}</div>
-              </div>
-            </React.Fragment>
-          ))}
-        </div>
-      </div>
 
-      <div className="absolute bottom-0 inset-x-0 h-px"
-        style={{ background: 'linear-gradient(to right, transparent 0%, rgba(200,16,46,0.2) 30%, rgba(200,16,46,0.2) 70%, transparent 100%)' }}/>
-    </section>
+                <div>
+                  <strong>Japan Export</strong>
+                  <small>Trusted Worldwide</small>
+                </div>
+              </div>
+
+              <div className="wazir-image-text">
+                <span>WAZIR TRADING LLC</span>
+                <strong>
+                  From Japan to the World
+                </strong>
+              </div>
+            </div>
+
+            <div className="wazir-content">
+              <span className="wazir-label">BUILT ON TRUST</span>
+
+              <h3>
+                A safer way to buy
+                <br />
+                <em>Japanese vehicles.</em>
+              </h3>
+
+              <p className="wazir-description">
+                We combine verified vehicles, secure payments and insured
+                international shipping to give every buyer complete peace
+                of mind from purchase to delivery.
+              </p>
+
+              <div className="wazir-trust-list">
+
+                <div className="wazir-trust-item">
+                  <div className="wazir-icon">
+                    <svg viewBox="0 0 24 24">
+                      <path d="M3 13.5h18"/>
+                      <path d="M5 13.5l1.8-5.2a2 2 0 0 1 1.9-1.3h6.6a2 2 0 0 1 1.9 1.3L19 13.5"/>
+                      <path d="M4 13.5v4h2v2h2v-2h8v2h2v-2h2v-4"/>
+                      <circle cx="7.5" cy="15.5" r="1"/>
+                      <circle cx="16.5" cy="15.5" r="1"/>
+                    </svg>
+                  </div>
+
+                  <div className="wazir-item-text">
+                    <h4>Japan Car Trust</h4>
+                    <p>Genuine vehicle information with verified
+                      odometer history.
+                    </p>
+                  </div>
+
+                  <div className="wazir-arrow">
+                    <svg viewBox="0 0 24 24">
+                      <path d="M7 17L17 7"/>
+                      <path d="M8 7h9v9"/>
+                    </svg>
+                  </div>
+                </div>
+
+                <div className="wazir-trust-item">
+                  <div className="wazir-icon">
+                    <svg viewBox="0 0 24 24">
+                      <rect x="3" y="5" width="18" height="14" rx="2"/>
+                      <path d="M3 9h18"/>
+                      <path d="M7 14h4"/>
+                      <path d="M15 13v4"/>
+                      <path d="M13 15h4"/>
+                    </svg>
+                  </div>
+
+                  <div className="wazir-item-text">
+                    <h4>Secure Wire Transfer</h4>
+                    <p>Payments handled through official Japanese
+                      banking channels.
+                    </p>
+                  </div>
+
+                  <div className="wazir-arrow">
+                    <svg viewBox="0 0 24 24">
+                      <path d="M7 17L17 7"/>
+                      <path d="M8 7h9v9"/>
+                    </svg>
+                  </div>
+                </div>
+
+                <div className="wazir-trust-item">
+                  <div className="wazir-icon">
+                    <svg viewBox="0 0 24 24">
+                      <path d="M12 3l7 3v5c0 4.7-2.9 8.3-7 10-4.1-1.7-7-5.3-7-10V6l7-3z"/>
+                      <path d="M8.5 12l2.3 2.3 4.7-5"/>
+                    </svg>
+                  </div>
+
+                  <div className="wazir-item-text">
+                    <h4>100% Insured Delivery</h4>
+                    <p>Full marine transit coverage from Japan
+                      to your destination.
+                    </p>
+                  </div>
+
+                  <div className="wazir-arrow">
+                    <svg viewBox="0 0 24 24">
+                      <path d="M7 17L17 7"/>
+                      <path d="M8 7h9v9"/>
+                    </svg>
+                  </div>
+                </div>
+
+                <div className="wazir-trust-item">
+                  <div className="wazir-icon">
+                    <svg viewBox="0 0 24 24">
+                      <circle cx="12" cy="12" r="9"/>
+                      <path d="M3 12h18"/>
+                      <path d="M12 3c2.3 2.5 3.5 5.5 3.5 9s-1.2 6.5-3.5 9"/>
+                      <path d="M12 3c-2.3 2.5-3.5 5.5-3.5 9s1.2 6.5 3.5 9"/>
+                      <path d="M5 7.5h14"/>
+                      <path d="M5 16.5h14"/>
+                    </svg>
+                  </div>
+
+                  <div className="wazir-item-text">
+                    <h4>Worldwide Shipping</h4>
+                    <p>Reliable export coordination to buyers
+                      across the globe.
+                    </p>
+                  </div>
+
+                  <div className="wazir-arrow">
+                    <svg viewBox="0 0 24 24">
+                      <path d="M7 17L17 7"/>
+                      <path d="M8 7h9v9"/>
+                    </svg>
+                  </div>
+                </div>
+
+              </div>
+            </div>
+
+            <div className="wazir-bottom">
+              <div>
+                <strong>01</strong>
+                <span>Verified Vehicles</span>
+              </div>
+              <i></i>
+              <div>
+                <strong>02</strong>
+                <span>Secure Payments</span>
+              </div>
+              <i></i>
+              <div>
+                <strong>03</strong>
+                <span>Insured Shipping</span>
+              </div>
+              <i></i>
+              <div>
+                <strong>04</strong>
+                <span>Global Delivery</span>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </section>
+
+      <style>{`
+        .wazir-trust {
+          width: 100%;
+          padding: 100px 0;
+          background: #f7f8fa;
+          overflow: hidden;
+        }
+
+        .wazir-container {
+          width: calc(100% - 40px);
+          max-width: 1200px;
+          margin: 0 auto;
+        }
+
+        .wazir-heading {
+          max-width: 850px;
+          margin: 0 auto 60px;
+          text-align: center;
+        }
+
+        .wazir-eyebrow {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 14px;
+          margin-bottom: 18px;
+          color: #d7193f;
+          font-size: 11px;
+          font-weight: 800;
+          letter-spacing: 4px;
+        }
+
+        .wazir-eyebrow span {
+          width: 38px;
+          height: 1px;
+          background: #d7193f;
+        }
+
+        .wazir-heading h2 {
+          margin: 0;
+          color: #071a33;
+          font-family: Georgia, "Times New Roman", serif;
+          font-size: clamp(40px, 5vw, 64px);
+          line-height: 1.05;
+          letter-spacing: -2px;
+        }
+
+        .wazir-heading h2 em {
+          display: block;
+          color: #d7193f;
+          font-weight: 400;
+        }
+
+        .wazir-heading p {
+          max-width: 650px;
+          margin: 22px auto 0;
+          color: #718096;
+          font-size: 15px;
+          line-height: 1.8;
+        }
+
+        .wazir-main {
+          width: 100%;
+          max-width: 1080px;
+          margin: 0 auto;
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 50px;
+          align-items: center;
+        }
+
+        .wazir-image {
+          position: relative;
+          height: 570px;
+          overflow: hidden;
+          background: #071a33;
+          box-shadow: 0 25px 60px rgba(7, 26, 51, .16);
+        }
+
+        .wazir-image img {
+          width: 100%;
+          height: 100%;
+          display: block;
+          object-fit: cover;
+          transition: transform .7s ease;
+        }
+
+        .wazir-image:hover img {
+          transform: scale(1.04);
+        }
+
+        .wazir-image-overlay {
+          position: absolute;
+          inset: 0;
+          background: linear-gradient(to bottom, rgba(7,26,51,.02) 30%, rgba(7,26,51,.85) 100%);
+        }
+
+        .wazir-image::after {
+          content: "";
+          position: absolute;
+          top: 20px;
+          right: 20px;
+          width: 110px;
+          height: 110px;
+          border-top: 3px solid #d7193f;
+          border-right: 3px solid #d7193f;
+          pointer-events: none;
+        }
+
+        .wazir-badge {
+          position: absolute;
+          top: 25px;
+          left: 25px;
+          display: flex;
+          align-items: center;
+          gap: 12px;
+          padding: 12px 18px 12px 12px;
+          background: rgba(255,255,255,.96);
+          box-shadow: 0 15px 35px rgba(0,0,0,.15);
+          z-index: 2;
+        }
+
+        .badge-check {
+          width: 38px;
+          height: 38px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          background: #d7193f;
+          color: #fff;
+        }
+
+        .badge-check svg {
+          width: 20px;
+          height: 20px;
+        }
+
+        .wazir-badge strong {
+          display: block;
+          color: #071a33;
+          font-size: 13px;
+        }
+
+        .wazir-badge small {
+          display: block;
+          margin-top: 3px;
+          color: #7b8592;
+          font-size: 10px;
+        }
+
+        .wazir-image-text {
+          position: absolute;
+          left: 30px;
+          bottom: 30px;
+          color: #fff;
+          z-index: 2;
+        }
+
+        .wazir-image-text span {
+          display: block;
+          margin-bottom: 8px;
+          color: #ffafbe;
+          font-size: 10px;
+          font-weight: 800;
+          letter-spacing: 3px;
+        }
+
+        .wazir-image-text strong {
+          font-family: Georgia, "Times New Roman", serif;
+          font-size: 30px;
+          font-weight: 400;
+        }
+
+        .wazir-content {
+          width: 100%;
+        }
+
+        .wazir-label {
+          color: #d7193f;
+          font-size: 10px;
+          font-weight: 800;
+          letter-spacing: 3px;
+        }
+
+        .wazir-content h3 {
+          margin: 14px 0 18px;
+          color: #071a33;
+          font-family: Georgia, "Times New Roman", serif;
+          font-size: 40px;
+          line-height: 1.1;
+          letter-spacing: -1px;
+        }
+
+        .wazir-content h3 em {
+          color: #d7193f;
+          font-weight: 400;
+        }
+
+        .wazir-description {
+          max-width: 500px;
+          margin: 0 0 30px;
+          color: #718096;
+          font-size: 14px;
+          line-height: 1.8;
+        }
+
+        .wazir-trust-list {
+          border-top: 1px solid #e1e6ec;
+        }
+
+        .wazir-trust-item {
+          display: flex;
+          align-items: center;
+          gap: 16px;
+          padding: 18px 5px 18px 0;
+          border-bottom: 1px solid #e1e6ec;
+          transition: padding-left .3s ease, background .3s ease;
+        }
+
+        .wazir-trust-item:hover {
+          padding-left: 8px;
+          background: rgba(255,255,255,.65);
+        }
+
+        .wazir-icon {
+          flex: 0 0 54px;
+          width: 54px;
+          height: 54px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          color: #d7193f;
+          background: #fff1f4;
+          border: 1px solid rgba(215,25,63,.10);
+          border-radius: 12px;
+          transition: background .3s ease, color .3s ease, transform .3s ease, box-shadow .3s ease;
+        }
+
+        .wazir-icon svg {
+          width: 25px;
+          height: 25px;
+          fill: none;
+          stroke: currentColor;
+          stroke-width: 1.7;
+          stroke-linecap: round;
+          stroke-linejoin: round;
+        }
+
+        .wazir-trust-item:hover .wazir-icon {
+          background: #d7193f;
+          color: #fff;
+          transform: translateY(-2px);
+          box-shadow: 0 8px 20px rgba(215,25,63,.20);
+        }
+
+        .wazir-item-text {
+          flex: 1;
+        }
+
+        .wazir-item-text h4 {
+          margin: 0 0 5px;
+          color: #071a33;
+          font-size: 14px;
+          font-weight: 800;
+        }
+
+        .wazir-item-text p {
+          margin: 0;
+          color: #8791a0;
+          font-size: 11px;
+          line-height: 1.5;
+        }
+
+        .wazir-arrow {
+          color: #c2c8d0;
+          transition: color .3s ease, transform .3s ease;
+        }
+
+        .wazir-arrow svg {
+          width: 19px;
+          height: 19px;
+          fill: none;
+          stroke: currentColor;
+          stroke-width: 1.7;
+          stroke-linecap: round;
+          stroke-linejoin: round;
+        }
+
+        .wazir-trust-item:hover .wazir-arrow {
+          color: #d7193f;
+          transform: translate(3px,-3px);
+        }
+
+        .wazir-bottom {
+          width: 100%;
+          max-width: 1080px;
+          margin: 55px auto 0;
+          padding: 25px 30px;
+          display: flex;
+          align-items: center;
+          justify-content: space-around;
+          box-sizing: border-box;
+          background: #071a33;
+          color: #fff;
+          box-shadow: 0 20px 45px rgba(7,26,51,.15);
+        }
+
+        .wazir-bottom div {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+        }
+
+        .wazir-bottom strong {
+          color: #d7193f;
+          font-size: 11px;
+          letter-spacing: 1px;
+        }
+
+        .wazir-bottom span {
+          color: #fff;
+          font-size: 11px;
+          font-weight: 700;
+        }
+
+        .wazir-bottom i {
+          width: 1px;
+          height: 25px;
+          background: rgba(255,255,255,.15);
+        }
+
+        @media (max-width: 900px) {
+          .wazir-trust { padding: 75px 0; }
+          .wazir-main {
+            grid-template-columns: 1fr;
+            max-width: 650px;
+          }
+          .wazir-image { height: 500px; }
+        }
+
+        @media (max-width: 600px) {
+          .wazir-trust { padding: 60px 0; }
+          .wazir-container { width: calc(100% - 28px); }
+          .wazir-heading { margin-bottom: 40px; }
+          .wazir-heading h2 { font-size: 40px; }
+          .wazir-heading p { font-size: 13px; }
+          .wazir-image { height: 380px; }
+          .wazir-badge { top: 15px; left: 15px; }
+          .wazir-image-text { left: 20px; bottom: 22px; }
+          .wazir-image-text strong { font-size: 24px; }
+          .wazir-content h3 { font-size: 34px; }
+          .wazir-icon { width: 48px; height: 48px; flex-basis: 48px; }
+          .wazir-icon svg { width: 22px; height: 22px; }
+          .wazir-bottom {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 18px;
+            padding: 22px;
+          }
+          .wazir-bottom i { display: none; }
+        }
+      `}</style>
+    </>
   );
 }
 
