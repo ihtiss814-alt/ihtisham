@@ -1408,6 +1408,20 @@ export default function CarsPage() {
             Search
           </button>
         </div>
+        <div className="flex justify-center mt-3">
+          <button
+            onClick={() => setShowAdvanced(v => !v)}
+            className="inline-flex items-center gap-2 px-4 py-3 rounded-full border border-gray-200 bg-white text-[13px] font-semibold text-gray-700 hover:border-[#C8102E] hover:text-[#C8102E] transition-all"
+            style={{ minWidth: 220 }}>
+            {showAdvanced ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+            More Filters
+            {advActiveCount > 0 && (
+              <span className="ml-1 px-2 py-0.5 rounded-full text-[10px] font-bold text-white" style={{ background: RED }}>
+                {advActiveCount}
+              </span>
+            )}
+          </button>
+        </div>
       </div>
 
       <div className="flex gap-0">
