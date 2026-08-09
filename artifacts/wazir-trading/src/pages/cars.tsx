@@ -859,16 +859,28 @@ type Filters = {
 };
 
 function applyFiltersToQuery(query: any, filters: Filters, activeTab: string, sortBy: string): any {
-  // Full-text search
+  // Full-text search across make/model plus related car attributes.
   if (filters.q) {
-    const q = filters.q.replace(/'/g, "''");
-    query = query.or(
-      `make.ilike.%${q}%,model.ilike.%${q}%,variant.ilike.%${q}%` +
-      `,ref_number.ilike.%${q}%,body_type.ilike.%${q}%,color.ilike.%${q}%` +
-      `,stock_location.ilike.%${q}%,chassis_number.ilike.%${q}%,lot_number.ilike.%${q}%` +
-      `,auction_grade.ilike.%${q}%,fuel_type.ilike.%${q}%,transmission.ilike.%${q}%` +
-      `,drive.ilike.%${q}%,steering.ilike.%${q}%`
-    );
+    const terms = filters.q
+      .trim()
+      .split(/\s+/)
+      .filter(Boolean)
+      .map(term => term.replace(/'/g, "''"));
+
+    const searchableFields = [
+      'make', 'model', 'variant', 'ref_number', 'body_type', 'color', 'stock_location',
+      'chassis_number', 'lot_number', 'auction_grade', 'fuel_type', 'transmission',
+      'drive', 'steering', 'port_of_loading', 'shipment_method', 'collection',
+      'exterior_grade', 'interior_grade', 'manufacture_month', 'status',
+    ];
+
+    terms.forEach(term => {
+      const conditions = searchableFields.map(field => `${field}.ilike.%${term}%`);
+      if (/^\d{4}$/.test(term)) {
+        conditions.push(`year.eq.${term}`);
+      }
+      query = query.or(conditions.join(','));
+    });
   }
 
   // Sidebar filters
