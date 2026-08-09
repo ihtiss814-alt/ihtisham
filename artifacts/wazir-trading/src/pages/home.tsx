@@ -1592,77 +1592,51 @@ function BestSellersSection() {
   );
 }
 
-/* ── Hero rotating background slideshow ─────────────────────── */
 const HERO_SLIDES = [
   {
-    // First slide preloaded in index.html — match exact URL
-    src: 'https://images.unsplash.com/photo-1494976388531-d1058494cdd8?q=75&w=1200&auto=format&fit=crop',
-    pos: 'center 40%',
+    src: 'https://images.unsplash.com/photo-1656522520706-c457fa20e504?auto=format&fit=crop&w=3840&q=100',
   },
   {
-    src: 'https://images.unsplash.com/photo-1503376780353-7e6692767b70?q=75&w=1200&auto=format&fit=crop',
-    pos: 'center 55%',
+    src: 'https://variantwheels.com/cdn/shop/collections/DSC03733.jpg?v=1761266419',
   },
   {
-    src: 'https://images.unsplash.com/photo-1583121274602-3e2820c69888?q=75&w=1200&auto=format&fit=crop',
-    pos: 'center 50%',
+    src: 'https://media.gqjapan.jp/photos/631949b9c1758891fcf4d910/1%3A1/w_2183%2Ch_2183%2Cc_limit/lexus-lc500-1.jpg',
+  },
+  {
+    src: 'https://images.unsplash.com/photo-1542362567-b07e54358753?auto=format&fit=crop&w=3840&q=100',
   },
 ];
 
 function HeroBackground() {
-  const [current, setCurrent] = useState(0);
-  const [prev, setPrev]       = useState<number | null>(null);
-  const [fading, setFading]   = useState(false);
+  const [currentSlide, setCurrentSlide] = useState(0);
 
   useEffect(() => {
-    const id = setInterval(() => {
-      setFading(true);
-      setTimeout(() => {
-        setPrev(c => c);
-        setCurrent(c => (c + 1) % HERO_SLIDES.length);
-        setFading(false);
-      }, 1200);
-    }, 6000);
-    return () => clearInterval(id);
+    const id = window.setInterval(() => {
+      setCurrentSlide((current) => (current + 1) % HERO_SLIDES.length);
+    }, 1500);
+    return () => window.clearInterval(id);
   }, []);
 
   return (
     <div className="absolute inset-0 z-0 overflow-hidden">
-      {/* Outgoing slide */}
-      {prev !== null && (
-        <div key={`p${prev}`}
-          style={{ position:'absolute',inset:0,overflow:'hidden',
-                   opacity: fading ? 0 : 1, transition:'opacity 1.2s ease-in-out', zIndex:1 }}>
-          <img src={HERO_SLIDES[prev].src} alt=""
-            className="hero-img-out"
-            style={{ width:'100%',height:'100%',objectFit:'cover',
-                     objectPosition: HERO_SLIDES[prev].pos }} />
-        </div>
-      )}
+      {HERO_SLIDES.map((slide, index) => (
+        <div
+          key={slide.src}
+          className={`slide ${index === currentSlide ? 'active' : ''}`}
+          style={{ backgroundImage: `url('${slide.src}')` }}
+        />
+      ))}
 
-      {/* Active slide */}
-      <div key={`c${current}`}
-        style={{ position:'absolute',inset:0,overflow:'hidden',
-                 opacity:1, zIndex:2 }}>
-        <img src={HERO_SLIDES[current].src} alt="Premium Japanese cars"
-          className="hero-img-in"
-          fetchPriority={current === 0 ? 'high' : 'auto'}
-          loading="eager"
-          decoding={current === 0 ? 'sync' : 'async'}
-          style={{ width:'100%',height:'100%',objectFit:'cover',
-                   objectPosition: HERO_SLIDES[current].pos }} />
-      </div>
-
-      {/* Overlay stack */}
-      <div style={{ position:'absolute',inset:0,zIndex:3,pointerEvents:'none' }}>
-        <div style={{ position:'absolute',inset:0,
-          background:'linear-gradient(108deg,rgba(0,0,0,0.88) 0%,rgba(0,0,0,0.58) 42%,rgba(0,0,0,0.18) 100%)' }}/>
-        <div style={{ position:'absolute',inset:0,
-          background:'linear-gradient(to top,rgba(0,0,0,0.78) 0%,transparent 52%)' }}/>
-        <div style={{ position:'absolute',inset:0,
-          background:'linear-gradient(to bottom,rgba(0,0,0,0.42) 0%,transparent 32%)' }}/>
-        <div style={{ position:'absolute',bottom:0,left:0,width:'55%',height:'45%',
-          background:'radial-gradient(ellipse at bottom left,rgba(200,16,46,0.22) 0%,transparent 70%)' }}/>
+      <div className="slide-indicators">
+        {HERO_SLIDES.map((_, index) => (
+          <button
+            key={index}
+            type="button"
+            className={`indicator ${index === currentSlide ? 'active' : ''}`}
+            aria-label={`Slide ${index + 1}`}
+            onClick={() => setCurrentSlide(index)}
+          />
+        ))}
       </div>
     </div>
   );
@@ -1747,103 +1721,22 @@ export default function HomePage() {
     <div className="min-h-screen bg-background">
 
       {/* ── HERO ──────────────────────────────────────────────────── */}
-      <section className="relative min-h-screen flex flex-col justify-center overflow-hidden bg-[#0A0A0A]">
-
-        {/* Background slideshow */}
+      <section className="hero">
         <HeroBackground />
 
-        {/* Subtle red glow bottom-left */}
-        <div
-          className="absolute bottom-0 left-0 w-[600px] h-[300px] pointer-events-none z-0"
-          style={{ background: 'radial-gradient(ellipse at bottom left, rgba(200,16,46,0.18) 0%, transparent 70%)' }}
-        />
+        <div className="hero-content">
+          <div className="eyebrow">Premium Japanese Imports</div>
 
-        {/* Content */}
-        <div className="relative z-10 max-w-4xl mx-auto px-4 md:px-8 w-full pt-[246px] sm:pt-[221px] md:pt-[176px] pb-10 flex flex-col items-center text-center">
-
-
-          {/* Headline */}
-          <h1
-            className="hero-anim-1 font-serif font-bold text-white leading-[1.1] mb-3"
-            style={{ fontSize: 'clamp(1.75rem, 4.5vw, 3.4rem)' }}
-          >
+          <h1 className="hero-title">
             Import Your Dream Car
-            <br />
-            <span style={{ color: '#F87171' }}>Direct from Japan</span>
+            <span>Direct from Japan</span>
           </h1>
 
-          {/* Subtext */}
-          <p
-            className="hero-anim-2 text-white/70 font-light leading-relaxed mb-6 max-w-xl"
-            style={{ fontSize: 'clamp(0.93rem, 2vw, 1.05rem)' }}
-          >
-            We source premium, quality-graded vehicles straight from Japan's auction halls
-            and ship them to{' '}
-            <span className="text-white font-medium">130+ countries worldwide</span>
-            {' '}— at unbeatable auction prices, with zero middlemen and full transparency.
-          </p>
-
-          {/* CTA buttons */}
-          <div className="hero-anim-3 flex flex-col sm:flex-row justify-center gap-2.5 mb-6 w-full sm:w-auto">
-            <Link
-              href="/cars"
-              className="group inline-flex items-center justify-center gap-2 px-6 py-2.5 font-bold tracking-wide text-white rounded-[3px] transition-all duration-200"
-              style={{
-                background: 'linear-gradient(135deg, #C8102E 0%, #A50D25 100%)',
-                boxShadow: '0 4px 16px rgba(200,16,46,0.4)',
-                fontSize: '0.8rem',
-                letterSpacing: '0.1em',
-              }}
-            >
-              Browse Cars
-              <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform duration-200" />
-            </Link>
-            <a
-              href={waLink}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="group inline-flex items-center justify-center gap-2 px-6 py-2.5 font-semibold rounded-[3px] border border-white/25 text-white hover:bg-white/10 hover:border-white/50 transition-all duration-200 backdrop-blur-sm"
-              style={{ fontSize: '0.8rem', letterSpacing: '0.1em' }}
-            >
-              <WhatsAppIcon size={15} className="text-[#25D366]" />
-              Contact on WhatsApp
-            </a>
-          </div>
-
-          {/* ── STATS ── */}
-          <div className="hero-anim-4 grid grid-cols-2 md:grid-cols-4 gap-px bg-white/10 rounded-[4px] overflow-hidden mb-4 w-full max-w-2xl">
-            {STATS.map(({ countObj, suffix, label, note }, i) => (
-              <div
-                key={i}
-                ref={countObj.ref}
-                className="flex flex-col items-center justify-center px-3 py-3 bg-black/40 backdrop-blur-sm text-center"
-              >
-                <span className="font-serif font-bold leading-none mb-0.5" style={{ fontSize: 'clamp(1.35rem, 2.8vw, 1.9rem)', color: i === 0 ? '#F87171' : 'white' }}>
-                  {countObj.value}{suffix}
-                </span>
-                <span className="text-[10px] font-semibold text-white/80 tracking-wide uppercase mb-0">{label}</span>
-                <span className="text-[10px] text-white/50 tracking-widest uppercase">{note}</span>
-              </div>
-            ))}
-          </div>
-
-          {/* ── TRUST BADGES ── */}
-          <div className="hero-anim-5 flex flex-wrap justify-center gap-1.5">
-            {TRUST.map(({ text }, i) => (
-              <span
-                key={i}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-semibold tracking-wide text-white/80 border border-white/20 backdrop-blur-sm"
-                style={{ background: 'rgba(255,255,255,0.06)' }}
-              >
-                <CheckCircle2 size={13} className="text-[#4ade80] flex-shrink-0" />
-                {text}
-              </span>
-            ))}
-          </div>
+          <a href="#cars" className="select-button">
+            Select your car
+            <span className="arrow">→</span>
+          </a>
         </div>
-
-        {/* Bottom fade into page */}
-        <div className="absolute bottom-0 inset-x-0 h-24 bg-gradient-to-t from-background to-transparent z-10 pointer-events-none" />
       </section>
 
       {/* ── SEARCH SECTION ────────────────────────────────────────── */}
