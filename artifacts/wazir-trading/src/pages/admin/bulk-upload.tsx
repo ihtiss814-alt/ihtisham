@@ -190,7 +190,10 @@ function parseRow(row: unknown[], colMap: ColMap): Record<string, unknown> {
 
 async function adminFetch(path: string) {
   const res = await fetch(`/api${path}`, {
-    headers: { 'X-Admin-Password': ADMIN_PASSWORD },
+    headers: {
+      'x-admin-password': ADMIN_PASSWORD,
+      'Content-Type': 'application/json',
+    },
   });
   if (!res.ok) {
     const body = await res.json().catch(() => ({}));
@@ -304,7 +307,10 @@ async function fetchFlatFolder(
 
     const res = await fetch(url.toString(), {
       method: 'GET',
-      headers: { 'X-Admin-Password': ADMIN_PASSWORD },
+      headers: {
+        'x-admin-password': ADMIN_PASSWORD,
+        'Content-Type': 'application/json',
+      },
     });
     const data = await res.json().catch(() => ({})) as {
       resources?: { public_id: string; secure_url: string }[];
@@ -329,7 +335,7 @@ async function searchCloudinaryByChassis(
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      'X-Admin-Password': ADMIN_PASSWORD,
+      'x-admin-password': ADMIN_PASSWORD,
     },
     body: JSON.stringify({ chassis_number: chassisNumber }),
   });
