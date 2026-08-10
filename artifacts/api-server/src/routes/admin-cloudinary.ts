@@ -157,8 +157,13 @@ router.post("/admin/cloudinary/search-by-chassis", async (req, res) => {
       for (const batch of nestedResults) addResources(batch);
     }
 
-    // 3. Flat filename structure: wazir-trading/<chassis>-NN_suffix
-    //    Search for public_ids matching "wazir-trading/<chassis>-*" using the Search API
+    // 3. Flat filename structure: images may live inside wazir-trading/ or at root.
+    //    Search for public_ids matching either:
+    //      public_id:wazir-trading/<chassis>*
+    //      public_id:<chassis>*
+    //    This covers both folder-prefixed and root-level uploads.
+    const chassisExpression = chassis_number.replace(/([\\"])/g, "\\$1");
+    const expression = `public_id:(wazir-trading/${chassisExpression}* OR ${chassisExpression}*)`;
     try {
       const creds = Buffer.from(`${API_KEY()}:${API_SECRET()}`).toString("base64");
       const searchRes = await fetch(
@@ -170,7 +175,7 @@ router.post("/admin/cloudinary/search-by-chassis", async (req, res) => {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            expression: `public_id:wazir-trading/${chassis_number}-*`,
+            expression,
             max_results: 100,
           }),
         }
