@@ -59,6 +59,10 @@ app.use(express.urlencoded({ extended: true }));
 // The Replit reverse proxy forwards /api/* to this service WITHOUT stripping
 // the prefix, so routes must be mounted under /api to match.
 // The Vite dev proxy also forwards the full /api/* path (no rewrite).
+// Mount router under both `/api` (local dev) and `/` (Vercel path-stripped proxy)
+// so routes work the same way in both environments. Example: /api/admin/... and
+// /admin/... will both be handled by the same Express router.
 app.use('/api', router);
+app.use('/', router);
 
 export default app;
