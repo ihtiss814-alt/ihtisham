@@ -1764,8 +1764,14 @@ function ShopByBodyTypeSection() {
         <h2 className="text-2xl md:text-3xl font-serif font-bold text-gray-900">Shop By Body Type</h2>
       </div>
 
-      <div className="max-w-6xl mx-auto px-4 md:px-8">
-        <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 gap-4">
+      <div className="relative w-full">
+        <div className="absolute left-0 top-0 bottom-0 w-16 z-10 pointer-events-none"
+          style={{ background: 'linear-gradient(to right, white, transparent)' }} />
+        <div className="absolute right-0 top-0 bottom-0 w-16 z-10 pointer-events-none"
+          style={{ background: 'linear-gradient(to left, white, transparent)' }} />
+
+        <div className="flex body-track gap-4 px-4" style={{ width: 'max-content' }}>
+          <BodyTypeCards />
           <BodyTypeCards />
         </div>
       </div>
@@ -1778,8 +1784,8 @@ function ShopByBodyTypeSection() {
 function BodyTypeCards() {
   return (
     <>
-      {BODY_TYPES.map((bt, idx) => (
-        <div key={bt.name} className="p-4 rounded-lg" style={{ background: bt.bg }}>
+      {BODY_TYPES.map((bt) => (
+        <div key={bt.name} className="p-4 rounded-lg min-w-[160px]" style={{ background: bt.bg }}>
           <button className="w-full h-full flex flex-col items-center justify-center p-4 rounded-lg">
             {bt.icon ? <img src={bt.icon} alt={bt.name} className="w-10 h-10 mb-2" /> : <CarSilhouette type={bt.name} color={bt.accent} />}
             <span className="text-sm font-bold" style={{ color: bt.accent }}>{bt.name}</span>
