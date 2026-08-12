@@ -212,7 +212,7 @@ export default function Navbar() {
                   <img
                     src="/logo-small.png"
                     alt="Wazir Trading LLC"
-                    className="h-[62px] md:h-[70px] w-auto transition-opacity duration-200 group-hover:opacity-85"
+                    className="h-[68px] md:h-[72px] w-auto transition-opacity duration-200 group-hover:opacity-85"
                     style={{ mixBlendMode: 'multiply' }}
                     loading="eager"
                     decoding="sync"
@@ -371,7 +371,7 @@ export default function Navbar() {
               <img
                 src="/logo-small.png"
                 alt="Wazir Trading LLC"
-                className="h-[62px] w-auto"
+                className="h-[68px] w-auto"
                 style={{ mixBlendMode: 'multiply' }}
                 loading="eager"
                 decoding="sync"
