@@ -5,7 +5,7 @@ export default function PaymentNotice() {
   return (
     <Link
       href="/payment-information"
-      className="flex h-9 items-center gap-1.5 bg-[#C8102E] px-3 text-white transition-colors hover:bg-[#A50D25]"
+      className="flex h-8 items-center gap-1.5 bg-[#C8102E] px-3 text-white transition-colors hover:bg-[#A50D25]"
       data-testid="payment-notice"
     >
       <AlertTriangle size={13} className="flex-shrink-0" strokeWidth={2.5} />

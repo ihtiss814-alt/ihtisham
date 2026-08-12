@@ -102,10 +102,10 @@
 
   /* Height of the fixed header, so pages can clear it without hand-tuned
      magic numbers that drift out of sync:
-       payment notice 36 + info strip 32 (+1 border) + accent 3 + nav 80 (+1)
+       payment notice 32 + info strip 28 (+1 border) + accent 3 + nav 68 (+1)
      Identical at every breakpoint — the header rewrites its content on mobile
      rather than changing height. */
-  --header-h: 144px;
+  --header-h: 132px;
 }
 
 .dark {

@@ -131,7 +131,7 @@ export default function Navbar() {
         <div className="bg-[#F9F9F9] border-b border-gray-200">
 
           {/* ── Desktop (md+): three-column layout ── */}
-          <div className="hidden md:flex max-w-7xl mx-auto px-8 h-8 items-center justify-between">
+          <div className="hidden md:flex max-w-7xl mx-auto px-8 h-7 items-center justify-between">
             {/* Left — tagline */}
             <span className="text-[10px] tracking-[0.24em] uppercase font-semibold text-[#C8102E] whitespace-nowrap">
               The Cars Exporting Expert
@@ -165,7 +165,7 @@ export default function Navbar() {
           </div>
 
           {/* ── Mobile (< md): single compact row ── */}
-          <div className="flex md:hidden max-w-7xl mx-auto px-4 h-8 items-center justify-between gap-2">
+          <div className="flex md:hidden max-w-7xl mx-auto px-4 h-7 items-center justify-between gap-2">
             {/* JST abbreviated */}
             <div className="flex items-center gap-1 min-w-0">
               <Clock size={9} className="text-gray-400 flex-shrink-0" />
@@ -203,7 +203,7 @@ export default function Navbar() {
         {/* ── MAIN NAV ──────────────────────────────────────────────── */}
         <div className="bg-white border-b border-gray-100">
           <div className="max-w-7xl mx-auto px-4 md:px-8">
-            <div className="flex items-center justify-between h-[72px]">
+            <div className="flex items-center justify-between h-[68px]">
 
               {/* Logo */}
               <Link href="/" className="flex-shrink-0 group" data-testid="link-logo">
@@ -364,7 +364,7 @@ export default function Navbar() {
         <div className="h-[3px] bg-[#C8102E] flex-shrink-0" />
 
         {/* Drawer header */}
-        <div className="flex items-center justify-between px-5 h-[64px] border-b border-gray-100 flex-shrink-0">
+        <div className="flex items-center justify-between px-5 h-[68px] border-b border-gray-100 flex-shrink-0">
           <Link href="/" onClick={() => setMobileOpen(false)}>
             <picture>
               <source srcSet="/logo.webp" type="image/webp" />
