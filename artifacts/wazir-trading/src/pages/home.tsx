@@ -344,6 +344,7 @@ function ShopByMakeSection() {
   const [, navigate] = useLocation();
   const sectionRef = React.useRef<HTMLElement>(null);
   const [makeCounts, setMakeCounts] = React.useState<Record<string, number>>({});
+  const [countsLoading, setCountsLoading] = React.useState(true);
 
   // Defer the query until this section is near the viewport — avoids a full-table
   // scan on page load. Also scoped to just the brands we actually display.
@@ -360,53 +361,43 @@ function ShopByMakeSection() {
         .eq('status', 'available')
         .in('make', brandNames)
         .then(({ data }) => {
-          if (!data) return;
           const counts: Record<string, number> = {};
-          for (const row of data) {
+          for (const row of data ?? []) {
             if (row.make) counts[row.make] = (counts[row.make] ?? 0) + 1;
           }
           setMakeCounts(counts);
+          setCountsLoading(false);
         });
     }, { rootMargin: '400px' });
     obs.observe(el);
     return () => obs.disconnect();
   }, []);
 
-  // Duplicate for seamless loop
-  const track = [...BRANDS, ...BRANDS];
-
   return (
-    <section ref={sectionRef} className="bg-white border-b border-gray-100 py-12 overflow-hidden">
+    <section ref={sectionRef} className="bg-[#F8FAFC] border-y border-gray-100 py-12">
       {/* Heading */}
-      <div className="text-center mb-8 px-4">
+      <div className="max-w-7xl mx-auto text-center mb-8 px-4">
         <p className="text-[10px] tracking-[0.28em] uppercase font-bold text-[#C8102E] mb-2">
           Browse By Brand
         </p>
-        <h2 className="text-2xl md:text-3xl font-serif font-bold text-gray-900">
+        <h2 className="text-2xl md:text-3xl font-serif font-bold text-gray-900 leading-tight">
           Shop By Make
         </h2>
+        <p className="mt-2 text-sm text-gray-500">Find your next vehicle by manufacturer.</p>
       </div>
 
-      {/* Scrolling row */}
-      <div className="relative w-full">
-        {/* Left fade */}
-        <div className="absolute left-0 top-0 bottom-0 w-16 z-10 pointer-events-none"
-          style={{ background: 'linear-gradient(to right, white, transparent)' }} />
-        {/* Right fade */}
-        <div className="absolute right-0 top-0 bottom-0 w-16 z-10 pointer-events-none"
-          style={{ background: 'linear-gradient(to left, white, transparent)' }} />
-
-        <div className="flex brand-track gap-4 px-4" style={{ width: 'max-content' }}>
-          {track.map(({ name, slug, accent }, i) => {
-            const count = makeCounts[name] ?? 0;
+      <div className="max-w-7xl mx-auto px-4 md:px-6">
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-3 md:gap-4">
+          {BRANDS.map(({ name, slug, accent }) => {
+            const count = makeCounts[name];
             return (
               <button
-                key={`${name}-${i}`}
+                key={name}
                 onClick={() => navigate(`/cars?make=${encodeURIComponent(name)}`)}
-                className="group flex-shrink-0 flex flex-col items-center gap-3 w-[120px] py-5 px-3 rounded-[8px] border border-gray-200 bg-white hover:border-[#C8102E] hover:shadow-[0_4px_20px_rgba(200,16,46,0.12)] transition-all duration-200 cursor-pointer"
+                className="group flex min-w-0 min-h-[172px] flex-col items-center justify-between gap-3 rounded-[8px] border border-gray-200 bg-white px-3 py-4 shadow-[0_1px_2px_rgba(15,23,42,0.04)] hover:-translate-y-0.5 hover:border-[#C8102E] hover:shadow-[0_8px_24px_rgba(200,16,46,0.12)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#C8102E] focus-visible:ring-offset-2 transition-all duration-200 cursor-pointer"
               >
                 {/* Logo box */}
-                <div className="w-20 h-14 flex items-center justify-center rounded-[6px] overflow-hidden bg-gray-50 flex-shrink-0 border border-gray-100">
+                <div className="w-full max-w-[92px] h-14 flex items-center justify-center rounded-[6px] overflow-hidden bg-gray-50 flex-shrink-0 border border-gray-100">
                   <BrandLogo slug={slug} name={name} accent={accent} />
                 </div>
 
@@ -416,9 +407,9 @@ function ShopByMakeSection() {
                 </span>
 
                 {/* Live car count */}
-                <span className="text-[10px] font-semibold tracking-[0.12em] uppercase"
-                  style={{ color: count > 0 ? '#C8102E' : '#9CA3AF' }}>
-                  {count > 0 ? `${count} car${count !== 1 ? 's' : ''}` : 'On Request'}
+                <span className="min-h-[28px] text-[10px] font-semibold tracking-[0.08em] uppercase leading-4"
+                  style={{ color: countsLoading ? '#9CA3AF' : count > 0 ? '#C8102E' : '#9CA3AF' }}>
+                  {countsLoading ? 'Loading stock' : `${(count ?? 0).toLocaleString()} ${(count ?? 0) === 1 ? 'vehicle' : 'vehicles'} in stock`}
                 </span>
               </button>
             );
