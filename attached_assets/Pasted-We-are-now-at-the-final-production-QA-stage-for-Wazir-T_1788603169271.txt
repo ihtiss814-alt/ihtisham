@@ -1,0 +1,153 @@
+We are now at the final production QA stage for Wazir Trading LLC.
+
+DO NOT make any new SEO changes, redesign the website, or add features.
+
+The project has already been fixed. I need you to VERIFY the current project against the following exact requirements.
+
+1. Run the production build using the actual project build command.
+
+2. Make sure the build completes successfully with the real Supabase environment/secrets.
+
+3. Report the actual number of:
+- Supabase inventory records fetched
+- eligible/indexable vehicles
+- generated vehicle HTML pages
+- vehicle URLs in sitemap
+- sitemap files generated
+
+4. Inspect the generated dist/ directory.
+
+The following MUST exist after the build:
+
+dist/sitemap.xml
+dist/sitemap-static.xml
+dist/sitemap-cars-1.xml
+
+If there are more vehicle sitemap files because of URL limits, report them too.
+
+5. Inspect dist/sitemap.xml.
+
+It MUST be a sitemap INDEX and MUST reference:
+
+https://www.wazirtradingllc.com/sitemap-static.xml
+
+and:
+
+https://www.wazirtradingllc.com/sitemap-cars-1.xml
+
+or every generated vehicle sitemap file.
+
+It must NOT contain:
+
+https://wazirtradingllc.com
+
+localhost URLs
+Replit URLs
+Vercel staging URLs
+
+6. Inspect sitemap-static.xml.
+
+Every URL must use:
+
+https://www.wazirtradingllc.com
+
+7. Inspect sitemap-cars-1.xml.
+
+Verify that:
+- every URL uses the www host
+- URLs correspond only to vehicles passing the existing vehicle SEO quality gate
+- there are no duplicate vehicle URLs
+- the number of vehicle sitemap URLs matches the number of generated eligible vehicle pages
+
+8. Verify the build did NOT silently fall back to a static/incomplete sitemap.
+
+If Supabase inventory access fails, the build must fail instead of producing a sitemap containing only static pages.
+
+9. Run TypeScript/type checking.
+
+10. Verify the generated vehicle page for a real vehicle, preferably:
+
+/cars/WLT-000307
+
+Check the generated initial HTML, not merely the browser DOM.
+
+Verify:
+- title
+- meta description
+- canonical
+- robots
+- OG title
+- OG description
+- OG URL
+- Twitter metadata
+- H1
+- actual vehicle information
+- JSON-LD
+- BreadcrumbList
+- Car/Product structured data
+- crawlable related vehicle links
+
+11. Verify the canonical host everywhere in generated production HTML.
+
+There must be no SEO URLs using:
+
+https://wazirtradingllc.com
+
+Everything public must use:
+
+https://www.wazirtradingllc.com
+
+12. Test invalid vehicle behavior.
+
+Test:
+
+/cars/INVALID-DOES-NOT-EXIST
+
+and an unknown route.
+
+They must return HTTP 404, not HTTP 200.
+
+13. Test:
+
+/robots.txt
+/sitemap.xml
+/sitemap-static.xml
+/sitemap-cars-1.xml
+
+They must return HTTP 200.
+
+14. Verify robots directives.
+
+Public indexable pages:
+index, follow, max-image-preview:large, max-snippet:-1
+
+Noindex pages:
+noindex, follow
+
+15. Verify the internal-link SEO QA catches an invalid /cars/{ref} reference.
+
+16. Verify pnpm-lock.yaml is synchronized with package.json and:
+
+pnpm install --frozen-lockfile
+
+succeeds.
+
+17. IMPORTANT:
+
+Do NOT fix problems automatically during this QA run.
+
+First run the checks and give me a report.
+
+If anything fails, clearly report:
+
+FAIL
+- exact failure
+- affected file
+- affected command
+- recommended fix
+
+If everything passes, report:
+
+PASS — READY FOR PRODUCTION DEPLOYMENT
+
+Do not claim PASS unless the actual commands and generated files prove it.
