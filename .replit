@@ -61,3 +61,10 @@ outputType = "console"
 task = "shell.exec"
 args = "bash scripts/ensure-dependencies.sh env PORT=8080 pnpm --filter @workspace/api-server run dev"
 waitForPort = 8080
+
+[userenv]
+
+[userenv.shared]
+CLOUDINARY_CLOUD_NAME = "txb1wiw1"
+VITE_CLOUDINARY_CLOUD_NAME = "txb1wiw1"
+VITE_SUPABASE_URL = "https://aphxjblbafyxobafjmot.supabase.co"
