@@ -1,0 +1,10 @@
+export function normalizedStatus(car: Record<string, any>): string;
+export function isAvailableVehicle(car: Record<string, any>): boolean;
+export function isSoldVehicle(car: Record<string, any>): boolean;
+export function validImageUrls(car: Record<string, any>): string[];
+export function vehicleQualityIssues(car: Record<string, any>): string[];
+export function isIndexableVehicle(car: Record<string, any>): boolean;
+export function vehicleName(car: Record<string, any>): string;
+export function vehicleSummary(car: Record<string, any>): string;
+export function vehicleImageAlt(car: Record<string, any>, index: number, suffix?: string): string;
+export function rankRelatedVehicles(current: Record<string, any>, candidates: Record<string, any>[], limit?: number): Record<string, any>[];

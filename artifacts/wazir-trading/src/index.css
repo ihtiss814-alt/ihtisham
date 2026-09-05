@@ -1,0 +1,506 @@
+/* Google Fonts are loaded non-blocking from index.html — no @import here */
+@import 'tailwindcss';
+@import 'tw-animate-css';
+@plugin "@tailwindcss/typography";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --color-background: hsl(var(--background));
+  --color-foreground: hsl(var(--foreground));
+  --color-border: hsl(var(--border));
+  --color-input: hsl(var(--input));
+  --color-ring: hsl(var(--ring));
+
+  --color-card: hsl(var(--card));
+  --color-card-foreground: hsl(var(--card-foreground));
+  --color-card-border: hsl(var(--card-border));
+
+  --color-popover: hsl(var(--popover));
+  --color-popover-foreground: hsl(var(--popover-foreground));
+  --color-popover-border: hsl(var(--popover-border));
+
+  --color-primary: hsl(var(--primary));
+  --color-primary-foreground: hsl(var(--primary-foreground));
+  --color-primary-border: var(--primary-border);
+
+  --color-secondary: hsl(var(--secondary));
+  --color-secondary-foreground: hsl(var(--secondary-foreground));
+  --color-secondary-border: var(--secondary-border);
+
+  --color-muted: hsl(var(--muted));
+  --color-muted-foreground: hsl(var(--muted-foreground));
+  --color-muted-border: var(--muted-border);
+
+  --color-accent: hsl(var(--accent));
+  --color-accent-foreground: hsl(var(--accent-foreground));
+  --color-accent-border: var(--accent-border);
+
+  --color-destructive: hsl(var(--destructive));
+  --color-destructive-foreground: hsl(var(--destructive-foreground));
+  --color-destructive-border: var(--destructive-border);
+
+  --color-brand-navy: var(--brand-navy);
+
+  --font-sans: var(--app-font-sans);
+  --font-serif: var(--app-font-serif);
+  --font-mono: var(--app-font-mono);
+
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+}
+
+:root {
+  --button-outline: rgba(0, 0, 0, 0.1);
+  --badge-outline: rgba(0, 0, 0, 0.05);
+
+  --opaque-button-border-intensity: -8;
+
+  --elevate-1: rgba(0, 0, 0, 0.03);
+  --elevate-2: rgba(0, 0, 0, 0.08);
+
+  /* Light Theme */
+  --background: 0 0% 100%;
+  --foreground: 222 47% 6%;
+  --border: 214 32% 91%;
+  --card: 0 0% 100%;
+  --card-foreground: 222 47% 6%;
+  --card-border: 214 32% 91%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 222 47% 6%;
+  --popover-border: 214 32% 91%;
+  
+  --primary: 350 85% 42%; /* Crimson Red #C8102E — brand color */
+  --primary-foreground: 0 0% 100%;
+  
+  --secondary: 222 47% 6%; /* Dark Navy */
+  --secondary-foreground: 0 0% 96%;
+  
+  --muted: 210 40% 96.1%;
+  --muted-foreground: 215.4 16.3% 46.9%;
+  
+  --accent: 210 40% 96.1%;
+  --accent-foreground: 222.2 47.4% 11.2%;
+  
+  --destructive: 0 84.2% 60.2%;
+  --destructive-foreground: 210 40% 98%;
+  
+  --input: 214.3 31.8% 91.4%;
+  --ring: 42 56% 55%;
+
+  /* Wazir type system: an approachable reader, an editorial voice, and
+     fixed-width numerals for the details buyers compare. */
+  --app-font-sans: 'DM Sans', ui-sans-serif, system-ui, sans-serif;
+  --app-font-serif: 'Fraunces', ui-serif, Georgia, serif;
+  --app-font-mono: 'Space Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+  --radius: 0.5rem;
+
+  /* Brand navy used for dark panels, heroes and the footer. Previously three
+     near-identical hexes (#0D1B3E, #0D1B2A) were scattered across pages, so the
+     shade shifted section to section. Change it here, not in a component. */
+  --brand-navy: #0D1B3E;
+
+  /* Height of the fixed header, so pages can clear it without hand-tuned
+     magic numbers that drift out of sync:
+       payment notice 32 + info strip 28 (+1 border) + accent 3 + nav 68 (+1)
+     Identical at every breakpoint — the header rewrites its content on mobile
+     rather than changing height. */
+  --header-h: 132px;
+}
+
+.dark {
+  --button-outline: rgba(255, 255, 255, 0.1);
+  --badge-outline: rgba(255, 255, 255, 0.05);
+
+  --opaque-button-border-intensity: 9;
+
+  --elevate-1: rgba(255, 255, 255, 0.04);
+  --elevate-2: rgba(255, 255, 255, 0.09);
+
+  /* Dark Theme */
+  --background: 222 47% 6%; /* Dark Navy */
+  --foreground: 0 0% 96%;
+  --border: 217 32% 17%;
+  --card: 222 47% 9%;
+  --card-foreground: 0 0% 96%;
+  --card-border: 217 32% 17%;
+  --popover: 222 47% 9%;
+  --popover-foreground: 0 0% 96%;
+  --popover-border: 217 32% 17%;
+  
+  --primary: 42 56% 55%; /* Gold */
+  --primary-foreground: 222 47% 6%;
+  
+  --secondary: 217 32% 17%;
+  --secondary-foreground: 0 0% 96%;
+  
+  --muted: 217 32% 17%;
+  --muted-foreground: 215 20.2% 65.1%;
+  
+  --accent: 217 32% 17%;
+  --accent-foreground: 0 0% 96%;
+  
+  --destructive: 0 62.8% 30.6%;
+  --destructive-foreground: 0 0% 96%;
+  
+  --input: 217 32% 17%;
+  --ring: 42 56% 55%;
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  html {
+    scroll-behavior: smooth;
+  }
+  body {
+    @apply font-sans antialiased bg-background text-foreground;
+    font-size: 15px;
+    line-height: 1.6;
+    font-optical-sizing: auto;
+    text-rendering: optimizeLegibility;
+  }
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-serif;
+    font-optical-sizing: auto;
+    text-wrap: balance;
+  }
+}
+
+/* Keep type roles explicit when a component needs to opt out of the heading
+   defaults. Data remains quiet and scannable; prose gets room to breathe. */
+.type-display {
+  font-family: var(--app-font-serif);
+  font-optical-sizing: auto;
+}
+
+.type-data,
+.font-mono,
+[data-type="reference"],
+[data-type="price"] {
+  font-family: var(--app-font-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+.prose,
+[data-type="prose"] {
+  line-height: 1.72;
+}
+
+/* ── Marquee / slideshow keyframes ──────────────────────────────────────────
+   Defined here once so components never inject <style> tags at runtime.     */
+
+@keyframes marquee-scroll {
+  0%   { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+@keyframes brand-scroll {
+  0%   { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+@keyframes body-scroll {
+  0%   { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+@keyframes fc-scroll {
+  0%   { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+@keyframes ken-burns-in  { from { transform: scale(1);    } to { transform: scale(1.10); } }
+@keyframes ken-burns-out { from { transform: scale(1.10); } to { transform: scale(1);    } }
+
+/* ─── Hero text entrance animations (replaces framer-motion on hero) ─── */
+@keyframes hero-fade-up {
+  from { opacity: 0; transform: translateY(24px); }
+  to   { opacity: 1; transform: translateY(0);    }
+}
+@keyframes hero-fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+/* animation-fill-mode: both → element starts invisible before delay fires */
+.hero-anim-1 { animation: hero-fade-up 0.75s cubic-bezier(0.22,1,0.36,1) 0.22s both; }
+.hero-anim-2 { animation: hero-fade-up 0.75s cubic-bezier(0.22,1,0.36,1) 0.34s both; }
+.hero-anim-3 { animation: hero-fade-up 0.65s cubic-bezier(0.22,1,0.36,1) 0.46s both; }
+.hero-anim-4 { animation: hero-fade-up 0.75s cubic-bezier(0.22,1,0.36,1) 0.58s both; }
+.hero-anim-5 { animation: hero-fade-in 0.75s ease-out 0.72s both; }
+
+/* ─── CSS containment: skip paint/layout for far-off-screen sections ─── */
+/* content-visibility:auto lets the browser skip rendering until near-viewport */
+.section-lazy {
+  content-visibility: auto;
+  /* hint to browser so it reserves space and doesn't cause layout shift */
+  contain-intrinsic-size: auto 640px;
+}
+
+.marquee-track {
+  animation: marquee-scroll 120s linear infinite;
+  will-change: transform;
+}
+.marquee-track:hover { animation-play-state: paused; }
+
+.brand-track {
+  animation: brand-scroll 40s linear infinite;
+  will-change: transform;
+}
+.brand-track:hover { animation-play-state: paused; }
+
+.body-track {
+  animation: body-scroll 45s linear infinite;
+  will-change: transform;
+}
+.body-track:hover { animation-play-state: paused; }
+
+.fc-track {
+  animation: fc-scroll var(--fc-dur, 30s) linear infinite;
+  will-change: transform;
+}
+.fc-track:hover { animation-play-state: paused; }
+
+.hero-img-in  { animation: ken-burns-in  7s ease-in-out forwards; }
+.hero-img-out { animation: ken-burns-out 7s ease-in-out forwards; }
+
+/* ─── Scroll reveal (paired with hooks/useReveal.ts) ─────────────────────────
+   The hook sets `revealed` immediately under reduced-motion, so the hidden
+   state is never reachable for those visitors.                              */
+.reveal {
+  opacity: 0;
+  transform: translateY(18px);
+  transition: opacity 0.6s cubic-bezier(0.22, 1, 0.36, 1),
+              transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.reveal.is-revealed {
+  opacity: 1;
+  transform: none;
+}
+
+/* ─── Reduced motion ────────────────────────────────────────────────────────
+   Four marquees loop forever and the hero runs a Ken Burns pan. Honour the
+   OS-level "reduce motion" setting: hold every looping track at its start
+   frame and let entrance animations resolve to their final state instantly,
+   so nothing is left invisible.                                             */
+@media (prefers-reduced-motion: reduce) {
+  .marquee-track,
+  .brand-track,
+  .body-track,
+  .fc-track,
+  .hero-img-in,
+  .hero-img-out {
+    animation: none !important;
+    will-change: auto;
+  }
+
+  .hero-anim-1,
+  .hero-anim-2,
+  .hero-anim-3,
+  .hero-anim-4,
+  .hero-anim-5 {
+    animation-duration: 1ms !important;
+    animation-delay: 0ms !important;
+  }
+
+  .dest-card:hover .dest-flag {
+    transform: none;
+  }
+
+  .reveal {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+
+  html { scroll-behavior: auto; }
+}
+
+/* Destination flag card */
+.dest-flag {
+  display: block;
+  width: 72px;
+  height: 48px;
+  object-fit: cover;
+  border-radius: 4px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.45);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.dest-card:hover .dest-flag {
+  transform: scale(1.06);
+  box-shadow: 0 4px 16px rgba(200,16,46,0.35);
+}
+
+/* Custom home page hero from the new design */
+.hero {
+  position: relative;
+  width: 100%;
+  height: 100vh;
+  min-height: 650px;
+  overflow: hidden;
+  background: #111;
+}
+
+.slide {
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  opacity: 0;
+  transform: scale(1.035);
+  filter: brightness(1.08) contrast(1.06) saturate(1.16);
+  transition: opacity .55s ease, transform 1.8s cubic-bezier(.2,.7,.2,1);
+  z-index: 1;
+}
+
+.slide.active {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.hero::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  background:
+    linear-gradient(90deg, rgba(0,0,0,.12) 0%, rgba(0,0,0,.02) 45%, rgba(0,0,0,.08) 100%),
+    linear-gradient(180deg, rgba(0,0,0,.05) 0%, transparent 45%, rgba(0,0,0,.14) 100%);
+}
+
+.hero::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 48%;
+  width: min(1000px, 92vw);
+  height: 480px;
+  transform: translate(-50%, -50%);
+  z-index: 3;
+  pointer-events: none;
+  background: radial-gradient(ellipse, rgba(0,0,0,.16) 0%, rgba(0,0,0,.07) 38%, transparent 72%);
+}
+
+.hero-content {
+  position: relative;
+  z-index: 5;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 40px 20px;
+}
+
+.eyebrow {
+  color: #fff;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 5px;
+  text-transform: uppercase;
+  margin-bottom: 22px;
+  text-shadow: 0 2px 7px rgba(0,0,0,.95), 0 4px 18px rgba(0,0,0,.7);
+}
+
+.hero-title {
+  max-width: 1100px;
+  font-family: var(--app-font-serif);
+  font-size: clamp(48px, 6.2vw, 94px);
+  line-height: .98;
+  font-weight: 700;
+  letter-spacing: -3px;
+  color: #fff;
+  margin-bottom: 38px;
+  text-shadow: 0 2px 3px rgba(0,0,0,1), 0 5px 12px rgba(0,0,0,.95), 0 12px 35px rgba(0,0,0,.75);
+}
+
+.hero-title span {
+  display: block;
+  margin-top: 8px;
+  color: #ff3348;
+  text-shadow: 0 2px 3px rgba(0,0,0,1), 0 5px 12px rgba(0,0,0,.95), 0 12px 30px rgba(0,0,0,.7);
+}
+
+.select-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 18px;
+  min-width: 235px;
+  height: 60px;
+  padding: 0 30px;
+  background: #ed102d;
+  color: #fff;
+  border: 1px solid rgba(255,255,255,.22);
+  border-radius: 4px;
+  font-size: 15px;
+  font-weight: 700;
+  text-decoration: none;
+  box-shadow: 0 7px 20px rgba(0,0,0,.45), 0 10px 35px rgba(237,16,45,.38);
+  transition: transform .25s ease, background .25s ease, box-shadow .25s ease;
+}
+
+.select-button:hover {
+  background: #ff1737;
+  transform: translateY(-3px);
+  box-shadow: 0 12px 28px rgba(0,0,0,.5), 0 14px 42px rgba(237,16,45,.52);
+}
+
+.arrow {
+  font-size: 21px;
+  transition: transform .25s ease;
+}
+
+.select-button:hover .arrow {
+  transform: translateX(7px);
+}
+
+.slide-indicators {
+  position: absolute;
+  z-index: 10;
+  bottom: 30px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 8px;
+}
+
+.indicator {
+  width: 32px;
+  height: 3px;
+  border: 0;
+  border-radius: 5px;
+  background: rgba(255,255,255,.65);
+  cursor: pointer;
+  transition: .3s ease;
+}
+
+.indicator.active {
+  width: 62px;
+  background: #ed102d;
+}
+
+@media (max-width: 768px) {
+  .hero {
+    min-height: 600px;
+  }
+  .slide {
+    background-position: center center;
+  }
+  .hero-title {
+    font-size: clamp(42px, 11.5vw, 65px);
+    letter-spacing: -2px;
+    margin-bottom: 32px;
+  }
+  .eyebrow {
+    font-size: 9px;
+    letter-spacing: 3px;
+  }
+  .select-button {
+    min-width: 205px;
+    height: 55px;
+  }
+}

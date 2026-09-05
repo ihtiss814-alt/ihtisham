@@ -1,0 +1,57 @@
+{
+  "version": 2,
+  "installCommand": "pnpm install --frozen-lockfile",
+  "buildCommand": "pnpm run build",
+  "outputDirectory": "dist",
+  "headers": [
+    {
+      "source": "/assets/(.*)",
+      "headers": [
+        { "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }
+      ]
+    },
+    {
+      "source": "/(.*)",
+      "headers": [
+        { "key": "X-Content-Type-Options", "value": "nosniff" },
+        { "key": "X-Frame-Options", "value": "SAMEORIGIN" },
+        { "key": "Referrer-Policy", "value": "strict-origin-when-cross-origin" },
+        { "key": "Permissions-Policy", "value": "camera=(), microphone=(), geolocation=()" }
+      ]
+    }
+  ],
+  "routes": [
+    {
+      "src": "^/api/(.*)$",
+      "dest": "https://ihtisham-api-server.vercel.app/$1"
+    },
+    {
+      "handle": "filesystem"
+    },
+    {
+      "src": "^/admin(?:/.*)?/?$",
+      "dest": "/index.html",
+      "headers": {
+        "X-Robots-Tag": "noindex, follow"
+      }
+    },
+    {
+      "src": "^/$",
+      "dest": "/index.html"
+    },
+    {
+      "src": "^/(cars|about|how-it-works|shipping-information|payment-information|contact|faqs)/?$",
+      "dest": "/index.html"
+    },
+    {
+      "src": "^/cars/[^/]+/?$",
+      "dest": "/404.html",
+      "status": 404
+    },
+    {
+      "src": "^/.*$",
+      "dest": "/404.html",
+      "status": 404
+    }
+  ]
+}
