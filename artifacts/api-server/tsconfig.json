@@ -1,0 +1,17 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "incremental": true,
+    "outDir": "dist",
+    "rootDir": ".",
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "types": [
+      "node"
+    ]
+  },
+  "include": [
+    "src",
+    "api"
+  ]
+}
