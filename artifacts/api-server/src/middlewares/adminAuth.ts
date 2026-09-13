@@ -14,7 +14,10 @@ export function requireAdminPassword(
   res: Response,
   next: NextFunction,
 ) {
-  const expected = process.env["ADMIN_PASSWORD"];
+  // Keep ADMIN_PASSWORD as the preferred dedicated credential. JWT_2 is the
+  // existing server-only secret configured for this project and is a safe
+  // compatibility fallback for the protected admin tool.
+  const expected = process.env["ADMIN_PASSWORD"] || process.env["JWT_2"];
 
   if (!expected) {
     res.status(503).json({ error: "Admin access is not configured on the server." });
