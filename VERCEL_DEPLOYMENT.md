@@ -23,10 +23,16 @@ The API function intentionally does **not** declare a legacy/custom `runtime` in
 
 Set the Vercel Root Directory to `artifacts/wazir-trading`.
 
-Required environment variables:
+Recommended environment variables:
 
 - `VITE_SUPABASE_URL`
 - `VITE_SUPABASE_ANON_KEY`
+
+When these are configured, the frontend build fetches the current inventory and
+pre-renders vehicle detail pages and vehicle sitemap entries. If they are not
+available during a build, the build still succeeds with the static SEO pages
+and an empty vehicle sitemap; the browser still needs these variables at
+runtime to load the live inventory.
 
 `VITE_CLOUDINARY_CLOUD_NAME` is optional. The admin tool now receives the public Cloudinary cloud name from the authenticated API, so it does not need a separate frontend Cloudinary variable.
 

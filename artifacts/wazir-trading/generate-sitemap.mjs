@@ -141,9 +141,12 @@ const STATIC_SEO_PAGES = [
   },
 ];
 
-function requireSupabaseConfig() {
+function getSupabaseConfig() {
   const url = process.env.VITE_SUPABASE_URL?.trim();
   const apiKey = process.env.VITE_SUPABASE_ANON_KEY?.trim();
+  if (!url && !apiKey) {
+    return null;
+  }
   if (!url || !apiKey) {
     throw new Error(
       'VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY are required to build the SEO sitemap and vehicle pages.',
@@ -158,7 +161,14 @@ function requireSupabaseConfig() {
 }
 
 async function fetchInventory() {
-  const { url, apiKey } = requireSupabaseConfig();
+  const config = getSupabaseConfig();
+  if (!config) {
+    console.warn(
+      '[seo] Supabase build variables are not configured; generating static SEO pages without vehicle inventory.',
+    );
+    return [];
+  }
+  const { url, apiKey } = config;
   const cars = [];
 
   for (let offset = 0; ; offset += INVENTORY_PAGE_SIZE) {
