@@ -29,6 +29,10 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+// Vercel can invoke this catch-all function with either the original `/api`
+// prefix or with the prefix already stripped. Mount both shapes so the same
+// server works behind the frontend rewrite and when called directly.
 app.use("/api", router);
+app.use(router);
 
 export default app;
