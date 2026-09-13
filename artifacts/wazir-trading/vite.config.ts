@@ -54,13 +54,14 @@ export default defineConfig({
     host: '0.0.0.0',
     allowedHosts: true,
     proxy: {
-      // In Replit, /api is path-routed to the api-server (port 8080).
-      // This proxy makes it work the same way in local Vite dev mode.
+      // Use the deployed API by default so the Vite preview does not depend
+      // on a second local process listening on port 8080. Set
+      // VITE_API_PROXY_TARGET when developing against a local API server.
       '/api': {
-        target: 'http://localhost:8080',
+        target: process.env.VITE_API_PROXY_TARGET || 'https://ihtisham-api-server.vercel.app',
         changeOrigin: true,
-        // No rewrite — forward the full /api/* path so the server sees the
-        // same URL shape as in Replit preview (proxy does not strip the prefix).
+        secure: true,
+        // No rewrite — the API server accepts the full /api/* path.
       },
     },
   },
