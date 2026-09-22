@@ -1558,6 +1558,7 @@ export default function CarsPage() {
 
   // ── Active filter count ──
   const filterCount = Object.values(filters).filter(Boolean).length;
+  const totalDisplay = totalCount.toLocaleString();
 
   // ── Active advanced-filter count (badge on the toggle) ──
   const advActiveCount = [
