@@ -393,13 +393,13 @@ export default function CarDetailPage() {
     return `${CURRENCY_SYMBOLS[currency]}${fmtNum(Math.round(usd * rate))}`;
   };
 
-  const calcTotal = (): { total: number | null; pkr: string | null } => {
-    if (!car) return { total: null, pkr: null };
+  const calcTotal = (): number | null => {
+    if (!car) return null;
     const cost = computeLandedCost(car.fob_price_usd, shippingRate, {
       freightType, withInspection, withInsurance,
     });
-    if (!cost) return { total: null, pkr: null };
-    return { total: cost.total, pkr: `PKR ${fmtNum(Math.round(cost.total * rates.pkr))}` };
+    if (!cost) return null;
+    return cost.total;
   };
 
   /* ─── loading / not found ─── */
@@ -433,7 +433,7 @@ export default function CarDetailPage() {
   );
   const waLink = `https://wa.me/${WA_NUMBER}?text=${waDetailMsg}`;
 
-  const { total: calcTotalVal, pkr: calcPkr } = calcTotal();
+  const calcTotalVal = calcTotal();
 
   return (
     <div className="car-detail-page min-h-screen pb-28 lg:pb-24" style={{ paddingTop: 'var(--header-h)' }}>
@@ -561,15 +561,9 @@ export default function CarDetailPage() {
                     </button>
                   ))}
                 </div>
-                <div className="flex items-end justify-between mb-3">
-                  <div>
-                    <p className="text-[10px] font-bold tracking-widest text-white/40 uppercase mb-1">Vehicle Price · FOB Japan</p>
-                    <div className="text-3xl font-mono font-bold text-[#C8102E]">{convertPrice(car.fob_price_usd ?? 0)}</div>
-                  </div>
-                  <div className="text-right">
-                    <p className="text-[10px] text-white/40 mb-0.5">PKR</p>
-                    <p className="text-sm font-mono font-bold text-white/70">{fmtNum(Math.round((car.fob_price_usd ?? 0) * rates.pkr))}</p>
-                  </div>
+                <div className="mb-3">
+                  <p className="text-[10px] font-bold tracking-widest text-white/40 uppercase mb-1">Vehicle Price · FOB Japan</p>
+                  <div className="text-3xl font-mono font-bold text-[#C8102E]">{convertPrice(car.fob_price_usd ?? 0)}</div>
                 </div>
                 <div className="grid grid-cols-2 gap-2">
                   {isAvailable ? (
@@ -730,7 +724,7 @@ export default function CarDetailPage() {
                   <div className="flex gap-4 overflow-x-auto pb-2">
                     {similarCars.map(sc => (
                       <CarCard key={sc.id} car={sc} variant="compact"
-                        primaryImage={sc.primaryImage ?? null} pkrRate={rates.pkr} />
+                        primaryImage={sc.primaryImage ?? null} />
                     ))}
                   </div>
                 </div>
@@ -939,9 +933,6 @@ export default function CarDetailPage() {
                         <div className="text-2xl font-mono font-bold text-[#C8102E]">
                           TOTAL PRICE {fmt(calcTotalVal)}
                         </div>
-                        {calcPkr && (
-                          <p className="text-xs text-white/50 mt-1">Total Price in Local {calcPkr}</p>
-                        )}
                         <div className="mt-2 space-y-1">
                           <div className="flex justify-between text-xs text-white/50">
                           <span>FOB Price</span><span className="font-mono text-white">{fmt(car.fob_price_usd ?? 0)}</span>

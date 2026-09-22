@@ -80,7 +80,6 @@ interface CarCardProps {
   car: Car;
   variant: CarCardVariant;
   primaryImage?: string | null;
-  pkrRate?: number;
   waNumber?: string;
   /** row variant only — parent supplies the "Offer Price" dialog trigger handling */
   onOfferPrice?: (car: Car) => void;
@@ -92,13 +91,12 @@ interface CarCardProps {
 }
 
 function CarCard({
-  car, variant, primaryImage = null, pkrRate = 0,
+  car, variant, primaryImage = null,
   waNumber = import.meta.env.VITE_WHATSAPP_NUMBER || '818089227375',
   onOfferPrice, isFavorite, onToggleFavorite, hideBadges = false,
 }: CarCardProps) {
   const [imgError, setImgError] = useState(false);
   const href = `/cars/${car.ref_number}`;
-  const pkrPrice = pkrRate > 0 && car.fob_price_usd != null ? Math.round(car.fob_price_usd * pkrRate) : null;
   const waMsg = encodeURIComponent(
     `Hi, I am interested in ${waTitle(car)}\nReference: ${car.ref_number}\nPlease share more details.`,
   );
@@ -171,9 +169,6 @@ function CarCard({
               <div className="price-usd">
                 {fmtUSD(car.fob_price_usd)}
               </div>
-              {pkrPrice != null && (
-                <div className="price-pkr">PKR {pkrPrice.toLocaleString()}</div>
-              )}
             </div>
 
             <div className="car-actions">
@@ -222,7 +217,6 @@ function CarCard({
           </Link>
           <p className="text-[10px] text-gray-400 mb-2">REF #{car.ref_number}</p>
           <p className="text-base font-mono font-bold text-[#C8102E]">{fmtUSD(car.fob_price_usd)}</p>
-          {pkrPrice != null && <p className="text-[10px] font-mono text-gray-400 mb-3">PKR {pkrPrice.toLocaleString()}</p>}
           <div className="flex gap-1.5">
             <Link href={href} className="flex-1 text-center text-[10px] font-bold py-1.5 text-white rounded-sm" style={{ background: '#C8102E' }}>
               Inquire
@@ -307,7 +301,6 @@ function CarCard({
           <p className="text-[20px] font-mono font-bold leading-tight tracking-tight" style={{ color: '#C8102E' }}>
             {fmtUSD(car.fob_price_usd)}
           </p>
-          {pkrPrice != null && <p className="text-[11px] font-mono text-gray-500">≈ PKR {pkrPrice.toLocaleString()}</p>}
         </div>
 
         <div className="flex gap-2 pt-1">

@@ -596,7 +596,6 @@ function BodyTypeCarousel({ setActiveBody }: { setActiveBody: (v: string) => voi
 /* TOTAL PRICE CALCULATOR (Supabase-connected)                      */
 /* ─────────────────────────────────────────────────────────────── */
 function TotalPriceCalculator({ initialCountry }: { initialCountry?: string }) {
-  const { pkr: pkrRate } = useExchangeRate();
   const startCountry = initialCountry && COUNTRY_PORTS[canonicalCountry(initialCountry)]
     ? canonicalCountry(initialCountry)
     : 'Pakistan';
@@ -605,7 +604,7 @@ function TotalPriceCalculator({ initialCountry }: { initialCountry?: string }) {
   const [fob, setFob]               = useState('');
   const [inspection, setInspection] = useState('Yes');
   const [insurance, setInsurance]   = useState('Yes');
-  const [result, setResult]         = useState<{ usd: number; pkr: number } | null>(null);
+  const [result, setResult]         = useState<{ usd: number } | null>(null);
   const [noRate, setNoRate]         = useState(false);
   const [inputError, setInputError] = useState('');
   const [calcLoading, setCalcLoading] = useState(false);
@@ -643,7 +642,7 @@ function TotalPriceCalculator({ initialCountry }: { initialCountry?: string }) {
       withInspection: inspection === 'Yes',
       withInsurance:  insurance === 'Yes',
     });
-    if (cost) setResult({ usd: cost.total, pkr: Math.round(cost.total * pkrRate) });
+    if (cost) setResult({ usd: cost.total });
     else setNoRate(true);
     setCalcLoading(false);
   };
@@ -706,7 +705,6 @@ function TotalPriceCalculator({ initialCountry }: { initialCountry?: string }) {
             <div className="p-4 rounded-sm border border-white/10" style={{ background: 'rgba(255,255,255,0.05)' }}>
               <div className="text-[11px] text-white/50 uppercase tracking-wider mb-1">Estimated Total</div>
               <div className="text-2xl font-black" style={{ color: RED }}>${result.usd.toLocaleString(undefined, { maximumFractionDigits: 0 })}</div>
-              <div className="text-sm font-semibold mt-1" style={{ color: '#D4AF37' }}>PKR {result.pkr.toLocaleString()}</div>
               <p className="text-white/30 text-[10px] mt-2">* Estimate only. Customs duties and local taxes not included.</p>
             </div>
           )}
@@ -1802,7 +1800,7 @@ export default function CarsPage() {
             ) : cars.length > 0 ? (
                <div className="car-list">
                 {cars.map(car => (
-                  <CarCard key={car.id} car={car} variant="row" pkrRate={pkrRate}
+                  <CarCard key={car.id} car={car} variant="row"
                     primaryImage={resolvePrimaryImage(car.car_images)}
                     onOfferPrice={setOfferCar} />
                 ))}
