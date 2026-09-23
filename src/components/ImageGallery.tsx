@@ -290,6 +290,7 @@ export default function ImageGallery({ carId, refNumber, make, model, year, vari
           {/* View Fullscreen */}
           <button
             onClick={() => openLightbox(safeActive)}
+            aria-label="View fullscreen"
             className="absolute bottom-3 right-3 z-10 bg-black/60 hover:bg-black/85 text-white text-xs font-medium px-3 py-1.5 flex items-center gap-1.5 rounded-sm backdrop-blur-sm transition-all opacity-0 group-hover:opacity-100"
           >
             <Maximize2 size={12} /> View Fullscreen
