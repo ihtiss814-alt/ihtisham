@@ -12,6 +12,8 @@ import { useEffect, type ReactNode } from "react";
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 
+const GA_TRACKING_ID = "G-EZ1K4BLVG9";
+
 function NotFoundComponent() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
@@ -122,6 +124,49 @@ function RootShell({ children }: { children: ReactNode }) {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    const globalWindow = window as Window & {
+      dataLayer?: unknown[];
+      gtag?: (...args: unknown[]) => void;
+    };
+
+    if (!globalWindow.dataLayer) {
+      globalWindow.dataLayer = [];
+    }
+
+    if (!globalWindow.gtag) {
+      globalWindow.gtag = function gtag(...args: unknown[]) {
+        globalWindow.dataLayer?.push(args);
+      };
+    }
+
+    const existingScript = document.querySelector(
+      `script[src="https://www.googletagmanager.com/gtag/js?id=${GA_TRACKING_ID}"]`,
+    );
+
+    if (!existingScript) {
+      const script = document.createElement("script");
+      script.async = true;
+      script.src = `https://www.googletagmanager.com/gtag/js?id=${GA_TRACKING_ID}`;
+      document.head.appendChild(script);
+    }
+
+    const inlineScriptId = "google-analytics-inline";
+    if (!document.getElementById(inlineScriptId)) {
+      const inlineScript = document.createElement("script");
+      inlineScript.id = inlineScriptId;
+      inlineScript.textContent = `
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', '${GA_TRACKING_ID}');
+      `;
+      document.head.appendChild(inlineScript);
+    }
+  }, []);
 
   return (
     <QueryClientProvider client={queryClient}>
