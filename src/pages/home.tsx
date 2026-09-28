@@ -12,6 +12,7 @@ function WhatsAppIcon({ size = 16, className = '' }: { size?: number; className?
 }
 import { isSupabaseConfigured, supabase } from '@/lib/supabase';
 import CarCard, { Car } from '@/components/CarCard';
+import HowToBuy from '@/components/HowToBuy';
 import { TESTIMONIALS } from '@/lib/testimonials';
 import { DEST_COUNTRIES } from '@/lib/shipping';
 import { useMeta } from '@/lib/use-meta';
@@ -475,101 +476,9 @@ function CarSilhouette({ type, color: c }: { type: string; color: string }) {
   return null;
 }
 
-    function HowToBuySection() {
-      const steps = [
-        {
-          number: '01',
-          title: 'Browse and Select',
-          description: 'Explore our live stock and filter by make, model, year, body type, and budget to find the right Japanese used car for you.',
-          icon: Search,
-        },
-        {
-          number: '02',
-          title: 'Get Your Proforma Invoice',
-          description: 'Once you choose your car, we send a detailed proforma invoice with the vehicle price, shipping details, and bank information.',
-          icon: CheckCircle2,
-        },
-        {
-          number: '03',
-          title: 'Make Secure Payment',
-          description: 'Pay via official bank transfer to our Japan account. We only work with verified Wazir Trading banking details for your safety.',
-          icon: ShieldCheck,
-        },
-        {
-          number: '04',
-          title: 'Professional Shipping',
-          description: 'We arrange export, loading, and tracking from Japan so your vehicle is delivered smoothly to your destination port.',
-          icon: Ship,
-        },
-        {
-          number: '05',
-          title: 'Receive Your Car',
-          description: 'You receive the export documents and final clearance support, making the handover simple and stress-free.',
-          icon: Globe,
-        },
-      ];
-
-      return (
-        <section className="relative overflow-hidden bg-[#f6f7fb] py-16 md:py-20">
-          <div className="max-w-7xl mx-auto px-4 md:px-6">
-            <div className="mx-auto max-w-3xl text-center mb-10 md:mb-12">
-              <p className="text-[10px] tracking-[0.28em] uppercase font-bold text-[#C8102E] mb-3">
-                How It Works
-              </p>
-              <h2 className="text-3xl md:text-5xl font-serif font-bold text-[#0D1B3E] leading-tight">
-                How to Buy Japanese Cars
-              </h2>
-              <p className="mt-4 text-sm md:text-base text-gray-600 leading-relaxed">
-                From selecting your vehicle to delivery at your destination port, we keep the process simple, transparent and secure.
-              </p>
-            </div>
-
-            <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-5">
-              {steps.map(({ number, title, description, icon: Icon }) => (
-                <article
-                  key={title}
-                  className="group relative rounded-2xl border border-gray-200 bg-white p-5 shadow-[0_10px_30px_rgba(15,23,42,0.04)] transition-all duration-200 hover:-translate-y-1 hover:border-[#C8102E]/40 hover:shadow-[0_20px_35px_rgba(200,16,46,0.08)]"
-                >
-                  <div className="mb-5 flex items-center justify-between gap-3">
-                    <span className="text-3xl font-serif font-bold text-[#0D1B3E]">{number}</span>
-                    <span className="flex h-12 w-12 items-center justify-center rounded-xl bg-[#C8102E]/10 text-[#C8102E]">
-                      <Icon size={21} strokeWidth={2} />
-                    </span>
-                  </div>
-
-                  <div className="mb-3 text-[10px] font-bold tracking-[0.24em] text-[#C8102E] uppercase">
-                    Step {number}
-                  </div>
-                  <h3 className="text-xl font-bold text-[#0D1B3E] mb-3 leading-tight">{title}</h3>
-                  <p className="text-sm leading-relaxed text-gray-600">{description}</p>
-                </article>
-              ))}
-            </div>
-
-            <div className="mt-10 rounded-[20px] bg-[#0D1B3E] p-6 md:p-8 text-white shadow-[0_18px_45px_rgba(13,27,62,0.14)]">
-              <div className="flex flex-col gap-5 md:flex-row md:items-center md:justify-between">
-                <div>
-                  <p className="text-[10px] tracking-[0.24em] uppercase font-bold text-[#FFB2C0] mb-2">
-                    Ready to start?
-                  </p>
-                  <h3 className="text-2xl md:text-3xl font-serif font-bold leading-tight text-white">
-                    Find your next Japanese vehicle.
-                  </h3>
-                </div>
-
-                <Link
-                  href="/cars"
-                  className="inline-flex items-center justify-center gap-2 rounded-full bg-[#C8102E] px-6 py-3 text-[11px] font-bold tracking-[0.2em] uppercase text-white transition-colors duration-150 hover:bg-[#A50D25]"
-                >
-                  Browse cars
-                  <ArrowRight size={15} strokeWidth={2.5} />
-                </Link>
-              </div>
-            </div>
-          </div>
-        </section>
-      );
-    }
+function HowToBuySection() {
+  return <HowToBuy />;
+}
 
 function ShopByBodyTypeSection() {
   const [, navigate] = useLocation();
