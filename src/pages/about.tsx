@@ -104,6 +104,38 @@ export default function AboutPage() {
         </div>
       </section>
 
+      {/* CEO / Leadership */}
+      <section className="py-20 md:py-24">
+        <div className="container mx-auto px-4 md:px-8">
+          <div className="max-w-6xl mx-auto overflow-hidden border border-border shadow-xl" style={{ background: 'var(--brand-navy)' }}>
+            <div className="grid grid-cols-1 md:grid-cols-2 items-stretch">
+              <div className="flex flex-col justify-center p-8 sm:p-10 md:p-12 lg:p-14 text-white">
+                <p className="text-xs uppercase tracking-[0.25em] text-primary font-bold mb-4">Leadership</p>
+                <h2 className="text-3xl md:text-4xl font-serif font-bold leading-tight mb-3">Meet Our CEO</h2>
+                <div className="w-12 h-1 bg-primary mb-6" />
+                <h3 className="text-2xl font-semibold mb-1">Mr. Mumtaz Khan</h3>
+                <p className="text-sm uppercase tracking-[0.16em] text-white/65 font-semibold mb-6">Chief Executive Officer</p>
+                <p className="text-white/80 leading-relaxed">
+                  Wazir Trading LLC helps buyers navigate Japanese vehicle listings, understand export details, and explore shipping information. Mr. Mumtaz Khan leads the company as Chief Executive Officer.
+                </p>
+              </div>
+              <div className="relative min-h-[300px] sm:min-h-[380px] md:min-h-[440px] bg-black/10">
+                <img
+                  src="/images/mumtaz-khan-ceo.webp"
+                  alt="Mr. Mumtaz Khan, Chief Executive Officer of Wazir Trading LLC, seated in his office"
+                  className="absolute inset-0 w-full h-full object-cover object-center"
+                  width="1448"
+                  height="1086"
+                  loading="lazy"
+                  decoding="async"
+                  sizes="(min-width: 768px) 50vw, 100vw"
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Core Values */}
       <section className="py-24 bg-muted/30 border-y border-border">
         <div className="container mx-auto px-4 md:px-8">
