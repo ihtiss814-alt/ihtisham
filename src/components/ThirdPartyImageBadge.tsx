@@ -1,10 +1,12 @@
 import React from 'react';
 
-const WTL_THIRD_PARTY_START = 1;
-const WTL_THIRD_PARTY_END = 295;
+const WTL_THIRD_PARTY_RANGES = [
+  [1, 295],
+  [593, 749],
+] as const;
 
 /**
- * WTL-00001 through WTL-00295 use images sourced from third parties.
+ * These WTL reference ranges use images sourced from third parties.
  * Keep this check reference-based so new image rows do not need a separate
  * database migration or manual attribution flag.
  */
@@ -13,9 +15,10 @@ export function isThirdPartyListing(refNumber: string | null | undefined): boole
   if (!match) return false;
 
   const number = Number(match[1]);
-  return Number.isInteger(number)
-    && number >= WTL_THIRD_PARTY_START
-    && number <= WTL_THIRD_PARTY_END;
+  return (
+    Number.isInteger(number) &&
+    WTL_THIRD_PARTY_RANGES.some(([start, end]) => number >= start && number <= end)
+  );
 }
 
 export function ThirdPartyImageBadge({
