@@ -4,26 +4,26 @@ import { useMeta } from '@/lib/use-meta';
 import ShippingRouteCanvas from '@/components/ShippingRouteCanvas';
 import { useReveal } from '@/hooks/useReveal';
 
-const offices = [
+const operatingInformation = [
   {
-    name: 'Japan Headquarters',
+    name: 'Japan Business Base',
     location: 'Kuwana, Mie, Japan',
-    role: 'Sourcing & export operations',
+    role: 'Published company contact address',
   },
   {
-    name: 'Dubai Office',
-    location: 'Dubai, United Arab Emirates',
-    role: 'Regional client relations',
+    name: 'Vehicle Listing Records',
+    location: 'Reference and specifications shown on each vehicle page',
+    role: 'Review the record and confirm details before purchase',
   },
   {
-    name: 'Guyana Office',
-    location: 'Guyana',
-    role: 'Regional customer support',
+    name: 'Written Export Quotation',
+    location: 'Prepared for the specific vehicle and destination enquiry',
+    role: 'Price basis, included items, exclusions and payment milestones',
   },
   {
-    name: 'Peshawar Office',
-    location: 'Peshawar, Pakistan',
-    role: 'Local customer relations',
+    name: 'Shipping Coordination',
+    location: 'Method, route and port confirmed for each quotation',
+    role: 'Carrier schedule and document scope confirmed before booking',
   },
 ];
 
@@ -160,31 +160,31 @@ export default function AboutPage() {
             />
             <ValueCard 
               icon={<Globe />} 
-              title="Global Reach" 
+              title="Destination Enquiries" 
               desc="Ask about available RoRo or container options and the destination costs for a specific vehicle."
             />
             <ValueCard 
               icon={<Clock />} 
-              title="End-to-End Service" 
+              title="Export Coordination" 
               desc="Contact us for availability, shipping options, and the documents required for your destination."
             />
           </div>
         </div>
       </section>
 
-      {/* Global Offices */}
+      {/* Company operating information */}
       <section className="py-24">
         <div className="container mx-auto px-4 md:px-8">
           <div className="text-center mb-14">
-            <p className="text-xs uppercase tracking-[0.25em] text-primary font-bold mb-3">Our global presence</p>
-            <h2 className="text-3xl md:text-4xl font-serif font-bold mb-4">Four Offices. One Global Standard.</h2>
+            <p className="text-xs uppercase tracking-[0.25em] text-primary font-bold mb-3">Company information</p>
+            <h2 className="text-3xl md:text-4xl font-serif font-bold mb-4">Japan Base. Clear Transaction Details.</h2>
             <p className="text-muted-foreground max-w-2xl mx-auto leading-relaxed">
-              From our sourcing headquarters in Japan to our regional offices abroad, our teams keep every client close to the people and expertise behind their vehicle.
+              Our published business contact address is in Japan. Vehicle availability, sourcing options, payment milestones and shipping arrangements are confirmed in writing for each enquiry.
             </p>
           </div>
 
           <div className="max-w-6xl mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-10">
-            {offices.map((office, index) => (
+            {operatingInformation.map((office, index) => (
               <div
                 key={office.name}
                 className={`relative bg-card border p-6 md:p-7 shadow-sm transition-all hover:-translate-y-1 hover:shadow-md ${
@@ -193,7 +193,7 @@ export default function AboutPage() {
               >
                 {index === 0 && (
                   <span className="absolute top-4 right-4 text-[10px] uppercase tracking-widest text-primary font-bold">
-                    HQ
+                    BASE
                   </span>
                 )}
                 <div className="w-11 h-11 rounded-full bg-primary/10 text-primary flex items-center justify-center mb-6">
@@ -212,22 +212,22 @@ export default function AboutPage() {
           </div>
 
           <div className="max-w-4xl mx-auto bg-card border border-border p-8 md:p-12 shadow-sm text-center">
-            <h3 className="text-xl font-bold mb-1">Japan Headquarters</h3>
+            <h3 className="text-xl font-bold mb-1">Japan Business Address</h3>
             <p className="text-muted-foreground mb-1 text-sm">Heights Mizutani 1C, 158-1 Jizou, Kuwana-City, Mie-Pref, Japan</p>
             <p className="text-xs text-muted-foreground/60 mb-8">Visits by appointment only</p>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-sm">
               <div>
-                <div className="uppercase tracking-widest text-xs text-primary font-bold mb-2">Global Sales</div>
-                <p className="text-muted-foreground">Operating worldwide with specialized divisions for Africa, Oceania, and the Caribbean.</p>
+                <div className="uppercase tracking-widest text-xs text-primary font-bold mb-2">Buyer Enquiries</div>
+                <p className="text-muted-foreground">Tell us the vehicle and destination you have in mind. We will confirm what can be offered before you commit.</p>
               </div>
               <div>
-                <div className="uppercase tracking-widest text-xs text-primary font-bold mb-2">Auction Operations</div>
-                <p className="text-muted-foreground">Direct bidding access to major auction houses across Japan, including USS, TAA, CAA and JAA.</p>
+                <div className="uppercase tracking-widest text-xs text-primary font-bold mb-2">Vehicle Sourcing</div>
+                <p className="text-muted-foreground">For a vehicle not shown in current stock, send your requirements. Any sourcing route, availability, fees and timing must be confirmed in a written quotation.</p>
               </div>
               <div>
-                <div className="uppercase tracking-widest text-xs text-primary font-bold mb-2">Logistics</div>
-                <p className="text-muted-foreground">Strategic partnerships with major shipping lines from Yokohama, Nagoya, and Kobe ports.</p>
+                <div className="uppercase tracking-widest text-xs text-primary font-bold mb-2">Shipping Details</div>
+                <p className="text-muted-foreground">The proposed method, departure and destination ports, carrier schedule, freight and included documents are identified for each confirmed shipment.</p>
               </div>
             </div>
           </div>

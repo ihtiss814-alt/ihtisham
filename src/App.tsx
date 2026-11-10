@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { Toaster } from '@/components/ui/toaster';
 import { TooltipProvider } from '@/components/ui/tooltip';
-import { Route, Switch, Router as WouterRouter, useLocation } from 'wouter';
+import { Route, Switch, Router as WouterRouter, useLocation, useRoute } from 'wouter';
 
 // Components always needed — load eagerly
 import Navbar from '@/components/Navbar';
@@ -20,8 +20,18 @@ import ShippingInformationPage from '@/pages/shipping-information';
 import ContactPage from '@/pages/contact';
 import FaqsPage from '@/pages/faqs';
 import PaymentInformationPage from '@/pages/payment-information';
+import BuyerInformationPage from '@/pages/buyer-information';
+import TermsAndConditionsPage from '@/pages/terms-and-conditions';
+import PrivacyPolicyPage from '@/pages/privacy-policy';
 import NotFound from '@/pages/not-found';
 import AdminBulkUpload from '@/pages/admin/bulk-upload';
+import { CountryDirectoryPage, CountryLandingPageRoute } from '@/pages/country-landing-pages';
+import {
+  VehicleBodyTypeLandingRoute,
+  VehicleLandingDirectoryPage,
+  VehicleMakeLandingRoute,
+  VehicleModelLandingRoute,
+} from '@/pages/vehicle-landing-pages';
 
 function ScrollToTop() {
   const [location] = useLocation();
@@ -90,12 +100,42 @@ class AppErrorBoundary extends React.Component<
   }
 }
 
+function CountrySlugRoute() {
+  const [match, params] = useRoute('/import-japanese-cars/:slug');
+  if (!match || !params?.slug) return <NotFound />;
+  return <CountryLandingPageRoute slug={params.slug} />;
+}
+
+function VehicleMakePathRoute() {
+  const [match, params] = useRoute('/used-japanese-cars/:makeSlug');
+  if (!match || !params?.makeSlug) return <NotFound />;
+  return <VehicleMakeLandingRoute slug={params.makeSlug} />;
+}
+
+function VehicleModelPathRoute() {
+  const [match, params] = useRoute('/used-japanese-cars/:makeSlug/:modelSlug');
+  if (!match || !params?.makeSlug || !params?.modelSlug) return <NotFound />;
+  return <VehicleModelLandingRoute makeSlug={params.makeSlug} modelSlug={params.modelSlug} />;
+}
+
+function VehicleBodyTypePathRoute() {
+  const [match, params] = useRoute('/used-japanese-cars/body-type/:bodySlug');
+  if (!match || !params?.bodySlug) return <NotFound />;
+  return <VehicleBodyTypeLandingRoute slug={params.bodySlug} />;
+}
+
 function Router() {
   return (
     <Switch>
         <Route path="/" component={HomePage} />
         <Route path="/cars" component={CarsPage} />
         <Route path="/cars/:ref" component={CarDetailPage} />
+        <Route path="/import-japanese-cars" component={CountryDirectoryPage} />
+        <Route path="/import-japanese-cars/:slug" component={CountrySlugRoute} />
+        <Route path="/used-japanese-cars" component={VehicleLandingDirectoryPage} />
+        <Route path="/used-japanese-cars/body-type/:bodySlug" component={VehicleBodyTypePathRoute} />
+        <Route path="/used-japanese-cars/:makeSlug/:modelSlug" component={VehicleModelPathRoute} />
+        <Route path="/used-japanese-cars/:makeSlug" component={VehicleMakePathRoute} />
         <Route path="/about" component={AboutPage} />
         <Route path="/how-it-works" component={HowItWorksPage} />
         <Route path="/auto-parts" component={AutoPartsPage} />
@@ -103,6 +143,9 @@ function Router() {
         <Route path="/contact" component={ContactPage} />
         <Route path="/faqs" component={FaqsPage} />
         <Route path="/payment-information" component={PaymentInformationPage} />
+        <Route path="/buyer-information" component={BuyerInformationPage} />
+        <Route path="/terms-and-conditions" component={TermsAndConditionsPage} />
+        <Route path="/privacy-policy" component={PrivacyPolicyPage} />
         <Route path="/admin/bulk-upload" component={AdminBulkUpload} />
         <Route component={NotFound} />
     </Switch>

@@ -110,7 +110,7 @@ export default function ContactPage() {
 
               <div className="bg-secondary text-white p-8 border border-secondary-border">
                 <h3 className="font-serif font-bold text-xl mb-4">Instant Assistance</h3>
-                <p className="text-white/70 text-sm mb-6">Our global sales team is available on WhatsApp to provide fast quotes and stock availability.</p>
+                <p className="text-white/70 text-sm mb-6">Use WhatsApp for direct enquiries about vehicle records, written quotations and destination-specific shipping questions.</p>
                 <a 
                   href={`https://wa.me/${waNumber}`}
                   target="_blank" 
@@ -133,7 +133,7 @@ export default function ContactPage() {
                   </div>
                   <h3 className="text-xl font-bold mb-2">Message Received</h3>
                   <p className="text-muted-foreground mb-3">
-                    Our team will review your inquiry and reply within a few hours — primarily on WhatsApp for the fastest response.
+                    Your enquiry has been received by the website. Our team will review the information and use the contact details you supplied to respond. Response times can vary.
                   </p>
                   <p className="text-xs text-muted-foreground/60">
                     You can also reach us at<br />
@@ -211,6 +211,9 @@ export default function ContactPage() {
                       className="w-full border border-border bg-background p-3 focus:border-primary outline-none resize-none transition-colors"
                     />
                   </div>
+                  <p className="text-xs text-muted-foreground leading-relaxed">
+                    By sending this form, you agree that Wazir Trading LLC may use the information you provide to review and respond to your enquiry. See our <a href="/privacy-policy" className="text-primary underline underline-offset-2">Privacy Policy</a>.
+                  </p>
                   <button
                     type="submit"
                     disabled={status === 'submitting'}
@@ -220,7 +223,7 @@ export default function ContactPage() {
                   </button>
                   {status === 'error' && (
                     <p className="text-destructive text-sm text-center">
-                      Failed to send. Please try WhatsApp instead — we're always available there.
+                      We could not submit your enquiry. You can try WhatsApp or email using the contact details shown on this page.
                     </p>
                   )}
                 </form>

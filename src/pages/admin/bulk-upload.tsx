@@ -1691,7 +1691,7 @@ function ReviewDashboardTab() {
   );
 
   const toggleSelect = (id: string) =>
-    setSelected(s => { const ns = new Set(s); ns.has(id) ? ns.delete(id) : ns.add(id); return ns; });
+    setSelected(s => { const ns = new Set(s); if (ns.has(id)) { ns.delete(id); } else { ns.add(id); } return ns; });
 
   const selectAll = () =>
     setSelected(selected.size === filtered.length ? new Set() : new Set(filtered.map(c => c.id)));

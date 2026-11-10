@@ -64,6 +64,8 @@ function WhatsAppIcon({ size = 20 }: { size?: number }) {
 
 const QUICK_LINKS = [
   { label: 'Browse Inventory', href: '/cars' },
+  { label: 'Import by Country', href: '/import-japanese-cars' },
+  { label: 'Cars by Make & Model', href: '/used-japanese-cars' },
   { label: 'How It Works', href: '/how-it-works' },
   { label: 'About Us', href: '/about' },
   { label: 'Contact Us', href: '/contact' },
@@ -71,15 +73,18 @@ const QUICK_LINKS = [
 
 const HELP_LINKS = [
   { label: 'FAQs', href: '/faqs' },
+  { label: 'Buyer Information', href: '/buyer-information' },
   { label: 'Payment Information', href: '/payment-information' },
   { label: 'Shipping Information', href: '/shipping-information' },
+  { label: 'Terms & Conditions', href: '/terms-and-conditions' },
+  { label: 'Privacy Policy', href: '/privacy-policy' },
 ];
 
 const TRUST_BADGES = [
-  'Direct Japan Auctions',
-  'Grade-Certified Stock',
-  'Secure Bank Transfer',
-  'Global Shipping',
+  'Vehicle reference records',
+  'Specifications shown per listing',
+  'Payment details to verify',
+  'Shipping terms by written quote',
 ];
 
 /* ─────────────────────────────────────────────────────────────────────── */

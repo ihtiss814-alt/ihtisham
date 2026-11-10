@@ -1,4 +1,20 @@
 import { isSupabaseConfigured, supabase } from './supabase';
+import { buildFaqStructuredData } from '../pages/faqs';
+import {
+  VEHICLE_LANDING_CAR_LIMIT,
+  VEHICLE_LANDING_DIRECTORY_PATH,
+  getVehicleLandingPage,
+  vehicleLandingDirectoryStructuredData,
+  vehicleLandingStructuredData,
+  type VehicleLandingPage,
+} from './vehicle-landing-pages';
+import {
+  countryDirectoryStructuredData,
+  countryPageStructuredData,
+  countryLandingPath,
+  getCountryLandingPage,
+  type CountryLandingPage,
+} from './country-landing-pages';
 import {
   SITE_URL,
   isIndexableVehicle,
@@ -20,6 +36,10 @@ const PAGE_META: Record<string, { title: string; description: string }> = {
   '/': {
     title: DEFAULT_TITLE,
     description: 'Browse current Japanese used vehicle listings, review specifications and photos, and request export and shipping information from Wazir Trading LLC.',
+  },
+  '/import-japanese-cars': {
+    title: 'Import Japanese Used Cars by Country | Wazir Trading LLC',
+    description: 'Explore country-specific planning guides for importing Japanese used vehicles, with official customs resources and buyer checklists for 40 destinations.',
   },
   '/cars': {
     title: 'Browse Japanese Used Cars for Export | Wazir Trading LLC',
@@ -53,6 +73,18 @@ const PAGE_META: Record<string, { title: string; description: string }> = {
     title: 'Payment Information — Bank Transfer Details | Wazir Trading',
     description: 'Review payment steps and bank transfer information for Japanese used vehicle purchases through Wazir Trading LLC.',
   },
+  '/buyer-information': {
+    title: 'Buyer Information & Vehicle Purchase Checklist | Wazir Trading LLC',
+    description: 'A practical checklist for reviewing Japanese used vehicle listings, export quotations, payment instructions, shipping scope and destination import requirements.',
+  },
+  '/terms-and-conditions': {
+    title: 'Website Terms & Vehicle Purchase Conditions | Wazir Trading LLC',
+    description: 'General website use and Japanese used vehicle purchase information, including listing accuracy, quotations, payment, shipping and import responsibilities.',
+  },
+  '/privacy-policy': {
+    title: 'Privacy Policy | Wazir Trading LLC',
+    description: 'Learn what information Wazir Trading LLC receives through website enquiries, how it is used to respond, and how to contact the business about privacy requests.',
+  },
 };
 
 export interface SeoBootstrapData {
@@ -64,6 +96,7 @@ export interface SeoBootstrapData {
   robots: string;
   ogType: string;
   ogImage: string;
+  ogImageAlt: string;
   structuredData: Record<string, unknown>[];
   vehicle?: (VehicleSeoCar & Record<string, unknown>) | null;
   vehicleRef?: string;
@@ -76,6 +109,12 @@ export interface SeoBootstrapData {
   stockCount?: number;
   stockCountResolved?: boolean;
   notFound?: boolean;
+  country?: CountryLandingPage;
+  vehicleLandingPage?: VehicleLandingPage;
+  vehicleLandingCars?: Record<string, unknown>[];
+  vehicleLandingAvailableCount?: number;
+  vehicleLandingQualifiedCount?: number;
+  vehicleLandingResolved?: boolean;
 }
 
 function normalizeSearch(value: string): string {
@@ -97,6 +136,7 @@ function basePayload(pathname: string, search: string, title: string, descriptio
     robots: 'index, follow, max-image-preview:large, max-snippet:-1',
     ogType: 'website',
     ogImage: SOCIAL_IMAGE,
+    ogImageAlt: 'Wazir Trading LLC — Japanese used vehicles for export',
     structuredData: [],
   };
 }
@@ -121,13 +161,121 @@ export async function loadSeoBootstrap(
   const search = normalizeSearch(searchValue);
   const params = new URLSearchParams(search);
 
+  if (pathname === '/import-japanese-cars') {
+    const payload = basePayload(pathname, search, PAGE_META[pathname].title, PAGE_META[pathname].description);
+    if (params.toString()) payload.robots = 'noindex, follow';
+    payload.structuredData = [countryDirectoryStructuredData()];
+    return payload;
+  }
+
+  if (pathname === VEHICLE_LANDING_DIRECTORY_PATH) {
+    const payload = basePayload(
+      pathname,
+      search,
+      'Japanese Used Cars by Make, Model & Body Type | Wazir Trading',
+      'Browse Japanese used vehicle guides by manufacturer, model and body type. Compare specifications and view matching available inventory from Japan.',
+    );
+    if (params.toString()) payload.robots = 'noindex, follow';
+    payload.structuredData = [vehicleLandingDirectoryStructuredData()];
+    return payload;
+  }
+
+  const vehicleLandingPage = getVehicleLandingPage(pathname);
+  if (vehicleLandingPage) {
+    const payload = basePayload(pathname, search, vehicleLandingPage.title, vehicleLandingPage.description);
+    payload.vehicleLandingPage = vehicleLandingPage;
+    payload.canonical = `${SITE_URL}${vehicleLandingPage.path}`;
+
+    if (params.toString() || !isSupabaseConfigured) {
+      payload.robots = 'noindex, follow';
+      return payload;
+    }
+
+    try {
+      let query = supabase
+        .from('cars')
+        .select(INVENTORY_SELECT, { count: 'exact' })
+        .eq('status', 'available');
+      if (vehicleLandingPage.make) query = query.ilike('make', vehicleLandingPage.make);
+      if (vehicleLandingPage.model) query = query.ilike('model', vehicleLandingPage.model);
+      if (vehicleLandingPage.bodyType) query = query.ilike('body_type', vehicleLandingPage.bodyType);
+
+      const { data, count, error } = await query
+        .order('created_at', { ascending: false })
+        .range(0, VEHICLE_LANDING_CAR_LIMIT - 1);
+      if (error) {
+        payload.robots = 'noindex, follow';
+        console.warn(`SEO bootstrap could not load ${vehicleLandingPage.path} inventory:`, error.message);
+        return payload;
+      }
+
+      const qualityCars = ((data ?? []) as unknown as VehicleSeoCar[]).filter(isIndexableVehicle);
+      payload.vehicleLandingCars = qualityCars.slice(0, 8) as unknown as Record<string, unknown>[];
+      payload.vehicleLandingAvailableCount = count ?? data?.length ?? 0;
+      payload.vehicleLandingQualifiedCount = qualityCars.length;
+      payload.vehicleLandingResolved = true;
+
+      if (qualityCars.length < 3) {
+        payload.robots = 'noindex, follow';
+      } else {
+        payload.structuredData = vehicleLandingStructuredData(vehicleLandingPage, qualityCars);
+        const firstImage = validImageUrls(qualityCars[0])[0];
+        if (firstImage) {
+          payload.ogImage = firstImage;
+          payload.ogImageAlt = `${vehicleLandingPage.label} vehicle from Japan`;
+        }
+      }
+    } catch (error) {
+      payload.robots = 'noindex, follow';
+      console.warn(`SEO bootstrap could not load ${vehicleLandingPage.path} inventory:`, error);
+    }
+    return payload;
+  }
+
+  // Unknown paths inside the vehicle-guide namespace must be true 404s, not
+  // soft-200 pages with the site's default title and indexable robots state.
+  if (pathname.startsWith(`${VEHICLE_LANDING_DIRECTORY_PATH}/`)) {
+    const missing = basePayload(pathname, search, 'Page Not Found | Wazir Trading LLC', 'The requested vehicle guide could not be found.');
+    missing.robots = 'noindex, follow';
+    missing.notFound = true;
+    return missing;
+  }
+
+  const countryMatch = pathname.match(/^\/import-japanese-cars\/([^/]+)$/);
+  if (countryMatch) {
+    let slug = countryMatch[1];
+    try { slug = decodeURIComponent(slug); } catch {
+      const invalid = basePayload(pathname, search, 'Page Not Found | Wazir Trading LLC', 'The requested destination guide could not be found.');
+      invalid.robots = 'noindex, follow';
+      invalid.notFound = true;
+      return invalid;
+    }
+    const country = getCountryLandingPage(slug);
+    if (!country) {
+      const missing = basePayload(pathname, search, 'Page Not Found | Wazir Trading LLC', 'The requested destination guide could not be found.');
+      missing.robots = 'noindex, follow';
+      missing.notFound = true;
+      return missing;
+    }
+    const payload = basePayload(pathname, search, country.title, country.description);
+    payload.country = country;
+    payload.canonical = `${SITE_URL}${countryLandingPath(country)}`;
+    if (!country.indexable || params.toString()) payload.robots = 'noindex, follow';
+    payload.structuredData = countryPageStructuredData(country);
+    return payload;
+  }
+
   if (pathname === '/cars') {
     const payload = basePayload(pathname, search, PAGE_META['/cars'].title, PAGE_META['/cars'].description);
     if (params.toString().length > 0) {
       payload.robots = 'noindex, follow';
       return payload;
     }
-    if (!isSupabaseConfigured) return payload;
+    if (!isSupabaseConfigured) {
+      // Do not index an inventory route that cannot render its stock data.
+      payload.robots = 'noindex, follow';
+      return payload;
+    }
 
     try {
       const { data, count, error } = await supabase
@@ -136,12 +284,22 @@ export async function loadSeoBootstrap(
         .eq('status', 'available')
         .order('created_at', { ascending: false })
         .range(0, 19);
-      if (!error) {
+      if (error) {
+        payload.robots = 'noindex, follow';
+        console.warn('SEO bootstrap could not load the first inventory page:', error.message);
+      } else {
         payload.inventoryCars = (data ?? []) as unknown as Record<string, unknown>[];
-        payload.inventoryCount = count ?? 0;
+        payload.inventoryCount = count ?? data?.length ?? 0;
         payload.inventoryResolved = true;
+        const hasIndexableInventory = (data ?? []).some((car) =>
+          isIndexableVehicle(car as unknown as VehicleSeoCar),
+        );
+        if (payload.inventoryCount === 0 || !hasIndexableInventory) {
+          payload.robots = 'noindex, follow';
+        }
       }
     } catch (error) {
+      payload.robots = 'noindex, follow';
       console.warn('SEO bootstrap could not load the first inventory page:', error);
     }
     return payload;
@@ -156,6 +314,7 @@ export async function loadSeoBootstrap(
         supabase
           .from('cars')
           .select(FEATURED_SELECT)
+          .eq('status', 'available')
           .eq('is_new_arrival', true)
           .order('created_at', { ascending: false })
           .limit(50),
@@ -229,6 +388,7 @@ export async function loadSeoBootstrap(
       payload.description = vehicleDescription(vehicle);
       payload.ogType = 'product';
       payload.ogImage = validImageUrls(vehicle)[0] ?? SOCIAL_IMAGE;
+      payload.ogImageAlt = `${vehicleTitle(vehicle)} — vehicle photograph`;
       payload.robots = isIndexableVehicle(vehicle)
         ? 'index, follow, max-image-preview:large, max-snippet:-1'
         : 'noindex, follow';
@@ -262,7 +422,9 @@ export async function loadSeoBootstrap(
     return payload;
   }
 
-  return basePayload(pathname, search, page.title, page.description);
+  const payload = basePayload(pathname, search, page.title, page.description);
+  if (pathname === '/faqs') payload.structuredData = [buildFaqStructuredData()];
+  return payload;
 }
 
 function safeJsonLd(value: Record<string, unknown>): string {
@@ -288,15 +450,19 @@ export function buildSeoHead(data: SeoBootstrapData | undefined) {
     { title: payload.title },
     { name: 'description', content: payload.description },
     { name: 'robots', content: payload.robots },
+    { property: 'og:site_name', content: 'Wazir Trading LLC' },
+    { property: 'og:locale', content: 'en_US' },
     { property: 'og:title', content: payload.title },
     { property: 'og:description', content: payload.description },
     { property: 'og:type', content: payload.ogType },
     { property: 'og:url', content: payload.canonical },
     { property: 'og:image', content: payload.ogImage },
+    { property: 'og:image:alt', content: payload.ogImageAlt },
     { name: 'twitter:card', content: 'summary_large_image' },
     { name: 'twitter:title', content: payload.title },
     { name: 'twitter:description', content: payload.description },
     { name: 'twitter:image', content: payload.ogImage },
+    { name: 'twitter:image:alt', content: payload.ogImageAlt },
   ];
   const links = [{ rel: 'canonical', href: payload.canonical }];
   const scripts = payload.structuredData.map((item) => ({
@@ -309,16 +475,39 @@ export function buildSeoHead(data: SeoBootstrapData | undefined) {
 export const ORGANIZATION_STRUCTURED_DATA: Record<string, unknown> = {
   '@context': 'https://schema.org',
   '@type': 'Organization',
+  '@id': `${SITE_URL}/#organization`,
   name: 'Wazir Trading LLC',
   url: SITE_URL,
-  logo: `${SITE_URL}/logo.webp`,
+  logo: {
+    '@type': 'ImageObject',
+    url: `${SITE_URL}/logo.webp`,
+  },
+  email: 'wazirtrading-pc@outlook.jp',
+  telephone: '+818089227375',
+  address: {
+    '@type': 'PostalAddress',
+    streetAddress: 'Heights Mizutani 1C, 158-1 Jizou',
+    addressLocality: 'Kuwana-City',
+    addressRegion: 'Mie-Prefecture',
+    addressCountry: 'JP',
+  },
+  contactPoint: [{
+    '@type': 'ContactPoint',
+    contactType: 'customer service',
+    telephone: '+818089227375',
+    email: 'wazirtrading-pc@outlook.jp',
+    availableLanguage: ['English'],
+  }],
+  sameAs: ['https://www.instagram.com/wazirtradingllc/'],
 };
 
 export const WEBSITE_STRUCTURED_DATA: Record<string, unknown> = {
   '@context': 'https://schema.org',
   '@type': 'WebSite',
+  '@id': `${SITE_URL}/#website`,
   name: 'Wazir Trading LLC',
   url: SITE_URL,
+  publisher: { '@id': `${SITE_URL}/#organization` },
   potentialAction: {
     '@type': 'SearchAction',
     target: `${SITE_URL}/cars?q={search_term_string}`,

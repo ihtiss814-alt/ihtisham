@@ -166,7 +166,12 @@ export default function CarDetailPage() {
   const ref = params.ref as string;
   const bootstrap = useSeoBootstrap();
   const hasServerVehicle = bootstrap?.vehicleResolved === true && bootstrap.vehicleRef === ref;
-  const initialVehicle = hasServerVehicle ? bootstrap?.vehicle as ExtendedCar : null;
+  // The SEO bootstrap intentionally exposes only the fields needed for SEO.
+  // This route's full vehicle query selects `*`, including the database `id`
+  // and the additional fields required by the detail-page UI.
+  const initialVehicle = hasServerVehicle
+    ? (bootstrap?.vehicle as unknown as ExtendedCar)
+    : null;
 
   // core data
   const [car, setCar] = useState<ExtendedCar | null>(initialVehicle);
@@ -431,10 +436,12 @@ export default function CarDetailPage() {
   const isAvailable = isAvailableVehicle(car);
   const isSold = isSoldVehicle(car);
   const waOfferMsg = encodeURIComponent(
-    `Hi, I would like to make an offer for ${car.make} ${car.model} ${car.year}\nReference: ${car.ref_number}\nPlease let me know your best price.`
+    `Hi Wazir Trading, please confirm the current availability and written price basis for ${car.make} ${car.model} ${car.year} (Ref: ${car.ref_number}).`
   );
   const waDetailMsg = encodeURIComponent(
-    `Hi Wazir Trading, I am interested in ${car.make} ${car.model} ${car.year} (Ref: ${car.ref_number}). Is it still available?`
+    isAvailable
+      ? `Hi Wazir Trading, please confirm current availability and the written quotation details for ${car.make} ${car.model} ${car.year} (Ref: ${car.ref_number}).`
+      : `Hi Wazir Trading, this ${car.make} ${car.model} ${car.year} listing (Ref: ${car.ref_number}) is not currently shown as available. Can you advise whether a similar vehicle is available?`
   );
   const waLink = `https://wa.me/${WA_NUMBER}?text=${waDetailMsg}`;
 
@@ -507,7 +514,7 @@ export default function CarDetailPage() {
 
               <div className="car-detail-meta-row">
                 <span><MapPin size={14} /> Stocked in {car.stock_location || 'Japan'}</span>
-                <span><BadgeCheck size={14} /> {isSold ? 'Historical vehicle record' : 'Export-ready vehicle'}</span>
+                <span><BadgeCheck size={14} /> {isSold ? 'Historical vehicle record' : 'Listing status — confirm before purchase'}</span>
               </div>
 
               {/* Quick spec chips */}
@@ -554,8 +561,8 @@ export default function CarDetailPage() {
             <div className="car-detail-mobile-price lg:hidden rounded-sm overflow-hidden shadow-lg" style={{ background: NAVY }}>
               <div className="px-4 pt-4 pb-3"><div className="flex items-end justify-between mb-3">
                   <div>
-                    <p className="text-[10px] font-bold tracking-widest text-white/40 uppercase mb-1">Vehicle Price · FOB Japan</p>
-                    <div className="text-3xl font-mono font-bold text-[#C8102E]">{convertPrice(car.fob_price_usd ?? 0)}</div>
+                    <p className="text-[10px] font-bold tracking-widest text-white/40 uppercase mb-1">{isAvailable && Number(car.fob_price_usd) > 0 ? 'Vehicle Price · FOB Japan' : 'Listing status'}</p>
+                    <div className="text-xl md:text-3xl font-mono font-bold text-[#C8102E]">{isAvailable && Number(car.fob_price_usd) > 0 ? convertPrice(car.fob_price_usd) : isSold ? 'Historical listing' : 'Price on request'}</div>
                   </div>
                   <div className="text-right">
                   </div>
@@ -569,7 +576,7 @@ export default function CarDetailPage() {
                       className="flex items-center justify-center gap-1.5 py-2.5 font-bold text-xs text-white rounded-sm transition-all hover:opacity-90"
                       style={{ background: '#25D366' }}
                     >
-                      Make an offer
+                      Request price confirmation
                     </a>
                   ) : (
                     <span className="flex items-center justify-center gap-1.5 py-2.5 font-bold text-xs text-white/70 rounded-sm bg-white/10">
@@ -577,11 +584,11 @@ export default function CarDetailPage() {
                     </span>
                   )}
                   <a
-                    href="#inquiry-section"
+                    href={isAvailable ? '#inquiry-section' : `/cars?make=${encodeURIComponent(car.make)}`}
                     className="flex items-center justify-center gap-1.5 py-2.5 font-bold text-xs text-white rounded-sm transition-all hover:opacity-90"
                     style={{ background: RED }}
                   >
-                    <Send size={13} /> Send Inquiry
+                    <Send size={13} /> {isAvailable ? 'Send Inquiry' : 'Browse Similar Cars'}
                   </a>
                 </div>
               </div>
@@ -607,7 +614,7 @@ export default function CarDetailPage() {
                   <span className="car-detail-section-icon"><Images size={17} /></span>
                   <div>
                     <h2>Vehicle photography</h2>
-                    <p>Detailed images from our Japan stock inspection</p>
+                    <p>Photographs supplied with this vehicle listing; ask about any additional records available</p>
                   </div>
                 </div>
                 <span className="car-detail-gallery-ref">REF {car.ref_number}</span>
@@ -704,7 +711,7 @@ export default function CarDetailPage() {
             </div>
 
             {/* ── Section 5: Related Vehicles ── */}
-            {isIndexableVehicle(car) && similarCars.length > 0 && (
+            {similarCars.length > 0 && (
               <div className="car-detail-content-card bg-white border border-gray-200 rounded-sm shadow-sm overflow-hidden">
                 <div className="px-6 py-4 border-b border-gray-100">
                   <div className="flex items-center justify-between gap-3">
@@ -730,9 +737,9 @@ export default function CarDetailPage() {
             <div className="car-detail-assurance bg-white border border-gray-200 rounded-sm shadow-sm">
               <div className="grid grid-cols-3 divide-x divide-gray-100">
                 {[
-                  { label: 'Transparent FOB pricing' },
-                  { label: 'Auction-graded condition' },
-                  { label: 'Worldwide shipping' },
+                  { label: 'Price basis shown where listed' },
+                  { label: 'Condition records where provided' },
+                  { label: 'Destination options by confirmation' },
                 ].map((item, i) => (
                   <div key={i} className="flex flex-col items-center justify-center py-6 px-4 text-center gap-2">
                     <ShieldCheck size={20} className="text-[#C8102E]" />
@@ -750,15 +757,19 @@ export default function CarDetailPage() {
               {/* ── Price Card ── */}
               <div className="car-detail-price-card rounded-sm overflow-hidden shadow-lg" style={{ background: NAVY }}>
                 <div className="px-6 pt-6 pb-4">
-                  <p className="text-xs font-bold tracking-widest text-white/50 uppercase mb-3">Vehicle Price</p>
+                  <p className="text-xs font-bold tracking-widest text-white/50 uppercase mb-3">{isAvailable && Number(car.fob_price_usd) > 0 ? 'Vehicle Price' : 'Listing status'}</p>
 
-                  <div className="text-4xl font-mono font-bold text-[#C8102E] mb-1">
-                    {convertPrice(car.fob_price_usd)}
-                  </div>
-                  <p className="text-xs text-white/40 mb-5">FOB Price · Japan</p>
+                  {isAvailable && Number(car.fob_price_usd) > 0 ? (
+                    <>
+                      <div className="text-4xl font-mono font-bold text-[#C8102E] mb-1">{convertPrice(car.fob_price_usd)}</div>
+                      <p className="text-xs text-white/40 mb-5">FOB Price · Japan — confirm in the current written quotation</p>
+                    </>
+                  ) : (
+                    <p className="text-lg font-semibold text-white mb-5">{isSold ? 'Historical listing — no current offer' : 'Price available on request'}</p>
+                  )}
 
                   {/* Offer button */}
-                  {isAvailable && (
+                  {isAvailable ? (
                     <a
                       href={`https://wa.me/${WA_NUMBER}?text=${waOfferMsg}`}
                       target="_blank"
@@ -766,8 +777,12 @@ export default function CarDetailPage() {
                       className="w-full flex items-center justify-center gap-2 py-3 font-bold text-sm text-white rounded-sm transition-all hover:opacity-90"
                       style={{ background: '#25D366' }}
                     >
-                      Make an offer
+                      Request price confirmation
                     </a>
+                  ) : (
+                    <Link href={`/cars?make=${encodeURIComponent(car.make)}`} className="w-full flex items-center justify-center gap-2 py-3 font-bold text-sm text-white rounded-sm" style={{ background: RED }}>
+                      Browse similar vehicles
+                    </Link>
                   )}
                 </div>
 
@@ -787,14 +802,15 @@ export default function CarDetailPage() {
                 </div>
               </div>
 
-              {/* ── Total Price Calculator ── */}
+              {/* ── Export estimate: only shown for a currently available listing with a recorded FOB price ── */}
+              {isAvailable && Number(car.fob_price_usd) > 0 && (
               <div className="car-detail-calculator rounded-sm overflow-hidden shadow-lg" style={{ background: NAVY }}>
                 <div className="px-6 py-4 border-b border-white/10">
                   <div className="flex items-start gap-3">
                     <span className="car-detail-aside-icon"><Calculator size={16} /></span>
                     <div>
-                      <h3 className="text-base font-serif font-bold text-white">Build your landed cost</h3>
-                      <p className="text-xs text-white/45 mt-0.5">See an estimate for your destination</p>
+                      <h3 className="text-base font-serif font-bold text-white">Estimate export costs</h3>
+                      <p className="text-xs text-white/45 mt-0.5">An indicative export subtotal, not a delivered-price offer</p>
                     </div>
                   </div>
                 </div>
@@ -912,7 +928,7 @@ export default function CarDetailPage() {
                     ) : calcTotalVal !== null ? (
                       <div>
                         <div className="text-2xl font-mono font-bold text-[#C8102E]">
-                          TOTAL PRICE {fmt(calcTotalVal)}
+                          ESTIMATED EXPORT SUBTOTAL {fmt(calcTotalVal)}
                         </div>
                         <div className="mt-2 space-y-1">
                           <div className="flex justify-between text-xs text-white/50">
@@ -934,6 +950,7 @@ export default function CarDetailPage() {
                             </div>
                           )}
                         </div>
+                        <p className="text-[10px] text-white/40 leading-relaxed mt-3">Illustrative estimate only. Import duties, taxes, customs clearance, destination terminal charges, registration and inland delivery are excluded unless the current written quotation expressly includes them.</p>
                       </div>
                     ) : (
                       <div>
@@ -953,12 +970,13 @@ export default function CarDetailPage() {
                   </div>
                 </div>
               </div>
+              )}
 
               {/* ── Inquiry Form ── */}
               <div id="inquiry-section" className="car-detail-inquiry bg-white border border-gray-200 rounded-sm shadow-sm overflow-hidden">
                 <div className="px-6 py-4 border-b border-gray-100" style={{ background: NAVY }}>
-                  <h3 className="text-base font-serif font-bold text-white">Talk to a car export specialist</h3>
-                  <p className="text-xs text-white/50 mt-0.5">We'll reply on WhatsApp with your full landed cost</p>
+                  <h3 className="text-base font-serif font-bold text-white">{isAvailable ? 'Ask about this vehicle' : 'Ask about similar vehicles'}</h3>
+                  <p className="text-xs text-white/50 mt-0.5">Share your destination and requirements for a written response</p>
                 </div>
 
                 {formStatus === 'success' ? (
@@ -966,15 +984,15 @@ export default function CarDetailPage() {
                     <div className="w-12 h-12 rounded-full bg-emerald-100 flex items-center justify-center mx-auto mb-3">
                       <Check size={22} className="text-emerald-600" />
                     </div>
-                    <p className="font-bold text-gray-800 mb-2">Quote Request Received!</p>
+                    <p className="font-bold text-gray-800 mb-2">Enquiry Received</p>
                     <p className="text-sm text-gray-500 leading-relaxed">
-                      Our team will reach out on WhatsApp within a few hours with your complete price — FOB, freight, inspection, and insurance all included.
+                      Your enquiry has been received. The team can review the vehicle and destination details and respond using the contact information you supplied. Any quotation will identify the available services, price basis, included items and exclusions.
                     </p>
                   </div>
                 ) : (
                   <form onSubmit={handleInquirySubmit} className="p-5 space-y-3">
                     <p className="text-xs text-gray-400 leading-relaxed">
-                      Tell us where to ship it. We'll calculate the full landed cost and send you a breakdown — no commitment required.
+                      {isAvailable ? 'Tell us your destination and the services you want quoted. Import duties, taxes, customs, destination terminal and inland charges are separate unless the written quotation expressly includes them.' : 'This listing is not currently available. Tell us your destination and requirements if you would like us to review whether a similar vehicle can be offered.'}
                     </p>
 
                     <div>
@@ -1031,7 +1049,7 @@ export default function CarDetailPage() {
                         WhatsApp Number <span className="text-[#C8102E]">*</span>
                       </label>
                       <input name="phone" type="tel" required placeholder="+1 234 567 8900 (with country code)" className="w-full border border-gray-200 text-gray-800 text-sm px-3 py-2 rounded-sm focus:outline-none focus:border-[#C8102E]" />
-                      <p className="text-[10px] text-gray-400 mt-0.5">We'll send your quote here first</p>
+                      <p className="text-[10px] text-gray-400 mt-0.5">Use a number where the team can contact you about this enquiry</p>
                     </div>
 
                     <div>
@@ -1046,7 +1064,7 @@ export default function CarDetailPage() {
                       <textarea
                         name="message"
                         rows={3}
-                        defaultValue={`Hi, I'm interested in the ${car.year} ${car.make} ${car.model} (Ref: ${car.ref_number}). Please send me the total landed cost to my destination, including freight, inspection, and insurance.`}
+                        defaultValue={isAvailable ? `Hi, I am enquiring about the ${car.year} ${car.make} ${car.model} (Ref: ${car.ref_number}). Please confirm current availability and provide a written quotation showing the price basis, shipping options, inclusions and exclusions for my destination.` : `Hi, I saw the ${car.year} ${car.make} ${car.model} (Ref: ${car.ref_number}) listing. Please let me know whether a similar vehicle is available and what destination options may be quoted.`}
                         className="w-full border border-gray-200 text-gray-800 text-sm px-3 py-2 rounded-sm focus:outline-none focus:border-[#C8102E] resize-none"
                       />
                     </div>
@@ -1062,12 +1080,12 @@ export default function CarDetailPage() {
                       style={{ background: RED }}
                     >
                       {formStatus === 'submitting' ? (
-                        <><Loader2 size={15} className="animate-spin" /> Calculating your quote…</>
+                        <><Loader2 size={15} className="animate-spin" /> Sending your enquiry…</>
                       ) : (
-                        <><Send size={15} /> Get My Shipping Quote</>
+                        <><Send size={15} /> Send Vehicle Enquiry</>
                       )}
                     </button>
-                    <p className="text-[10px] text-gray-400 text-center">No payment required. We'll send you the full price breakdown.</p>
+                    <p className="text-[10px] text-gray-400 text-center">Submitting an enquiry does not reserve a vehicle or create a purchase contract. See our <Link href="/privacy-policy" className="underline underline-offset-2">Privacy Policy</Link>.</p>
                   </form>
                 )}
               </div>
@@ -1081,8 +1099,8 @@ export default function CarDetailPage() {
       <div className="fixed bottom-0 left-0 right-0 z-40 lg:hidden shadow-2xl" style={{ background: NAVY }}>
         <div className="flex items-center gap-3 px-4 py-3 border-t border-white/10">
           <div className="flex-1 min-w-0">
-            <p className="text-[10px] text-white/40 uppercase tracking-wider leading-none mb-0.5">FOB Price</p>
-            <p className="text-lg font-mono font-bold text-[#C8102E] truncate leading-tight">{convertPrice(car.fob_price_usd ?? 0)}</p>
+            <p className="text-[10px] text-white/40 uppercase tracking-wider leading-none mb-0.5">{isAvailable && Number(car.fob_price_usd) > 0 ? 'FOB Price · Japan' : 'Listing status'}</p>
+            <p className="text-sm md:text-lg font-semibold font-mono text-[#C8102E] truncate leading-tight">{isAvailable && Number(car.fob_price_usd) > 0 ? convertPrice(car.fob_price_usd) : isSold ? 'Historical listing' : 'Price on request'}</p>
           </div>
           <a
             href={waLink}
@@ -1094,11 +1112,11 @@ export default function CarDetailPage() {
             <WhatsAppIcon size={14} /> WhatsApp
           </a>
           <a
-            href="#inquiry-section"
+            href={isAvailable ? '#inquiry-section' : `/cars?make=${encodeURIComponent(car.make)}`}
             className="flex items-center gap-1.5 px-4 py-2.5 font-bold text-xs text-white rounded-sm shrink-0 transition-opacity hover:opacity-90 active:opacity-75"
             style={{ background: RED }}
           >
-            <Send size={14} /> Inquire
+            <Send size={14} /> {isAvailable ? 'Inquire' : 'Browse stock'}
           </a>
         </div>
       </div>

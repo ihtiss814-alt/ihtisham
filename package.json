@@ -9,7 +9,10 @@
     "build:dev": "vite build --mode development",
     "preview": "vite preview",
     "lint": "eslint .",
-    "format": "prettier --write ."
+    "format": "prettier --write .",
+    "typecheck": "tsc --noEmit",
+    "validate:country-pages": "node scripts/validate-country-pages.mjs",
+    "validate:vehicle-pages": "node scripts/validate-vehicle-pages.mjs"
   },
   "overrides": {
     "rolldown": "1.2.1"

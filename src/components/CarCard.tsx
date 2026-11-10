@@ -31,7 +31,7 @@ export interface Car {
   collection?: string;
   is_featured?: boolean;
   is_new_arrival?: boolean;
-  features?: any;
+  features?: unknown;
   created_at?: string;
   exterior_grade?: string;
   interior_grade?: string;

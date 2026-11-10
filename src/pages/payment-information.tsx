@@ -74,7 +74,7 @@ export default function PaymentInformationPage() {
     setAllCopied(true); setTimeout(() => setAllCopied(false), 2000);
   }, []);
 
-  const waNumber = (import.meta as any).env?.VITE_WHATSAPP_NUMBER || '818089227375';
+  const waNumber = import.meta.env.VITE_WHATSAPP_NUMBER || '818089227375';
   const waLink = `https://wa.me/${waNumber}?text=${encodeURIComponent('Hello, I have a question about making payment to Wazir Trading LLC.')}`;
 
   return (
@@ -97,7 +97,7 @@ export default function PaymentInformationPage() {
           </div>
           <h1 className="text-3xl md:text-4xl font-bold text-white mb-2 leading-tight">Payment Information</h1>
           <p className="text-white/55 text-sm leading-relaxed max-w-sm mx-auto">
-            Secure and transparent payment — direct to our Japan bank account only.
+            Review the payment method, verify the beneficiary independently, and follow the current written invoice.
           </p>
         </div>
       </section>
@@ -110,7 +110,7 @@ export default function PaymentInformationPage() {
           <div className="flex items-center gap-2.5 mb-4 bg-amber-50 border border-amber-200 rounded-md px-4 py-3">
             <AlertTriangle size={16} className="text-amber-500 flex-shrink-0" />
             <p className="text-amber-800 text-xs font-semibold leading-snug">
-              We <span className="text-amber-900 font-bold">ONLY</span> accept payments to this account. Never send to any other account.
+              These published bank details are a reference only. Before every transfer, obtain the current written Proforma Invoice and independently verify the beneficiary and account details with Wazir Trading. If anything differs, pause and contact the company using the details on this website.
             </p>
           </div>
 
@@ -122,8 +122,8 @@ export default function PaymentInformationPage() {
                 <Landmark size={16} className="text-[#C8102E]" />
               </div>
               <div>
-                <p className="text-white font-bold text-sm leading-none">Official Bank Account</p>
-                <p className="text-white/40 text-[11px] mt-0.5">Japan · Mitsui Sumitomo Bank</p>
+                <p className="text-white font-bold text-sm leading-none">Published Bank Details — Reference</p>
+                <p className="text-white/40 text-[11px] mt-0.5">Confirm against the current written invoice</p>
               </div>
             </div>
 
@@ -175,10 +175,10 @@ export default function PaymentInformationPage() {
             <div className="flex-1 min-w-0">
               <div className="flex flex-wrap items-center gap-2 mb-1">
                 <p className="font-bold text-[#0D1B3E] text-base">Telegraphic Transfer (TT)</p>
-                <span className="px-2 py-0.5 text-white text-[10px] font-bold uppercase rounded-full" style={{ background: RED }}>Only Method</span>
+                <span className="px-2 py-0.5 text-white text-[10px] font-bold uppercase rounded-full" style={{ background: RED }}>Payment information</span>
               </div>
               <p className="text-gray-500 text-sm leading-relaxed">
-                Bank-to-bank wire transfer directly to our Japan bank account. This is the only accepted payment method.
+                The website describes bank-to-bank Telegraphic Transfer to the company’s Japan business account. Follow the payment method and beneficiary stated in the current written invoice or signed sale agreement.
               </p>
             </div>
           </div>
@@ -186,7 +186,7 @@ export default function PaymentInformationPage() {
           <div className="flex items-start gap-2.5 bg-gray-50 border border-gray-200 rounded-lg px-4 py-3">
             <CircleX size={14} className="text-gray-400 flex-shrink-0 mt-0.5" />
             <p className="text-sm text-gray-500">
-              We do <strong>not</strong> accept Western Union, MoneyGram, PayPal, or any personal payment services.
+              Do not use an alternative payment service, personal account or intermediary unless that arrangement is expressly identified in a signed transaction document and independently verified with the company.
             </p>
           </div>
         </div>
@@ -206,22 +206,22 @@ export default function PaymentInformationPage() {
               {
                 num: 1,
                 title: 'Get Your Invoice',
-                desc: 'After confirming your car, request your official Proforma Invoice from us via WhatsApp or email. Invoice includes full bank details and payment amount.',
+                desc: 'Request the current Proforma Invoice or signed sale agreement. Check that it identifies the vehicle, currency, amount, payment due date or milestones, beneficiary and account details.',
               },
               {
                 num: 2,
                 title: 'Verify Bank Details',
-                desc: 'Cross-check bank details on invoice with the official details on this page. If anything is different contact us immediately before sending.',
+                desc: 'Independently confirm the beneficiary and account details using the company contact information you obtain from this website. If the invoice, account name or any payment instruction changes unexpectedly, pause and verify before transferring funds.',
               },
               {
                 num: 3,
                 title: 'Make Transfer',
-                desc: 'Visit your bank and make a Telegraphic Transfer (TT) to our Japan account. Include your Invoice Number in the transfer reference.',
+                desc: 'If the payment instruction has been independently verified and matches the current written agreement, arrange the stated transfer through your bank and use the payment reference requested in the invoice.',
               },
               {
                 num: 4,
                 title: 'Send Payment Receipt',
-                desc: 'After transfer, send us a clear photo or scan of your bank receipt via WhatsApp. This confirms payment and we begin processing your shipment.',
+                desc: 'After transfer, send us a clear photo or scan of your bank receipt via WhatsApp. We can confirm receipt and advise the next agreed transaction step. Shipment timing and booking depend on the written agreement and carrier availability.',
               },
             ].map((step, idx, arr) => (
               <div key={step.num} className="flex gap-4">
@@ -262,9 +262,7 @@ export default function PaymentInformationPage() {
               <div>
                 <h3 className="font-bold text-[#0D1B3E] text-sm mb-1">Verify Bank Account Details</h3>
                 <p className="text-gray-500 text-sm leading-relaxed">
-                  Before making any payment, confirm you are using the correct bank account information. The beneficiary
-                  for all accounts is <strong className="text-[#0D1B3E]">Wazir Trading LLC</strong> and we exclusively
-                  use the Japan bank details stated above. We do not use Western Union or any money transfer services.
+                  Treat the details displayed on this page as a reference, not as a substitute for the current transaction documents. Before every transfer, check that the beneficiary, account number, currency and amount match the current Proforma Invoice or signed agreement. Independently call or message Wazir Trading using contact details obtained from this website. If anything differs or a change is requested unexpectedly, do not transfer until it has been verified.
                 </p>
               </div>
             </div>
@@ -292,15 +290,13 @@ export default function PaymentInformationPage() {
               <div className="flex-1">
                 <h3 className="font-bold text-[#0D1B3E] text-sm mb-1">Payment Guidelines</h3>
                 <p className="text-gray-500 text-sm leading-relaxed mb-3">
-                  Wazir Trading strictly prohibits any local agents from accepting payments on our behalf. Our staff is
-                  not authorized to conduct any transactions on behalf of clients. All payments go directly to our Japan
-                  bank account only.
+                  Follow the payment instructions in the current written invoice or signed sale agreement. Do not send funds to an individual, local intermediary or alternative beneficiary based only on a phone call, email or message. If a third party is named in a transaction document, independently confirm the arrangement with Wazir Trading before paying.
                 </p>
                 <ul className="space-y-1.5">
                   {[
-                    'Bank account is in Japan only',
-                    'Never pay to personal accounts',
-                    'Never pay to agents outside Japan',
+                    'Verify the beneficiary and account stated in the current written invoice',
+                    'Do not pay an unverified personal or third-party account',
+                    'Independently verify any named intermediary before transfer',
                     'Always verify details before transfer',
                     'Contact us if anything seems suspicious',
                   ].map((pt) => (
@@ -321,8 +317,7 @@ export default function PaymentInformationPage() {
               <div>
                 <h3 className="font-bold text-[#0D1B3E] text-sm mb-1">Right to Cancel</h3>
                 <p className="text-gray-500 text-sm leading-relaxed">
-                  Wazir Trading reserves the right to cancel, terminate, or suspend any deal if there are suspicions of
-                  fraudulent activities or unauthorized transactions by any party involved.
+                  Cancellation, refund, storage and third-party costs depend on the signed sale terms, the stage of the transaction and applicable law. Ask for the specific cancellation and refund terms in writing before making payment.
                 </p>
               </div>
             </div>
@@ -344,18 +339,18 @@ export default function PaymentInformationPage() {
               {[
                 {
                   icon: <Landmark size={18} className="text-[#C8102E]" />,
-                  title: 'Our bank account is ONLY in Japan.',
-                  desc: 'Never send payment to any other country.',
+                  title: 'Use only independently verified payment instructions.',
+                  desc: 'Confirm the beneficiary and account details against the current written invoice or signed sale agreement before each transfer.',
                 },
                 {
                   icon: <CircleX size={18} className="text-[#C8102E]" />,
-                  title: 'We do NOT accept payments to personal bank accounts, mobile wallets, or agents.',
+                  title: 'Do not transfer funds to an unverified third party.',
                   desc: 'If anyone requests this, contact us immediately.',
                 },
                 {
                   icon: <ShieldCheck size={18} className="text-[#C8102E]" />,
-                  title: 'Always verify bank details directly on this page before every transaction.',
-                  desc: 'Bank details never change without official notice from us.',
+                  title: 'Verify payment instructions independently before every transfer.',
+                  desc: 'Do not rely on an email or message alone to confirm a bank-account change. Independently contact the company using the phone number published on this website before transferring funds.',
                 },
               ].map((w, i) => (
                 <div key={i} className="flex items-start gap-4 px-5 py-4">
@@ -370,6 +365,12 @@ export default function PaymentInformationPage() {
               ))}
             </div>
           </div>
+        </div>
+      </section>
+
+      <section className="py-6 bg-white border-t border-gray-100">
+        <div className="container mx-auto px-4 md:px-8 max-w-2xl text-center text-sm text-gray-500">
+          Before paying, review our <a href="/buyer-information" className="text-[#C8102E] underline underline-offset-2">Buyer Information</a> and <a href="/terms-and-conditions" className="text-[#C8102E] underline underline-offset-2">Terms &amp; Conditions</a>.
         </div>
       </section>
 

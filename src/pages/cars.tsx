@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useMeta } from '@/lib/use-meta';
 import { useSeoBootstrap } from '@/lib/seo-bootstrap-context';
+import { isIndexableVehicle, type VehicleSeoCar } from '@/lib/vehicle-seo';
 import { Link, useLocation } from 'wouter';
 import {
   Search, ChevronDown, ChevronUp, ChevronLeft, ChevronRight,
@@ -651,8 +652,8 @@ function TotalPriceCalculator({ initialCountry }: { initialCountry?: string }) {
   return (
     <div className="mb-6 rounded-sm overflow-hidden shadow-md" style={{ background: NAVY }}>
       <div className="px-6 pt-5 pb-3 border-b border-white/10">
-        <h3 className="text-white font-bold text-lg" style={{ fontFamily: 'var(--app-font-serif)' }}>Total Price Calculator</h3>
-        <p className="text-white/60 text-[12px] mt-1">Estimate the landed cost based on your destination.</p>
+        <h3 className="text-white font-bold text-lg" style={{ fontFamily: 'var(--app-font-serif)' }}>Export Cost Estimator</h3>
+        <p className="text-white/60 text-[12px] mt-1">Estimate the FOB price plus any route charges currently recorded for the selected destination.</p>
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-6">
         <div className="space-y-4">
@@ -704,16 +705,16 @@ function TotalPriceCalculator({ initialCountry }: { initialCountry?: string }) {
           </div>
           {result && (
             <div className="p-4 rounded-sm border border-white/10" style={{ background: 'rgba(255,255,255,0.05)' }}>
-              <div className="text-[11px] text-white/50 uppercase tracking-wider mb-1">Estimated Total</div>
+              <div className="text-[11px] text-white/50 uppercase tracking-wider mb-1">Estimated Export Subtotal</div>
               <div className="text-2xl font-black" style={{ color: RED }}>${result.usd.toLocaleString(undefined, { maximumFractionDigits: 0 })}</div>
-              <p className="text-white/30 text-[10px] mt-2">* Estimate only. Customs duties and local taxes not included.</p>
+              <p className="text-white/50 text-[10px] mt-2">Estimate only: uses the entered FOB amount and any recorded freight, inspection and insurance rates. It is not a delivered or duty-paid price. Customs duties and taxes, clearance, destination terminal/port charges, storage, registration and inland delivery are excluded unless the written quotation expressly includes them.</p>
             </div>
           )}
           {noRate && (
             <div className="p-4 rounded-sm border border-white/10" style={{ background: 'rgba(255,255,255,0.05)' }}>
               <div className="text-2xl font-black mb-1" style={{ color: RED }}>ASK</div>
               <p className="text-white/50 text-[12px] mb-3">
-                We do not have a published rate for {port ? `${port}, ` : ''}{country} yet. Message us and we will quote it.
+                No route rate is currently recorded for {port ? `${port}, ` : ''}{country}. Request a current written quotation.
               </p>
               <a
                 href={`https://wa.me/${WA_NUMBER}?text=${encodeURIComponent(
@@ -732,7 +733,7 @@ function TotalPriceCalculator({ initialCountry }: { initialCountry?: string }) {
         <button onClick={calculate} disabled={calcLoading}
           className="w-full py-3 font-bold text-sm tracking-[0.1em] uppercase text-white rounded-sm transition-all hover:opacity-90 disabled:opacity-60 flex items-center justify-center gap-2"
           style={{ background: RED }}>
-          {calcLoading ? <><Loader2 size={16} className="animate-spin" /> Calculating...</> : 'Calculate Total Price'}
+          {calcLoading ? <><Loader2 size={16} className="animate-spin" /> Calculating...</> : 'Calculate Export Subtotal'}
         </button>
       </div>
     </div>
@@ -917,7 +918,30 @@ type Filters = {
   smartMinEngine: string; smartMaxEngine: string;
 };
 
-function applyFiltersToQuery(query: any, filters: Filters, activeTab: string, sortBy: string): any {
+function createCarsListQuery() {
+  return supabase
+    .from("cars")
+    .select("*, car_images(image_url, is_primary, display_order)", { count: "exact" })
+    .eq("status", "available");
+}
+
+type CarsListQuery = ReturnType<typeof createCarsListQuery>;
+
+function createCarsCountQuery() {
+  return supabase
+    .from("cars")
+    .select("*", { count: "exact", head: true })
+    .eq("status", "available");
+}
+
+type CarsCountQuery = ReturnType<typeof createCarsCountQuery>;
+
+function applyFiltersToQuery(
+  query: CarsListQuery,
+  filters: Filters,
+  activeTab: string,
+  sortBy: string,
+): CarsListQuery {
   // Full-text search across make/model plus related car attributes.
   if (filters.q) {
     const terms = filters.q
@@ -1062,11 +1086,17 @@ export default function CarsPage() {
     ? new URLSearchParams(bootstrap.search).toString().length > 0
     : typeof window !== 'undefined'
       && new URLSearchParams(window.location.search).toString().length > 0;
+  const inventoryNotReadyForIndex = bootstrap?.pathname !== '/cars'
+    || bootstrap.inventoryResolved !== true
+    || (bootstrap.inventoryCount ?? 0) === 0
+    || !(bootstrap.inventoryCars ?? []).some((car) =>
+      isIndexableVehicle(car as unknown as VehicleSeoCar),
+    );
   useMeta({
     title: 'Browse Japanese Used Cars for Export | Wazir Trading LLC',
     description: 'Browse current Japanese used cars available for export. Filter by make, model, price, and body type, then review FOB prices and vehicle records from Japan.',
     canonical: 'https://www.wazirtradingllc.com/cars',
-    noindex: hasInventoryQuery,
+    noindex: hasInventoryQuery || inventoryNotReadyForIndex,
   });
 
   // ── Read URL params ──
@@ -1328,22 +1358,22 @@ export default function CarsPage() {
       return;
     }
     try {
-      const tabConfigs = [
-        { key: 'new_arrivals', apply: (q: any) => q.eq('is_new_arrival', true) },
-        { key: 'clearance',    apply: (q: any) => q.ilike('collection', 'clearance') },
-        { key: 'japan',        apply: (q: any) => q.ilike('stock_location', 'Japan') },
-        { key: 'hybrid',       apply: (q: any) => q.ilike('fuel_type', 'Hybrid') },
-        { key: 'suv',          apply: (q: any) => q.ilike('body_type', 'SUV') },
-        { key: 'budget',       apply: (q: any) => q.lte('fob_price_usd', 5000) },
+      const tabConfigs: Array<{ key: string; apply: (query: CarsCountQuery) => CarsCountQuery }> = [
+        { key: 'new_arrivals', apply: (q: CarsCountQuery) => q.eq('is_new_arrival', true) },
+        { key: 'clearance',    apply: (q: CarsCountQuery) => q.ilike('collection', 'clearance') },
+        { key: 'japan',        apply: (q: CarsCountQuery) => q.ilike('stock_location', 'Japan') },
+        { key: 'hybrid',       apply: (q: CarsCountQuery) => q.ilike('fuel_type', 'Hybrid') },
+        { key: 'suv',          apply: (q: CarsCountQuery) => q.ilike('body_type', 'SUV') },
+        { key: 'budget',       apply: (q: CarsCountQuery) => q.lte('fob_price_usd', 5000) },
       ];
       const results = await Promise.all(
         tabConfigs.map(({ key, apply }) =>
           apply(supabase.from('cars').select('*', { count: 'exact', head: true }).eq('status', 'available'))
-            .then(({ count }: any) => ({ key, count: count || 0 }))
+            .then(({ count }) => ({ key, count: count || 0 }))
         )
       );
       const counts: Record<string, number> = {};
-      results.forEach(({ key, count }: any) => { counts[key] = count; });
+      results.forEach(({ key, count }) => { counts[key] = count; });
       setTabCounts(counts);
     } catch (err) {
       console.error('Failed to fetch tab counts:', err);
@@ -1377,7 +1407,7 @@ export default function CarsPage() {
     if (!isSupabaseConfigured || !filters.make) { setAvailableModels([]); return; }
     supabase.from('cars').select('model').eq('status', 'available').ilike('make', filters.make).limit(500)
       .then(({ data }) => {
-        const models = [...new Set((data || []).map((r: any) => r.model).filter(Boolean))].sort() as string[];
+        const models = [...new Set((data || []).map((row: { model?: string | null }) => row.model).filter(Boolean))].sort() as string[];
         setAvailableModels(models);
       });
   }, [filters.make]);

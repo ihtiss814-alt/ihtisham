@@ -128,6 +128,7 @@ export function vehicleJsonLd(car: VehicleSeoCar, imageUrls = validImageUrls(car
     '@context': 'https://schema.org',
     '@type': ['Product', 'Car'],
     name: vehicleName(car),
+    description: vehicleDescription(car),
     sku: car.ref_number,
     brand: { '@type': 'Brand', name: car.make },
     model: car.model,
@@ -166,7 +167,7 @@ export function vehicleJsonLd(car: VehicleSeoCar, imageUrls = validImageUrls(car
         ? 'https://schema.org/InStock'
         : 'https://schema.org/OutOfStock',
       url: vehicleCanonical(car.ref_number),
-      seller: { '@type': 'Organization', name: ORGANIZATION_NAME, url: SITE_URL },
+      seller: { '@id': `${SITE_URL}/#organization` },
     };
   }
   if (car.updated_at) jsonLd.dateModified = car.updated_at;

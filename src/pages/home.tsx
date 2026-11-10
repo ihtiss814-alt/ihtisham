@@ -159,11 +159,12 @@ function DestinationCountriesSection() {
       {/* Section heading */}
       <div className="text-center mb-8 px-4">
         <p className="text-[10px] tracking-[0.28em] uppercase font-bold text-[#C8102E] mb-2">
-          We Ship To
+          Destination enquiry
         </p>
         <h2 className="text-2xl md:text-3xl font-serif font-bold text-white">
-          Select Your Destination Country
+          Ask About Shipping to Your Country
         </h2>
+        <p className="text-xs text-white/55 max-w-2xl mx-auto mt-2">Select a country to prefill a destination enquiry. Service availability, route, port, shipping method and costs must be confirmed for the specific vehicle and order.</p>
       </div>
 
       {/* Scrolling track */}
@@ -192,7 +193,7 @@ function DestinationCountriesSection() {
                 {name}
               </span>
               <span className="text-[9px] tracking-[0.2em] uppercase text-[#C8102E]/60 group-hover:text-[#C8102E] font-bold transition-colors">
-                STOCK
+                REQUEST OPTIONS
               </span>
             </button>
           ))}
@@ -838,7 +839,7 @@ function CantFindCarSection() {
             Can't Find Your Car?
           </h2>
           <p className="text-gray-400 text-sm md:text-base max-w-xl mx-auto">
-            Submit your requirements below and our global sourcing desk will search Japanese auto auctions to find your exact vehicle.
+            Tell us the vehicle and destination you are considering. We will review your request and confirm whether a suitable sourcing option can be offered.
           </p>
         </div>
 
@@ -860,7 +861,7 @@ function CantFindCarSection() {
                 </div>
                 <div>
                   <div className="font-bold text-gray-900 text-sm">Vehicle Request Form</div>
-                  <div className="text-xs text-gray-400">Tell us what you need — we'll find it and send you the price</div>
+                  <div className="text-xs text-gray-400">Share your requirements for a review and written quotation</div>
                 </div>
               </div>
 
@@ -875,10 +876,10 @@ function CantFindCarSection() {
                   </div>
                   <h3 className="font-serif font-bold text-xl text-gray-900 mb-2">We're On It!</h3>
                   <p className="text-gray-500 text-sm max-w-sm mb-2">
-                    Your request is with our Japan sourcing desk. We'll search the auction network and send you matching options — with full pricing — on WhatsApp within 24 hours.
+                    Your request has been recorded. We will review the details and contact you to confirm whether a matching vehicle or sourcing option can be offered.
                   </p>
                   <p className="text-xs text-gray-400 max-w-xs">
-                    No payment needed at this stage. We'll confirm availability and price before anything moves forward.
+                    Submitting a request does not reserve a vehicle or create a purchase contract. Do not make a payment until you have reviewed and accepted the written quotation and payment instructions.
                   </p>
                   <button onClick={() => setSuccess(false)}
                     className="mt-6 px-6 py-2.5 rounded-full text-sm font-semibold text-white cursor-pointer"
@@ -996,9 +997,10 @@ function CantFindCarSection() {
                         onMouseEnter={e => { if (!submitting) (e.currentTarget as HTMLButtonElement).style.boxShadow = '0 8px 32px rgba(200,16,46,0.45)'; }}
                         onMouseLeave={e => { if (!submitting) (e.currentTarget as HTMLButtonElement).style.boxShadow = '0 4px 20px rgba(200,16,46,0.35)'; }}
                       >
-                        {submitting ? 'Sending Request…' : 'Search Japan Auctions for Me'}
+                        {submitting ? 'Sending Request…' : 'Submit Vehicle Request'}
                       </button>
                     </div>
+                    <p className="sm:col-span-2 text-xs text-gray-400 text-center mt-2">By submitting, you agree that your details may be used to review and respond to this enquiry. See our <a href="/privacy-policy" className="underline underline-offset-2">Privacy Policy</a>.</p>
                   </div>
                 </form>
               )}
@@ -1285,10 +1287,10 @@ export default function HomePage() {
   }, [bootstrap?.pathname, bootstrap?.stockCountResolved]);
 
   const TRUST = [
-    { text: 'Bank to Bank TT Payment' },
-    { text: 'Bill of Lading documentation' },
-    { text: 'Export information' },
-    { text: 'Live vehicle listings' },
+    { text: 'Payment instructions by written invoice' },
+    { text: 'Export documents by transaction' },
+    { text: 'Export and shipping information' },
+    { text: 'Current vehicle listings' },
   ];
 
   return (
@@ -1299,15 +1301,15 @@ export default function HomePage() {
         <HeroBackground />
 
         <div className="hero-content">
-          <div className="eyebrow">Premium Japanese Imports</div>
+          <div className="eyebrow">Japanese Vehicle Export</div>
 
           <h1 className="hero-title">
-            Import Your Dream Car
-            <span>Direct from Japan</span>
+            Japanese Used Cars
+            <span>For Export from Japan</span>
           </h1>
 
           <Link href="/cars" className="select-button">
-            Select your car
+            Browse Available Cars
             <span className="arrow">→</span>
           </Link>
         </div>

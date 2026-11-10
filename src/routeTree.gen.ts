@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as SplatRouteImport } from './routes/$'
+import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as ApiPublicCloudinaryAuthRouteImport } from './routes/api/public/cloudinary/auth'
 import { Route as ApiPublicCloudinaryFetchFlatFolderRouteImport } from './routes/api/public/cloudinary/fetch-flat-folder'
 import { Route as ApiPublicCloudinarySearchByChassisRouteImport } from './routes/api/public/cloudinary/search-by-chassis'
@@ -25,6 +26,11 @@ const IndexRoute = IndexRouteImport.update({
 const SplatRoute = SplatRouteImport.update({
   id: '/$',
   path: '/$',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
+  id: '/sitemap.xml',
+  path: '/sitemap.xml',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiPublicCloudinaryAuthRoute = ApiPublicCloudinaryAuthRouteImport.update({
@@ -60,6 +66,7 @@ const ApiPublicCloudinaryResourcesDateFolderSubfolderRoute =
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/$': typeof SplatRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/api/public/cloudinary/auth': typeof ApiPublicCloudinaryAuthRoute
   '/api/public/cloudinary/fetch-flat-folder': typeof ApiPublicCloudinaryFetchFlatFolderRoute
   '/api/public/cloudinary/search-by-chassis': typeof ApiPublicCloudinarySearchByChassisRoute
@@ -69,6 +76,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/$': typeof SplatRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/api/public/cloudinary/auth': typeof ApiPublicCloudinaryAuthRoute
   '/api/public/cloudinary/fetch-flat-folder': typeof ApiPublicCloudinaryFetchFlatFolderRoute
   '/api/public/cloudinary/search-by-chassis': typeof ApiPublicCloudinarySearchByChassisRoute
@@ -79,6 +87,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/$': typeof SplatRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/api/public/cloudinary/auth': typeof ApiPublicCloudinaryAuthRoute
   '/api/public/cloudinary/fetch-flat-folder': typeof ApiPublicCloudinaryFetchFlatFolderRoute
   '/api/public/cloudinary/search-by-chassis': typeof ApiPublicCloudinarySearchByChassisRoute
@@ -90,6 +99,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/$'
+    | '/sitemap.xml'
     | '/api/public/cloudinary/auth'
     | '/api/public/cloudinary/fetch-flat-folder'
     | '/api/public/cloudinary/search-by-chassis'
@@ -99,6 +109,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/$'
+    | '/sitemap.xml'
     | '/api/public/cloudinary/auth'
     | '/api/public/cloudinary/fetch-flat-folder'
     | '/api/public/cloudinary/search-by-chassis'
@@ -108,6 +119,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/$'
+    | '/sitemap.xml'
     | '/api/public/cloudinary/auth'
     | '/api/public/cloudinary/fetch-flat-folder'
     | '/api/public/cloudinary/search-by-chassis'
@@ -118,6 +130,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   SplatRoute: typeof SplatRoute
+  SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   ApiPublicCloudinaryAuthRoute: typeof ApiPublicCloudinaryAuthRoute
   ApiPublicCloudinaryFetchFlatFolderRoute: typeof ApiPublicCloudinaryFetchFlatFolderRoute
   ApiPublicCloudinarySearchByChassisRoute: typeof ApiPublicCloudinarySearchByChassisRoute
@@ -139,6 +152,13 @@ declare module '@tanstack/react-router' {
       path: '/$'
       fullPath: '/$'
       preLoaderRoute: typeof SplatRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/sitemap.xml': {
+      id: '/sitemap.xml'
+      path: '/sitemap.xml'
+      fullPath: '/sitemap.xml'
+      preLoaderRoute: typeof SitemapDotxmlRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/public/cloudinary/auth': {
@@ -182,6 +202,7 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   SplatRoute: SplatRoute,
+  SitemapDotxmlRoute: SitemapDotxmlRoute,
   ApiPublicCloudinaryAuthRoute: ApiPublicCloudinaryAuthRoute,
   ApiPublicCloudinaryFetchFlatFolderRoute:
     ApiPublicCloudinaryFetchFlatFolderRoute,

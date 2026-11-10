@@ -14,102 +14,77 @@ const STEPS = [
   {
     num: '01',
     icon: <Search size={22} className="text-[#C8102E]" />,
-    title: 'Browse and Select',
+    title: 'Review a Vehicle Listing',
     description:
-      'Browse our live inventory of quality Japanese used cars. Filter by make, model, year, price, and body type. Each car includes full specifications, auction grade, mileage, and multiple photos. Click Inquire Now on any car you like.',
+      'Browse the current inventory and open the vehicle record you are considering. Check its reference, availability status, photographs, mileage, specifications, price field and any auction or condition information actually shown. Ask us to confirm current availability and any important detail before deciding.',
     extra: null,
   },
   {
     num: '02',
     icon: <FileText size={22} className="text-[#C8102E]" />,
-    title: 'Get Your Proforma Invoice',
+    title: 'Request a Written Quotation',
     description:
-      'Once you select your car, contact us on WhatsApp or submit an inquiry. We will send you an official Proforma Invoice within 24 hours. The invoice includes the full price breakdown, banking details, and shipment information.',
+      'Contact us with the vehicle reference and destination. Before paying, request a written Proforma Invoice or quotation that identifies the vehicle, currency, price basis and named port where applicable, shipping method, included services, exclusions, required documents and payment milestones.',
     extra: null,
   },
   {
     num: '03',
     icon: <Landmark size={22} className="text-[#C8102E]" />,
-    title: 'Make Secure Payment',
+    title: 'Verify the Invoice and Payment Details',
     description:
-      'Make a Telegraphic Transfer directly to our official Wazir Trading LLC bank account in Japan only. We accept 50% deposit to reserve the car and remaining 50% before shipment. Send us your payment receipt via WhatsApp to confirm.',
+      'The website states that payment is by bank-to-bank Telegraphic Transfer to Wazir Trading LLC’s Japan business account. The amount, due date and any deposit or balance milestone are transaction-specific and must be written in the current invoice or sale agreement. Independently verify beneficiary details using the contact information published on this website before transferring funds.',
     extra: (
-      <div className="mt-4 bg-[#0D1B3E] rounded-[4px] px-4 py-3 text-sm font-mono space-y-1">
-        <div className="text-[#C8102E] text-[11px] font-bold uppercase tracking-widest mb-2">Bank Details</div>
-        {[
-          ['Bank', 'Mitsui Sumitomo Ginko (0009)'],
-          ['Account', 'Wazir Trading LLC'],
-          ['SWIFT', 'SMBCJPJT'],
-        ].map(([k, v]) => (
-          <div key={k} className="flex gap-3">
-            <span className="text-white/40 w-20 flex-shrink-0">{k}:</span>
-            <span className="text-white font-semibold">{v}</span>
-          </div>
-        ))}
+      <div className="mt-4 bg-[#0D1B3E] rounded-[4px] px-4 py-3 text-sm space-y-1">
+        <div className="text-[#C8102E] text-[11px] font-bold uppercase tracking-widest mb-2">Payment Safety Check</div>
+        <p className="text-white/85">Do not send money to a personal account or an intermediary claiming to represent the company.</p>
+        <p className="text-white/65">If an invoice or message changes bank details, stop and verify the change by calling the phone or WhatsApp number independently obtained from this website.</p>
+        <Link href="/payment-information" className="inline-flex mt-2 text-white underline underline-offset-4">Read payment information</Link>
       </div>
     ),
   },
   {
     num: '04',
     icon: <Ship size={22} className="text-[#C8102E]" />,
-    title: 'Professional Shipping',
+    title: 'Confirm Shipping Before Booking',
     description:
-      'Once payment is confirmed we arrange immediate shipment from Yokohama port. We offer both RORO and Container shipping options. You will receive photos of your car being loaded, vessel name, voyage number, and estimated arrival date at your port.',
+      'Ro-Ro or container shipping may be quoted where available for the vehicle and destination. The written quotation should identify the proposed departure and destination ports, freight basis, carrier or booking information when available, insurance if included, estimated schedule and charges that remain payable at destination. No fixed sailing or arrival time is promised by this general guide.',
     extra: null,
   },
   {
     num: '05',
     icon: <MapPin size={22} className="text-[#C8102E]" />,
-    title: 'Receive Your Car',
+    title: 'Receive the Agreed Export Documents',
     description:
-      'We send you the original Bill of Lading and all required export documents to clear your car at your destination port. Our team is available to assist with any documentation questions throughout the process.',
+      'After the agreed transaction and export steps, Wazir Trading will provide the documents identified in your written sale and shipping documents. Depending on the shipment and destination, these may include a Japanese export certificate, commercial invoice and a Bill of Lading once issued. Check your country’s official import, customs, inspection and registration requirements before purchase.',
     extra: null,
   },
 ];
 
-const TIMELINE = [
-  { region: 'South Asia',  destination: 'Pakistan',       port: 'Karachi',         method: 'RORO', time: '3–4 weeks' },
-  { region: 'South Asia',  destination: 'Pakistan',       port: 'Gwadar',          method: 'RORO', time: '4–5 weeks' },
-  { region: 'Middle East', destination: 'UAE',            port: 'Dubai',           method: 'RORO', time: '2–3 weeks' },
-  { region: 'Caribbean',   destination: 'Guyana',         port: 'Georgetown',      method: 'RORO', time: '6–8 weeks' },
-  { region: 'Caribbean',   destination: 'Jamaica',        port: 'Kingston',        method: 'RORO', time: '6–8 weeks' },
-  { region: 'Caribbean',   destination: 'Trinidad',       port: 'Port of Spain',   method: 'RORO', time: '6–8 weeks' },
-  { region: 'Africa',      destination: 'Kenya',          port: 'Mombasa',         method: 'RORO', time: '4–5 weeks' },
-  { region: 'Africa',      destination: 'Tanzania',       port: 'Dar es Salaam',   method: 'RORO', time: '4–5 weeks' },
-  { region: 'Africa',      destination: 'Ghana',          port: 'Tema',            method: 'RORO', time: '6–7 weeks' },
-  { region: 'Africa',      destination: 'Nigeria',        port: 'Lagos',           method: 'RORO', time: '6–7 weeks' },
-  { region: 'Pacific',     destination: 'New Zealand',    port: 'Auckland',        method: 'RORO', time: '3–4 weeks' },
-  { region: 'Pacific',     destination: 'Papua New Guinea', port: 'Port Moresby',  method: 'RORO', time: '4–5 weeks' },
-  { region: 'Europe',      destination: 'UK',             port: 'Southampton',     method: 'RORO', time: '5–6 weeks' },
-  { region: 'Europe',      destination: 'Germany',        port: 'Hamburg',         method: 'RORO', time: '5–6 weeks' },
-  { region: 'Russia',      destination: 'Russia',         port: 'Vladivostok',     method: 'RORO', time: '2–3 weeks' },
-];
-
 const BENEFITS = [
-  { icon: <Star size={20} className="text-[#C8102E]" />,        title: 'Japan vehicle sourcing',  desc: 'Review current listings and contact us when you need help locating a specific vehicle.' },
-  { icon: <TrendingDown size={20} className="text-[#C8102E]" />, title: 'Clear price fields',         desc: 'Vehicle pages identify the FOB price when a verified price is present; ask us for destination costs.' },
-  { icon: <CheckCircle size={20} className="text-[#C8102E]" />, title: 'Record-led review',           desc: 'Use the reference, specifications, images, and available grade fields to assess a listing.' },
-  { icon: <ShieldCheck size={20} className="text-[#C8102E]" />, title: 'Secure Payment',               desc: 'Official Japan bank account only — Bank-to-Bank TT transfers' },
-  { icon: <Zap size={20} className="text-[#C8102E]" />,         title: 'Fast Shipping',               desc: 'Earliest available vessel from Yokohama after payment confirmation' },
-  { icon: <Package size={20} className="text-[#C8102E]" />,     title: 'Complete Documentation',       desc: 'All export documents, Bill of Lading and shipping papers handled by us' },
+  { icon: <Star size={20} className="text-[#C8102E]" />, title: 'Japan Vehicle Listings', desc: 'Review the current stock records and use the reference number when asking about a vehicle.' },
+  { icon: <TrendingDown size={20} className="text-[#C8102E]" />, title: 'Written Price Basis', desc: 'Ask for a quotation that states the currency, named port and exactly what the price includes or excludes.' },
+  { icon: <CheckCircle size={20} className="text-[#C8102E]" />, title: 'Record-Led Review', desc: 'Use the specifications, images and condition information actually supplied for each vehicle; request clarification where a field is missing.' },
+  { icon: <ShieldCheck size={20} className="text-[#C8102E]" />, title: 'Payment Verification', desc: 'Verify the current Proforma Invoice and business beneficiary independently before making a bank transfer.' },
+  { icon: <Zap size={20} className="text-[#C8102E]" />, title: 'Shipment by Confirmation', desc: 'The proposed method, route and schedule are confirmed for the particular vehicle and destination.' },
+  { icon: <Package size={20} className="text-[#C8102E]" />, title: 'Document Scope in Writing', desc: 'Check which export and shipping documents will be issued for your transaction and destination.' },
 ];
 
 const FAQS = [
   {
     q: 'How long does delivery take?',
-    a: 'Typically 4 to 8 weeks depending on your destination. See our timeline table above for specific estimates.',
+    a: 'There is no single delivery time for every destination. The proposed carrier, vessel schedule, port sequence, booking date, transshipment and customs process all affect timing. Ask for the current estimated schedule in writing; carrier estimates can change.',
   },
   {
     q: 'What payment method do you accept?',
-    a: 'We accept Telegraphic Transfer (TT) only to our official Japan bank account. Visit our Payment Information page for full banking details.',
+    a: 'The current website payment policy states bank-to-bank Telegraphic Transfer to the company’s Japan business account. The amount and payment milestones are specific to the written Proforma Invoice or sale agreement. Verify the beneficiary independently before transfer.',
   },
   {
     q: 'Can you source a car not in your stock?',
-    a: 'Yes. Submit your requirements using our Car Request form and we will search Japanese auctions to find your vehicle.',
+    a: 'Send the make, model, year range, budget and destination using the contact form. We will review the request and confirm whether a sourcing option, price, fees and timing can be offered. A request does not guarantee that a matching vehicle is available.',
   },
   {
     q: 'Do I need an agent to buy from you?',
-    a: 'No. You can buy directly from us. Never pay to any third party agent claiming to represent Wazir Trading.',
+    a: 'Contact Wazir Trading using the official phone, WhatsApp or email shown on this website. Do not transfer money to a personal account or an agent unless a specific written agreement from the company expressly identifies that arrangement and you have independently verified it.',
   },
 ];
 
@@ -144,18 +119,6 @@ function FaqAccordion({ q, a }: { q: string; a: string }) {
     </div>
   );
 }
-
-// ─── Region badge colours ──────────────────────────────────────────────────
-
-const REGION_COLORS: Record<string, string> = {
-  'South Asia':  'bg-blue-50 text-blue-700',
-  'Middle East': 'bg-amber-50 text-amber-700',
-  'Caribbean':   'bg-purple-50 text-purple-700',
-  'Africa':      'bg-green-50 text-green-700',
-  'Pacific':     'bg-teal-50 text-teal-700',
-  'Europe':      'bg-indigo-50 text-indigo-700',
-  'Russia':      'bg-red-50 text-red-700',
-};
 
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
@@ -205,7 +168,7 @@ export default function HowItWorksPage() {
           </div>
           <h1 className="text-4xl md:text-5xl font-bold mb-4 leading-tight">How To Buy Your Dream Car</h1>
           <p className="text-white/60 text-base leading-relaxed max-w-xl mx-auto mb-10">
-            Simple, transparent and hassle-free process from Japan to your door
+            A clear process for reviewing a Japanese vehicle listing, agreeing the terms and arranging export where available
           </p>
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
             <Link
@@ -240,8 +203,7 @@ export default function HowItWorksPage() {
               </div>
               <h3 className="font-bold text-[#0D1B3E] text-xl mb-3">Purchase from Stock</h3>
               <p className="text-gray-500 text-sm leading-relaxed flex-1 mb-6">
-                Browse and purchase from our live inventory of quality Japanese used cars available for immediate export
-                from Japan.
+                Browse the vehicle records shown in our current inventory. Confirm the listing status, current price and export availability with us before committing.
               </p>
               <Link
                 href="/cars"
@@ -259,8 +221,7 @@ export default function HowItWorksPage() {
               </div>
               <h3 className="font-bold text-[#0D1B3E] text-xl mb-3">Source Your Specific Car</h3>
               <p className="text-gray-500 text-sm leading-relaxed flex-1 mb-6">
-                Tell us exactly what you need and we will search Japanese auctions to find your perfect vehicle at the
-                best price.
+                Tell us your requirements and destination. We will review the request and confirm whether a suitable sourcing option, its costs and timing can be offered.
               </p>
               <Link
                 href="/contact"
@@ -280,7 +241,7 @@ export default function HowItWorksPage() {
           <div className="text-center mb-14">
             <h2 className="text-3xl font-bold text-[#0D1B3E] mb-3">Simple 5 Step Process</h2>
             <p className="text-gray-500 max-w-md mx-auto text-sm">
-              From selecting your ideal car to delivery at your destination port
+              From reviewing a vehicle to confirming the agreed export documents for your transaction
             </p>
           </div>
 
@@ -315,54 +276,29 @@ export default function HowItWorksPage() {
         </div>
       </section>
 
-      {/* ── Section 3: Shipping Timeline ───────────────────────────────────── */}
+      {/* ── Section 3: Shipping details ───────────────────────────────────── */}
       <section className="py-16 bg-gray-50 border-t border-gray-100">
         <div className="container mx-auto px-4 md:px-8 max-w-5xl">
           <div className="text-center mb-10">
-            <h2 className="text-2xl font-bold text-[#0D1B3E] mb-2">Estimated Delivery Timelines</h2>
-            <p className="text-gray-500 text-sm">Average shipping time from Japan to major destination ports</p>
+            <h2 className="text-2xl font-bold text-[#0D1B3E] mb-2">Shipping Is Confirmed for Each Order</h2>
+            <p className="text-gray-500 text-sm max-w-2xl mx-auto">Do not rely on a general transit-time table. Ask for the proposed route and schedule for your vehicle and destination before approving the quotation.</p>
           </div>
-
-          <div className="overflow-x-auto rounded-[6px] border border-gray-200 shadow-sm">
-            <table className="w-full text-sm min-w-[600px]">
-              <thead>
-                <tr className="bg-[#0D1B3E] text-white">
-                  {['Region', 'Destination', 'Port', 'Shipping Method', 'Est. Time'].map((h) => (
-                    <th key={h} className="px-4 py-3.5 text-left text-[11px] uppercase tracking-[0.15em] font-semibold">
-                      {h}
-                    </th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-100">
-                {TIMELINE.map((row, idx) => (
-                  <tr key={idx} className="bg-white hover:bg-gray-50 transition-colors">
-                    <td className="px-4 py-3">
-                      <span
-                        className={`inline-block px-2 py-0.5 rounded-full text-[11px] font-semibold ${
-                          REGION_COLORS[row.region] ?? 'bg-gray-100 text-gray-600'
-                        }`}
-                      >
-                        {row.region}
-                      </span>
-                    </td>
-                    <td className="px-4 py-3 font-semibold text-[#0D1B3E]">{row.destination}</td>
-                    <td className="px-4 py-3 text-gray-600">{row.port}</td>
-                    <td className="px-4 py-3">
-                      <span className="inline-block px-2 py-0.5 bg-blue-50 text-blue-700 text-[11px] font-semibold rounded">
-                        {row.method}
-                      </span>
-                    </td>
-                    <td className="px-4 py-3 font-bold text-[#C8102E]">{row.time}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+            {[
+              { title: 'Ports and carrier', text: 'Confirm the named departure port, destination port, carrier or booking details where available, and whether the route is direct or includes transshipment.' },
+              { title: 'Freight and insurance', text: 'Check whether freight is prepaid or collect, whether marine insurance is included, the cover provided, and any deductible or exclusions.' },
+              { title: 'Arrival and local charges', text: 'Ask which destination terminal, customs, duty, tax, inspection, storage, registration and inland-delivery costs are excluded from the export quotation.' },
+            ].map((item) => (
+              <div key={item.title} className="bg-white border border-gray-200 rounded-[6px] p-6 shadow-sm">
+                <h3 className="font-bold text-[#0D1B3E] mb-2">{item.title}</h3>
+                <p className="text-gray-500 text-sm leading-relaxed">{item.text}</p>
+              </div>
+            ))}
           </div>
-
-          <p className="text-xs text-gray-400 mt-4 text-center">
-            Timelines are estimates and may vary based on vessel availability and customs clearance at destination port.
-          </p>
+          <p className="text-xs text-gray-400 mt-5 text-center">Schedules and estimated arrival dates are indicative until confirmed by the carrier. They may change due to vessel schedules, port operations, weather, transshipment or customs processing.</p>
+          <div className="text-center mt-6">
+            <Link href="/shipping-information" className="inline-flex items-center gap-2 text-[#C8102E] font-semibold text-sm hover:underline">Read shipping information <ChevronRight size={14} /></Link>
+          </div>
         </div>
       </section>
 
@@ -381,9 +317,9 @@ export default function HowItWorksPage() {
               </div>
               <ul className="space-y-3">
                 {[
-                  '50% deposit to reserve the car',
-                  '50% balance before loading on vessel',
-                  'Both payments to Japan bank account only',
+                  'Payment method: bank-to-bank TT as stated in the current payment policy',
+                  'Amount and due dates are set out in the current written invoice or sale agreement',
+                  'Verify the beneficiary and all bank details through the website’s published contact channel before transfer',
                 ].map((item) => (
                   <li key={item} className="flex items-start gap-2.5 text-sm text-gray-700">
                     <CheckCircle size={15} className="text-[#C8102E] flex-shrink-0 mt-0.5" strokeWidth={2.5} />
@@ -403,9 +339,9 @@ export default function HowItWorksPage() {
               </div>
               <ul className="space-y-3">
                 {[
-                  'Contact us for special bulk pricing',
-                  'Special payment terms available',
-                  '20% bulk discount for 5 or more vehicles',
+                  'Ask for a vehicle-by-vehicle written quotation',
+                  'Any volume pricing or different payment terms must be expressly stated in the quotation',
+                  'Do not assume a discount or payment arrangement unless confirmed in writing',
                 ].map((item) => (
                   <li key={item} className="flex items-start gap-2.5 text-sm text-gray-700">
                     <CheckCircle size={15} className="text-gray-400 flex-shrink-0 mt-0.5" strokeWidth={2.5} />
@@ -452,8 +388,7 @@ export default function HowItWorksPage() {
           </div>
           <h2 className="text-3xl font-bold text-white mb-4">Want to Know the Total Cost?</h2>
           <p className="text-white/60 mb-8 leading-relaxed">
-            Use our Total Price Calculator to get an instant estimate of the full C&amp;F price to your destination port
-            including shipping, inspection and insurance.
+            Use the vehicle calculator as an indicative guide only. Confirm freight, insurance, destination handling, customs, duties, taxes and local charges in the written quotation before making a decision.
           </p>
           <Link
             href="/cars"
@@ -491,8 +426,7 @@ export default function HowItWorksPage() {
         <div className="container mx-auto px-4 md:px-8 max-w-3xl text-center">
           <h2 className="text-3xl font-bold text-white mb-4">Ready to Start Your Journey?</h2>
           <p className="text-white/60 mb-10 leading-relaxed">
-            Our team is available Mon–Sat 9AM–6PM Japan Standard Time. Contact us now for
-            assistance with your car purchase.
+            Contact the Japan business office using the phone, WhatsApp or email details published on this website. Ask for written confirmation of vehicle availability, price basis and shipping scope before paying.
           </p>
 
           <div className="flex flex-col sm:flex-row gap-3 justify-center mb-10">

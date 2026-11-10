@@ -1,82 +1,97 @@
-# Wazir Trading LLC — Existing Website SEO Implementation
+# Wazir Trading LLC — Phase 1 technical SEO implementation
 
-## Scope
-This patch upgrades the existing TanStack Start + React + Wouter website for crawlability and technical SEO. It does not redesign the site or change visual styling, images, layout components, colour tokens, or page copy. No framework migration or new npm dependency is included.
+## Scope and design protection
 
-## What changed
+This is an SEO/runtime-only update to the existing TanStack Start + React + Wouter application. It does **not** migrate frameworks or modify visual design. No CSS, stylesheet, image, logo, font, colour token, page layout, navigation markup, component styling, or visual asset has been changed.
 
-- Removed the hydration gate that returned `null` before `useEffect`, allowing the existing Wouter pages to render in the initial server response using Wouter `ssrPath`.
-- Added a route-loader SEO bootstrap for the homepage, inventory listing, vehicle detail pages, static public pages, and admin/unknown paths.
-- Moved the existing page title/description intent into TanStack route `head` output so title, description, robots, canonical, Open Graph, Twitter metadata and JSON-LD are present in the initial HTML. Existing client-side `useMeta` remains for Wouter client navigation.
-- Fetched the homepage featured stock/count and first inventory page on the server, then hydrate the existing interactive components from that data. Existing client-side refresh/filter behavior remains.
-- Vehicle detail routes load their vehicle record on the server and emit unique title/description/canonical/social tags plus Product/Car and BreadcrumbList JSON-LD when the record passes the site's existing quality gate.
-- Reuses the server-emitted vehicle and breadcrumb JSON-LD elements after hydration to avoid duplicate structured-data blocks.
-- Adds a dynamic `/sitemap.xml` server route. It includes the existing public static routes and only available vehicle records passing `isIndexableVehicle`; valid vehicle images and `updated_at` are included where available.
-- Updates `public/robots.txt` to disallow admin/API paths and declare the canonical sitemap URL.
-- Filtered/search inventory URLs remain `noindex, follow` with the clean `/cars` canonical. The existing public vehicle detail canonical and quality rules are preserved.
-- Unknown URLs and unknown admin paths return a 404; error/404 metadata remains noindex. The existing `/admin/bulk-upload` route remains noindex/nofollow.
-- Removes the redundant app-level React Query client so pages use the TanStack router's request-scoped QueryClient provider during SSR.
-- Adds `.env.example` with placeholders only. The original local `.env` file is intentionally excluded from both ZIPs.
+No new npm dependency was added. The TanStack dependency versions already present in the uploaded source are retained.
 
-## Indexation policy used
+## Implemented in source
 
-- Public static pages listed in `src/lib/seo-bootstrap.ts` are index/follow.
-- `/cars` without query parameters is index/follow. Filtered/query URLs are noindex/follow and canonicalize to `/cars`.
-- A vehicle page is indexable only when `isIndexableVehicle()` approves the record. The existing quality gate requires a valid reference, make, model, year, available status, at least one meaningful specification, and at least one valid photo. Non-qualifying stock is noindex and omitted from the sitemap.
-- Admin pages are noindex/nofollow and `/admin/` is disallowed in robots.txt. Unknown paths return 404/noindex.
+- Public pages render through the existing Wouter app during the TanStack Start server request by passing Wouter `ssrPath`; query strings are preserved for server-side filter state.
+- TanStack route loaders provide page-specific server-rendered title, meta description, robots directive, canonical URL, Open Graph and Twitter tags.
+- The existing page components retain `useMeta` for client-side Wouter navigation after hydration.
+- Homepage featured inventory and stock count are fetched in the loader and passed to existing components as initial data. Existing client refresh behavior remains.
+- The first 20 `/cars` inventory records and exact available-stock count are fetched on the server. Filtered/search/sorted/query-string inventory URLs are `noindex, follow` and canonicalize to the clean `/cars` URL.
+- `/cars` stays `noindex` if the inventory could not be fetched, is empty, or none of its first 20 server-rendered records passes the existing vehicle quality gate. The client-side `useMeta` state preserves that same rule after hydration.
+- Individual `/cars/{ref_number}` records are looked up on the server. Valid vehicles receive unique title/description, canonical, Open Graph/Twitter image metadata, Product/Car JSON-LD and BreadcrumbList JSON-LD. Missing records return a not-found response; non-qualifying records remain `noindex`.
+- Product JSON-LD now includes the generated factual vehicle description and references the Organization entity as seller for an available FOB offer.
+- FAQPage JSON-LD is generated in the initial server head from the existing visible FAQ content; the existing client-side behavior reuses that script rather than adding a duplicate.
+- Global Organization and WebSite JSON-LD includes the company's existing public contact and Japan address details already displayed on the site.
+- Dynamic `/sitemap.xml` lists existing public pages and only vehicle URLs that pass `isIndexableVehicle`. Vehicle queries select only fields required for the sitemap quality check and image/date entries. The `/cars` catalogue URL is listed only if its first 20 server-rendered rows contain at least one qualifying vehicle, matching its robots rule.
+- `public/robots.txt` allows public pages, disallows `/admin/` and `/api/`, and references the canonical `www` sitemap hostname.
+- Admin pages are `noindex, nofollow`; unknown admin and unknown public paths return 404/noindex.
+- Adds a typecheck npm script (`npm run typecheck`) and `.env.example` with placeholder values only. Server-only Cloudinary secrets are not prefixed with `VITE_`.
 
-## Files changed
+## Indexation policy
 
-- `src/App.tsx`
-- `src/components/WazirApp.tsx`
-- `src/lib/seo-bootstrap.ts` (new)
-- `src/lib/seo-bootstrap-context.tsx` (new)
-- `src/pages/home.tsx`
+- Existing public informational pages are index/follow.
+- `/cars` is index/follow only when its first 20 server-rendered records include qualifying inventory; query/filter variants are noindex/follow and canonicalize to `/cars`.
+- Vehicle pages are indexable only when the existing `isIndexableVehicle()` quality gate passes: valid reference, make, model, year, available status, at least one meaningful specification, and at least one valid HTTP(S) image.
+- Non-qualifying, sold, unavailable, unresolved or missing vehicle records are not indexable and are omitted from the sitemap.
+- `/admin/` and `/api/` are disallowed in `robots.txt`; admin documents also receive noindex/nofollow. Unknown paths return 404/noindex.
+
+## Files changed in this completion pass
+
+- `.env.example` (new; placeholders only)
+- `package.json` (adds `typecheck` script; no dependency changes)
+- `src/lib/seo-bootstrap.ts`
+- `src/lib/vehicle-seo.ts`
 - `src/pages/cars.tsx`
-- `src/pages/car-detail.tsx`
-- `src/routes/index.tsx`
-- `src/routes/$.tsx`
-- `src/routes/__root.tsx`
-- `src/routes/sitemap[.]xml.ts` (new)
-- `public/robots.txt`
-- `.env.example` (new)
+- `src/pages/faqs.tsx`
+- `src/routes/sitemap[.]xml.ts` (new dynamic server route)
 
-The TanStack route tree is generated by the existing Vite/TanStack plugin. Do not hand-edit `src/routeTree.gen.ts`; the new sitemap route should be picked up during dev/build route generation.
+The existing SSR work in `src/App.tsx`, `src/components/WazirApp.tsx`, `src/pages/home.tsx`, `src/pages/car-detail.tsx`, `src/routes/index.tsx`, `src/routes/$.tsx`, `src/routes/__root.tsx`, and `public/robots.txt` is retained from the supplied SEO-ready source package.
 
-## Local validation status
+`src/routeTree.gen.ts` is generated by the existing TanStack Vite plugin. Do not edit it manually; run the project's build/dev command so the `/sitemap.xml` route is included in the generated tree.
 
-- TypeScript/TSX syntax parse: 99 files parsed, no syntax diagnostics.
-- Changed-file relative/alias imports: resolved, excluding the intentional Vite asset import `../styles.css?url` which resolves to `src/styles.css`.
-- Visual/style files: none changed.
-- Full dependency install/build/typecheck: not run successfully in this environment because `npm ci --ignore-scripts --no-audit --no-fund --prefer-offline` timed out while accessing the npm registry. Do not treat this as a production build pass.
+## Validation status in this environment
+
+- 99 TypeScript/TSX implementation files passed TypeScript transpile/syntax parsing with zero syntax diagnostics.
+- `package.json` parses as valid JSON.
+- The sitemap's vehicle selection uses the dedicated minimal column list.
+- The changed source file set contains no CSS, image, logo, font, design-token or visual-layout files.
+- A full semantic typecheck, lint and production build could not be completed in this container: the installed `node_modules` is incomplete (`vite/client` type declarations are missing), and a fresh dependency install timed out while reaching the npm registry. Do not interpret syntax parsing as a full typecheck or production build pass.
+- The user previously reported a successful production build for the preceding SEO-ready repository after the TanStack security-version update. The final changes in this handoff still need to be run through the checks below.
 
 ## Apply to the existing repository
 
-1. Back up the existing project folder or commit any pending work first.
-2. Extract `Wazir-Existing-Website-SEO-Only-Patch.zip` over the repository root, preserving your existing `.env` and local credentials. The ZIP does not contain `.env`.
-3. In PowerShell at the project root run:
+1. Back up the repository or commit pending work first.
+2. Extract the SEO-only patch over the existing repository root. It does not contain `.env` or any real credentials.
+3. Run:
 
 ```powershell
 npm install
+npm run typecheck
 npm run lint
 npm run build
-npx tsc --noEmit
 ```
 
-The existing `package.json` does not define a `typecheck` script; use `npx tsc --noEmit` if you want a standalone TypeScript check. Build/dev will regenerate the TanStack route tree.
+The TanStack route tree should regenerate during build. Do not manually edit the generated route tree.
 
-4. Confirm `/sitemap.xml`, `/robots.txt`, `/`, `/cars`, and a real `/cars/{ref_number}` URL locally. View page source (not only the Elements panel) and check that the initial HTML contains the page H1/text, title, description, canonical, robots and vehicle JSON-LD.
-5. Commit and push only after the checks pass. Vercel will deploy the commit through the existing Git integration.
+4. Confirm these routes locally:
+   - `/`
+   - `/cars`
+   - `/cars?make=Toyota` (or another existing filter)
+   - one real `/cars/{ref_number}` URL
+   - a nonexistent public URL
+   - `/robots.txt`
+   - `/sitemap.xml`
+5. Use **View Page Source** (not just DevTools Elements) to verify that initial HTML contains actual page text/H1, title, description, canonical and robots directives. Confirm valid vehicle pages include JSON-LD before hydration.
+6. Confirm HTTP status codes: public pages 200; missing pages and missing vehicle references 404; `/robots.txt` and `/sitemap.xml` 200 with correct content types.
+7. Check the sitemap: only canonical host URLs, no filtered URLs, no invalid/sold vehicle URLs, and all image URLs resolve.
+8. Push only after local checks pass. Vercel will deploy from the existing connected Git repository.
 
-## Post-deploy verification
+## Production verification still required before declaring Phase 1 fully complete
 
-- Check homepage and representative vehicle URLs return HTTP 200.
-- Check a nonexistent path and a nonexistent vehicle reference return HTTP 404 and `noindex`.
-- Check filtered `/cars?...` URLs return `noindex, follow` and canonical `/cars`.
-- Validate XML at `/sitemap.xml`, ensure only qualifying vehicles appear, and ensure robots.txt references the same sitemap hostname.
-- In Google Search Console, verify the domain property and submit `https://www.wazirtradingllc.com/sitemap.xml`. Use URL Inspection for the homepage, inventory, a valid vehicle, and a 404.
-- Review actual Search Console indexing and Core Web Vitals after Google has crawled the new output.
+- Verify the `www` canonical host and redirects in production; the observed non-`www` host redirected to `www` during the audit.
+- Inspect server-returned HTML for homepage, inventory, one valid vehicle, filtered inventory, and a 404.
+- Validate JSON-LD with Google's Rich Results Test / Schema Markup Validator, while remembering that valid schema does not guarantee rich-result display.
+- Verify the site in Google Search Console, submit `https://www.wazirtradingllc.com/sitemap.xml`, and inspect representative URLs.
+- Review Search Console indexing coverage and real-user Core Web Vitals once sufficient field data exists.
+- Review the output of `npm audit`; earlier install output reported 16 vulnerabilities (9 moderate, 6 high, 1 critical). The TanStack packages were upgraded to patched versions, but the full audit report has not been reviewed. Do not use `npm audit fix --force` without reviewing the dependency changes.
+- Verify Supabase public RLS permissions and ensure the service-role key, Cloudinary API secret, and database password are not committed to Git or exposed through `VITE_` variables.
 
-## Not included in this technical patch
+## Explicitly out of scope
 
-This patch does not create new destination/country, make/model, or vehicle-category editorial landing pages. Those require inventory coverage and verified business/import/shipping facts to avoid thin or inaccurate pages. It also does not claim ranking guarantees or substitute for Search Console, live HTTP, Supabase RLS, and device/performance testing.
+This phase does not add country, make/model, vehicle-category or editorial landing pages; no new page copy; no visual redesign; and no ranking guarantee. Those belong to later roadmap phases after Phase 1 production verification.
