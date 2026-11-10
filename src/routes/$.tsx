@@ -1,12 +1,19 @@
-import { createFileRoute } from "@tanstack/react-router";
-import WazirApp from "../components/WazirApp";
+import { createFileRoute, notFound } from '@tanstack/react-router';
+import WazirApp from '../components/WazirApp';
+import { buildSeoHead, loadSeoBootstrap } from '../lib/seo-bootstrap';
 
-// Catch-all: every site path (/cars, /about, /admin/...) is handled by the
-// Wazir Trading app's own client-side router.
-export const Route = createFileRoute("/$")({
+export const Route = createFileRoute('/$')({
+  loader: async ({ location }) => {
+    const bootstrap = await loadSeoBootstrap(location.pathname, location.searchStr);
+    if (bootstrap.notFound) throw notFound();
+    return bootstrap;
+  },
+  head: ({ loaderData }) => buildSeoHead(loaderData),
   component: CatchAll,
 });
 
 function CatchAll() {
-  return <WazirApp />;
+  const bootstrap = Route.useLoaderData();
+  const ssrPath = `${bootstrap.pathname}${bootstrap.search}`;
+  return <WazirApp ssrPath={ssrPath} bootstrap={bootstrap} />;
 }

@@ -11,6 +11,7 @@ import { useEffect, type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
+import { buildGlobalStructuredDataScripts } from "../lib/seo-bootstrap";
 
 const GA_TRACKING_ID = "G-EZ1K4BLVG9";
 
@@ -80,6 +81,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
       { title: "Japanese Used Cars for Export | Wazir Trading LLC" },
+      { name: "robots", content: "noindex, follow" },
       {
         name: "description",
         content:
@@ -88,6 +90,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
+    scripts: buildGlobalStructuredDataScripts(),
     links: [
       {
         rel: "stylesheet",

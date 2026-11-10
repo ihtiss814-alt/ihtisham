@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useMeta } from '@/lib/use-meta';
+import { useSeoBootstrap } from '@/lib/seo-bootstrap-context';
 import { Link, useLocation } from 'wouter';
 import {
   Search, ChevronDown, ChevronUp, ChevronLeft, ChevronRight,
@@ -812,9 +813,11 @@ function Pagination({ page, total, onPage }: {
   const end = Math.min(totalPages, page + 2);
   for (let i = start; i <= end; i++) pageNums.push(i);
   const pageHref = (nextPage: number) => {
-    const params = new URLSearchParams(window.location.search);
+    const currentSearch = typeof window === 'undefined' ? '' : window.location.search;
+    const currentPath = typeof window === 'undefined' ? '/cars' : window.location.pathname;
+    const params = new URLSearchParams(currentSearch);
     params.set('page', String(nextPage));
-    return `${window.location.pathname}?${params.toString()}`;
+    return `${currentPath}?${params.toString()}`;
   };
   const goToPage = (event: React.MouseEvent<HTMLAnchorElement>, nextPage: number) => {
     event.preventDefault();
@@ -857,7 +860,10 @@ function Pagination({ page, total, onPage }: {
 /* ─────────────────────────────────────────────────────────────── */
 /* URL PARAM HELPERS                                                */
 /* ─────────────────────────────────────────────────────────────── */
-function getParams(): URLSearchParams {
+function getParams(serverSearch = ''): URLSearchParams {
+  if (typeof window === 'undefined') {
+    return new URLSearchParams(serverSearch.startsWith('?') ? serverSearch.slice(1) : serverSearch);
+  }
   return new URLSearchParams(window.location.search);
 }
 
@@ -1045,9 +1051,17 @@ function applyFiltersToQuery(query: any, filters: Filters, activeTab: string, so
 /* MAIN PAGE                                                        */
 /* ─────────────────────────────────────────────────────────────── */
 export default function CarsPage() {
+  const bootstrap = useSeoBootstrap();
+  const serverSearch = bootstrap?.pathname === '/cars' ? bootstrap.search : '';
+  const initialInventoryLoaded = bootstrap?.pathname === '/cars' && bootstrap.inventoryResolved === true;
+  const initialInventoryCars = initialInventoryLoaded
+    ? (bootstrap.inventoryCars ?? []) as unknown as CarWithImage[]
+    : [];
   const [, navigate] = useLocation();
-  const hasInventoryQuery = typeof window !== 'undefined'
-    && new URLSearchParams(window.location.search).toString().length > 0;
+  const hasInventoryQuery = bootstrap?.pathname === '/cars'
+    ? new URLSearchParams(bootstrap.search).toString().length > 0
+    : typeof window !== 'undefined'
+      && new URLSearchParams(window.location.search).toString().length > 0;
   useMeta({
     title: 'Browse Japanese Used Cars for Export | Wazir Trading LLC',
     description: 'Browse current Japanese used cars available for export. Filter by make, model, price, and body type, then review FOB prices and vehicle records from Japan.',
@@ -1057,7 +1071,7 @@ export default function CarsPage() {
 
   // ── Read URL params ──
   const readFiltersFromUrl = useCallback((): Filters => {
-    const p = getParams();
+    const p = getParams(serverSearch);
     return {
       q:           p.get('q')           || '',
       searchText:  p.get('searchText')  || p.get('q') || '',
@@ -1094,17 +1108,17 @@ export default function CarsPage() {
       smartMinEngine:  p.get('smartMinEngine')  || '',
       smartMaxEngine:  p.get('smartMaxEngine')  || '',
     };
-  }, []);
+  }, [serverSearch]);
 
   // ── Core state ──
   const [filters, setFilters]           = useState(readFiltersFromUrl);
-  const [cars, setCars]                 = useState<CarWithImage[]>([]);
+  const [cars, setCars]                 = useState<CarWithImage[]>(initialInventoryCars);
   const [offerCar, setOfferCar]         = useState<CarWithImage | null>(null);
-  const [totalCount, setTotalCount]     = useState(0);
-  const [loading, setLoading]           = useState(true);
-  const [page, setPage]                 = useState(() => parseInt(getParams().get('page') || '1'));
+  const [totalCount, setTotalCount]     = useState(initialInventoryLoaded ? (bootstrap.inventoryCount ?? 0) : 0);
+  const [loading, setLoading]           = useState(!initialInventoryLoaded);
+  const [page, setPage]                 = useState(() => parseInt(getParams(serverSearch).get('page') || '1'));
   const [sortBy, setSortBy]             = useState('Newest First');
-  const [activeTab, setActiveTab]       = useState(() => getParams().get('tab') || '');
+  const [activeTab, setActiveTab]       = useState(() => getParams(serverSearch).get('tab') || '');
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
   const [makeCounts, setMakeCounts]     = useState<Record<string, number>>({});
   const [makeOptions,     setMakeOptions]     = useState<FilterOption[]>([]);
@@ -1375,9 +1389,14 @@ export default function CarsPage() {
   }, [fetchFilterOptions, fetchTabCounts]);
 
   // ── Re-fetch cars when filters/page/sort/tab change ──
+  const skippedServerInventoryFetch = useRef(false);
   useEffect(() => {
+    if (initialInventoryLoaded && !skippedServerInventoryFetch.current) {
+      skippedServerInventoryFetch.current = true;
+      return;
+    }
     fetchCars(filters, activeTab, sortBy, page);
-  }, [filters, activeTab, sortBy, page, fetchCars]);
+  }, [filters, activeTab, sortBy, page, fetchCars, initialInventoryLoaded]);
 
   // ── Write a filter change to state + URL (resets page to 1) ──
   // The three price inputs (sidebar range, home-page numeric bounds, advanced-panel bounds)

@@ -16,6 +16,7 @@ import HowToBuy from '@/components/HowToBuy';
 import { TESTIMONIALS } from '@/lib/testimonials';
 import { DEST_COUNTRIES } from '@/lib/shipping';
 import { useMeta } from '@/lib/use-meta';
+import { useSeoBootstrap } from '@/lib/seo-bootstrap-context';
 
 /* ── Destination Countries Section ──────────────────────────── */
 const DESTINATIONS = [
@@ -605,12 +606,23 @@ async function fetchCarImages(ids: string[]): Promise<Record<string, string>> {
 }
 
 function FeaturedCollectionSection() {
-  const [cars, setCars]       = React.useState<Car[]>([]);
-  const [imgMap, setImgMap]   = React.useState<Record<string, string>>({});
-  const [loading, setLoading] = React.useState(true);
+  const bootstrap = useSeoBootstrap();
+  const initialCars = bootstrap?.pathname === '/' && bootstrap.featuredResolved
+    ? (bootstrap.featuredCars ?? []) as unknown as Car[]
+    : [];
+  const initialImageMap = Object.fromEntries(
+    initialCars.map((car) => [
+      car.id,
+      car.car_images?.find((image) => image.is_primary)?.image_url ?? car.car_images?.[0]?.image_url ?? '',
+    ]).filter((entry) => Boolean(entry[1])),
+  );
+  const [cars, setCars] = React.useState<Car[]>(initialCars);
+  const [imgMap, setImgMap] = React.useState<Record<string, string>>(initialImageMap);
+  const [loading, setLoading] = React.useState(!(bootstrap?.pathname === '/' && bootstrap.featuredResolved));
   const waNumber = import.meta.env.VITE_WHATSAPP_NUMBER || '818089227375';
  
   React.useEffect(() => {
+    if (bootstrap?.pathname === '/' && bootstrap.featuredResolved) return;
     let cancelled = false;
     if (!isSupabaseConfigured) {
       setLoading(false);
@@ -636,7 +648,7 @@ function FeaturedCollectionSection() {
       }
     });
     return () => { cancelled = true; };
-  }, []);
+  }, [bootstrap?.featuredResolved, bootstrap?.pathname]);
 
   return (
     <section className="py-12" style={{ background: '#F8FAFC' }}>
@@ -1240,7 +1252,8 @@ function useCountUp(target: number, duration = 1800) {
 }
 
 export default function HomePage() {
-  const [stockCount, setStockCount]     = useState(0);
+  const bootstrap = useSeoBootstrap();
+  const [stockCount, setStockCount] = useState(bootstrap?.stockCount ?? 0);
 
   useMeta({
     title: 'Japanese Used Cars for Export | Wazir Trading LLC',
@@ -1253,6 +1266,7 @@ export default function HomePage() {
   const waLink = `https://wa.me/${waNumber}?text=${waMessage}`;
 
   useEffect(() => {
+    if (bootstrap?.pathname === '/' && bootstrap.stockCountResolved) return;
     let cancelled = false;
     if (!isSupabaseConfigured) return () => { cancelled = true; };
     supabase
@@ -1268,7 +1282,7 @@ export default function HomePage() {
         if (!cancelled) console.warn('Could not load homepage stock count:', error);
       });
     return () => { cancelled = true; };
-  }, []);
+  }, [bootstrap?.pathname, bootstrap?.stockCountResolved]);
 
   const TRUST = [
     { text: 'Bank to Bank TT Payment' },

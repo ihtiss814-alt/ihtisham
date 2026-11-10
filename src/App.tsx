@@ -1,5 +1,4 @@
 import React, { useEffect } from 'react';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Toaster } from '@/components/ui/toaster';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { Route, Switch, Router as WouterRouter, useLocation } from 'wouter';
@@ -23,16 +22,6 @@ import FaqsPage from '@/pages/faqs';
 import PaymentInformationPage from '@/pages/payment-information';
 import NotFound from '@/pages/not-found';
 import AdminBulkUpload from '@/pages/admin/bulk-upload';
-
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      staleTime: 60_000,       // 60 s — avoid refetching on every mount
-      gcTime: 5 * 60_000,      // 5 min cache retention
-      retry: 1,
-    },
-  },
-});
 
 function ScrollToTop() {
   const [location] = useLocation();
@@ -147,17 +136,15 @@ function AppShell() {
   );
 }
 
-function App() {
+function App({ ssrPath = '/' }: { ssrPath?: string }) {
   return (
     <AppErrorBoundary>
-      <QueryClientProvider client={queryClient}>
-        <TooltipProvider>
-          <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, '')}>
-            <AppShell />
-          </WouterRouter>
-          <Toaster />
-        </TooltipProvider>
-      </QueryClientProvider>
+      <TooltipProvider>
+        <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, '')} ssrPath={ssrPath}>
+          <AppShell />
+        </WouterRouter>
+        <Toaster />
+      </TooltipProvider>
     </AppErrorBoundary>
   );
 }

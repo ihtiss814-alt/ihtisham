@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'wouter';
 import { isSupabaseConfigured, supabase } from '@/lib/supabase';
 import { useMeta } from '@/lib/use-meta';
+import { useSeoBootstrap } from '@/lib/seo-bootstrap-context';
 import CarCard, { Car } from '@/components/CarCard';
 import {
   breadcrumbJsonLd,
@@ -163,11 +164,13 @@ function fmtNum(n: number | null | undefined) {
 export default function CarDetailPage() {
   const params = useParams();
   const ref = params.ref as string;
-
+  const bootstrap = useSeoBootstrap();
+  const hasServerVehicle = bootstrap?.vehicleResolved === true && bootstrap.vehicleRef === ref;
+  const initialVehicle = hasServerVehicle ? bootstrap?.vehicle as ExtendedCar : null;
 
   // core data
-  const [car, setCar] = useState<ExtendedCar | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [car, setCar] = useState<ExtendedCar | null>(initialVehicle);
+  const [loading, setLoading] = useState(!hasServerVehicle);
   const [similarCars, setSimilarCars] = useState<SimilarCar[]>([]);
 
   // UI state
@@ -198,6 +201,7 @@ export default function CarDetailPage() {
 
   /* ─── fetch car ─── */
   useEffect(() => {
+    if (hasServerVehicle) return;
     async function load() {
       if (!ref || !isSupabaseConfigured) {
         setLoading(false);
@@ -220,7 +224,7 @@ export default function CarDetailPage() {
       }
     }
     load();
-  }, [ref]);
+  }, [ref, hasServerVehicle]);
 
   /* ─── check saved ─── */
   useEffect(() => {
@@ -247,8 +251,29 @@ export default function CarDetailPage() {
     setMeta('og:type', 'product');
     if (images[0]) setMeta('og:image', images[0]);
 
-    const setJsonLd = (id: string, value: Record<string, unknown>) => {
+    const setJsonLd = (
+      id: string,
+      value: Record<string, unknown>,
+      matchesServerTag: (candidate: Record<string, unknown>) => boolean,
+    ) => {
       let script = document.getElementById(id) as HTMLScriptElement | null;
+      if (!script) {
+        // The initial document already contains the server-rendered JSON-LD.
+        // Reuse that node instead of emitting a duplicate after hydration.
+        const existing = Array.from(
+          document.querySelectorAll<HTMLScriptElement>('script[type="application/ld+json"]'),
+        ).find((candidate) => {
+          try {
+            return matchesServerTag(JSON.parse(candidate.textContent || '{}') as Record<string, unknown>);
+          } catch {
+            return false;
+          }
+        });
+        if (existing) {
+          script = existing;
+          script.id = id;
+        }
+      }
       if (!script) {
         script = document.createElement('script');
         script.id = id;
@@ -257,8 +282,14 @@ export default function CarDetailPage() {
       }
       script.textContent = JSON.stringify(value);
     };
-    setJsonLd('vehicle-jsonld', vehicleJsonLd(car, images));
-    setJsonLd('breadcrumb-jsonld', breadcrumbJsonLd(car));
+    setJsonLd('vehicle-jsonld', vehicleJsonLd(car, images), (candidate) => candidate.sku === car.ref_number);
+    setJsonLd('breadcrumb-jsonld', breadcrumbJsonLd(car), (candidate) => {
+      if (candidate['@type'] !== 'BreadcrumbList') return false;
+      const items = candidate.itemListElement;
+      return Array.isArray(items)
+        && items.some((item) => typeof item === 'object' && item !== null
+          && 'item' in item && item.item === canonicalUrl);
+    });
 
     return () => {
       document.getElementById('vehicle-jsonld')?.remove();

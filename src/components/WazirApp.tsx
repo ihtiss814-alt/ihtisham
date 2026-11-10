@@ -1,14 +1,22 @@
-import { useEffect, useState } from "react";
-import App from "../App";
+import App from '../App';
+import { SeoBootstrapProvider } from '../lib/seo-bootstrap-context';
+import type { SeoBootstrapData } from '../lib/seo-bootstrap';
 
 /**
- * The Wazir Trading site is a client-side app (wouter router, browser-only
- * data fetching). Render it only after hydration so TanStack's SSR never
- * evaluates browser-dependent code.
+ * Render the existing Wouter application during the TanStack Start request.
+ * Wouter's ssrPath makes its route matching use the incoming request path on
+ * the server and the browser location during hydration.
  */
-export default function WazirApp() {
-  const [mounted, setMounted] = useState(false);
-  useEffect(() => setMounted(true), []);
-  if (!mounted) return null;
-  return <App />;
+export default function WazirApp({
+  ssrPath,
+  bootstrap,
+}: {
+  ssrPath: string;
+  bootstrap: SeoBootstrapData | null;
+}) {
+  return (
+    <SeoBootstrapProvider value={bootstrap}>
+      <App ssrPath={ssrPath} />
+    </SeoBootstrapProvider>
+  );
 }
