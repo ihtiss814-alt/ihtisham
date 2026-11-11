@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { ChevronLeft, ChevronRight, Expand, ImageOff, MapPinned, X } from "lucide-react";
 import { isThirdPartyListing, ThirdPartyImageBadge } from "@/components/ThirdPartyImageBadge";
 import { vehicleImageAlt, type VehicleSeoCar, type VehicleSeoImage } from "@/lib/vehicle-seo";
+import { getResponsiveImageSrcSet, getResponsiveImageUrl } from "@/lib/image-delivery";
 
 type GalleryImage = VehicleSeoImage & { display_order?: number | null };
 
@@ -78,9 +79,13 @@ export default function VehiclePhotoGallery({
         {active && !imageFailed ? (
           <img
             key={active.image_url}
-            src={active.image_url}
+            src={getResponsiveImageUrl(active.image_url, 1280)}
+            srcSet={getResponsiveImageSrcSet(active.image_url, [640, 960, 1280, 1600])}
+            sizes="(max-width: 860px) 100vw, 65vw"
             alt={vehicleImageAlt(car, activeIndex)}
             className="vehicle-gallery-main-image"
+            width={1280}
+            height={960}
             loading="eager"
             fetchPriority="high"
             decoding="async"
@@ -150,7 +155,16 @@ export default function VehiclePhotoGallery({
               aria-label={`Show vehicle photo ${index + 1}`}
               aria-pressed={index === activeIndex}
             >
-              <img src={image.image_url} alt="" loading="lazy" decoding="async" />
+              <img
+                src={getResponsiveImageUrl(image.image_url, 200)}
+                srcSet={getResponsiveImageSrcSet(image.image_url, [100, 160, 200, 320])}
+                sizes="64px"
+                alt=""
+                width={160}
+                height={120}
+                loading="lazy"
+                decoding="async"
+              />
             </button>
           ))}
           {photos.length > 8 && (
@@ -207,8 +221,13 @@ export default function VehiclePhotoGallery({
             </button>
           )}
           <img
-            src={active.image_url}
+            src={getResponsiveImageUrl(active.image_url, 1600)}
+            srcSet={getResponsiveImageSrcSet(active.image_url, [960, 1280, 1600, 1920])}
+            sizes="100vw"
+            width={1600}
+            height={1200}
             alt={vehicleImageAlt(car, activeIndex)}
+            decoding="async"
             onClick={(event) => event.stopPropagation()}
           />
           {photos.length > 1 && (

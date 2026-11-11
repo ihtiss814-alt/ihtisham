@@ -37,26 +37,33 @@ import {
 
 function ScrollToTop() {
   const [location] = useLocation();
+  const [popRevision, setPopRevision] = React.useState(0);
   const positions = React.useRef(new Map<string, number>());
-  const restoring = React.useRef(false);
+  const pendingPopRestore = React.useRef<number | null>(null);
+
   useEffect(() => {
     const keyName = "__wazirScrollEntry";
     const nativePush = window.history.pushState;
     const nativeReplace = window.history.replaceState;
-    const previous = window.history.scrollRestoration;
+    const previousRestoration = window.history.scrollRestoration;
     const stateOf = (value: unknown): Record<string, unknown> =>
       value && typeof value === "object" ? (value as Record<string, unknown>) : {};
     const newKey = () => `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}`;
     const initial = stateOf(window.history.state);
-    let activeKey = typeof initial[keyName] === "string" ? (initial[keyName] as string) : newKey();
-    if (typeof initial[keyName] !== "string")
+    let activeKey =
+      typeof initial[keyName] === "string" ? (initial[keyName] as string) : newKey();
+
+    if (typeof initial[keyName] !== "string") {
       nativeReplace.call(
         window.history,
         { ...initial, [keyName]: activeKey },
         "",
         window.location.href,
       );
+    }
+
     const save = () => positions.current.set(activeKey, window.scrollY);
+
     window.history.pushState = function (state, unused, url) {
       save();
       const nextKey = newKey();
@@ -69,9 +76,11 @@ function ScrollToTop() {
       activeKey = nextKey;
       return result;
     };
+
     window.history.replaceState = function (state, unused, url) {
       const next = stateOf(state);
-      const nextKey = typeof next[keyName] === "string" ? (next[keyName] as string) : activeKey;
+      const nextKey =
+        typeof next[keyName] === "string" ? (next[keyName] as string) : activeKey;
       const result = nativeReplace.call(
         window.history,
         { ...next, [keyName]: nextKey },
@@ -81,36 +90,42 @@ function ScrollToTop() {
       activeKey = nextKey;
       return result;
     };
-    const pop = (event: PopStateEvent) => {
+
+    const restoreOnPop = (event: PopStateEvent) => {
       const state = stateOf(event.state);
       if (typeof state[keyName] === "string") activeKey = state[keyName] as string;
-      restoring.current = true;
-      requestAnimationFrame(() => {
-        window.scrollTo({
-          top: positions.current.get(activeKey) ?? 0,
-          left: 0,
-          behavior: "instant",
-        });
-        restoring.current = false;
-      });
+      pendingPopRestore.current = positions.current.get(activeKey) ?? 0;
+      setPopRevision((revision) => revision + 1);
     };
+
     window.history.scrollRestoration = "manual";
     window.addEventListener("scroll", save, { passive: true });
-    window.addEventListener("popstate", pop);
+    window.addEventListener("popstate", restoreOnPop);
+
     return () => {
       window.removeEventListener("scroll", save);
-      window.removeEventListener("popstate", pop);
+      window.removeEventListener("popstate", restoreOnPop);
       window.history.pushState = nativePush;
       window.history.replaceState = nativeReplace;
-      window.history.scrollRestoration = previous;
+      window.history.scrollRestoration = previousRestoration;
     };
   }, []);
+
   useEffect(() => {
-    if (!restoring.current) window.scrollTo({ top: 0, left: 0, behavior: "instant" });
-  }, [location]);
+    const savedPosition = pendingPopRestore.current;
+    if (savedPosition !== null) {
+      pendingPopRestore.current = null;
+      window.requestAnimationFrame(() => {
+        window.scrollTo({ top: savedPosition, left: 0, behavior: "instant" });
+      });
+      return;
+    }
+
+    window.scrollTo({ top: 0, left: 0, behavior: "instant" });
+  }, [location, popRevision]);
+
   return null;
 }
-
 function NavigationPrefetcher() {
   useEffect(() => {
     const seen = new Map<string, number>();

@@ -1,8 +1,10 @@
-name: Performance edition validation and ZIP
+name: Wazir Trading quality checks and source ZIP
 
 on:
   push:
-    branches: [performance-instant-navigation]
+    branches:
+      - main
+      - performance-final-pass
   workflow_dispatch:
 
 permissions:
@@ -13,23 +15,46 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 25
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - name: Check out source
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
         with:
           node-version: 22
           cache: npm
-      - run: npm ci
-      - run: npm run typecheck
-      - run: npm run lint
-      - run: npm run validate:country-pages
-      - run: npm run validate:vehicle-pages
-      - run: node scripts/validate-vehicle-detail-redesign.mjs
-      - run: npm run build
-      - name: Create source archive
+
+      - name: Install locked dependencies
+        run: npm ci
+
+      - name: TypeScript validation
+        run: npm run typecheck
+
+      - name: ESLint
+        run: npm run lint
+
+      - name: Validate country landing pages
+        run: npm run validate:country-pages
+
+      - name: Validate vehicle landing pages
+        run: npm run validate:vehicle-pages
+
+      - name: Validate vehicle detail redesign
+        run: node scripts/validate-vehicle-detail-redesign.mjs
+
+      - name: Validate performance optimizations
+        run: node scripts/validate-performance-optimizations.mjs
+
+      - name: Production build
+        run: npm run build
+
+      - name: Create complete source ZIP
         run: git archive --format=zip --output=Wazir-Trading-Performance-Edition.zip HEAD
-      - uses: actions/upload-artifact@v4
+
+      - name: Upload source ZIP
+        uses: actions/upload-artifact@v4
         with:
           name: Wazir-Trading-Performance-Edition
           path: Wazir-Trading-Performance-Edition.zip
           if-no-files-found: error
-          retention-days: 14
+          retention-days: 30

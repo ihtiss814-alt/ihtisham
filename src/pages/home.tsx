@@ -20,6 +20,9 @@ function WhatsAppIcon({ size = 16, className = "" }: { size?: number; className?
   );
 }
 import { isSupabaseConfigured, supabase } from "@/lib/supabase";
+import { cachedRequest } from "@/lib/request-cache";
+import { getAvailableStockCount } from "@/lib/inventory-cache";
+import { getHomepageInventoryCounts } from "@/lib/homepage-inventory-cache";
 import CarCard, { Car } from "@/components/CarCard";
 import HowToBuy from "@/components/HowToBuy";
 import { TESTIMONIALS } from "@/lib/testimonials";
@@ -275,9 +278,9 @@ function BrandLogo({ slug, name, accent }: { slug: string; name: string; accent:
       alt={`${name} logo`}
       onError={() => setFailed(true)}
       className="w-full h-full object-contain p-1"
-      loading="eager"
+      loading="lazy"
       decoding="async"
-      fetchPriority="high"
+      fetchPriority="low"
       style={{
         // Tint monochrome Simple Icons SVGs to brand accent colour
         filter: `brightness(0) saturate(100%) ${accentToFilter(accent)}`,
@@ -334,44 +337,56 @@ function ShopByMakeSection() {
   const [makeCounts, setMakeCounts] = React.useState<Record<string, number>>({});
   const [countsLoading, setCountsLoading] = React.useState(true);
   const [countsError, setCountsError] = React.useState(false);
+  const [nearViewport, setNearViewport] = React.useState(false);
 
-  // Load each displayed make's exact available count as soon as the homepage
-  // mounts. Head/count queries transfer no car rows, so the inventory numbers
-  // are accurate without delaying the vehicle cards or downloading the catalogue.
   React.useEffect(() => {
+    const section = sectionRef.current;
+    if (!section || !("IntersectionObserver" in window)) {
+      setNearViewport(true);
+      return;
+    }
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries.some((entry) => entry.isIntersecting)) {
+          setNearViewport(true);
+          observer.disconnect();
+        }
+      },
+      { rootMargin: "500px 0px" },
+    );
+
+    observer.observe(section);
+    return () => observer.disconnect();
+  }, []);
+
+  // Defer exact totals until this directory approaches the viewport.
+  React.useEffect(() => {
+    if (!nearViewport) return;
     if (!isSupabaseConfigured) {
       setCountsLoading(false);
       setCountsError(true);
       return;
     }
-    let cancelled = false;
-    Promise.all(
-      POPULAR_BRANDS.map(async ({ name }) => {
-        const { count, error } = await supabase
-          .from("cars")
-          .select("id", { count: "exact", head: true })
-          .eq("status", "available")
-          .ilike("make", name);
-        if (error) throw error;
-        return [name, count ?? 0] as const;
-      }),
-    )
-      .then((results) => {
-        if (cancelled) return;
-        setMakeCounts(Object.fromEntries(results));
+
+    let active = true;
+    getHomepageInventoryCounts("make", POPULAR_BRANDS)
+      .then((counts) => {
+        if (!active) return;
+        setMakeCounts(counts);
         setCountsLoading(false);
       })
       .catch((error: unknown) => {
-        if (cancelled) return;
+        if (!active) return;
         setCountsLoading(false);
         setCountsError(true);
         console.warn("Could not load homepage make counts:", error);
       });
 
     return () => {
-      cancelled = true;
+      active = false;
     };
-  }, []);
+  }, [nearViewport]);
 
   return (
     <section ref={sectionRef} className="bg-[#F8FAFC] border-y border-gray-100 py-14 md:py-16">
@@ -624,42 +639,55 @@ function ShopByBodyTypeSection() {
   const [bodyCounts, setBodyCounts] = React.useState<Record<string, number>>({});
   const [countsLoading, setCountsLoading] = React.useState(true);
   const [countsError, setCountsError] = React.useState(false);
+  const [nearViewport, setNearViewport] = React.useState(false);
 
   React.useEffect(() => {
+    const section = sectionRef.current;
+    if (!section || !("IntersectionObserver" in window)) {
+      setNearViewport(true);
+      return;
+    }
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries.some((entry) => entry.isIntersecting)) {
+          setNearViewport(true);
+          observer.disconnect();
+        }
+      },
+      { rootMargin: "500px 0px" },
+    );
+
+    observer.observe(section);
+    return () => observer.disconnect();
+  }, []);
+
+  React.useEffect(() => {
+    if (!nearViewport) return;
     if (!isSupabaseConfigured) {
       setCountsLoading(false);
       setCountsError(true);
       return;
     }
 
-    let cancelled = false;
-    Promise.all(
-      POPULAR_BODY_TYPES.map(async ({ name, databaseValue }) => {
-        const { count, error } = await supabase
-          .from("cars")
-          .select("id", { count: "exact", head: true })
-          .eq("status", "available")
-          .ilike("body_type", databaseValue);
-        if (error) throw error;
-        return [name, count ?? 0] as const;
-      }),
-    )
-      .then((results) => {
-        if (cancelled) return;
-        setBodyCounts(Object.fromEntries(results));
+    let active = true;
+    getHomepageInventoryCounts("body_type", POPULAR_BODY_TYPES)
+      .then((counts) => {
+        if (!active) return;
+        setBodyCounts(counts);
         setCountsLoading(false);
       })
       .catch((error: unknown) => {
-        if (cancelled) return;
+        if (!active) return;
         setCountsLoading(false);
         setCountsError(true);
         console.warn("Could not load homepage body type counts:", error);
       });
 
     return () => {
-      cancelled = true;
+      active = false;
     };
-  }, []);
+  }, [nearViewport]);
 
   return (
     <section ref={sectionRef} className="bg-white border-b border-gray-100 py-14 md:py-16">
@@ -691,7 +719,7 @@ function ShopByBodyTypeSection() {
                     src={icon}
                     alt={`${name} vehicles`}
                     className="h-10 w-14 object-contain transition-transform duration-200 group-hover:scale-110"
-                    loading="eager"
+                    loading="lazy"
                     decoding="async"
                     onError={(event) => {
                       event.currentTarget.style.display = "none";
@@ -724,22 +752,6 @@ function ShopByBodyTypeSection() {
 
 /* ── Featured Collection ─────────────────────────────────────── */
 
-async function fetchCarImages(ids: string[]): Promise<Record<string, string>> {
-  if (!ids.length) return {};
-  const { data } = await supabase
-    .from("car_images")
-    .select("car_id,image_url,is_primary")
-    .in("car_id", ids);
-  if (!data) return {};
-  const map: Record<string, string> = {};
-  // Prefer primary image, then fall back to first found
-  for (const row of data as { car_id: string; image_url: string; is_primary: boolean }[]) {
-    if (!row.car_id || !row.image_url) continue;
-    if (!map[row.car_id] || row.is_primary) map[row.car_id] = row.image_url;
-  }
-  return map;
-}
-
 function FeaturedCollectionSection() {
   const bootstrap = useSeoBootstrap();
   const initialCars =
@@ -765,40 +777,61 @@ function FeaturedCollectionSection() {
 
   React.useEffect(() => {
     if (bootstrap?.pathname === "/" && bootstrap.featuredResolved) return;
-    let cancelled = false;
+    let active = true;
     if (!isSupabaseConfigured) {
       setLoading(false);
       return () => {
-        cancelled = true;
+        active = false;
       };
     }
-    (async () => {
-      setLoading(true);
-      const { data } = await supabase
-        .from("cars")
-        .select(
-          "id,ref_number,make,model,variant,year,engine_cc,fob_price_usd,is_featured,created_at,mileage_km,transmission,fuel_type",
-        )
-        .eq("status", "available")
-        .eq("is_featured", true)
-        .order("created_at", { ascending: false })
-        .limit(50);
-      if (cancelled) return;
-      const fetched = (data ?? []) as Car[];
-      setCars(fetched);
-      const imgs = await fetchCarImages(fetched.map((c) => c.id));
-      if (!cancelled) {
-        setImgMap(imgs);
+
+    setLoading(true);
+    void cachedRequest(
+      "homepage:featured-vehicles",
+      async () => {
+        const { data, error } = await supabase
+          .from("cars")
+          .select(
+            "id,ref_number,make,model,variant,year,engine_cc,fob_price_usd,is_featured,created_at,mileage_km,transmission,fuel_type,car_images(image_url,is_primary,display_order)",
+          )
+          .eq("status", "available")
+          .eq("is_featured", true)
+          .order("created_at", { ascending: false })
+          .limit(50);
+
+        if (error) throw error;
+
+        const fetched = (data ?? []) as Car[];
+        const imageMap = Object.fromEntries(
+          fetched
+            .map((car) => {
+              const images = [...(car.car_images ?? [])].sort((a, b) => {
+                if (Boolean(a.is_primary) !== Boolean(b.is_primary)) return a.is_primary ? -1 : 1;
+                return 0;
+              });
+              return [car.id, images[0]?.image_url ?? ""];
+            })
+            .filter((entry) => Boolean(entry[1])),
+        );
+
+        return { cars: fetched, imageMap };
+      },
+      45_000,
+    )
+      .then((result) => {
+        if (!active) return;
+        setCars(result.cars);
+        setImgMap(result.imageMap);
         setLoading(false);
-      }
-    })().catch((error: unknown) => {
-      if (!cancelled) {
+      })
+      .catch((error: unknown) => {
+        if (!active) return;
         setLoading(false);
         console.warn("Could not load featured vehicles:", error);
-      }
-    });
+      });
+
     return () => {
-      cancelled = true;
+      active = false;
     };
   }, [bootstrap?.featuredResolved, bootstrap?.pathname]);
 
@@ -1448,9 +1481,9 @@ function CantFindCarSection() {
                     <p className="sm:col-span-2 text-xs text-gray-400 text-center mt-2">
                       By submitting, you agree that your details may be used to review and respond
                       to this enquiry. See our{" "}
-                      <a href="/privacy-policy" className="underline underline-offset-2">
+                      <Link href="/privacy-policy" className="underline underline-offset-2">
                         Privacy Policy
-                      </a>
+                      </Link>
                       .
                     </p>
                   </div>
@@ -1679,36 +1712,60 @@ const TRUST_ITEMS = [
 
 const HERO_SLIDES = [
   {
-    src: "https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=2400&q=85",
+    src: "https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=1920&q=80",
   },
   {
-    src: "https://images.unsplash.com/photo-1552519507-da3b142c6e3d?auto=format&fit=crop&w=2400&q=85",
+    src: "https://images.unsplash.com/photo-1552519507-da3b142c6e3d?auto=format&fit=crop&w=1920&q=80",
   },
   {
-    src: "https://images.unsplash.com/photo-1494976388531-d1058494cdd8?auto=format&fit=crop&w=2400&q=85",
+    src: "https://images.unsplash.com/photo-1494976388531-d1058494cdd8?auto=format&fit=crop&w=1920&q=80",
   },
   {
-    src: "https://images.unsplash.com/photo-1502877338535-766e1452684a?auto=format&fit=crop&w=2400&q=85",
+    src: "https://images.unsplash.com/photo-1502877338535-766e1452684a?auto=format&fit=crop&w=1920&q=80",
   },
   {
-    src: "https://images.unsplash.com/photo-1583121274602-3e2820c69888?auto=format&fit=crop&w=2400&q=85",
+    src: "https://images.unsplash.com/photo-1583121274602-3e2820c69888?auto=format&fit=crop&w=1920&q=80",
   },
   {
-    src: "https://images.unsplash.com/photo-1568605117036-5fe5e7bab0b7?auto=format&fit=crop&w=2400&q=85",
+    src: "https://images.unsplash.com/photo-1568605117036-5fe5e7bab0b7?auto=format&fit=crop&w=1920&q=80",
   },
 ];
 
-const SLIDE_DURATION = 1500;
+const SLIDE_DURATION = 6000;
 
 function HeroBackground() {
   const [currentSlide, setCurrentSlide] = useState(0);
+  const [loadedSlides, setLoadedSlides] = useState<Set<number>>(() => new Set([0]));
+  const loadedSlidesRef = useRef<Set<number>>(new Set([0]));
+  const pendingLoads = useRef<Map<number, Promise<boolean>>>(new Map());
+  const currentSlideRef = useRef(0);
+  const slideIntentRef = useRef(0);
   const slideTimer = useRef<number | null>(null);
 
-  const startSlider = React.useCallback(() => {
-    if (slideTimer.current !== null) window.clearInterval(slideTimer.current);
-    slideTimer.current = window.setInterval(() => {
-      setCurrentSlide((current) => (current + 1) % HERO_SLIDES.length);
-    }, SLIDE_DURATION);
+  const preloadSlide = React.useCallback((index: number): Promise<boolean> => {
+    if (loadedSlidesRef.current.has(index)) return Promise.resolve(true);
+    const pending = pendingLoads.current.get(index);
+    if (pending) return pending;
+
+    const request = new Promise<boolean>((resolve) => {
+      const image = new window.Image();
+      image.decoding = "async";
+      image.fetchPriority = "low";
+      image.onload = () => {
+        loadedSlidesRef.current.add(index);
+        setLoadedSlides(new Set(loadedSlidesRef.current));
+        pendingLoads.current.delete(index);
+        resolve(true);
+      };
+      image.onerror = () => {
+        pendingLoads.current.delete(index);
+        resolve(false);
+      };
+      image.src = HERO_SLIDES[index].src;
+    });
+
+    pendingLoads.current.set(index, request);
+    return request;
   }, []);
 
   const stopSlider = React.useCallback(() => {
@@ -1718,38 +1775,56 @@ function HeroBackground() {
     }
   }, []);
 
-  useEffect(() => {
-    const preloadImages = () => {
-      HERO_SLIDES.forEach(({ src }) => {
-        const img = new window.Image();
-        img.src = src;
+  const startSlider = React.useCallback(() => {
+    stopSlider();
+    if (document.hidden || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+
+    slideTimer.current = window.setInterval(() => {
+      const nextIndex = (currentSlideRef.current + 1) % HERO_SLIDES.length;
+      const intent = ++slideIntentRef.current;
+      void preloadSlide(nextIndex).then((loaded) => {
+        if (!loaded || intent !== slideIntentRef.current) return;
+        currentSlideRef.current = nextIndex;
+        setCurrentSlide(nextIndex);
       });
-    };
-
-    preloadImages();
-  }, []);
+    }, SLIDE_DURATION);
+  }, [preloadSlide, stopSlider]);
 
   useEffect(() => {
-    startSlider();
+    void preloadSlide((currentSlide + 1) % HERO_SLIDES.length);
+  }, [currentSlide, preloadSlide]);
 
-    const handleVisibilityChange = () => {
-      if (document.hidden) {
-        stopSlider();
-      } else {
-        startSlider();
-      }
+  useEffect(() => {
+    const motionPreference = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const syncPlayback = () => {
+      if (document.hidden || motionPreference.matches) stopSlider();
+      else startSlider();
     };
 
-    document.addEventListener("visibilitychange", handleVisibilityChange);
+    syncPlayback();
+    document.addEventListener("visibilitychange", syncPlayback);
+    motionPreference.addEventListener("change", syncPlayback);
+
     return () => {
-      document.removeEventListener("visibilitychange", handleVisibilityChange);
+      document.removeEventListener("visibilitychange", syncPlayback);
+      motionPreference.removeEventListener("change", syncPlayback);
       stopSlider();
     };
   }, [startSlider, stopSlider]);
 
   const changeSlide = (index: number) => {
-    setCurrentSlide(index);
-    startSlider();
+    if (index === currentSlideRef.current) {
+      startSlider();
+      return;
+    }
+
+    const intent = ++slideIntentRef.current;
+    void preloadSlide(index).then((loaded) => {
+      if (!loaded || intent !== slideIntentRef.current) return;
+      currentSlideRef.current = index;
+      setCurrentSlide(index);
+      startSlider();
+    });
   };
 
   return (
@@ -1758,7 +1833,9 @@ function HeroBackground() {
         <div
           key={slide.src}
           className={`slide ${index === currentSlide ? "active" : ""}`}
-          style={{ backgroundImage: `url('${slide.src}')` }}
+          style={{
+            backgroundImage: loadedSlides.has(index) ? `url('${slide.src}')` : "none",
+          }}
           aria-hidden={index !== currentSlide}
         />
       ))}
@@ -1823,25 +1900,17 @@ export default function HomePage() {
 
   useEffect(() => {
     if (bootstrap?.pathname === "/" && bootstrap.stockCountResolved) return;
-    let cancelled = false;
-    if (!isSupabaseConfigured)
-      return () => {
-        cancelled = true;
-      };
-    supabase
-      .from("cars")
-      .select("id", { count: "exact", head: true })
-      .eq("status", "available")
-      .then(({ count, error }) => {
-        if (cancelled) return;
-        if (count !== null) setStockCount(count);
-        if (error) console.warn("Could not load homepage stock count:", error.message);
+    let active = true;
+    getAvailableStockCount()
+      .then((count) => {
+        if (active && count !== null) setStockCount(count);
       })
-      .then(undefined, (error: unknown) => {
-        if (!cancelled) console.warn("Could not load homepage stock count:", error);
+      .catch((error: unknown) => {
+        if (active) console.warn("Could not load homepage stock count:", error);
       });
+
     return () => {
-      cancelled = true;
+      active = false;
     };
   }, [bootstrap?.pathname, bootstrap?.stockCountResolved]);
 

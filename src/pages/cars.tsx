@@ -1611,10 +1611,13 @@ type Filters = {
   smartMaxEngine: string;
 };
 
+const CARS_LIST_SELECT =
+  "id,ref_number,make,model,variant,year,engine_cc,fuel_type,transmission,body_type,color,drive,steering,seats,doors,mileage_km,auction_grade,fob_price_usd,stock_location,port_of_loading,shipment_method,status,collection,is_featured,is_new_arrival,features,created_at,exterior_grade,interior_grade,lot_number,manufacture_month,car_images(image_url,is_primary,display_order)";
+
 function createCarsListQuery() {
   return supabase
     .from("cars")
-    .select("*, car_images(image_url, is_primary, display_order)", { count: "exact" })
+    .select(CARS_LIST_SELECT, { count: "exact" })
     .eq("status", "available");
 }
 
@@ -2118,7 +2121,7 @@ export default function CarsPage() {
             let query = supabase
               .from("cars")
               // Counts and inventory rows intentionally come from the same live dataset.
-              .select("*, car_images(image_url, is_primary, display_order)", { count: "exact" })
+              .select(CARS_LIST_SELECT, { count: "exact" })
               .eq("status", "available");
             query = applyFiltersToQuery(query, currentFilters, currentTab, currentSort);
             const from = (currentPage - 1) * PAGE_SIZE;
@@ -2146,13 +2149,22 @@ export default function CarsPage() {
   const fetchFilterOptions = useCallback(async () => {
     if (!isSupabaseConfigured) return;
     try {
-      const { data } = await supabase
-        .from("cars")
-        .select("make, model, body_type, transmission, fuel_type, drive, stock_location, color")
-        .eq("status", "available")
-        .limit(10000);
+      const data = await cachedRequest(
+        "cars:filter-options",
+        async () => {
+          const { data, error } = await supabase
+            .from("cars")
+            .select("make, model, body_type, transmission, fuel_type, drive, stock_location, color")
+            .eq("status", "available")
+            .limit(10000);
 
-      if (!data) return;
+          if (error) throw error;
+          return data ?? [];
+        },
+        5 * 60_000,
+      );
+
+      if (!data.length) return;
 
       // Count distinct values for a given column, sorted by count descending.
       // Optional normalise fn maps raw DB value → display key.
@@ -2223,32 +2235,38 @@ export default function CarsPage() {
       return;
     }
     try {
-      const tabConfigs: Array<{ key: string; apply: (query: CarsCountQuery) => CarsCountQuery }> = [
-        {
-          key: "new_arrivals",
-          apply: (q: CarsCountQuery) =>
-            q.gte("created_at", newArrivalCutoffIso()).lte("created_at", new Date().toISOString()),
+      const counts = await cachedRequest(
+        "cars:tab-counts",
+        async () => {
+          const tabConfigs: Array<{ key: string; apply: (query: CarsCountQuery) => CarsCountQuery }> = [
+            {
+              key: "new_arrivals",
+              apply: (q: CarsCountQuery) =>
+                q.gte("created_at", newArrivalCutoffIso()).lte("created_at", new Date().toISOString()),
+            },
+            { key: "clearance", apply: (q: CarsCountQuery) => q.ilike("collection", "clearance") },
+            { key: "japan", apply: (q: CarsCountQuery) => q.ilike("stock_location", "Japan") },
+            { key: "hybrid", apply: (q: CarsCountQuery) => q.ilike("fuel_type", "Hybrid") },
+            { key: "suv", apply: (q: CarsCountQuery) => q.ilike("body_type", "SUV") },
+            { key: "budget", apply: (q: CarsCountQuery) => q.lte("fob_price_usd", 5000) },
+          ];
+          const results = await Promise.all(
+            tabConfigs.map(({ key, apply }) =>
+              apply(createCarsCountQuery()).then(({ count, error }) => {
+                if (error) throw error;
+                return { key, count: count ?? 0 };
+              }),
+            ),
+          );
+
+          return Object.fromEntries(results.map(({ key, count }) => [key, count])) as Record<
+            string,
+            number
+          >;
         },
-        { key: "clearance", apply: (q: CarsCountQuery) => q.ilike("collection", "clearance") },
-        { key: "japan", apply: (q: CarsCountQuery) => q.ilike("stock_location", "Japan") },
-        { key: "hybrid", apply: (q: CarsCountQuery) => q.ilike("fuel_type", "Hybrid") },
-        { key: "suv", apply: (q: CarsCountQuery) => q.ilike("body_type", "SUV") },
-        { key: "budget", apply: (q: CarsCountQuery) => q.lte("fob_price_usd", 5000) },
-      ];
-      const results = await Promise.all(
-        tabConfigs.map(({ key, apply }) =>
-          apply(
-            supabase
-              .from("cars")
-              .select("id", { count: "exact", head: true })
-              .eq("status", "available"),
-          ).then(({ count }) => ({ key, count: count || 0 })),
-        ),
+        45_000,
       );
-      const counts: Record<string, number> = {};
-      results.forEach(({ key, count }) => {
-        counts[key] = count;
-      });
+
       setTabCounts(counts);
     } catch (err) {
       console.error("Failed to fetch tab counts:", err);
@@ -2292,20 +2310,36 @@ export default function CarsPage() {
       setAvailableModels([]);
       return;
     }
-    supabase
-      .from("cars")
-      .select("model")
-      .eq("status", "available")
-      .ilike("make", filters.make)
-      .limit(500)
-      .then(({ data }) => {
-        const models = [
+    let active = true;
+    void cachedRequest(
+      `cars:models:${filters.make.toLowerCase()}`,
+      async () => {
+        const { data, error } = await supabase
+          .from("cars")
+          .select("model")
+          .eq("status", "available")
+          .ilike("make", filters.make)
+          .limit(500);
+
+        if (error) throw error;
+        return [
           ...new Set(
-            (data || []).map((row: { model?: string | null }) => row.model).filter(Boolean),
+            (data ?? []).map((row: { model?: string | null }) => row.model).filter(Boolean),
           ),
         ].sort() as string[];
-        setAvailableModels(models);
+      },
+      5 * 60_000,
+    )
+      .then((models) => {
+        if (active) setAvailableModels(models);
+      })
+      .catch((error: unknown) => {
+        if (active) console.warn("Could not load inventory models:", error);
       });
+
+    return () => {
+      active = false;
+    };
   }, [filters.make]);
 
   // ── Initial data load ──

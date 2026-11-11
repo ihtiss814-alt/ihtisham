@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { Link } from "wouter";
 import { isSupabaseConfigured, supabase } from "@/lib/supabase";
 import { Mail, MapPin, Phone, Check, CarFront, Ship, CreditCard, CircleHelp } from "lucide-react";
 import { useMeta } from "@/lib/use-meta";
@@ -272,9 +273,9 @@ export default function ContactPage() {
                   <p className="text-xs text-muted-foreground leading-relaxed">
                     By sending this form, you agree that Wazir Trading LLC may use the information
                     you provide to review and respond to your enquiry. See our{" "}
-                    <a href="/privacy-policy" className="text-primary underline underline-offset-2">
+                    <Link href="/privacy-policy" className="text-primary underline underline-offset-2">
                       Privacy Policy
-                    </a>
+                    </Link>
                     .
                   </p>
                   <button

@@ -3,6 +3,7 @@ import { Link } from "wouter";
 import { Heart, ImageOff, Eye } from "lucide-react";
 import { isThirdPartyListing, ThirdPartyImageBadge } from "@/components/ThirdPartyImageBadge";
 import { isRecentInventoryListing, vehicleImageAlt } from "@/lib/vehicle-seo";
+import { getResponsiveImageSrcSet, getResponsiveImageUrl } from "@/lib/image-delivery";
 
 export interface Car {
   id: string;
@@ -139,10 +140,14 @@ function CarCard({
             )}
             {showImage ? (
               <img
-                src={primaryImage!}
+                src={getResponsiveImageUrl(primaryImage!, 640)}
+                srcSet={getResponsiveImageSrcSet(primaryImage!, [320, 640, 960])}
+                sizes="(max-width: 768px) 100vw, 40vw"
                 alt={vehicleImageAlt(car, 0)}
                 onError={() => setImgError(true)}
                 className="car-img-photo"
+                width={640}
+                height={480}
                 loading="lazy"
                 decoding="async"
               />
@@ -224,10 +229,14 @@ function CarCard({
             )}
             {showImage ? (
               <img
-                src={primaryImage!}
+                src={getResponsiveImageUrl(primaryImage!, 480)}
+                srcSet={getResponsiveImageSrcSet(primaryImage!, [240, 360, 480, 640])}
+                sizes="208px"
                 alt={vehicleImageAlt(car, 0)}
                 onError={() => setImgError(true)}
                 className="w-full h-full object-cover hover:scale-105 transition-transform duration-500"
+                width={480}
+                height={360}
                 loading="lazy"
                 decoding="async"
               />
@@ -285,8 +294,12 @@ function CarCard({
         <Link href={href} className="block w-full h-full">
           {showImage ? (
             <img
-              src={primaryImage!}
+              src={getResponsiveImageUrl(primaryImage!, 960)}
+              srcSet={getResponsiveImageSrcSet(primaryImage!, [320, 640, 960, 1280])}
+              sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
               alt={vehicleImageAlt(car, 0)}
+              width={640}
+              height={480}
               loading="lazy"
               decoding="async"
               onError={() => setImgError(true)}
