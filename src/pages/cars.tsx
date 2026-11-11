@@ -1611,64 +1611,41 @@ type Filters = {
   smartMaxEngine: string;
 };
 
-type Filters = {
-  q: string;
-  searchText: string;
-  make: string;
-  price: string;
-  body: string;
-  category: string;
-  location: string;
-  year: string;
-  drive: string;
-  trans: string;
-  engine: string;
-  fuel: string;
-  mileage: string;
-  steering: string;
-  destination: string;
-  // Direct numeric price bounds — used by home-page "Shop by Price Range" links (?minPrice=X&maxPrice=Y)
-  minPrice: string;
-  maxPrice: string;
-  // Advanced-panel-only fields (no sidebar equivalent)
-  advModel: string;
-  advYearFrom: string;
-  advYearTo: string;
-  advMinPrice: string;
-  advMaxPrice: string;
-  advColor: string;
-  advMinMil: string;
-  advMaxMil: string;
-  advMinEng: string;
-  advMaxEng: string;
-  smartFuel: string;
-  smartTrans: string;
-  smartDrive: string;
-  smartMinMileage: string;
-  smartMaxMileage: string;
-  smartMinEngine: string;
-  smartMaxEngine: string;
-};
+function createCarsListQuery() {
+  return supabase
+    .from("cars")
+    .select("*, car_images(image_url, is_primary, display_order)", { count: "exact" })
+    .eq("status", "available");
+}
 
-const EMPTY_FILTERS: Filters = {
-  q:"",searchText:"",make:"",price:"",body:"",category:"",location:"",year:"",drive:"",trans:"",
-  engine:"",fuel:"",mileage:"",steering:"",destination:"",minPrice:"",maxPrice:"",advModel:"",
-  advYearFrom:"",advYearTo:"",advMinPrice:"",advMaxPrice:"",advColor:"",advMinMil:"",advMaxMil:"",
-  advMinEng:"",advMaxEng:"",smartFuel:"",smartTrans:"",smartDrive:"",smartMinMileage:"",
-  smartMaxMileage:"",smartMinEngine:"",smartMaxEngine:""
-};
-function carsPageCacheKey(filters:Filters,tab:string,sort:string,page:number):string {
-  return `cars:list:${JSON.stringify([filters,tab,sort,page])}`;
+type CarsListQuery = ReturnType<typeof createCarsListQuery>;
+
+function createCarsCountQuery() {
+  return supabase
+    .from("cars")
+    .select("id", { count: "exact", head: true })
+    .eq("status", "available");
 }
-export function prefetchCarsPage():void {
-  if(!isSupabaseConfigured)return;
-  void cachedRequest(carsPageCacheKey(EMPTY_FILTERS,"","Newest First",1),async()=>{
-    const query=applyFiltersToQuery(createCarsListQuery(),EMPTY_FILTERS,"","Newest First").range(0,PAGE_SIZE-1);
-    const {data,count,error}=await query;if(error)throw error;
-    return {cars:(data??[]) as CarWithImage[],totalCount:count??0};
-  },25000).catch(()=>undefined);
-}
-"model",
+
+type CarsCountQuery = ReturnType<typeof createCarsCountQuery>;
+
+function applyFiltersToQuery(
+  query: CarsListQuery,
+  filters: Filters,
+  activeTab: string,
+  sortBy: string,
+): CarsListQuery {
+  // Full-text search across make/model plus related car attributes.
+  if (filters.q) {
+    const terms = filters.q
+      .trim()
+      .split(/\s+/)
+      .filter(Boolean)
+      .map((term) => term.replace(/'/g, "''"));
+
+    const searchableFields = [
+      "make",
+      "model",
       "variant",
       "ref_number",
       "body_type",
@@ -1836,6 +1813,38 @@ export function prefetchCarsPage():void {
   }
 
   return query;
+}
+
+type CarsPageCacheResult = { cars: CarWithImage[]; totalCount: number };
+
+const EMPTY_FILTERS: Filters = {
+  q: "", searchText: "", make: "", price: "", body: "", category: "", location: "",
+  year: "", drive: "", trans: "", engine: "", fuel: "", mileage: "", steering: "",
+  destination: "", minPrice: "", maxPrice: "", advModel: "", advYearFrom: "",
+  advYearTo: "", advMinPrice: "", advMaxPrice: "", advColor: "", advMinMil: "",
+  advMaxMil: "", advMinEng: "", advMaxEng: "", smartFuel: "", smartTrans: "",
+  smartDrive: "", smartMinMileage: "", smartMaxMileage: "", smartMinEngine: "",
+  smartMaxEngine: "",
+};
+
+function carsPageCacheKey(filters: Filters, tab: string, sort: string, page: number): string {
+  return `cars:list:${JSON.stringify([filters, tab, sort, page])}`;
+}
+
+export function prefetchCarsPage(): void {
+  if (!isSupabaseConfigured) return;
+  void cachedRequest<CarsPageCacheResult>(
+    carsPageCacheKey(EMPTY_FILTERS, "", "Newest First", 1),
+    async () => {
+      const query = applyFiltersToQuery(
+        createCarsListQuery(), EMPTY_FILTERS, "", "Newest First",
+      ).range(0, PAGE_SIZE - 1);
+      const { data, count, error } = await query;
+      if (error) throw error;
+      return { cars: (data ?? []) as CarWithImage[], totalCount: count ?? 0 };
+    },
+    25_000,
+  ).catch(() => undefined);
 }
 
 /* ─────────────────────────────────────────────────────────────── */
@@ -2073,17 +2082,25 @@ export default function CarsPage() {
         return;
       }
       try {
-        const result = await cachedRequest(carsPageCacheKey(currentFilters,currentTab,currentSort,currentPage),async()=>{
-          let query=supabase.from("cars")
-            .select("*, car_images(image_url, is_primary, display_order)",{count:"exact"})
-            .eq("status","available");
-          query=applyFiltersToQuery(query,currentFilters,currentTab,currentSort);
-          const from=(currentPage-1)*PAGE_SIZE;
-          query=query.range(from,from+PAGE_SIZE-1);
-          const {data,count,error}=await query;if(error)throw error;
-          return {cars:(data??[]) as CarWithImage[],totalCount:count??0};
-        },25000);
-        setCars(result.cars);setTotalCount(result.totalCount);
+        const result = await cachedRequest<CarsPageCacheResult>(
+          carsPageCacheKey(currentFilters, currentTab, currentSort, currentPage),
+          async () => {
+            let query = supabase
+              .from("cars")
+              // Counts and inventory rows intentionally come from the same live dataset.
+              .select("*, car_images(image_url, is_primary, display_order)", { count: "exact" })
+              .eq("status", "available");
+            query = applyFiltersToQuery(query, currentFilters, currentTab, currentSort);
+            const from = (currentPage - 1) * PAGE_SIZE;
+            query = query.range(from, from + PAGE_SIZE - 1);
+            const { data, count, error } = await query;
+            if (error) throw error;
+            return { cars: (data ?? []) as CarWithImage[], totalCount: count ?? 0 };
+          },
+          25_000,
+        );
+        setCars(result.cars);
+        setTotalCount(result.totalCount);
       } catch (err) {
         console.error("Failed to fetch cars:", err);
         setCars([]);
