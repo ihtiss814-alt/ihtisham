@@ -262,13 +262,13 @@ const tierTwoFile = ts.createSourceFile(
   ts.ScriptKind.TS,
 );
 let tierTwoInitializer;
-function visitTierOne(node) {
+function visitTierTwo(node) {
   if (ts.isVariableDeclaration(node) && propertyName(node.name) === "COUNTRY_TIER_TWO_CONTENT") {
     tierTwoInitializer = node.initializer;
   }
-  ts.forEachChild(node, visitTierOne);
+  ts.forEachChild(node, visitTierTwo);
 }
-visitTierOne(tierTwoFile);
+visitTierTwo(tierTwoFile);
 
 const tierTwoCountries = new Set(
   countries.filter((country) => country.seoTier === 2).map((country) => country.slug),
@@ -277,7 +277,7 @@ const tierTwoEntries =
   tierTwoInitializer && ts.isObjectLiteralExpression(tierTwoInitializer)
     ? tierTwoInitializer.properties.filter(ts.isPropertyAssignment)
     : [];
-const enrichedSlugs = new Set();
+const tierTwoEnrichedSlugs = new Set();
 
 if (!tierTwoInitializer || !ts.isObjectLiteralExpression(tierTwoInitializer)) {
   errors.push(
@@ -292,8 +292,8 @@ for (const entry of tierTwoEntries) {
     errors.push("Each Tier 2 enrichment must be a keyed object");
     continue;
   }
-  if (enrichedSlugs.has(slug)) errors.push("Duplicate Tier 2 enrichment: " + slug);
-  enrichedSlugs.add(slug);
+  if (tierTwoEnrichedSlugs.has(slug)) errors.push("Duplicate Tier 2 enrichment: " + slug);
+  tierTwoEnrichedSlugs.add(slug);
   if (!tierTwoCountries.has(slug)) {
     errors.push(slug + ": enrichment does not match a Tier 2 country");
   }
@@ -314,7 +314,9 @@ for (const entry of tierTwoEntries) {
   if (!overview || overview.length < 250) {
     errors.push(slug + ": market overview must provide substantial destination-specific guidance");
   }
-  if (!logistics || logistics.length < 160) errors.push(slug + ": logistics summary is too short");
+  if (!logistics || logistics.length < 160) {
+    errors.push(slug + ": logistics summary is too short");
+  }
   if (!enquiryNote || enquiryNote.length < 70) {
     errors.push(slug + ": enquiry guidance is too short");
   }
@@ -354,10 +356,10 @@ for (const entry of tierTwoEntries) {
 }
 
 for (const slug of tierTwoCountries) {
-  if (!enrichedSlugs.has(slug)) errors.push(slug + ": missing Tier 2 enrichment");
+  if (!tierTwoEnrichedSlugs.has(slug)) errors.push(slug + ": missing Tier 2 enrichment");
 }
-if (enrichedSlugs.size !== 13) {
-  errors.push("Expected exactly 13 Tier 2 enrichments; found " + enrichedSlugs.size);
+if (tierTwoEnrichedSlugs.size !== 13) {
+  errors.push("Expected exactly 13 Tier 2 enrichments; found " + tierTwoEnrichedSlugs.size);
 }
 
 
