@@ -74,7 +74,10 @@ function NativeDocumentNavigation() {
         destination.pathname === window.location.pathname &&
         destination.search === window.location.search &&
         destination.hash.length > 0;
-      if (isSameDocumentFragment) return;
+      if (isSameDocumentFragment) {
+        event.stopImmediatePropagation();
+        return;
+      }
 
       // Use a real document request for internal page links. The browser owns
       // its loading indicator, document lifecycle, and history scroll restore.

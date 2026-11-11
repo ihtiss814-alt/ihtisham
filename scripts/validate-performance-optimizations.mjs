@@ -16,6 +16,7 @@ const gallery = read("src/components/VehiclePhotoGallery.tsx");
 const imageDelivery = read("src/lib/image-delivery.ts");
 const app = read("src/App.tsx");
 const howToBuy = read("src/components/HowToBuy.tsx");
+const rootRoute = read("src/routes/__root.tsx");
 const homeRoute = read("src/routes/index.tsx");
 const contact = read("src/pages/contact.tsx");
 const payment = read("src/pages/payment-information.tsx");
@@ -136,7 +137,8 @@ if (
   !home.includes('href={`/cars?make=${encodeURIComponent(name)}`}') ||
   !home.includes('href={`/cars?body=${encodeURIComponent(name)}`}') ||
   howToBuy.includes("data-wt-nav") ||
-  howToBuy.includes("navigate(")
+  howToBuy.includes("navigate(") ||
+  rootRoute.includes("<Link")
 ) {
   fail("Homepage destination/make/body cards and How To Buy links must use normal anchor navigation.");
 } else {
