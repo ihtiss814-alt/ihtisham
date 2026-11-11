@@ -2,11 +2,13 @@ import type { DestinationPreference } from "@/hooks/useDestinationPreference";
 import { canonicalCountry } from "@/lib/shipping";
 import { COUNTRY_LANDING_PAGES, countryLandingPath } from "@/lib/country-landing-pages";
 
-export function quoteRequestHref(input: Partial<DestinationPreference> & {
-  vehicleRef?: string;
-  vehicleModel?: string;
-  requestType?: "vehicle" | "sourcing" | "shipping" | "general";
-} = {}): string {
+export function quoteRequestHref(
+  input: Partial<DestinationPreference> & {
+    vehicleRef?: string;
+    vehicleModel?: string;
+    requestType?: "vehicle" | "sourcing" | "shipping" | "general";
+  } = {},
+): string {
   const params = new URLSearchParams();
   if (input.country?.trim()) params.set("country", input.country.trim());
   if (input.port?.trim()) params.set("port", input.port.trim());

@@ -62,7 +62,9 @@ export default function DestinationFields({
       <div>
         <label className={labelClass} htmlFor={portId}>
           Preferred seaport, border or final city
-          <span className="ml-1 normal-case tracking-normal font-normal opacity-70">(optional)</span>
+          <span className="ml-1 normal-case tracking-normal font-normal opacity-70">
+            (optional)
+          </span>
         </label>
         <input
           id={portId}
@@ -84,10 +86,16 @@ export default function DestinationFields({
         )}
       </div>
       {showGuidance && (
-        <p className={dark ? "text-[11px] leading-5 text-white/55 sm:col-span-2" : "text-[11px] leading-5 text-slate-500 sm:col-span-2"}>
-          Enter any destination worldwide. Suggested locations are only starting points; the
-          actual route, carrier availability, port handling and price must be confirmed for your
-          vehicle. For a landlocked country, you can enter your final city or preferred border.
+        <p
+          className={
+            dark
+              ? "text-[11px] leading-5 text-white/55 sm:col-span-2"
+              : "text-[11px] leading-5 text-slate-500 sm:col-span-2"
+          }
+        >
+          Enter any destination worldwide. Suggested locations are only starting points; the actual
+          route, carrier availability, port handling and price must be confirmed for your vehicle.
+          For a landlocked country, you can enter your final city or preferred border.
         </p>
       )}
     </div>

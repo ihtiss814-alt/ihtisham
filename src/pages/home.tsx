@@ -204,27 +204,28 @@ function DestinationCountriesSection() {
             const guidePath = countryGuidePathForName(name);
             const href = guidePath ?? quoteRequestHref({ country: name, requestType: "shipping" });
             return (
-            <Link
-              key={`${code}-${i}`}
-              href={href}
-              className="dest-card group flex-shrink-0 flex flex-col items-center gap-3 w-[108px] py-5 px-3 rounded-[8px] border border-white/10 bg-white/5 hover:bg-white/10 hover:border-[#C8102E]/60 transition-all duration-200 cursor-pointer"
-            >
-              {/* Country flag — matched by the ISO code with emoji fallback */}
-              <div
-                className="overflow-hidden rounded-[4px] flex-shrink-0"
-                style={{ width: 72, height: 48, boxShadow: "0 2px 8px rgba(0,0,0,0.5)" }}
+              <Link
+                key={`${code}-${i}`}
+                href={href}
+                className="dest-card group flex-shrink-0 flex flex-col items-center gap-3 w-[108px] py-5 px-3 rounded-[8px] border border-white/10 bg-white/5 hover:bg-white/10 hover:border-[#C8102E]/60 transition-all duration-200 cursor-pointer"
               >
-                <FlagImg code={code} name={name} />
-              </div>
+                {/* Country flag — matched by the ISO code with emoji fallback */}
+                <div
+                  className="overflow-hidden rounded-[4px] flex-shrink-0"
+                  style={{ width: 72, height: 48, boxShadow: "0 2px 8px rgba(0,0,0,0.5)" }}
+                >
+                  <FlagImg code={code} name={name} />
+                </div>
 
-              <span className="text-[11px] font-bold text-white/90 tracking-wide text-center leading-tight">
-                {name}
-              </span>
-              <span className="text-[9px] tracking-[0.2em] uppercase text-[#C8102E]/60 group-hover:text-[#C8102E] font-bold transition-colors">
-                {guidePath ? "IMPORT GUIDE" : "PLAN A QUOTE"}
-              </span>
-            </Link>
-          ); })}
+                <span className="text-[11px] font-bold text-white/90 tracking-wide text-center leading-tight">
+                  {name}
+                </span>
+                <span className="text-[9px] tracking-[0.2em] uppercase text-[#C8102E]/60 group-hover:text-[#C8102E] font-bold transition-colors">
+                  {guidePath ? "IMPORT GUIDE" : "PLAN A QUOTE"}
+                </span>
+              </Link>
+            );
+          })}
         </div>
       </div>
     </section>
@@ -1024,7 +1025,9 @@ function CantFindCarSection() {
     <section className="relative overflow-hidden bg-[#F8FAFC] py-20">
       <div
         className="absolute inset-x-0 top-0 h-px"
-        style={{ background: "linear-gradient(to right, transparent, rgba(200,16,46,0.4), transparent)" }}
+        style={{
+          background: "linear-gradient(to right, transparent, rgba(200,16,46,0.4), transparent)",
+        }}
       />
       <div className="container mx-auto grid max-w-6xl grid-cols-1 items-center gap-8 px-4 md:px-8 lg:grid-cols-[1.1fr_0.9fr]">
         <div>
@@ -1036,8 +1039,8 @@ function CantFindCarSection() {
           </h2>
           <p className="mt-4 max-w-xl text-sm leading-7 text-slate-600 md:text-base">
             Tell us the make, model, year, budget and destination you have in mind. We will review
-            the brief and confirm whether a suitable sourcing option and written quotation can
-            be offered.
+            the brief and confirm whether a suitable sourcing option and written quotation can be
+            offered.
           </p>
           <ul className="mt-6 grid grid-cols-1 gap-3 text-sm text-slate-600 sm:grid-cols-2">
             {[
@@ -1059,7 +1062,10 @@ function CantFindCarSection() {
             >
               Start a sourcing request <ArrowRight size={15} />
             </Link>
-            <Link href="/cars" className="text-sm font-semibold text-[#0D1B3E] underline decoration-[#C8102E]/40 underline-offset-4 hover:text-[#C8102E]">
+            <Link
+              href="/cars"
+              className="text-sm font-semibold text-[#0D1B3E] underline decoration-[#C8102E]/40 underline-offset-4 hover:text-[#C8102E]"
+            >
               Browse current inventory
             </Link>
           </div>
@@ -1072,7 +1078,9 @@ function CantFindCarSection() {
             </div>
             <div>
               <h3 className="font-serif text-xl font-bold text-[#0D1B3E]">Set your destination</h3>
-              <p className="text-xs text-slate-500">Used to prefill this and future enquiries on this device</p>
+              <p className="text-xs text-slate-500">
+                Used to prefill this and future enquiries on this device
+              </p>
             </div>
           </div>
           <DestinationPreferenceControl mobile />
@@ -1081,7 +1089,10 @@ function CantFindCarSection() {
             vehicle eligibility, costs and local import requirements are confirmed separately.
           </p>
           <div className="mt-5 border-t border-slate-100 pt-4">
-            <Link href="/import-japanese-cars" className="inline-flex items-center gap-2 text-sm font-semibold text-[#C8102E] hover:underline">
+            <Link
+              href="/import-japanese-cars"
+              className="inline-flex items-center gap-2 text-sm font-semibold text-[#C8102E] hover:underline"
+            >
               Read destination import guides <ArrowRight size={14} />
             </Link>
           </div>

@@ -44,11 +44,7 @@ import { useDestinationPreference } from "@/hooks/useDestinationPreference";
 import { quoteRequestHref } from "@/lib/destination-links";
 import "./cars.css";
 import { useExchangeRate } from "@/hooks/useExchangeRate";
-import {
-  canonicalCountry,
-  fetchShippingRate,
-  computeLandedCost,
-} from "@/lib/shipping";
+import { canonicalCountry, fetchShippingRate, computeLandedCost } from "@/lib/shipping";
 import {
   parseSmartSearch,
   type SmartSearchResult,
@@ -1147,12 +1143,14 @@ function TotalPriceCalculator({ initialCountry }: { initialCountry?: string }) {
     if (!preference.loaded) return;
     const preferredCountry = initialCountry ? canonicalCountry(initialCountry) : preference.country;
     setCountry((current) => current || preferredCountry);
-    setPort((current) => current || (
-      preferredCountry &&
-      canonicalCountry(preference.country) === canonicalCountry(preferredCountry)
-        ? preference.port
-        : ""
-    ));
+    setPort(
+      (current) =>
+        current ||
+        (preferredCountry &&
+        canonicalCountry(preference.country) === canonicalCountry(preferredCountry)
+          ? preference.port
+          : ""),
+    );
   }, [initialCountry, preference.loaded, preference.country, preference.port]);
 
   const handleCountryChange = (nextCountry: string) => {
@@ -1181,7 +1179,9 @@ function TotalPriceCalculator({ initialCountry }: { initialCountry?: string }) {
       return;
     }
     if (!country || !port.trim()) {
-      setInputError("Choose a destination and enter the preferred seaport, border crossing or final city.");
+      setInputError(
+        "Choose a destination and enter the preferred seaport, border crossing or final city.",
+      );
       setResult(null);
       setNoRate(false);
       return;
@@ -1223,7 +1223,8 @@ function TotalPriceCalculator({ initialCountry }: { initialCountry?: string }) {
           Export Cost Estimator
         </h3>
         <p className="mt-1 text-[12px] text-white/60">
-          Uses an exact route-rate record only. It does not estimate duties, tax or destination-side charges.
+          Uses an exact route-rate record only. It does not estimate duties, tax or destination-side
+          charges.
         </p>
       </div>
       <div className="grid grid-cols-1 gap-6 p-6 md:grid-cols-2">
@@ -1254,7 +1255,11 @@ function TotalPriceCalculator({ initialCountry }: { initialCountry?: string }) {
             idPrefix="inventory-calculator"
             dark
           />
-          {inputError && <p className="text-[11px] text-[#FF9CA8]" role="alert">{inputError}</p>}
+          {inputError && (
+            <p className="text-[11px] text-[#FF9CA8]" role="alert">
+              {inputError}
+            </p>
+          )}
         </div>
         <div className="space-y-4">
           <div>
@@ -1269,7 +1274,10 @@ function TotalPriceCalculator({ initialCountry }: { initialCountry?: string }) {
                     name="calc-inspection"
                     value={option}
                     checked={inspection === option}
-                    onChange={() => { setInspection(option); setResult(null); }}
+                    onChange={() => {
+                      setInspection(option);
+                      setResult(null);
+                    }}
                     className="accent-[#C8102E]"
                   />
                   <span className="text-sm text-white/80">{option}</span>
@@ -1289,7 +1297,10 @@ function TotalPriceCalculator({ initialCountry }: { initialCountry?: string }) {
                     name="calc-insurance"
                     value={option}
                     checked={insurance === option}
-                    onChange={() => { setInsurance(option); setResult(null); }}
+                    onChange={() => {
+                      setInsurance(option);
+                      setResult(null);
+                    }}
                     className="accent-[#C8102E]"
                   />
                   <span className="text-sm text-white/80">{option}</span>
@@ -1298,30 +1309,64 @@ function TotalPriceCalculator({ initialCountry }: { initialCountry?: string }) {
             </div>
           </div>
           {result && (
-            <div className="rounded-sm border border-white/10 p-4" style={{ background: "rgba(255,255,255,0.05)" }}>
+            <div
+              className="rounded-sm border border-white/10 p-4"
+              style={{ background: "rgba(255,255,255,0.05)" }}
+            >
               <div className="mb-3 text-[11px] uppercase tracking-wider text-white/50">
                 Estimated export subtotal · USD
               </div>
               <div className="space-y-2 text-sm">
-                <div className="flex justify-between gap-4 text-white/70"><span>FOB vehicle price</span><strong className="text-white">${result.fob.toLocaleString(undefined, { maximumFractionDigits: 2 })}</strong></div>
-                <div className="flex justify-between gap-4 text-white/70"><span>Recorded freight</span><strong className="text-white">${result.freight.toLocaleString(undefined, { maximumFractionDigits: 2 })}</strong></div>
-                <div className="flex justify-between gap-4 text-white/70"><span>Inspection</span><strong className="text-white">${result.inspection.toLocaleString(undefined, { maximumFractionDigits: 2 })}</strong></div>
-                <div className="flex justify-between gap-4 text-white/70"><span>Rate-based insurance</span><strong className="text-white">${result.insurance.toLocaleString(undefined, { maximumFractionDigits: 2 })}</strong></div>
-                <div className="mt-3 flex justify-between gap-4 border-t border-white/15 pt-3 text-white"><span className="font-bold">Estimated subtotal</span><strong className="text-xl font-black" style={{ color: RED }}>${result.total.toLocaleString(undefined, { maximumFractionDigits: 2 })}</strong></div>
+                <div className="flex justify-between gap-4 text-white/70">
+                  <span>FOB vehicle price</span>
+                  <strong className="text-white">
+                    ${result.fob.toLocaleString(undefined, { maximumFractionDigits: 2 })}
+                  </strong>
+                </div>
+                <div className="flex justify-between gap-4 text-white/70">
+                  <span>Recorded freight</span>
+                  <strong className="text-white">
+                    ${result.freight.toLocaleString(undefined, { maximumFractionDigits: 2 })}
+                  </strong>
+                </div>
+                <div className="flex justify-between gap-4 text-white/70">
+                  <span>Inspection</span>
+                  <strong className="text-white">
+                    ${result.inspection.toLocaleString(undefined, { maximumFractionDigits: 2 })}
+                  </strong>
+                </div>
+                <div className="flex justify-between gap-4 text-white/70">
+                  <span>Rate-based insurance</span>
+                  <strong className="text-white">
+                    ${result.insurance.toLocaleString(undefined, { maximumFractionDigits: 2 })}
+                  </strong>
+                </div>
+                <div className="mt-3 flex justify-between gap-4 border-t border-white/15 pt-3 text-white">
+                  <span className="font-bold">Estimated subtotal</span>
+                  <strong className="text-xl font-black" style={{ color: RED }}>
+                    ${result.total.toLocaleString(undefined, { maximumFractionDigits: 2 })}
+                  </strong>
+                </div>
               </div>
               <p className="mt-3 text-[10px] text-white/50">
-                Rate-based estimate only. Duties, taxes, customs clearance, destination port/terminal,
-                storage, registration and inland delivery are excluded unless a written quotation
-                expressly includes them. Confirm the rate and validity before payment.
+                Rate-based estimate only. Duties, taxes, customs clearance, destination
+                port/terminal, storage, registration and inland delivery are excluded unless a
+                written quotation expressly includes them. Confirm the rate and validity before
+                payment.
               </p>
             </div>
           )}
           {noRate && (
-            <div className="rounded-sm border border-white/10 p-4" style={{ background: "rgba(255,255,255,0.05)" }}>
-              <div className="mb-1 text-lg font-black" style={{ color: RED }}>QUOTE REQUIRED</div>
+            <div
+              className="rounded-sm border border-white/10 p-4"
+              style={{ background: "rgba(255,255,255,0.05)" }}
+            >
+              <div className="mb-1 text-lg font-black" style={{ color: RED }}>
+                QUOTE REQUIRED
+              </div>
               <p className="mb-3 text-[12px] text-white/60">
-                No valid rate record was found for {port ? `${port}, ` : ""}{country}. We will not
-                substitute a generic freight price.
+                No valid rate record was found for {port ? `${port}, ` : ""}
+                {country}. We will not substitute a generic freight price.
               </p>
               <Link
                 href={estimateHref}
@@ -1342,7 +1387,13 @@ function TotalPriceCalculator({ initialCountry }: { initialCountry?: string }) {
           className="flex w-full items-center justify-center gap-2 rounded-sm py-3 text-sm font-bold uppercase tracking-[0.1em] text-white transition-all hover:opacity-90 disabled:opacity-60"
           style={{ background: RED }}
         >
-          {calcLoading ? <><Loader2 size={16} className="animate-spin" /> Checking route rate…</> : "Calculate recorded export subtotal"}
+          {calcLoading ? (
+            <>
+              <Loader2 size={16} className="animate-spin" /> Checking route rate…
+            </>
+          ) : (
+            "Calculate recorded export subtotal"
+          )}
         </button>
       </div>
     </div>

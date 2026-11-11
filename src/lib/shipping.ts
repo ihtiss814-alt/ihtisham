@@ -204,18 +204,26 @@ export async function fetchShippingRate(
       if (error || !data) return null;
       const row = data as unknown as Record<string, unknown>;
       if (
-        row.freight_usd == null || row.freight_usd === "" ||
-        row.inspection_fee == null || row.inspection_fee === "" ||
-        row.insurance_rate == null || row.insurance_rate === ""
-      ) return null;
+        row.freight_usd == null ||
+        row.freight_usd === "" ||
+        row.inspection_fee == null ||
+        row.inspection_fee === "" ||
+        row.insurance_rate == null ||
+        row.insurance_rate === ""
+      )
+        return null;
       const freight = Number(row.freight_usd);
       const inspection = Number(row.inspection_fee);
       const insuranceRate = Number(row.insurance_rate);
       if (
-        !Number.isFinite(freight) || freight < 0 ||
-        !Number.isFinite(inspection) || inspection < 0 ||
-        !Number.isFinite(insuranceRate) || insuranceRate < 0
-      ) return null;
+        !Number.isFinite(freight) ||
+        freight < 0 ||
+        !Number.isFinite(inspection) ||
+        inspection < 0 ||
+        !Number.isFinite(insuranceRate) ||
+        insuranceRate < 0
+      )
+        return null;
       return {
         country: String(row.country ?? countryKey),
         port: String(row.port ?? portKey),

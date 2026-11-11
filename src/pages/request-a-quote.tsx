@@ -41,10 +41,26 @@ const EMPTY_FORM: QuoteForm = {
 };
 
 const REQUEST_TYPES: Array<{ value: RequestType; label: string; detail: string }> = [
-  { value: "vehicle", label: "A vehicle I found", detail: "Ask about a specific listing or reference." },
-  { value: "sourcing", label: "Find a vehicle", detail: "Tell us the make, model and requirements." },
-  { value: "shipping", label: "Shipping only", detail: "Ask whether a route or shipping quote can be offered." },
-  { value: "general", label: "Something else", detail: "Ask a payment, process or general question." },
+  {
+    value: "vehicle",
+    label: "A vehicle I found",
+    detail: "Ask about a specific listing or reference.",
+  },
+  {
+    value: "sourcing",
+    label: "Find a vehicle",
+    detail: "Tell us the make, model and requirements.",
+  },
+  {
+    value: "shipping",
+    label: "Shipping only",
+    detail: "Ask whether a route or shipping quote can be offered.",
+  },
+  {
+    value: "general",
+    label: "Something else",
+    detail: "Ask a payment, process or general question.",
+  },
 ];
 
 const WA_NUMBER = (import.meta.env.VITE_WHATSAPP_NUMBER || "818089227375").replace(/\D/g, "");
@@ -65,9 +81,12 @@ export default function RequestQuotePage() {
   const [form, setForm] = useState<QuoteForm>(EMPTY_FORM);
   const [status, setStatus] = useState<SubmissionStatus>("idle");
   const [errorMessage, setErrorMessage] = useState("");
-  const search = bootstrap?.pathname === "/request-a-quote"
-    ? bootstrap.search
-    : location.includes("?") ? `?${location.split("?")[1]}` : "";
+  const search =
+    bootstrap?.pathname === "/request-a-quote"
+      ? bootstrap.search
+      : location.includes("?")
+        ? `?${location.split("?")[1]}`
+        : "";
 
   useMeta({
     title: "Request a Japanese Car Export Quote | Wazir Trading LLC",
@@ -114,7 +133,9 @@ export default function RequestQuotePage() {
     event.preventDefault();
     if (!isSupabaseConfigured) {
       setStatus("error");
-      setErrorMessage("The enquiry service is not currently available. Please use WhatsApp or email.");
+      setErrorMessage(
+        "The enquiry service is not currently available. Please use WhatsApp or email.",
+      );
       return;
     }
     if (!form.country.trim()) {
@@ -144,12 +165,18 @@ export default function RequestQuotePage() {
       form.vehicleModel.trim() ? `Vehicle / model: ${form.vehicleModel.trim()}` : "",
       budgetValue !== null ? `Target budget (USD): ${budgetValue}` : "",
       form.requirements.trim() ? `Requirements: ${form.requirements.trim()}` : "",
-    ].filter(Boolean).join("\n");
+    ]
+      .filter(Boolean)
+      .join("\n");
     const message = [destinationText, detailText].filter(Boolean).join("\n\n");
     const inquiryType =
-      form.requestType === "vehicle" ? "car-inquiry" :
-      form.requestType === "sourcing" ? "custom-request" :
-      form.requestType === "shipping" ? "shipping" : "general";
+      form.requestType === "vehicle"
+        ? "car-inquiry"
+        : form.requestType === "sourcing"
+          ? "custom-request"
+          : form.requestType === "shipping"
+            ? "shipping"
+            : "general";
     const payload = {
       name: form.name.trim(),
       full_name: form.name.trim(),
@@ -177,7 +204,9 @@ export default function RequestQuotePage() {
     } catch (error) {
       console.warn("Quote request submission failed:", error);
       setStatus("error");
-      setErrorMessage("We could not save this request. Please try again or contact us directly using the details below.");
+      setErrorMessage(
+        "We could not save this request. Please try again or contact us directly using the details below.",
+      );
     }
   };
 
@@ -190,7 +219,9 @@ export default function RequestQuotePage() {
       form.vehicleRef ? `Vehicle reference: ${form.vehicleRef}` : "",
       form.vehicleModel ? `Vehicle: ${form.vehicleModel}` : "",
       form.requirements ? `Requirements: ${form.requirements}` : "",
-    ].filter(Boolean).join("\n"),
+    ]
+      .filter(Boolean)
+      .join("\n"),
   );
   const whatsappHref = `https://wa.me/${WA_NUMBER}?text=${whatsappText}`;
 
@@ -205,8 +236,8 @@ export default function RequestQuotePage() {
             Tell us where the vehicle needs to go
           </h1>
           <p className="mt-4 max-w-2xl text-sm leading-6 text-white/75 md:text-base">
-            Share the vehicle or sourcing brief and your destination. We will review the details
-            and confirm what can be quoted for that particular request.
+            Share the vehicle or sourcing brief and your destination. We will review the details and
+            confirm what can be quoted for that particular request.
           </p>
         </div>
       </section>
@@ -216,17 +247,31 @@ export default function RequestQuotePage() {
           {status === "success" ? (
             <div className="py-8 text-center" role="status">
               <CheckCircle2 size={42} className="mx-auto mb-4 text-emerald-600" />
-              <h2 className="font-serif text-2xl font-bold text-foreground">Your enquiry was recorded</h2>
+              <h2 className="font-serif text-2xl font-bold text-foreground">
+                Your enquiry was recorded
+              </h2>
               <p className="mx-auto mt-3 max-w-xl text-sm leading-6 text-muted-foreground">
-                The information has been sent to the website enquiry service. Our team can now review
-                the vehicle and destination details you supplied. Response times and available
-                routes depend on the specific request.
+                The information has been sent to the website enquiry service. Our team can now
+                review the vehicle and destination details you supplied. Response times and
+                available routes depend on the specific request.
               </p>
               <div className="mt-6 flex flex-col justify-center gap-3 sm:flex-row">
-                <a href={whatsappHref} target="_blank" rel="noopener noreferrer" className="inline-flex items-center justify-center gap-2 rounded-sm bg-[#25D366] px-5 py-3 text-sm font-bold text-white hover:opacity-90">
+                <a
+                  href={whatsappHref}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center justify-center gap-2 rounded-sm bg-[#25D366] px-5 py-3 text-sm font-bold text-white hover:opacity-90"
+                >
                   <MessageCircle size={16} /> Continue on WhatsApp
                 </a>
-                <button type="button" onClick={() => { setStatus("idle"); setForm(EMPTY_FORM); }} className="border border-border px-5 py-3 text-sm font-semibold text-foreground hover:bg-muted">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setStatus("idle");
+                    setForm(EMPTY_FORM);
+                  }}
+                  className="border border-border px-5 py-3 text-sm font-semibold text-foreground hover:bg-muted"
+                >
                   Send another enquiry
                 </button>
               </div>
@@ -239,7 +284,9 @@ export default function RequestQuotePage() {
           ) : (
             <form onSubmit={handleSubmit} className="space-y-6">
               <div>
-                <h2 className="font-serif text-xl font-bold text-foreground">1. What do you need?</h2>
+                <h2 className="font-serif text-xl font-bold text-foreground">
+                  1. What do you need?
+                </h2>
                 <div className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-2">
                   {REQUEST_TYPES.map((option) => (
                     <button
@@ -253,15 +300,21 @@ export default function RequestQuotePage() {
                           : "border-border hover:border-primary/40"
                       }`}
                     >
-                      <span className="block text-sm font-bold text-foreground">{option.label}</span>
-                      <span className="mt-1 block text-xs leading-5 text-muted-foreground">{option.detail}</span>
+                      <span className="block text-sm font-bold text-foreground">
+                        {option.label}
+                      </span>
+                      <span className="mt-1 block text-xs leading-5 text-muted-foreground">
+                        {option.detail}
+                      </span>
                     </button>
                   ))}
                 </div>
               </div>
 
               <div>
-                <h2 className="font-serif text-xl font-bold text-foreground">2. Where is the destination?</h2>
+                <h2 className="font-serif text-xl font-bold text-foreground">
+                  2. Where is the destination?
+                </h2>
                 <div className="mt-3">
                   <DestinationFields
                     country={form.country}
@@ -274,7 +327,10 @@ export default function RequestQuotePage() {
                 {countryGuide ? (
                   <p className="mt-3 text-xs leading-5 text-muted-foreground">
                     Planning an import to {countryGuide.name}? Read the{" "}
-                    <Link href={countryLandingPath(countryGuide)} className="font-semibold text-primary underline underline-offset-2">
+                    <Link
+                      href={countryLandingPath(countryGuide)}
+                      className="font-semibold text-primary underline underline-offset-2"
+                    >
                       {countryGuide.name} import guide
                     </Link>{" "}
                     and confirm current rules with the relevant authority.
@@ -284,9 +340,13 @@ export default function RequestQuotePage() {
                     Country-specific guidance is not currently published for every territory. We
                     will not assume eligibility or calculate taxes without verified information.
                     Start with the{" "}
-                    <Link href="/import-japanese-cars" className="font-semibold text-primary underline underline-offset-2">
+                    <Link
+                      href="/import-japanese-cars"
+                      className="font-semibold text-primary underline underline-offset-2"
+                    >
                       destination guide directory
-                    </Link>.
+                    </Link>
+                    .
                   </p>
                 )}
               </div>
@@ -341,38 +401,91 @@ export default function RequestQuotePage() {
               </div>
 
               <div>
-                <h2 className="font-serif text-xl font-bold text-foreground">4. How can we contact you?</h2>
+                <h2 className="font-serif text-xl font-bold text-foreground">
+                  4. How can we contact you?
+                </h2>
                 <div className="mt-3 grid grid-cols-1 gap-4 sm:grid-cols-2">
                   <label className="block text-xs font-semibold uppercase tracking-wide text-muted-foreground">
                     Full name *
-                    <input required autoComplete="name" value={form.name} onChange={(event) => setField("name", event.target.value)} maxLength={120} className="mt-1.5 w-full rounded-sm border border-border bg-background p-3 text-sm font-normal normal-case tracking-normal text-foreground outline-none focus:border-primary" />
+                    <input
+                      required
+                      autoComplete="name"
+                      value={form.name}
+                      onChange={(event) => setField("name", event.target.value)}
+                      maxLength={120}
+                      className="mt-1.5 w-full rounded-sm border border-border bg-background p-3 text-sm font-normal normal-case tracking-normal text-foreground outline-none focus:border-primary"
+                    />
                   </label>
                   <label className="block text-xs font-semibold uppercase tracking-wide text-muted-foreground">
                     Email address *
-                    <input required type="email" autoComplete="email" value={form.email} onChange={(event) => setField("email", event.target.value)} maxLength={254} className="mt-1.5 w-full rounded-sm border border-border bg-background p-3 text-sm font-normal normal-case tracking-normal text-foreground outline-none focus:border-primary" />
+                    <input
+                      required
+                      type="email"
+                      autoComplete="email"
+                      value={form.email}
+                      onChange={(event) => setField("email", event.target.value)}
+                      maxLength={254}
+                      className="mt-1.5 w-full rounded-sm border border-border bg-background p-3 text-sm font-normal normal-case tracking-normal text-foreground outline-none focus:border-primary"
+                    />
                   </label>
                   <label className="block text-xs font-semibold uppercase tracking-wide text-muted-foreground sm:col-span-2">
                     WhatsApp / phone (optional)
-                    <input type="tel" autoComplete="tel" value={form.phone} onChange={(event) => setField("phone", event.target.value)} maxLength={40} placeholder="Include country code" className="mt-1.5 w-full rounded-sm border border-border bg-background p-3 text-sm font-normal normal-case tracking-normal text-foreground outline-none focus:border-primary" />
+                    <input
+                      type="tel"
+                      autoComplete="tel"
+                      value={form.phone}
+                      onChange={(event) => setField("phone", event.target.value)}
+                      maxLength={40}
+                      placeholder="Include country code"
+                      className="mt-1.5 w-full rounded-sm border border-border bg-background p-3 text-sm font-normal normal-case tracking-normal text-foreground outline-none focus:border-primary"
+                    />
                   </label>
                 </div>
               </div>
 
               <label className="flex items-start gap-3 text-xs leading-5 text-muted-foreground">
-                <input type="checkbox" required checked={form.consent} onChange={(event) => setField("consent", event.target.checked)} className="mt-1 accent-[#C8102E]" />
+                <input
+                  type="checkbox"
+                  required
+                  checked={form.consent}
+                  onChange={(event) => setField("consent", event.target.checked)}
+                  className="mt-1 accent-[#C8102E]"
+                />
                 <span>
                   I agree that Wazir Trading LLC may use the information above to review and respond
-                  to this enquiry. See the <Link href="/privacy-policy" className="text-primary underline underline-offset-2">Privacy Policy</Link>.
+                  to this enquiry. See the{" "}
+                  <Link
+                    href="/privacy-policy"
+                    className="text-primary underline underline-offset-2"
+                  >
+                    Privacy Policy
+                  </Link>
+                  .
                 </span>
               </label>
 
-              {errorMessage && <p role="alert" className="rounded-sm border border-destructive/30 bg-destructive/5 p-3 text-sm text-destructive">{errorMessage}</p>}
-              {!isSupabaseConfigured && (
-                <p role="status" className="rounded-sm border border-amber-300 bg-amber-50 p-3 text-sm text-amber-900">
-                  The online enquiry form is currently unavailable. Please contact us using WhatsApp or email.
+              {errorMessage && (
+                <p
+                  role="alert"
+                  className="rounded-sm border border-destructive/30 bg-destructive/5 p-3 text-sm text-destructive"
+                >
+                  {errorMessage}
                 </p>
               )}
-              <button type="submit" disabled={status === "submitting" || !isSupabaseConfigured} className="inline-flex w-full items-center justify-center gap-2 rounded-sm bg-[#C8102E] px-6 py-4 text-sm font-bold uppercase tracking-wide text-white transition-colors hover:bg-[#A50D25] disabled:cursor-not-allowed disabled:opacity-60">
+              {!isSupabaseConfigured && (
+                <p
+                  role="status"
+                  className="rounded-sm border border-amber-300 bg-amber-50 p-3 text-sm text-amber-900"
+                >
+                  The online enquiry form is currently unavailable. Please contact us using WhatsApp
+                  or email.
+                </p>
+              )}
+              <button
+                type="submit"
+                disabled={status === "submitting" || !isSupabaseConfigured}
+                className="inline-flex w-full items-center justify-center gap-2 rounded-sm bg-[#C8102E] px-6 py-4 text-sm font-bold uppercase tracking-wide text-white transition-colors hover:bg-[#A50D25] disabled:cursor-not-allowed disabled:opacity-60"
+              >
                 {status === "submitting" ? "Sending your enquiry…" : "Send my quote request"}
                 <ArrowRight size={16} />
               </button>
@@ -387,7 +500,9 @@ export default function RequestQuotePage() {
         <aside className="space-y-4">
           <div className="border border-border bg-card p-5">
             <ShieldCheck className="mb-3 text-primary" size={24} />
-            <h2 className="font-serif text-lg font-bold text-foreground">Clear, itemised answers</h2>
+            <h2 className="font-serif text-lg font-bold text-foreground">
+              Clear, itemised answers
+            </h2>
             <p className="mt-2 text-sm leading-6 text-muted-foreground">
               Ask for the exact vehicle reference, price basis, named route, included services,
               exclusions, documents and payment milestones in writing before you decide.
@@ -398,20 +513,50 @@ export default function RequestQuotePage() {
             <p className="mt-2 text-sm leading-6 text-muted-foreground">
               You can contact our team without sending the form.
             </p>
-            <a href={`https://wa.me/${WA_NUMBER}`} target="_blank" rel="noopener noreferrer" className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-sm bg-[#25D366] px-4 py-3 text-sm font-bold text-white hover:opacity-90">
+            <a
+              href={`https://wa.me/${WA_NUMBER}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-sm bg-[#25D366] px-4 py-3 text-sm font-bold text-white hover:opacity-90"
+            >
               <MessageCircle size={16} /> WhatsApp
             </a>
-            <a href={`mailto:${CONTACT_EMAIL}`} className="mt-2 inline-flex w-full items-center justify-center border border-border bg-card px-4 py-3 text-sm font-semibold text-foreground hover:bg-muted">
+            <a
+              href={`mailto:${CONTACT_EMAIL}`}
+              className="mt-2 inline-flex w-full items-center justify-center border border-border bg-card px-4 py-3 text-sm font-semibold text-foreground hover:bg-muted"
+            >
               Email Wazir Trading
             </a>
           </div>
           <div className="border border-border p-5">
             <h2 className="font-semibold text-foreground">Helpful before you enquire</h2>
             <ul className="mt-3 space-y-2 text-sm">
-              <li><Link href="/how-it-works" className="text-muted-foreground hover:text-primary">How the purchase process works</Link></li>
-              <li><Link href="/buyer-information" className="text-muted-foreground hover:text-primary">Buyer checklist and price basis</Link></li>
-              <li><Link href="/shipping-information" className="text-muted-foreground hover:text-primary">Shipping and export documents</Link></li>
-              <li><Link href="/faqs" className="text-muted-foreground hover:text-primary">Common questions</Link></li>
+              <li>
+                <Link href="/how-it-works" className="text-muted-foreground hover:text-primary">
+                  How the purchase process works
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/buyer-information"
+                  className="text-muted-foreground hover:text-primary"
+                >
+                  Buyer checklist and price basis
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/shipping-information"
+                  className="text-muted-foreground hover:text-primary"
+                >
+                  Shipping and export documents
+                </Link>
+              </li>
+              <li>
+                <Link href="/faqs" className="text-muted-foreground hover:text-primary">
+                  Common questions
+                </Link>
+              </li>
             </ul>
           </div>
         </aside>

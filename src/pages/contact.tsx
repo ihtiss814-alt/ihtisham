@@ -47,8 +47,12 @@ export default function ContactPage() {
       destination_port: port.trim(),
       message: [
         String(formData.get("message") ?? "").trim(),
-        port.trim() ? `Preferred port / final city: ${port.trim()}` : "Preferred port or final city to be confirmed.",
-      ].filter(Boolean).join("\n\n"),
+        port.trim()
+          ? `Preferred port / final city: ${port.trim()}`
+          : "Preferred port or final city to be confirmed.",
+      ]
+        .filter(Boolean)
+        .join("\n\n"),
       inquiry_type: inquiryType,
     };
 
@@ -154,11 +158,15 @@ export default function ContactPage() {
             <div className="bg-card border border-border p-8 md:p-10 shadow-sm">
               <h2 className="text-2xl font-serif font-bold mb-2">Send a Message</h2>
               <p className="mb-6 text-sm leading-6 text-muted-foreground">
-                Choose the destination so our team can understand the context of your question.
-                For a vehicle-specific or shipping request, use the{" "}
-                <Link href="/request-a-quote" className="font-semibold text-primary underline underline-offset-2">
+                Choose the destination so our team can understand the context of your question. For
+                a vehicle-specific or shipping request, use the{" "}
+                <Link
+                  href="/request-a-quote"
+                  className="font-semibold text-primary underline underline-offset-2"
+                >
                   guided quote form
-                </Link>.
+                </Link>
+                .
               </p>
 
               {status === "success" ? (

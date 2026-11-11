@@ -41,11 +41,7 @@ import {
   type VehicleSeoCar,
   type VehicleSeoImage,
 } from "@/lib/vehicle-seo";
-import {
-  fetchShippingRate,
-  computeLandedCost,
-  type ShippingRate,
-} from "@/lib/shipping";
+import { fetchShippingRate, computeLandedCost, type ShippingRate } from "@/lib/shipping";
 import { VEHICLE_RELATED_SELECT } from "@/lib/vehicle-detail-data";
 import { getCachedVehicleDetail } from "@/lib/vehicle-request-cache";
 import { cachedRequest } from "@/lib/request-cache";

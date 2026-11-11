@@ -33,14 +33,21 @@ export default function DestinationPreferenceControl({ mobile = false }: { mobil
         }
       >
         <span className="flex min-w-0 items-center gap-2">
-          {mobile ? <Globe2 size={16} className="text-[#C8102E]" /> : <MapPin size={14} className="text-[#C8102E]" />}
+          {mobile ? (
+            <Globe2 size={16} className="text-[#C8102E]" />
+          ) : (
+            <MapPin size={14} className="text-[#C8102E]" />
+          )}
           <span className="truncate">
             {preference.country
               ? `Destination: ${preference.country}${preference.port ? ` · ${preference.port}` : ""}`
               : "Choose destination"}
           </span>
         </span>
-        <ChevronDown size={14} className={open ? "rotate-180 transition-transform" : "transition-transform"} />
+        <ChevronDown
+          size={14}
+          className={open ? "rotate-180 transition-transform" : "transition-transform"}
+        />
       </button>
 
       {open && (
@@ -57,10 +64,16 @@ export default function DestinationPreferenceControl({ mobile = false }: { mobil
             <div>
               <h3 className="font-serif text-lg font-bold text-[#0D1B3E]">Your destination</h3>
               <p className="mt-1 text-xs leading-5 text-slate-500">
-                Save a country and optional port or city to prefill calculators and enquiries on this device.
+                Save a country and optional port or city to prefill calculators and enquiries on
+                this device.
               </p>
             </div>
-            <button type="button" onClick={() => setOpen(false)} aria-label="Close destination selector" className="rounded p-1 text-slate-400 hover:bg-slate-100">
+            <button
+              type="button"
+              onClick={() => setOpen(false)}
+              aria-label="Close destination selector"
+              className="rounded p-1 text-slate-400 hover:bg-slate-100"
+            >
               <X size={16} />
             </button>
           </div>
@@ -76,10 +89,24 @@ export default function DestinationPreferenceControl({ mobile = false }: { mobil
             Saving this preference does not confirm an available shipping route or a price.
           </p>
           <div className="mt-4 flex flex-wrap items-center gap-2">
-            <button type="button" onClick={save} disabled={!country} className="inline-flex items-center gap-2 rounded-sm bg-[#C8102E] px-4 py-2.5 text-xs font-bold uppercase tracking-wide text-white transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50">
+            <button
+              type="button"
+              onClick={save}
+              disabled={!country}
+              className="inline-flex items-center gap-2 rounded-sm bg-[#C8102E] px-4 py-2.5 text-xs font-bold uppercase tracking-wide text-white transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
+            >
               <Check size={14} /> Save destination
             </button>
-            <button type="button" onClick={() => { setCountry(""); setPort(""); preference.setDestination({ country: "", port: "" }); setOpen(false); }} className="px-3 py-2 text-xs font-semibold text-slate-500 hover:text-slate-900">
+            <button
+              type="button"
+              onClick={() => {
+                setCountry("");
+                setPort("");
+                preference.setDestination({ country: "", port: "" });
+                setOpen(false);
+              }}
+              className="px-3 py-2 text-xs font-semibold text-slate-500 hover:text-slate-900"
+            >
               Clear saved destination
             </button>
           </div>
