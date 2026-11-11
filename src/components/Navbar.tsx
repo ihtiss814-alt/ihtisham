@@ -53,10 +53,14 @@ function useStockCount() {
   const [count, setCount] = useState<number | null>(null);
   useEffect(() => {
     let active = true;
-    getAvailableStockCount().then((value) => {
-      if (active && value !== null) setCount(value);
-    }).catch((error: unknown) => console.warn("Could not load navigation stock count:", error));
-    return () => { active = false; };
+    getAvailableStockCount()
+      .then((value) => {
+        if (active && value !== null) setCount(value);
+      })
+      .catch((error: unknown) => console.warn("Could not load navigation stock count:", error));
+    return () => {
+      active = false;
+    };
   }, []);
   return count;
 }

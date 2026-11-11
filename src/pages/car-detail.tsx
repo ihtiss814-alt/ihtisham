@@ -355,13 +355,31 @@ export default function CarDetailPage() {
         `vehicle:related:${car.id}:${car.make}:${car.model}:${car.body_type ?? ""}`,
         async () => {
           const queries = [
-            supabase.from("cars").select(VEHICLE_RELATED_SELECT).eq("make", car.make).eq("model", car.model),
+            supabase
+              .from("cars")
+              .select(VEHICLE_RELATED_SELECT)
+              .eq("make", car.make)
+              .eq("model", car.model),
             supabase.from("cars").select(VEHICLE_RELATED_SELECT).eq("make", car.make),
-            ...(car.body_type ? [supabase.from("cars").select(VEHICLE_RELATED_SELECT).eq("body_type", car.body_type)] : []),
+            ...(car.body_type
+              ? [
+                  supabase
+                    .from("cars")
+                    .select(VEHICLE_RELATED_SELECT)
+                    .eq("body_type", car.body_type),
+                ]
+              : []),
           ];
-          const results = await Promise.all(queries.map((query) => query
-            .neq("id", car.id).eq("status", "available").order("year", { ascending: false })
-            .limit(16).returns<Car[]>()));
+          const results = await Promise.all(
+            queries.map((query) =>
+              query
+                .neq("id", car.id)
+                .eq("status", "available")
+                .order("year", { ascending: false })
+                .limit(16)
+                .returns<Car[]>(),
+            ),
+          );
           return results.flatMap((result) => result.data ?? []);
         },
         60_000,

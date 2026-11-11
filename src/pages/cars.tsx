@@ -1818,12 +1818,39 @@ function applyFiltersToQuery(
 type CarsPageCacheResult = { cars: CarWithImage[]; totalCount: number };
 
 const EMPTY_FILTERS: Filters = {
-  q: "", searchText: "", make: "", price: "", body: "", category: "", location: "",
-  year: "", drive: "", trans: "", engine: "", fuel: "", mileage: "", steering: "",
-  destination: "", minPrice: "", maxPrice: "", advModel: "", advYearFrom: "",
-  advYearTo: "", advMinPrice: "", advMaxPrice: "", advColor: "", advMinMil: "",
-  advMaxMil: "", advMinEng: "", advMaxEng: "", smartFuel: "", smartTrans: "",
-  smartDrive: "", smartMinMileage: "", smartMaxMileage: "", smartMinEngine: "",
+  q: "",
+  searchText: "",
+  make: "",
+  price: "",
+  body: "",
+  category: "",
+  location: "",
+  year: "",
+  drive: "",
+  trans: "",
+  engine: "",
+  fuel: "",
+  mileage: "",
+  steering: "",
+  destination: "",
+  minPrice: "",
+  maxPrice: "",
+  advModel: "",
+  advYearFrom: "",
+  advYearTo: "",
+  advMinPrice: "",
+  advMaxPrice: "",
+  advColor: "",
+  advMinMil: "",
+  advMaxMil: "",
+  advMinEng: "",
+  advMaxEng: "",
+  smartFuel: "",
+  smartTrans: "",
+  smartDrive: "",
+  smartMinMileage: "",
+  smartMaxMileage: "",
+  smartMinEngine: "",
   smartMaxEngine: "",
 };
 
@@ -1837,7 +1864,10 @@ export function prefetchCarsPage(): void {
     carsPageCacheKey(EMPTY_FILTERS, "", "Newest First", 1),
     async () => {
       const query = applyFiltersToQuery(
-        createCarsListQuery(), EMPTY_FILTERS, "", "Newest First",
+        createCarsListQuery(),
+        EMPTY_FILTERS,
+        "",
+        "Newest First",
       ).range(0, PAGE_SIZE - 1);
       const { data, count, error } = await query;
       if (error) throw error;

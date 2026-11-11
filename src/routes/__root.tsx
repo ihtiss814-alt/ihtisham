@@ -100,7 +100,15 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" as const },
       { rel: "preconnect", href: "https://flagcdn.com", crossOrigin: "anonymous" as const },
       { rel: "preconnect", href: "https://images.unsplash.com", crossOrigin: "anonymous" as const },
-      ...(import.meta.env.VITE_SUPABASE_URL ? [{ rel: "preconnect", href: import.meta.env.VITE_SUPABASE_URL, crossOrigin: "anonymous" as const }] : []),
+      ...(import.meta.env.VITE_SUPABASE_URL
+        ? [
+            {
+              rel: "preconnect",
+              href: import.meta.env.VITE_SUPABASE_URL,
+              crossOrigin: "anonymous" as const,
+            },
+          ]
+        : []),
       {
         rel: "stylesheet",
         href: "https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=Inter:wght@400;500;600;700&family=Fraunces:opsz,wght@9..144,400..700&family=Space+Mono:wght@400;700&display=swap",

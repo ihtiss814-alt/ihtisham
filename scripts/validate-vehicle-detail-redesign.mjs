@@ -91,25 +91,17 @@ else pass("Vehicle guide directory includes manufacturer logos and body-style ic
 if (!countryPages.includes("<CountryFlag")) fail("Country pages must display flag assets.");
 else pass("Country directory and country detail page include flag components.");
 
-const identityFlagBlock = identity.match(
-  /const COUNTRY_ISO2:[\s\S]*?=\s*\{([\s\S]*?)\n\};/,
-);
+const identityFlagBlock = identity.match(/const COUNTRY_ISO2:[\s\S]*?=\s*\{([\s\S]*?)\n\};/);
 const mappedFlags = identityFlagBlock
   ? [
-      ...identityFlagBlock[1].matchAll(
-        /^\s*["']?([a-z0-9-]+)["']?:\s*["']([a-z]{2})["'],?\s*$/gm,
-      ),
+      ...identityFlagBlock[1].matchAll(/^\s*["']?([a-z0-9-]+)["']?:\s*["']([a-z]{2})["'],?\s*$/gm),
     ].map((m) => m[1])
   : [];
-const registrySlugs = [
-  ...countryRegistry.matchAll(/slug:\s*["']([^"']+)["']/g),
-].map((m) => m[1]);
+const registrySlugs = [...countryRegistry.matchAll(/slug:\s*["']([^"']+)["']/g)].map((m) => m[1]);
 const uniqueRegistrySlugs = [...new Set(registrySlugs)].filter(
   (slug) => slug !== "import-japanese-cars",
 );
-const missingFlags = uniqueRegistrySlugs.filter(
-  (slug) => !mappedFlags.includes(slug),
-);
+const missingFlags = uniqueRegistrySlugs.filter((slug) => !mappedFlags.includes(slug));
 
 if (uniqueRegistrySlugs.length !== 40 || missingFlags.length) {
   fail(
@@ -119,15 +111,11 @@ if (uniqueRegistrySlugs.length !== 40 || missingFlags.length) {
 
 const makeContent =
   makeRegistry.split("const makeContent = [")[1]?.split("const modelContent = [")[0] ?? "";
-const makeNames = [
-  ...makeContent.matchAll(/name:\s*["']([^"']+)["']/g),
-].map((m) => m[1]);
+const makeNames = [...makeContent.matchAll(/name:\s*["']([^"']+)["']/g)].map((m) => m[1]);
 const logoFiles = new Set(
   fs.readdirSync(path.join(root, "public/logos")).filter((file) => file.endsWith(".svg")),
 );
-const aliasBlock = identity.match(
-  /const MAKE_LOGO_ALIASES:[\s\S]*?=\s*\{([\s\S]*?)\n\};/,
-);
+const aliasBlock = identity.match(/const MAKE_LOGO_ALIASES:[\s\S]*?=\s*\{([\s\S]*?)\n\};/);
 const aliases = new Map();
 if (aliasBlock) {
   for (const match of aliasBlock[1].matchAll(/["']([^"']+)["']:\s*["']([^"']+)["']/g)) {
