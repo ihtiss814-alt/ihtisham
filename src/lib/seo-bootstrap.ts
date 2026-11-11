@@ -73,6 +73,10 @@ const PAGE_META: Record<string, { title: string; description: string }> = {
     description:
       "Review shipping routes, export documentation, and delivery information for Japanese used cars purchased through Wazir Trading LLC.",
   },
+  "/request-a-quote": {
+    title: "Request a Japanese Car Export Quote | Wazir Trading LLC",
+    description: "Send your vehicle, budget and worldwide destination details to Wazir Trading LLC for a review of vehicle availability, shipping options and a written export quotation.",
+  },
   "/contact": {
     title: "Contact Wazir Trading LLC | Japanese Car Export",
     description:

@@ -39,13 +39,13 @@ import {
 import { isSupabaseConfigured, supabase } from "@/lib/supabase";
 import { cachedRequest } from "@/lib/request-cache";
 import CarCard, { resolvePrimaryImage, type Car } from "@/components/CarCard";
+import DestinationFields from "@/components/DestinationFields";
+import { useDestinationPreference } from "@/hooks/useDestinationPreference";
+import { quoteRequestHref } from "@/lib/destination-links";
 import "./cars.css";
 import { useExchangeRate } from "@/hooks/useExchangeRate";
 import {
-  COUNTRY_PORTS,
-  DEST_COUNTRIES,
   canonicalCountry,
-  portsFor,
   fetchShippingRate,
   computeLandedCost,
 } from "@/lib/shipping";
@@ -1132,28 +1132,44 @@ function BodyTypeCarousel({ setActiveBody }: { setActiveBody: (v: string) => voi
 /* TOTAL PRICE CALCULATOR (Supabase-connected)                      */
 /* ─────────────────────────────────────────────────────────────── */
 function TotalPriceCalculator({ initialCountry }: { initialCountry?: string }) {
-  const { pkr: pkrRate } = useExchangeRate();
-  const startCountry =
-    initialCountry && COUNTRY_PORTS[canonicalCountry(initialCountry)]
-      ? canonicalCountry(initialCountry)
-      : "Pakistan";
-  const [country, setCountry] = useState(startCountry);
-  const [port, setPort] = useState(COUNTRY_PORTS[startCountry]?.[0] ?? "Karachi");
+  const preference = useDestinationPreference();
+  const [country, setCountry] = useState(initialCountry ? canonicalCountry(initialCountry) : "");
+  const [port, setPort] = useState("");
   const [fob, setFob] = useState("");
   const [inspection, setInspection] = useState("Yes");
   const [insurance, setInsurance] = useState("Yes");
-  const [result, setResult] = useState<{ usd: number } | null>(null);
+  const [result, setResult] = useState<ReturnType<typeof computeLandedCost>>(null);
   const [noRate, setNoRate] = useState(false);
   const [inputError, setInputError] = useState("");
   const [calcLoading, setCalcLoading] = useState(false);
 
-  const ports = portsFor(country);
+  useEffect(() => {
+    if (!preference.loaded) return;
+    const preferredCountry = initialCountry ? canonicalCountry(initialCountry) : preference.country;
+    setCountry((current) => current || preferredCountry);
+    setPort((current) => current || (
+      preferredCountry &&
+      canonicalCountry(preference.country) === canonicalCountry(preferredCountry)
+        ? preference.port
+        : ""
+    ));
+  }, [initialCountry, preference.loaded, preference.country, preference.port]);
 
-  const handleCountryChange = (c: string) => {
-    setCountry(c);
-    setPort(portsFor(c)[0] || "");
+  const handleCountryChange = (nextCountry: string) => {
+    setCountry(nextCountry);
+    setPort("");
+    preference.setDestination({ country: nextCountry, port: "" });
     setResult(null);
     setNoRate(false);
+    setInputError("");
+  };
+
+  const handlePortChange = (nextPort: string) => {
+    setPort(nextPort);
+    preference.setDestination({ country, port: nextPort });
+    setResult(null);
+    setNoRate(false);
+    setInputError("");
   };
 
   const calculate = async () => {
@@ -1164,208 +1180,175 @@ function TotalPriceCalculator({ initialCountry }: { initialCountry?: string }) {
       setNoRate(false);
       return;
     }
-    if (!country || !port) {
-      setInputError("Select a destination country and port.");
+    if (!country || !port.trim()) {
+      setInputError("Choose a destination and enter the preferred seaport, border crossing or final city.");
+      setResult(null);
+      setNoRate(false);
       return;
     }
+
     setInputError("");
     setCalcLoading(true);
     setResult(null);
     setNoRate(false);
-    // Uses the same rate lookup and maths as the car-detail calculator. If we have
-    // no published rate for the route we say so rather than inventing a freight
-    // figure, which is what this calculator used to do.
-    const rate = await fetchShippingRate(country, port);
-    const cost = computeLandedCost(fobValue, rate, {
-      withInspection: inspection === "Yes",
-      withInsurance: insurance === "Yes",
-    });
-    if (cost) setResult({ usd: cost.total });
-    else setNoRate(true);
-    setCalcLoading(false);
+    try {
+      const rate = await fetchShippingRate(country, port);
+      const cost = computeLandedCost(fobValue, rate, {
+        withInspection: inspection === "Yes",
+        withInsurance: insurance === "Yes",
+      });
+      if (cost) setResult(cost);
+      else setNoRate(true);
+    } catch (error) {
+      console.warn("Export rate lookup failed:", error);
+      setNoRate(true);
+    } finally {
+      setCalcLoading(false);
+    }
   };
 
+  const estimateHref = quoteRequestHref({
+    country,
+    port,
+    requestType: "shipping",
+  });
+
   return (
-    <div className="mb-6 rounded-sm overflow-hidden shadow-md" style={{ background: NAVY }}>
-      <div className="px-6 pt-5 pb-3 border-b border-white/10">
+    <div className="mb-6 overflow-hidden rounded-sm shadow-md" style={{ background: NAVY }}>
+      <div className="border-b border-white/10 px-6 pb-3 pt-5">
         <h3
-          className="text-white font-bold text-lg"
+          className="text-lg font-bold text-white"
           style={{ fontFamily: "var(--app-font-serif)" }}
         >
           Export Cost Estimator
         </h3>
-        <p className="text-white/60 text-[12px] mt-1">
-          Estimate the FOB price plus any route charges currently recorded for the selected
-          destination.
+        <p className="mt-1 text-[12px] text-white/60">
+          Uses an exact route-rate record only. It does not estimate duties, tax or destination-side charges.
         </p>
       </div>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-6">
+      <div className="grid grid-cols-1 gap-6 p-6 md:grid-cols-2">
         <div className="space-y-4">
           <div>
-            <label className="text-white/70 text-[11px] font-semibold uppercase tracking-wide block mb-1">
-              FOB Price (USD)
+            <label className="mb-1 block text-[11px] font-semibold uppercase tracking-wide text-white/70">
+              FOB price (USD)
             </label>
             <input
               type="number"
               min="1"
               step="1"
               value={fob}
-              onChange={(e) => {
-                setFob(e.target.value);
+              onChange={(event) => {
+                setFob(event.target.value);
                 setInputError("");
+                setResult(null);
               }}
               placeholder="e.g. 8500"
-              className="w-full bg-white/10 border border-white/20 text-white text-sm px-3 py-2 outline-none focus:border-[#C8102E] rounded-sm placeholder:text-white/30"
+              className="w-full rounded-sm border border-white/20 bg-white/10 px-3 py-2 text-sm text-white outline-none placeholder:text-white/30 focus:border-[#C8102E]"
             />
-            {inputError && (
-              <p className="text-[#FF9CA8] text-[11px] mt-1" role="alert">
-                {inputError}
-              </p>
-            )}
           </div>
-          <div>
-            <label className="text-white/70 text-[11px] font-semibold uppercase tracking-wide block mb-1">
-              Destination Country
-            </label>
-            <select
-              value={country}
-              onChange={(e) => handleCountryChange(e.target.value)}
-              className="w-full bg-white/10 border border-white/20 text-white text-sm px-3 py-2 outline-none focus:border-[#C8102E] rounded-sm"
-            >
-              {DEST_COUNTRIES.map((c) => (
-                <option key={c} value={c} className="bg-[#0D1B3E] text-white">
-                  {c}
-                </option>
-              ))}
-            </select>
-          </div>
-          <div>
-            <label className="text-white/70 text-[11px] font-semibold uppercase tracking-wide block mb-1">
-              Port
-            </label>
-            <select
-              value={port}
-              onChange={(e) => setPort(e.target.value)}
-              className="w-full bg-white/10 border border-white/20 text-white text-sm px-3 py-2 outline-none focus:border-[#C8102E] rounded-sm"
-            >
-              {ports.map((p) => (
-                <option key={p} value={p} className="bg-[#0D1B3E] text-white">
-                  {p}
-                </option>
-              ))}
-            </select>
-          </div>
+          <DestinationFields
+            country={country}
+            port={port}
+            onCountryChange={handleCountryChange}
+            onPortChange={handlePortChange}
+            idPrefix="inventory-calculator"
+            dark
+          />
+          {inputError && <p className="text-[11px] text-[#FF9CA8]" role="alert">{inputError}</p>}
         </div>
         <div className="space-y-4">
           <div>
-            <label className="text-white/70 text-[11px] font-semibold uppercase tracking-wide block mb-2">
+            <label className="mb-2 block text-[11px] font-semibold uppercase tracking-wide text-white/70">
               Inspection
             </label>
             <div className="flex gap-4">
-              {["Yes", "No"].map((o) => (
-                <label key={o} className="flex items-center gap-2 cursor-pointer">
+              {["Yes", "No"].map((option) => (
+                <label key={option} className="flex cursor-pointer items-center gap-2">
                   <input
                     type="radio"
                     name="calc-inspection"
-                    value={o}
-                    checked={inspection === o}
-                    onChange={() => setInspection(o)}
+                    value={option}
+                    checked={inspection === option}
+                    onChange={() => { setInspection(option); setResult(null); }}
                     className="accent-[#C8102E]"
                   />
-                  <span className="text-white/80 text-sm">{o}</span>
+                  <span className="text-sm text-white/80">{option}</span>
                 </label>
               ))}
             </div>
           </div>
           <div>
-            <label className="text-white/70 text-[11px] font-semibold uppercase tracking-wide block mb-2">
+            <label className="mb-2 block text-[11px] font-semibold uppercase tracking-wide text-white/70">
               Insurance
             </label>
             <div className="flex gap-4">
-              {["Yes", "No"].map((o) => (
-                <label key={o} className="flex items-center gap-2 cursor-pointer">
+              {["Yes", "No"].map((option) => (
+                <label key={option} className="flex cursor-pointer items-center gap-2">
                   <input
                     type="radio"
                     name="calc-insurance"
-                    value={o}
-                    checked={insurance === o}
-                    onChange={() => setInsurance(o)}
+                    value={option}
+                    checked={insurance === option}
+                    onChange={() => { setInsurance(option); setResult(null); }}
                     className="accent-[#C8102E]"
                   />
-                  <span className="text-white/80 text-sm">{o}</span>
+                  <span className="text-sm text-white/80">{option}</span>
                 </label>
               ))}
             </div>
           </div>
           {result && (
-            <div
-              className="p-4 rounded-sm border border-white/10"
-              style={{ background: "rgba(255,255,255,0.05)" }}
-            >
-              <div className="text-[11px] text-white/50 uppercase tracking-wider mb-1">
-                Estimated Export Subtotal
+            <div className="rounded-sm border border-white/10 p-4" style={{ background: "rgba(255,255,255,0.05)" }}>
+              <div className="mb-3 text-[11px] uppercase tracking-wider text-white/50">
+                Estimated export subtotal · USD
               </div>
-              <div className="text-2xl font-black" style={{ color: RED }}>
-                ${result.usd.toLocaleString(undefined, { maximumFractionDigits: 0 })}
+              <div className="space-y-2 text-sm">
+                <div className="flex justify-between gap-4 text-white/70"><span>FOB vehicle price</span><strong className="text-white">${result.fob.toLocaleString(undefined, { maximumFractionDigits: 2 })}</strong></div>
+                <div className="flex justify-between gap-4 text-white/70"><span>Recorded freight</span><strong className="text-white">${result.freight.toLocaleString(undefined, { maximumFractionDigits: 2 })}</strong></div>
+                <div className="flex justify-between gap-4 text-white/70"><span>Inspection</span><strong className="text-white">${result.inspection.toLocaleString(undefined, { maximumFractionDigits: 2 })}</strong></div>
+                <div className="flex justify-between gap-4 text-white/70"><span>Rate-based insurance</span><strong className="text-white">${result.insurance.toLocaleString(undefined, { maximumFractionDigits: 2 })}</strong></div>
+                <div className="mt-3 flex justify-between gap-4 border-t border-white/15 pt-3 text-white"><span className="font-bold">Estimated subtotal</span><strong className="text-xl font-black" style={{ color: RED }}>${result.total.toLocaleString(undefined, { maximumFractionDigits: 2 })}</strong></div>
               </div>
-              <p className="text-white/50 text-[10px] mt-2">
-                Estimate only: uses the entered FOB amount and any recorded freight, inspection and
-                insurance rates. It is not a delivered or duty-paid price. Customs duties and taxes,
-                clearance, destination terminal/port charges, storage, registration and inland
-                delivery are excluded unless the written quotation expressly includes them.
+              <p className="mt-3 text-[10px] text-white/50">
+                Rate-based estimate only. Duties, taxes, customs clearance, destination port/terminal,
+                storage, registration and inland delivery are excluded unless a written quotation
+                expressly includes them. Confirm the rate and validity before payment.
               </p>
             </div>
           )}
           {noRate && (
-            <div
-              className="p-4 rounded-sm border border-white/10"
-              style={{ background: "rgba(255,255,255,0.05)" }}
-            >
-              <div className="text-2xl font-black mb-1" style={{ color: RED }}>
-                ASK
-              </div>
-              <p className="text-white/50 text-[12px] mb-3">
-                No route rate is currently recorded for {port ? `${port}, ` : ""}
-                {country}. Request a current written quotation.
+            <div className="rounded-sm border border-white/10 p-4" style={{ background: "rgba(255,255,255,0.05)" }}>
+              <div className="mb-1 text-lg font-black" style={{ color: RED }}>QUOTE REQUIRED</div>
+              <p className="mb-3 text-[12px] text-white/60">
+                No valid rate record was found for {port ? `${port}, ` : ""}{country}. We will not
+                substitute a generic freight price.
               </p>
-              <a
-                href={`https://wa.me/${WA_NUMBER}?text=${encodeURIComponent(
-                  `Hi, please quote shipping to ${port ? port + ", " : ""}${country}.`,
-                )}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="w-full flex items-center justify-center gap-2 py-2.5 text-[12px] font-bold text-white rounded-sm transition-opacity hover:opacity-90"
-                style={{ background: "#25D366" }}
+              <Link
+                href={estimateHref}
+                className="flex w-full items-center justify-center gap-2 rounded-sm py-2.5 text-[12px] font-bold text-white transition-opacity hover:opacity-90"
+                style={{ background: RED }}
               >
-                <WhatsAppIcon size={13} /> Get Quote on WhatsApp
-              </a>
+                Request this route quote <ChevronRight size={14} />
+              </Link>
             </div>
           )}
         </div>
       </div>
       <div className="px-6 pb-6">
         <button
+          type="button"
           onClick={calculate}
           disabled={calcLoading}
-          className="w-full py-3 font-bold text-sm tracking-[0.1em] uppercase text-white rounded-sm transition-all hover:opacity-90 disabled:opacity-60 flex items-center justify-center gap-2"
+          className="flex w-full items-center justify-center gap-2 rounded-sm py-3 text-sm font-bold uppercase tracking-[0.1em] text-white transition-all hover:opacity-90 disabled:opacity-60"
           style={{ background: RED }}
         >
-          {calcLoading ? (
-            <>
-              <Loader2 size={16} className="animate-spin" /> Calculating...
-            </>
-          ) : (
-            "Calculate Export Subtotal"
-          )}
+          {calcLoading ? <><Loader2 size={16} className="animate-spin" /> Checking route rate…</> : "Calculate recorded export subtotal"}
         </button>
       </div>
     </div>
   );
 }
 
-/* ─────────────────────────────────────────────────────────────── */
-/* OFFER PRICE DIALOG — replaces the old window.prompt() flow        */
-/* ─────────────────────────────────────────────────────────────── */
 function OfferPriceDialog({ car, onClose }: { car: CarWithImage | null; onClose: () => void }) {
   const [amount, setAmount] = useState("");
 

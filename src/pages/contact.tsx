@@ -1,9 +1,10 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Link } from "wouter";
 import { isSupabaseConfigured, supabase } from "@/lib/supabase";
 import { Mail, MapPin, Phone, Check, CarFront, Ship, CreditCard, CircleHelp } from "lucide-react";
 import { useMeta } from "@/lib/use-meta";
-import { DEST_COUNTRIES } from "@/lib/shipping";
+import DestinationFields from "@/components/DestinationFields";
+import { useDestinationPreference } from "@/hooks/useDestinationPreference";
 
 function WhatsAppIcon({ size = 20 }: { size?: number }) {
   return (
@@ -22,6 +23,15 @@ export default function ContactPage() {
   });
   const [status, setStatus] = useState<"idle" | "submitting" | "success" | "error">("idle");
   const [inquiryType, setInquiryType] = useState("general");
+  const destination = useDestinationPreference();
+  const [country, setCountry] = useState("");
+  const [port, setPort] = useState("");
+
+  useEffect(() => {
+    if (!destination.loaded) return;
+    setCountry((current) => current || destination.country);
+    setPort((current) => current || destination.port);
+  }, [destination.loaded, destination.country, destination.port]);
   const waNumber = import.meta.env.VITE_WHATSAPP_NUMBER || "818089227375";
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -33,8 +43,12 @@ export default function ContactPage() {
       name: formData.get("name") as string,
       email: formData.get("email") as string,
       phone: formData.get("phone") as string,
-      country: formData.get("country") as string,
-      message: formData.get("message") as string,
+      country,
+      destination_port: port.trim(),
+      message: [
+        String(formData.get("message") ?? "").trim(),
+        port.trim() ? `Preferred port / final city: ${port.trim()}` : "Preferred port or final city to be confirmed.",
+      ].filter(Boolean).join("\n\n"),
       inquiry_type: inquiryType,
     };
 
@@ -47,7 +61,6 @@ export default function ContactPage() {
       setStatus("success");
       (e.target as HTMLFormElement).reset();
       setInquiryType("general");
-      setTimeout(() => setStatus("idle"), 5000);
     } catch (err) {
       console.error(err);
       setStatus("error");
@@ -139,7 +152,14 @@ export default function ContactPage() {
 
             {/* Contact Form */}
             <div className="bg-card border border-border p-8 md:p-10 shadow-sm">
-              <h2 className="text-2xl font-serif font-bold mb-6">Send a Message</h2>
+              <h2 className="text-2xl font-serif font-bold mb-2">Send a Message</h2>
+              <p className="mb-6 text-sm leading-6 text-muted-foreground">
+                Choose the destination so our team can understand the context of your question.
+                For a vehicle-specific or shipping request, use the{" "}
+                <Link href="/request-a-quote" className="font-semibold text-primary underline underline-offset-2">
+                  guided quote form
+                </Link>.
+              </p>
 
               {status === "success" ? (
                 <div className="h-full flex flex-col items-center justify-center text-center py-12">
@@ -217,38 +237,31 @@ export default function ContactPage() {
                       className="w-full border border-border bg-background p-3 focus:border-primary outline-none transition-colors"
                     />
                   </div>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-xs uppercase tracking-wider mb-2 font-medium text-foreground/80">
-                        WhatsApp / Phone
-                      </label>
-                      <input
-                        name="phone"
-                        type="tel"
-                        placeholder="+1 234 567 8900"
-                        className="w-full border border-border bg-background p-3 focus:border-primary outline-none transition-colors"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-xs uppercase tracking-wider mb-2 font-medium text-foreground/80">
-                        Your Country *
-                      </label>
-                      <select
-                        required
-                        name="country"
-                        defaultValue=""
-                        className="w-full border border-border bg-background p-3 focus:border-primary outline-none transition-colors"
-                      >
-                        <option value="" disabled>
-                          Select your destination country
-                        </option>
-                        {DEST_COUNTRIES.map((country) => (
-                          <option key={country} value={country}>
-                            {country}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
+                  <div>
+                    <label className="block text-xs uppercase tracking-wider mb-2 font-medium text-foreground/80">
+                      WhatsApp / Phone
+                    </label>
+                    <input
+                      name="phone"
+                      type="tel"
+                      placeholder="+1 234 567 8900"
+                      className="w-full border border-border bg-background p-3 focus:border-primary outline-none transition-colors"
+                    />
+                  </div>
+                  <div className="rounded-sm border border-border bg-muted/20 p-4">
+                    <DestinationFields
+                      country={country}
+                      port={port}
+                      onCountryChange={(nextCountry) => {
+                        setCountry(nextCountry);
+                        destination.setDestination({ country: nextCountry, port });
+                      }}
+                      onPortChange={(nextPort) => {
+                        setPort(nextPort);
+                        destination.setDestination({ country, port: nextPort });
+                      }}
+                      idPrefix="contact-destination"
+                    />
                   </div>
                   <div>
                     <label className="block text-xs uppercase tracking-wider mb-2 font-medium text-foreground/80">

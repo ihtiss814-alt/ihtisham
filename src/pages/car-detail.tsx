@@ -21,6 +21,9 @@ import CarCard, { type Car } from "@/components/CarCard";
 import { MakeLogo as ManufacturerLogo } from "@/components/VehicleIdentity";
 import VehiclePhotoGallery from "@/components/VehiclePhotoGallery";
 import { isSupabaseConfigured, supabase } from "@/lib/supabase";
+import DestinationFields from "@/components/DestinationFields";
+import { useDestinationPreference } from "@/hooks/useDestinationPreference";
+import { quoteRequestHref } from "@/lib/destination-links";
 import { useMeta } from "@/lib/use-meta";
 import { useSeoBootstrap } from "@/lib/seo-bootstrap-context";
 import {
@@ -39,8 +42,6 @@ import {
   type VehicleSeoImage,
 } from "@/lib/vehicle-seo";
 import {
-  COUNTRY_PORTS,
-  DEST_COUNTRIES,
   fetchShippingRate,
   computeLandedCost,
   type ShippingRate,
@@ -229,8 +230,15 @@ export default function CarDetailPage() {
   const [similarCars, setSimilarCars] = useState<SimilarCar[]>([]);
   const [saved, setSaved] = useState(false);
   const [shareState, setShareState] = useState<"idle" | "copied">("idle");
-  const [country, setCountry] = useState("Pakistan");
-  const [port, setPort] = useState(COUNTRY_PORTS.Pakistan?.[0] ?? "");
+  const destinationPreference = useDestinationPreference();
+  const [country, setCountry] = useState("");
+  const [port, setPort] = useState("");
+
+  useEffect(() => {
+    if (!destinationPreference.loaded) return;
+    setCountry((current) => current || destinationPreference.country);
+    setPort((current) => current || destinationPreference.port);
+  }, [destinationPreference.loaded, destinationPreference.country, destinationPreference.port]);
   const [freightType, setFreightType] = useState<"Prepaid" | "Collect">("Prepaid");
   const [withInspection, setWithInspection] = useState(true);
   const [withInsurance, setWithInsurance] = useState(true);
@@ -440,7 +448,6 @@ export default function CarDetailPage() {
       withInsurance,
     });
   }, [freightType, hasFobPrice, fobPrice, shippingRate, withInspection, withInsurance]);
-  const activePorts = COUNTRY_PORTS[country] ?? [];
   const availableFeatures = useMemo(
     () => FEATURE_LABELS.filter((label) => car && featureIsPresent(car.features, label)),
     [car],
@@ -477,7 +484,15 @@ export default function CarDetailPage() {
 
   const changeCountry = (nextCountry: string) => {
     setCountry(nextCountry);
-    setPort(COUNTRY_PORTS[nextCountry]?.[0] ?? "");
+    setPort("");
+    setShippingRate(null);
+    destinationPreference.setDestination({ country: nextCountry, port: "" });
+  };
+
+  const changePort = (nextPort: string) => {
+    setPort(nextPort);
+    setShippingRate(null);
+    destinationPreference.setDestination({ country, port: nextPort });
   };
 
   const handleInquirySubmit = async (event: React.FormEvent<HTMLFormElement>) => {
@@ -895,35 +910,13 @@ export default function CarDetailPage() {
                     title="Export cost estimate"
                     description="Shown only when a route rate is available in the shipping-rate database."
                   />
-                  <label className="vehicle-form-label" htmlFor="vehicle-country">
-                    Destination country
-                  </label>
-                  <select
-                    id="vehicle-country"
-                    value={country}
-                    onChange={(event) => changeCountry(event.target.value)}
-                  >
-                    {DEST_COUNTRIES.map((name) => (
-                      <option key={name} value={name}>
-                        {name}
-                      </option>
-                    ))}
-                  </select>
-                  <label className="vehicle-form-label" htmlFor="vehicle-port">
-                    Destination port
-                  </label>
-                  <select
-                    id="vehicle-port"
-                    value={port}
-                    onChange={(event) => setPort(event.target.value)}
-                    disabled={!activePorts.length}
-                  >
-                    {activePorts.map((name) => (
-                      <option key={name} value={name}>
-                        {name}
-                      </option>
-                    ))}
-                  </select>
+                  <DestinationFields
+                    country={country}
+                    port={port}
+                    onCountryChange={changeCountry}
+                    onPortChange={changePort}
+                    idPrefix="vehicle-estimate-destination"
+                  />
                   <div className="vehicle-rate-options">
                     <label>
                       <input
@@ -997,9 +990,17 @@ export default function CarDetailPage() {
                         No published rate was found for this country and port. We will not estimate
                         a freight charge without a matching rate record.
                       </p>
-                      <a href={whatsappUrl}>
-                        Request a route quote <ArrowRight size={14} />
-                      </a>
+                      <Link
+                        href={quoteRequestHref({
+                          country,
+                          port,
+                          vehicleRef: car.ref_number,
+                          vehicleModel: carName,
+                          requestType: "vehicle",
+                        })}
+                      >
+                        Request a written route quote <ArrowRight size={14} />
+                      </Link>
                     </div>
                   )}
                 </section>
@@ -1031,37 +1032,13 @@ export default function CarDetailPage() {
                       <span>Vehicle reference</span>
                       <strong>{car.ref_number}</strong>
                     </div>
-                    <label className="vehicle-form-label" htmlFor="inquiry-country">
-                      Destination country
-                    </label>
-                    <select
-                      id="inquiry-country"
-                      value={country}
-                      onChange={(event) => changeCountry(event.target.value)}
-                      required
-                    >
-                      {DEST_COUNTRIES.map((name) => (
-                        <option key={name} value={name}>
-                          {name}
-                        </option>
-                      ))}
-                    </select>
-                    <label className="vehicle-form-label" htmlFor="inquiry-port">
-                      Nearest port
-                    </label>
-                    <select
-                      id="inquiry-port"
-                      value={port}
-                      onChange={(event) => setPort(event.target.value)}
-                      required
-                      disabled={!activePorts.length}
-                    >
-                      {activePorts.map((name) => (
-                        <option key={name} value={name}>
-                          {name}
-                        </option>
-                      ))}
-                    </select>
+                    <DestinationFields
+                      country={country}
+                      port={port}
+                      onCountryChange={changeCountry}
+                      onPortChange={changePort}
+                      idPrefix="vehicle-inquiry-destination"
+                    />
                     <label className="vehicle-form-label" htmlFor="inquiry-name">
                       Full name
                     </label>

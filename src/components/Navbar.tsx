@@ -3,6 +3,7 @@ import { Link, useLocation } from "wouter";
 import { Menu, X, ChevronRight, ChevronDown, Clock, Car, Mail } from "lucide-react";
 import { getAvailableStockCount } from "@/lib/inventory-cache";
 import { useExchangeRate } from "@/hooks/useExchangeRate";
+import DestinationPreferenceControl from "@/components/DestinationPreferenceControl";
 
 // ─── Brand tokens ────────────────────────────────────────────────
 // Primary:   #C8102E  (crimson — extracted from logo shield)
@@ -20,6 +21,10 @@ const NAV_LINKS = [
 ];
 
 const HELP_LINKS = [
+  { label: "Request a Quote", href: "/request-a-quote" },
+  { label: "Import by Country", href: "/import-japanese-cars" },
+  { label: "Makes & Models", href: "/used-japanese-cars" },
+  { label: "Buyer Information", href: "/buyer-information" },
   { label: "How It Works", href: "/how-it-works" },
   { label: "Shipping Information", href: "/shipping-information" },
   { label: "Payment Information", href: "/payment-information" },
@@ -363,6 +368,15 @@ export default function Navbar() {
 
               {/* Desktop CTAs */}
               <div className="hidden lg:flex items-center gap-2.5">
+                <DestinationPreferenceControl />
+                <Link
+                  href="/request-a-quote"
+                  className="group flex items-center gap-1.5 px-4 py-2.5 border border-[#C8102E] text-[#C8102E] hover:bg-red-50 text-[10px] tracking-[0.12em] uppercase font-bold transition-colors duration-150 rounded-[2px]"
+                  data-testid="nav-request-quote-btn"
+                >
+                  Request a Quote
+                  <ChevronRight size={11} strokeWidth={2.5} />
+                </Link>
                 {/* View Inventory — crimson filled */}
                 <Link
                   href="/cars"
@@ -548,6 +562,8 @@ export default function Navbar() {
                 })}
               </div>
             )}
+          <div className="mt-4 border-t border-gray-100 pt-4">
+            <DestinationPreferenceControl mobile />
           </div>
         </nav>
 
@@ -593,6 +609,14 @@ export default function Navbar() {
 
         {/* CTA buttons */}
         <div className="px-4 pb-8 pt-1 border-t border-gray-100 space-y-2.5 flex-shrink-0">
+          <Link
+            href="/request-a-quote"
+            onClick={() => setMobileOpen(false)}
+            className="flex items-center justify-center gap-2 w-full py-3 border border-[#C8102E] text-[#C8102E] text-[10.5px] tracking-[0.2em] uppercase font-bold rounded-[2px] transition-colors duration-150 hover:bg-red-50"
+          >
+            Request a Quote
+            <ChevronRight size={12} strokeWidth={2.5} />
+          </Link>
           <Link
             href="/cars"
             onClick={() => setMobileOpen(false)}

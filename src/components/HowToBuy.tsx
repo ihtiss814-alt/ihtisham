@@ -9,8 +9,9 @@ const HTML = `<section class="wt-htb" id="how-to-buy" aria-labelledby="wt-htb-ti
       <span class="wt-htb__eyebrow">How it works</span>
       <h2 class="wt-htb__title" id="wt-htb-title">Buying a car from Japan, in four clear steps</h2>
       <p class="wt-htb__lead">
-        From choosing your vehicle to collecting it at your port, we handle the auctions,
-        paperwork and shipping. You always know the full cost before you pay.
+        Choose a vehicle or describe what you need, then share your destination. We will review
+        what can be offered and set out confirmed vehicle and export charges in a written quote.
+        Destination import duties, taxes and local clearance costs may be separate.
       </p>
 
       <div class="wt-htb__hero">
@@ -100,6 +101,7 @@ const HTML = `<section class="wt-htb" id="how-to-buy" aria-labelledby="wt-htb-ti
 
       <div class="wt-htb__actions">
         <a class="wt-htb__btn wt-htb__btn--primary" href="/cars">Browse available cars</a>
+        <a class="wt-htb__btn wt-htb__btn--ghost" href="/request-a-quote">Plan an export quote</a>
         <a class="wt-htb__btn wt-htb__btn--ghost" href="__WA__" target="_blank" rel="noopener noreferrer">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M20.5 3.5A11 11 0 003.3 16.8L2 22l5.3-1.4A11 11 0 0020.5 3.5zM12 20.2a9 9 0 01-4.6-1.3l-.3-.2-3.1.8.8-3-.2-.3A9 9 0 1112 20.2zm5-6.7c-.3-.1-1.6-.8-1.9-.9-.3-.1-.5-.1-.7.1l-.9 1.1c-.2.2-.3.2-.6.1a7.4 7.4 0 01-3.7-3.2c-.3-.5.3-.5.8-1.5.1-.2 0-.4 0-.5l-.9-2.1c-.2-.5-.4-.4-.6-.4h-.5a1 1 0 00-.7.3 3 3 0 00-.9 2.2 5.2 5.2 0 001.1 2.8 11.9 11.9 0 004.6 4.1c1.7.7 2.4.8 3.2.7.5-.1 1.6-.7 1.8-1.3.2-.6.2-1.2.2-1.3-.1-.1-.3-.2-.6-.3z"/></svg>
           Ask us on WhatsApp
@@ -109,11 +111,11 @@ const HTML = `<section class="wt-htb" id="how-to-buy" aria-labelledby="wt-htb-ti
       <ul class="wt-htb__trust">
         <li>
           <span aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3 8-8"/><path d="M20 12v6a2 2 0 01-2 2H6a2 2 0 01-2-2V6a2 2 0 012-2h9"/></svg></span>
-          Itemised, transparent pricing
+          Written quote with clear inclusions and exclusions
         </li>
         <li>
           <span aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17h13V6H3zM16 10h4l1 3v4h-5"/><circle cx="7" cy="18" r="2"/><circle cx="18" cy="18" r="2"/></svg></span>
-          Shipping arranged for you
+          Shipping options confirmed for your order
         </li>
         <li>
           <span aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 01-2 2H8l-5 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg></span>
@@ -184,7 +186,7 @@ const HTML = `<section class="wt-htb" id="how-to-buy" aria-labelledby="wt-htb-ti
               <span class="wt-htb__icon" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg></span>
               <h3>Choose your car and get a clear estimate</h3>
             </div>
-            <p>Browse our stock or tell us what you want. Give us your destination country and port so the estimate covers the real cost of getting the car on your road, not just the car price.</p>
+            <p>Browse our stock or tell us what you want. Give us your destination country and port so the team can confirm which costs can be quoted and what may remain payable at destination.</p>
             <span class="wt-htb__tag"><b>You do:</b> select a car, request an estimate</span>
             <details class="wt-htb__more">
               <summary>How to get an accurate estimate</summary>
@@ -299,7 +301,7 @@ const HTML = `<section class="wt-htb" id="how-to-buy" aria-labelledby="wt-htb-ti
               <span class="wt-htb__icon" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10l9-6 9 6"/><path d="M5 10v8M9.5 10v8M14.5 10v8M19 10v8M3 21h18"/></svg></span>
               <h3>Pay by telegraphic transfer</h3>
             </div>
-            <p>Send the invoice amount by bank transfer (T/T) to our Japan account. Once we confirm your payment, we reserve the car and begin export preparation.</p>
+            <p>Follow the payment amount, beneficiary and milestone on the current proforma invoice. Reservation and export preparation proceed only as set out in the written sale terms and after cleared payment is confirmed.</p>
             <span class="wt-htb__tag"><b>You do:</b> transfer funds, share the receipt</span>
             <details class="wt-htb__more">
               <summary>Before you transfer</summary>
@@ -377,7 +379,7 @@ const HTML = `<section class="wt-htb" id="how-to-buy" aria-labelledby="wt-htb-ti
             <details class="wt-htb__more">
               <summary>What happens next</summary>
               <ul>
-                <li>In Japan: we deregister the car for export and book space on the vessel</li>
+                <li>Export preparation: the agreed export documents and vessel space are arranged for the confirmed order</li>
                 <li>Where your country requires it: a pre-shipment inspection or cleaning certificate</li>
                 <li>We send your documents: commercial invoice, export certificate and Bill of Lading</li>
                 <li>On arrival: customs declaration, duties and taxes, any biosecurity or compliance checks, then pickup</li>
@@ -392,16 +394,17 @@ const HTML = `<section class="wt-htb" id="how-to-buy" aria-labelledby="wt-htb-ti
 
     <div class="wt-htb__final">
       <h3>Ready to find your car?</h3>
-      <p>Tell us your budget and destination port. We will reply with real options and a full cost estimate, with no obligation.</p>
+      <p>Tell us your vehicle requirements and destination. We will review the request and confirm what can be quoted. Any estimate will identify recorded charges and exclusions; destination-side duties and local costs must be checked separately.</p>
       <div class="wt-htb__actions">
         <a class="wt-htb__btn wt-htb__btn--primary" href="/cars">Browse available cars <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+        <a class="wt-htb__btn wt-htb__btn--ghost" href="/request-a-quote">Request a destination-specific quote</a>
         <a class="wt-htb__btn wt-htb__btn--light" href="__WA__" target="_blank" rel="noopener noreferrer"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M20.5 3.5A11 11 0 003.3 16.8L2 22l5.3-1.4A11 11 0 0020.5 3.5zM12 20.2a9 9 0 01-4.6-1.3l-.3-.2-3.1.8.8-3-.2-.3A9 9 0 1112 20.2zm5-6.7c-.3-.1-1.6-.8-1.9-.9-.3-.1-.5-.1-.7.1l-.9 1.1c-.2.2-.3.2-.6.1a7.4 7.4 0 01-3.7-3.2c-.3-.5.3-.5.8-1.5.1-.2 0-.4 0-.5l-.9-2.1c-.2-.5-.4-.4-.6-.4h-.5a1 1 0 00-.7.3 3 3 0 00-.9 2.2 5.2 5.2 0 001.1 2.8 11.9 11.9 0 004.6 4.1c1.7.7 2.4.8 3.2.7.5-.1 1.6-.7 1.8-1.3.2-.6.2-1.2.2-1.3-.1-.1-.3-.2-.6-.3z"/></svg> Get an estimate on WhatsApp</a>
       </div>
     </div>
 
   </div>
 </section>
-<script type="application/ld+json">{"@context": "https://schema.org", "@type": "HowTo", "name": "How to buy a car from Japan with Wazir Trading", "step": [{"@type": "HowToStep", "position": 1, "name": "Choose your car and get a clear estimate", "text": "Browse our stock or tell us what you want, with your destination country and port, so the estimate covers the real cost."}, {"@type": "HowToStep", "position": 2, "name": "Review your proforma invoice", "text": "We send an itemised invoice with the vehicle price, shipping method and destination port. Confirm when everything matches."}, {"@type": "HowToStep", "position": 3, "name": "Pay by telegraphic transfer", "text": "Send the invoice amount by bank transfer to our Japan account. Once confirmed, we reserve the car and begin export preparation."}, {"@type": "HowToStep", "position": 4, "name": "Shipping, customs and pickup", "text": "We deregister the car, prepare export documents and ship it to your port. You clear customs and collect your vehicle."}]}</script>`;
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "HowTo", "name": "How to buy a car from Japan with Wazir Trading", "step": [{"@type": "HowToStep", "position": 1, "name": "Choose your car and get a clear estimate", "text": "Browse our stock or tell us what you want, with your destination country and port, so the team can confirm which costs can be quoted and what may remain payable at destination."}, {"@type": "HowToStep", "position": 2, "name": "Review your proforma invoice", "text": "We send an itemised invoice with the vehicle price, shipping method and destination port. Confirm when everything matches."}, {"@type": "HowToStep", "position": 3, "name": "Pay by telegraphic transfer", "text": "Follow the payment instructions and milestone stated in the current proforma invoice. Confirm the beneficiary independently before transferring funds; reservation and export preparation depend on the written sale terms and cleared payment."}, {"@type": "HowToStep", "position": 4, "name": "Shipping, customs and pickup", "text": "The agreed export and shipping steps are confirmed for the individual order. Destination customs clearance, duties, taxes, port handling and collection may require separate payment or a local customs representative."}]}</script>`;
 
 /**
  * "How to buy" section. Markup and styles are scoped under .wt-htb so they

@@ -26,6 +26,7 @@ const STATIC_PATHS = [
   "/auto-parts",
   "/shipping-information",
   "/contact",
+  "/request-a-quote",
   "/faqs",
   "/payment-information",
   "/buyer-information",

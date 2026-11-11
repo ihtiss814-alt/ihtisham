@@ -44,6 +44,7 @@ function WhatsAppIcon({ size = 20 }: { size?: number }) {
 /* ─────────────────────────────────────────────────────────────────────── */
 
 const QUICK_LINKS = [
+  { label: "Request a Quote", href: "/request-a-quote" },
   { label: "Browse Inventory", href: "/cars" },
   { label: "Import by Country", href: "/import-japanese-cars" },
   { label: "Cars by Make & Model", href: "/used-japanese-cars" },
@@ -53,6 +54,8 @@ const QUICK_LINKS = [
 ];
 
 const HELP_LINKS = [
+  { label: "Import by Country", href: "/import-japanese-cars" },
+  { label: "Makes & Models", href: "/used-japanese-cars" },
   { label: "FAQs", href: "/faqs" },
   { label: "Buyer Information", href: "/buyer-information" },
   { label: "Payment Information", href: "/payment-information" },
