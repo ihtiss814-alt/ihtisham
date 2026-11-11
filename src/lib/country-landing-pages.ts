@@ -17,6 +17,8 @@ export interface CountryLandingPage {
   slug: string;
   name: string;
   region: string;
+  /** Internal prioritisation tier; public country URLs remain unchanged. */
+  seoTier: 1 | 2 | 3;
   title: string;
   description: string;
   intro: string;
@@ -34,15 +36,16 @@ export const COUNTRY_LANDING_PAGES: CountryLandingPage[] = [
     slug: "pakistan",
     name: "Pakistan",
     region: "South Asia",
-    title: "Japanese Car Import Guide for Pakistan | Wazir Trading",
+    seoTier: 1,
+    title: "Import Japanese Cars to Pakistan | Wazir Trading",
     description:
-      "Plan a Japanese used-car purchase for Pakistan. Review current FBR and Ministry of Commerce vehicle-import notices, eligibility, duties and documents before shipment.",
+      "Review Pakistan’s 2026 used-vehicle import rules, commercial-import conditions, overseas-scheme changes and regulatory duties before shipment.",
     intro:
       "Planning to buy a Japanese used vehicle for Pakistan? Start with the exact import route that applies to you. Pakistan’s rules distinguish commercial imports from personal schemes, and recent amendments make it especially important to verify the current policy before choosing a vehicle.",
     buyerContext:
       "For a Pakistan enquiry, identify whether the intended import is commercial or under an eligible personal scheme. The vehicle’s year, engine capacity, category, ownership documents and importer eligibility can affect whether the transaction is workable.",
     regulatorySnapshot:
-      "Pakistan’s Ministry of Commerce and FBR published multiple Import Policy Order and customs amendments during 2025–2026. The FBR’s vehicle guidance and the Ministry’s current SRO list should be read together; older summaries can be superseded. The active SRO list currently includes 2026 changes relating to commercial used-vehicle regulatory duty, while January 2026 changes also amended the personal baggage, transfer-of-residence and gift schemes.",
+      "Pakistan’s rules distinguish commercial used-vehicle imports from the schemes available to eligible overseas Pakistanis. SRO 61(I)/2026 dated 15 January 2026 removed the personal-baggage scheme and amended the remaining schemes. SRO 1895(I)/2025 provided for commercial imports under specified PCT headings, initially subject to a vehicle-age condition through 30 June 2026 and thereafter stated that the age limit may be removed, subject to prescribed environmental, safety and quality testing and certification. SRO 1065(I)/2026 dated 30 June 2026 levies a 30% regulatory duty on covered commercial used-vehicle imports in addition to the duty under SRO 1064(I)/2026. Confirm the operative requirements with the Ministry of Commerce, FBR or a licensed customs professional before committing funds.",
     checks: [
       "Confirm whether the intended transaction is commercial or an eligible personal import; do not assume the personal-baggage, gift and transfer-of-residence rules are interchangeable.",
       "Check the latest Import Policy Order and operative Customs SROs for the shipment date, including applicable age, safety, environmental and quality conditions.",
@@ -71,23 +74,39 @@ export const COUNTRY_LANDING_PAGES: CountryLandingPage[] = [
         url: "https://tipp.gov.pk/ur-pk/site/display/751",
         authority: "Pakistan Trade Information Portal",
       },
+      {
+        label: "Ministry of Commerce — SRO 1895(I)/2025 commercial used-vehicle policy",
+        url: "https://www.commerce.gov.pk/wp-content/uploads/2025/09/SRO_1895_2025.pdf",
+        authority: "Ministry of Commerce, Government of Pakistan",
+      },
+      {
+        label: "Pakistan Trade Information Portal — SRO 1065(I)/2026 regulatory duty",
+        url: "https://tipp.gov.pk/ur-pk/site/display/751",
+        authority: "Federal Board of Revenue / Pakistan Trade Information Portal",
+      },
+      {
+        label: "Ministry of Commerce — SRO 61(I)/2026 overseas import-scheme amendments",
+        url: "https://www.commerce.gov.pk/wp-content/uploads/2026/01/SRO-No.-61.pdf",
+        authority: "Ministry of Commerce, Government of Pakistan",
+      },
     ],
-    reviewedOn: "2026-11-10",
+    reviewedOn: "2026-11-11",
     indexable: true,
   },
   {
     slug: "sri-lanka",
     name: "Sri Lanka",
     region: "South Asia",
-    title: "Japanese Car Import Guide for Sri Lanka | Wazir Trading",
+    seoTier: 1,
+    title: "Import Japanese Cars to Sri Lanka | Wazir Trading",
     description:
-      "Explore the checks involved in buying a Japanese used vehicle for Sri Lanka, including import-control procedures, inspection documents and customs clearance.",
+      "Review Sri Lanka vehicle-import permits, current Gazette conditions, inspection documents and customs checks before buying from Japan.",
     intro:
       "A Japanese vehicle purchase for Sri Lanka should begin with the current import-control route, not only the vehicle price. Confirm that the vehicle category and importer qualify under the rules in force on the intended import date.",
     buyerContext:
       "Sri Lanka’s import-control and customs process has been amended through regulations and operational instructions. A buyer should establish the permit or licence pathway, inspection certificate requirement and document-verification process before arranging shipment.",
     regulatorySnapshot:
-      "Sri Lanka’s 2025 Gazette regulations include requirements concerning export inspection documentation and online verification of supporting documents before Customs clearance. The Trade Information Portal also maintains vehicle-permit procedure information. Check the latest regulations and operational instructions rather than relying on an old permit guide or historical tax table.",
+      "Sri Lanka’s vehicle-import process is governed by category-specific controls, regulations and operational instructions. The applicable permit route, permitted vehicle category, age or specification conditions and inspection evidence must be checked against the current Gazette and the Department of Import and Export Control before purchase. Customs release and registration requirements should also be confirmed for the exact vehicle; historical permit guides and tax tables may no longer apply.",
     checks: [
       "Ask the Department of Import and Export Control whether the selected vehicle and importer category require a licence, permit or other approval before purchase.",
       "Confirm which pre-export inspection certificate and verification process applies to a vehicle sourced in Japan under the latest Gazette and operational instructions.",
@@ -111,14 +130,20 @@ export const COUNTRY_LANDING_PAGES: CountryLandingPage[] = [
         url: "https://www.customs.gov.lk/",
         authority: "Sri Lanka Customs",
       },
+      {
+        label: "Department of Import and Export Control — Sri Lanka",
+        url: "https://imexport.gov.lk/",
+        authority: "Department of Import and Export Control, Sri Lanka",
+      },
     ],
-    reviewedOn: "2026-11-10",
+    reviewedOn: "2026-11-11",
     indexable: true,
   },
   {
     slug: "bangladesh",
     name: "Bangladesh",
     region: "South Asia",
+    seoTier: 2,
     title: "Japanese Car Import Guide for Bangladesh | Wazir Trading",
     description:
       "Prepare a Japanese vehicle enquiry for Bangladesh with official guidance on customs clearance, importer eligibility and vehicle documentation.",
@@ -154,15 +179,16 @@ export const COUNTRY_LANDING_PAGES: CountryLandingPage[] = [
     slug: "united-arab-emirates",
     name: "United Arab Emirates",
     region: "Gulf & Middle East",
-    title: "Japanese Car Import Guide for United Arab Emirates | Wazir Trading",
+    seoTier: 1,
+    title: "Import Japanese Used Cars to UAE | Wazir Trading",
     description:
-      "Plan a Japanese used-car purchase for the UAE. Check customs clearance, vehicle conformity and the product-status process for registration before shipping.",
+      "Plan a Japanese used-car import to the UAE with customs, vehicle conformity and MOIAT registration-eligibility checks before shipment.",
     intro:
       "A Japanese used vehicle intended for the United Arab Emirates needs both a customs plan and a registration-eligibility check. Do not assume that customs release alone means a vehicle can be registered for road use in the relevant emirate.",
     buyerContext:
       "The UAE is a federation, and practical clearance or registration steps can involve federal and emirate-level authorities. The selected emirate, vehicle history, condition, steering configuration and conformity documentation should be checked before purchase.",
     regulatorySnapshot:
-      "The Ministry of Industry and Advanced Technology provides a Product Status Statement service for imported used vehicles to confirm eligibility for registration in the traffic system. Abu Dhabi Customs also publishes vehicle import information and document requirements. Confirm the exact process with the relevant emirate authority.",
+      "MOIAT provides a Product Status Statement for imported used vehicles to confirm whether a vehicle is eligible for registration in the UAE traffic system. Its published service requirements include a UAE ID and the vehicle’s unified identification number. Customs clearance and the vehicle’s registration eligibility are separate checks; confirm the process with the authority for the intended emirate before shipment.",
     checks: [
       "Check whether the vehicle can obtain the required product-status or conformity documentation and can be registered in the intended emirate.",
       "Verify steering configuration, accident history, vehicle condition, export certificate, original invoice and bill-of-lading requirements before shipment.",
@@ -187,13 +213,14 @@ export const COUNTRY_LANDING_PAGES: CountryLandingPage[] = [
         authority: "Dubai Customs",
       },
     ],
-    reviewedOn: "2026-11-10",
+    reviewedOn: "2026-11-11",
     indexable: true,
   },
   {
     slug: "oman",
     name: "Oman",
     region: "Gulf & Middle East",
+    seoTier: 3,
     title: "Japanese Car Import Guide for Oman | Wazir Trading",
     description:
       "Review official Oman Customs guidance for second-hand vehicles and the checks to complete before buying a Japanese used car for Oman.",
@@ -234,6 +261,7 @@ export const COUNTRY_LANDING_PAGES: CountryLandingPage[] = [
     slug: "qatar",
     name: "Qatar",
     region: "Gulf & Middle East",
+    seoTier: 3,
     title: "Japanese Car Import Guide for Qatar | Wazir Trading",
     description:
       "Plan a Japanese vehicle import to Qatar with a checklist for customs declarations, shipping documents, conformity and destination charges.",
@@ -269,6 +297,7 @@ export const COUNTRY_LANDING_PAGES: CountryLandingPage[] = [
     slug: "bahrain",
     name: "Bahrain",
     region: "Gulf & Middle East",
+    seoTier: 3,
     title: "Japanese Car Import Guide for Bahrain | Wazir Trading",
     description:
       "Understand the Bahrain checks for customs clearance and initial registration of a used vehicle imported from Japan.",
@@ -304,6 +333,7 @@ export const COUNTRY_LANDING_PAGES: CountryLandingPage[] = [
     slug: "saudi-arabia",
     name: "Saudi Arabia",
     region: "Gulf & Middle East",
+    seoTier: 3,
     title: "Japanese Car Import Guide for Saudi Arabia | Wazir Trading",
     description:
       "Check Saudi ZATCA vehicle-import controls, vehicle age, conformity and steering requirements before arranging a Japanese used-car shipment.",
@@ -344,15 +374,16 @@ export const COUNTRY_LANDING_PAGES: CountryLandingPage[] = [
     slug: "kenya",
     name: "Kenya",
     region: "East Africa",
-    title: "Japanese Car Import Guide for Kenya | Wazir Trading",
+    seoTier: 1,
+    title: "Import Japanese Cars to Kenya | Wazir Trading",
     description:
-      "Review Kenya Revenue Authority and KEBS vehicle-import requirements for Japanese used cars, including age, right-hand drive and inspection checks.",
+      "Check Kenya vehicle-import rules for Japanese used cars, including first-registration age, right-hand drive, KEBS inspection and customs planning.",
     intro:
       "Kenya is a market where vehicle eligibility should be checked before a buyer selects a car. The official KRA guidance identifies both a vehicle-age requirement and right-hand-drive condition, with roadworthiness inspection requirements.",
     buyerContext:
       "For a Kenya enquiry, confirm the first-registration date, steering configuration and required pre-export inspection. A Japanese vehicle’s manufacture year alone may not answer the age test described by KRA.",
     regulatorySnapshot:
-      "KRA’s motor-vehicle import procedure states that the vehicle must be less than eight years old from the year of first registration, must be right-hand drive and is subject to roadworthiness inspection by a KEBS-appointed inspection agent in the country of export. Review current KRA and KEBS notices, including any special-purpose vehicle exceptions, before shipment.",
+      "KRA states that an imported used vehicle must be less than eight years old measured from its year of first registration, must be right-hand drive and must undergo roadworthiness inspection by a KEBS-appointed inspection agent in the country of export. KEBS notices also reiterate the eight-year test. Confirm the applicable first-registration calculation, vehicle category and current inspection procedure before purchase; do not rely on the model year alone.",
     checks: [
       "Calculate the vehicle’s age using the applicable first-registration test, not just the model year shown in a sales listing.",
       "Confirm the vehicle is right-hand drive and that the specific model/category is not subject to a special restriction or waiver process.",
@@ -371,23 +402,29 @@ export const COUNTRY_LANDING_PAGES: CountryLandingPage[] = [
         url: "https://www.kebs.org/",
         authority: "Kenya Bureau of Standards",
       },
+      {
+        label: "Government of Kenya — KEBS notice to used-vehicle importers",
+        url: "https://www.mygov.go.ke/sites/default/files/2024-11/Notice%20to%20Importers%20of%20Used%20%3ASecondhand%20Motor%20Vehicles.pdf",
+        authority: "Government of Kenya / Kenya Bureau of Standards",
+      },
     ],
-    reviewedOn: "2026-11-10",
+    reviewedOn: "2026-11-11",
     indexable: true,
   },
   {
     slug: "tanzania",
     name: "Tanzania",
     region: "East Africa",
-    title: "Japanese Car Import Guide for Tanzania | Wazir Trading",
+    seoTier: 1,
+    title: "Import Japanese Cars to Tanzania | Wazir Trading",
     description:
-      "Plan a Japanese used-car import to Tanzania with current TBS inspection and customs-clearance resources, plus a pre-shipment checklist.",
+      "Plan a Japanese used-car import to Tanzania with TBS roadworthiness, pre-shipment or destination-inspection checks and customs guidance.",
     intro:
       "For Tanzania, pre-shipment conformity and destination clearance need to be considered together. Tanzania Bureau of Standards publishes specific procedures and notices for imported used motor vehicles, including a 2026 destination-inspection procedure.",
     buyerContext:
       "Do not rely on an old inspection certificate or a previous shipment’s process. Ask TBS or an authorised inspection provider which route applies to the chosen vehicle, shipment date and Japan origin.",
     regulatorySnapshot:
-      "TBS currently lists a 2026 destination-inspection procedure for imported used motor vehicles and also publishes PVoC information. Earlier notices described inspection in Japan for vehicles exported from Japan; the operative procedure should be confirmed directly for the current shipment.",
+      "TBS publishes a 2026 destination-inspection procedure for imported used motor vehicles. Tanzania’s Trade Portal also describes the TBS roadworthiness-certificate workflow and supporting paperwork. The applicable route depends on whether the consignment has a valid Certificate of Conformity under PVoC or requires destination inspection. Confirm the current procedure with TBS for the specific vehicle and shipment before loading.",
     checks: [
       "Confirm with TBS whether the vehicle requires PVoC inspection in Japan, destination inspection, authentication or another current procedure.",
       "Check that the inspection certificate and vehicle details match the chassis, invoice and shipping documents.",
@@ -411,23 +448,29 @@ export const COUNTRY_LANDING_PAGES: CountryLandingPage[] = [
         url: "https://www.tra.go.tz/",
         authority: "Tanzania Revenue Authority",
       },
+      {
+        label: "Tanzania Trade Portal — TBS vehicle roadworthiness certificate procedure",
+        url: "https://trade.tanzania.go.tz/procedure/449?includeSearch=true&l=en",
+        authority: "Tanzania Trade Portal / Tanzania Bureau of Standards",
+      },
     ],
-    reviewedOn: "2026-11-10",
+    reviewedOn: "2026-11-11",
     indexable: true,
   },
   {
     slug: "uganda",
     name: "Uganda",
     region: "East Africa",
-    title: "Japanese Car Import Guide for Uganda | Wazir Trading",
+    seoTier: 1,
+    title: "Import Japanese Cars to Uganda | Wazir Trading",
     description:
-      "Prepare a Japanese vehicle import to Uganda using the latest URA used-motor-vehicle valuation information and a destination-clearance checklist.",
+      "Plan a Japanese used-car import to Uganda with URA valuation guidance, age-linked environmental levies and transit-cost checks.",
     intro:
       "Uganda’s customs valuation process is an important part of planning a used-car purchase. Uganda Revenue Authority publishes a used motor vehicle database and value guide that importers should consult before relying on the seller’s invoice alone.",
     buyerContext:
       "Uganda is landlocked, so a buyer should confirm the full transit and inland-delivery plan as well as the final customs and registration process. The route, transit fees and destination handover must be stated in a written quotation.",
     regulatorySnapshot:
-      "URA published a used motor vehicle database dated 1 August 2026 and explains that its valuation database is used for customs risk management and vehicle valuation. The current database can change; obtain the applicable version and tax assessment for the exact make, model, engine and year.",
+      "URA states that its used-motor-vehicle valuation database, rather than the seller’s invoice alone, is used as the basis for customs valuation. Its published environmental-levy table lists a 50% levy for passenger/saloon vehicles aged 9–15 years and states that passenger/saloon vehicles above 15 years are not allowed. The table treats some goods-vehicle categories differently, so buyers must check the exact classification and current URA guidance rather than applying passenger-car rules to every vehicle.",
     checks: [
       "Check the latest URA motor-vehicle valuation database and ask a broker to explain how it applies to the specific vehicle.",
       "Confirm applicable age, environmental levy, roadworthiness, registration and vehicle-category rules with URA and the relevant transport authority.",
@@ -451,14 +494,20 @@ export const COUNTRY_LANDING_PAGES: CountryLandingPage[] = [
         url: "https://ura.go.ug/en/import-export-faqs/",
         authority: "Uganda Revenue Authority",
       },
+      {
+        label: "URA — Import and export FAQs, used-vehicle valuation and environmental levy",
+        url: "https://ura.go.ug/en/import-export-faqs/",
+        authority: "Uganda Revenue Authority",
+      },
     ],
-    reviewedOn: "2026-11-10",
+    reviewedOn: "2026-11-11",
     indexable: true,
   },
   {
     slug: "zambia",
     name: "Zambia",
     region: "Southern Africa",
+    seoTier: 2,
     title: "Japanese Car Import Guide for Zambia | Wazir Trading",
     description:
       "Plan a Japanese used-car import to landlocked Zambia with ZRA vehicle-duty resources, customs valuation checks and transit-cost planning.",
@@ -499,6 +548,7 @@ export const COUNTRY_LANDING_PAGES: CountryLandingPage[] = [
     slug: "malawi",
     name: "Malawi",
     region: "Southern Africa",
+    seoTier: 2,
     title: "Japanese Car Import Guide for Malawi | Wazir Trading",
     description:
       "Review Malawi’s official vehicle-importer registration process and customs steps before buying a Japanese used vehicle for Malawi.",
@@ -539,6 +589,7 @@ export const COUNTRY_LANDING_PAGES: CountryLandingPage[] = [
     slug: "mozambique",
     name: "Mozambique",
     region: "Southern Africa",
+    seoTier: 2,
     title: "Japanese Car Import Guide for Mozambique | Wazir Trading",
     description:
       "Prepare a Japanese used-car enquiry for Mozambique with the latest Tax Authority vehicle-import procedures and customs document checks.",
@@ -574,6 +625,7 @@ export const COUNTRY_LANDING_PAGES: CountryLandingPage[] = [
     slug: "zimbabwe",
     name: "Zimbabwe",
     region: "Southern Africa",
+    seoTier: 2,
     title: "Japanese Car Import Guide for Zimbabwe | Wazir Trading",
     description:
       "Review ZIMRA’s published second-hand vehicle age restriction, valuation and document guidance before buying a Japanese used car for Zimbabwe.",
@@ -609,6 +661,7 @@ export const COUNTRY_LANDING_PAGES: CountryLandingPage[] = [
     slug: "botswana",
     name: "Botswana",
     region: "Southern Africa",
+    seoTier: 3,
     title: "Japanese Car Import Guide for Botswana | Wazir Trading",
     description:
       "Plan a Japanese vehicle import to Botswana with BURS motor-vehicle clearance guidance, customs documents and duty/tax checks.",
@@ -644,6 +697,7 @@ export const COUNTRY_LANDING_PAGES: CountryLandingPage[] = [
     slug: "namibia",
     name: "Namibia",
     region: "Southern Africa",
+    seoTier: 2,
     title: "Japanese Car Import Guide for Namibia | Wazir Trading",
     description:
       "Check Namibia’s official second-hand vehicle import permit requirements, steering restrictions, age and transport rules before buying in Japan.",
@@ -679,15 +733,16 @@ export const COUNTRY_LANDING_PAGES: CountryLandingPage[] = [
     slug: "south-africa",
     name: "South Africa",
     region: "Southern Africa",
-    title: "Japanese Car Import Guide for South Africa | Wazir Trading",
+    seoTier: 1,
+    title: "South Africa Used-Car Import Eligibility | Wazir Trading",
     description:
-      "Understand South Africa’s restrictions on used vehicle imports and the permit/letter-of-authority checks before considering a Japanese car purchase.",
+      "Check South Africa’s strict used-vehicle import permit rules and NRCS letter-of-authority requirements before considering a Japanese car.",
     intro:
       "South Africa is a particularly important destination to check before purchase because the government restricts the importation of second-hand vehicles. A Japanese used-car listing is not, by itself, evidence that the vehicle is eligible for import or registration.",
     buyerContext:
       "The importer’s circumstances and the vehicle’s category or purpose can determine whether an import permit route is available. Confirm eligibility with ITAC and the National Regulator for Compulsory Specifications before paying for a vehicle or arranging shipping.",
     regulatorySnapshot:
-      "The South African Government’s published guidance states that a second-hand vehicle may only be imported where the importer has been granted a permit, and that permits are issued under specifically defined circumstances. It also identifies a letter of authority from NRCS as a prior requirement for vehicle imports. This is not a general open-market import route.",
+      "The South African Government states that a second-hand vehicle may only be imported with a permit and that permits are issued in specifically defined circumstances, mainly for qualifying returning South African nationals and immigrants. The government guidance also requires an NRCS letter of authority before import. ITAC’s used-vehicle guidelines state that permits are not issued for ordinary commercial resale imports outside the defined exceptions. This is an eligibility guide, not an open-market import route.",
     checks: [
       "Obtain written confirmation from ITAC that the importer and specific vehicle qualify for a permit before purchase.",
       "Confirm whether an NRCS letter of authority, standards approval or other regulatory document is required.",
@@ -711,14 +766,25 @@ export const COUNTRY_LANDING_PAGES: CountryLandingPage[] = [
         url: "https://www.nrcs.org.za/",
         authority: "NRCS",
       },
+      {
+        label: "ITAC — Application forms for used passenger vehicle permits",
+        url: "https://itac.org.za/import-control/application-forms/",
+        authority: "International Trade Administration Commission",
+      },
+      {
+        label: "ITAC — Guidelines for importing used or second-hand vehicles",
+        url: "https://itac.org.za/wp-content/uploads/amended-guidelines-for-importation-of-used-or-second-hand-vehicles_.pdf",
+        authority: "International Trade Administration Commission",
+      },
     ],
-    reviewedOn: "2026-11-10",
+    reviewedOn: "2026-11-11",
     indexable: true,
   },
   {
     slug: "ghana",
     name: "Ghana",
     region: "West Africa",
+    seoTier: 2,
     title: "Japanese Car Import Guide for Ghana | Wazir Trading",
     description:
       "Review Ghana Revenue Authority vehicle-import guidance, especially right-hand-steering restrictions and the approvals required before a Japanese car is shipped.",
@@ -754,15 +820,16 @@ export const COUNTRY_LANDING_PAGES: CountryLandingPage[] = [
     slug: "nigeria",
     name: "Nigeria",
     region: "West Africa",
-    title: "Japanese Car Import Guide for Nigeria | Wazir Trading",
+    seoTier: 1,
+    title: "Import Japanese Cars to Nigeria | Wazir Trading",
     description:
-      "Plan a Japanese used-car import to Nigeria with the official Trade Information Portal and 2026 customs tariff resources.",
+      "Check Nigeria used-car age rules, 2026 customs tariff measures and vehicle-specific import costs before buying from Japan.",
     intro:
       "A Nigeria vehicle enquiry should start with the current tariff and import procedure for the exact HS code. Nigeria’s official trade portal provides an automobile import process, while the 2026 fiscal policy updates include vehicle-related tariff measures that buyers should account for.",
     buyerContext:
       "The import procedure can involve importer registration, product classification, banking/import documentation, a customs declaration and assessment. Verify the vehicle’s eligibility, current age/condition rules and any taxes or levies that apply to the precise engine size and category.",
     regulatorySnapshot:
-      "Nigeria’s Trade Information Portal lists an automobile import procedure and was updated in March 2026. The Federal Ministry of Information also announced 2026 fiscal policy and tariff amendments, including a green-tax surcharge affecting motor vehicles with engine capacities of 2,000cc and above. Use the current Nigeria Customs tariff and competent agency guidance for the exact vehicle.",
+      "Nigeria’s National Trade Information Portal describes the automobile import procedure and states an age restriction for vehicles based on year of manufacture. The Federal Ministry of Information’s 2026 fiscal-policy notice confirms a green-tax surcharge for motor vehicles with engine capacity of 2,000cc and above, alongside revised import-adjustment-tax measures. The exact tariff treatment depends on the HS classification, engine capacity and current customs schedule; do not rely on a generic flat-rate estimate or assume every vehicle category follows the same process.",
     checks: [
       "Search the current Nigeria Trade Information Portal for HS 8702, 8703 or 8704 as applicable and confirm the relevant procedure and agency requirements.",
       "Confirm the current 2026 tariff, Import Adjustment Tax, green-tax or other vehicle levies for the exact engine capacity and classification.",
@@ -786,14 +853,20 @@ export const COUNTRY_LANDING_PAGES: CountryLandingPage[] = [
         url: "https://customs.gov.ng/",
         authority: "Nigeria Customs Service",
       },
+      {
+        label: "Federal Ministry of Information — 2026 Customs fiscal-policy measures",
+        url: "https://fmino.gov.ng/nigeria-customs-service-implements-2026-fiscal-policy-measures-and-tariff-amendments/",
+        authority: "Federal Ministry of Information and National Orientation",
+      },
     ],
-    reviewedOn: "2026-11-10",
+    reviewedOn: "2026-11-11",
     indexable: true,
   },
   {
     slug: "senegal",
     name: "Senegal",
     region: "West Africa",
+    seoTier: 3,
     title: "Japanese Car Import Guide for Senegal | Wazir Trading",
     description:
       "Prepare a Japanese used-vehicle import to Senegal with official guidance on Dakar vehicle customs clearance, documents and duty valuation.",
@@ -829,6 +902,7 @@ export const COUNTRY_LANDING_PAGES: CountryLandingPage[] = [
     slug: "the-gambia",
     name: "The Gambia",
     region: "West Africa",
+    seoTier: 3,
     title: "Japanese Car Import Guide for The Gambia | Wazir Trading",
     description:
       "Review Gambia Revenue Authority vehicle-age and customs-clearance guidance before selecting a Japanese used car for The Gambia.",
@@ -864,6 +938,7 @@ export const COUNTRY_LANDING_PAGES: CountryLandingPage[] = [
     slug: "sierra-leone",
     name: "Sierra Leone",
     region: "West Africa",
+    seoTier: 3,
     title: "Japanese Car Import Guide for Sierra Leone | Wazir Trading",
     description:
       "Plan a Japanese vehicle import to Sierra Leone with a customs-document checklist and links to official revenue and trade authorities.",
@@ -899,6 +974,7 @@ export const COUNTRY_LANDING_PAGES: CountryLandingPage[] = [
     slug: "liberia",
     name: "Liberia",
     region: "West Africa",
+    seoTier: 3,
     title: "Japanese Car Import Guide for Liberia | Wazir Trading",
     description:
       "Prepare a Japanese used-car import to Liberia with LRA customs documentation, used-vehicle valuation and clearance checks.",
@@ -939,6 +1015,7 @@ export const COUNTRY_LANDING_PAGES: CountryLandingPage[] = [
     slug: "mauritius",
     name: "Mauritius",
     region: "Indian Ocean",
+    seoTier: 2,
     title: "Japanese Car Import Guide for Mauritius | Wazir Trading",
     description:
       "Check Mauritius Revenue Authority and Ministry of Commerce updates on second-hand vehicle permits and customs valuation before buying in Japan.",
@@ -979,6 +1056,7 @@ export const COUNTRY_LANDING_PAGES: CountryLandingPage[] = [
     slug: "seychelles",
     name: "Seychelles",
     region: "Indian Ocean",
+    seoTier: 3,
     title: "Japanese Car Import Guide for Seychelles | Wazir Trading",
     description:
       "Review Seychelles Revenue Commission guidance on right-hand-drive vehicles, import permits and vehicle documents before buying from Japan.",
@@ -1014,6 +1092,7 @@ export const COUNTRY_LANDING_PAGES: CountryLandingPage[] = [
     slug: "madagascar",
     name: "Madagascar",
     region: "Indian Ocean",
+    seoTier: 3,
     title: "Japanese Car Import Guide for Madagascar | Wazir Trading",
     description:
       "Understand Madagascar Customs’ CIVIO identification process and right-hand-drive restrictions before considering a Japanese used vehicle.",
@@ -1049,6 +1128,7 @@ export const COUNTRY_LANDING_PAGES: CountryLandingPage[] = [
     slug: "fiji",
     name: "Fiji",
     region: "Pacific",
+    seoTier: 2,
     title: "Japanese Car Import Guide for Fiji | Wazir Trading",
     description:
       "Check Fiji’s 2026 used-vehicle age, Euro 4, import-licence and pre-shipment requirements before buying a Japanese car.",
@@ -1089,6 +1169,7 @@ export const COUNTRY_LANDING_PAGES: CountryLandingPage[] = [
     slug: "papua-new-guinea",
     name: "Papua New Guinea",
     region: "Pacific",
+    seoTier: 3,
     title: "Japanese Car Import Guide for Papua New Guinea | Wazir Trading",
     description:
       "Prepare a Japanese vehicle import to Papua New Guinea with Customs guidance on brokers, classification, quarantine, clearance and wharf deadlines.",
@@ -1124,6 +1205,7 @@ export const COUNTRY_LANDING_PAGES: CountryLandingPage[] = [
     slug: "solomon-islands",
     name: "Solomon Islands",
     region: "Pacific",
+    seoTier: 3,
     title: "Japanese Car Import Guide for Solomon Islands | Wazir Trading",
     description:
       "Plan a Japanese vehicle import to Solomon Islands with official Customs ASYCUDA, vehicle declaration and document resources.",
@@ -1164,6 +1246,7 @@ export const COUNTRY_LANDING_PAGES: CountryLandingPage[] = [
     slug: "vanuatu",
     name: "Vanuatu",
     region: "Pacific",
+    seoTier: 3,
     title: "Japanese Car Import Guide for Vanuatu | Wazir Trading",
     description:
       "Review Vanuatu Customs and Inland Revenue vehicle-registration steps, customs release documents and destination-fee checks before shipping from Japan.",
@@ -1199,15 +1282,16 @@ export const COUNTRY_LANDING_PAGES: CountryLandingPage[] = [
     slug: "new-zealand",
     name: "New Zealand",
     region: "Pacific",
-    title: "Japanese Car Import Guide for New Zealand | Wazir Trading",
+    seoTier: 1,
+    title: "Import Japanese Cars to New Zealand | Wazir Trading",
     description:
-      "Plan a Japanese used-car import to New Zealand with NZTA standards, entry certification, border inspection and biosecurity checks.",
+      "Plan a Japanese used-car import to New Zealand with NZTA vehicle standards, entry certification and MPI biosecurity checks.",
     intro:
       "New Zealand’s used-vehicle import process includes vehicle standards, border inspection, entry certification, biosecurity and Customs. A vehicle’s prior registration overseas does not automatically mean it meets New Zealand requirements.",
     buyerContext:
       "The importer should review the vehicle against NZTA requirements before purchase and plan for the MPI biosecurity process. A Japanese-origin vehicle may require specific cleaning or offshore treatment evidence before it can proceed through the border process.",
     regulatorySnapshot:
-      "NZTA describes several requirements for used imports, including safety/emissions standards, evidence of compliance, border inspection, entry certification and registration. MPI controls biosecurity cleanliness and may require treatment or approved systems for vehicles exported from Japan; Customs manages customs entry and taxes.",
+      "NZTA requires evidence that a used import meets applicable standards, including ownership, emissions, frontal-impact, fuel-consumption and electronic-stability-control requirements, followed by border inspection and entry certification before road registration. MPI separately requires used passenger vehicles from Japan to be cleaned through an MPI-approved system in Japan and inspected for biosecurity risks on arrival. Customs clearance does not replace NZTA certification or MPI biosecurity clearance.",
     checks: [
       "Check the exact vehicle against NZTA standards and confirm it can obtain entry certification before purchase.",
       "Confirm MPI biosecurity cleaning, treatment and documentation requirements for a vehicle arriving from Japan.",
@@ -1231,14 +1315,20 @@ export const COUNTRY_LANDING_PAGES: CountryLandingPage[] = [
         url: "https://www.customs.govt.nz/",
         authority: "New Zealand Customs Service",
       },
+      {
+        label: "MPI — Steps to importing vehicles from Japan",
+        url: "https://www.mpi.govt.nz/import/vehicles-machinery-parts/steps-to-importing-vehicles-machinery-or-equipment",
+        authority: "Ministry for Primary Industries — Biosecurity New Zealand",
+      },
     ],
-    reviewedOn: "2026-11-10",
+    reviewedOn: "2026-11-11",
     indexable: true,
   },
   {
     slug: "australia",
     name: "Australia",
     region: "Pacific",
+    seoTier: 2,
     title: "Japanese Car Import Guide for Australia | Wazir Trading",
     description:
       "Check Australia’s road-vehicle import approval, ROVER, quarantine, customs and registration requirements before buying a Japanese vehicle.",
@@ -1279,15 +1369,16 @@ export const COUNTRY_LANDING_PAGES: CountryLandingPage[] = [
     slug: "jamaica",
     name: "Jamaica",
     region: "Caribbean",
-    title: "Japanese Car Import Guide for Jamaica | Wazir Trading",
+    seoTier: 1,
+    title: "Import Japanese Cars to Jamaica | Wazir Trading",
     description:
-      "Review Jamaica Trade Board import-licence and Japan-origin pre-shipment inspection requirements before buying a Japanese used car.",
+      "Check Jamaica import licences, Japan-origin pre-shipment inspection and vehicle-category age limits before buying a used car.",
     intro:
       "Jamaica has vehicle-specific import licensing and pre-shipment inspection requirements. Buyers importing a used vehicle from Japan should verify the current Trade Board process before the vehicle is purchased or shipped.",
     buyerContext:
       "The Jamaica Trade Board’s 2026 notice identifies Japan among countries for which pre-shipment inspection is mandatory for used vehicles. The importer should confirm the approved inspection agency, certificate format and import-licence procedure for the exact vehicle.",
     regulatorySnapshot:
-      "Jamaica Customs states that an import licence must be obtained from the Trade Board before arrangements are made to ship certain motor vehicles. A June 2026 Trade Board notice states that pre-shipment inspection is mandatory for used vehicles from Japan and identifies consequences and verification fees for non-compliance.",
+      "Jamaica Customs says the required Trade Board import licence must be obtained before shipping arrangements are made. The Trade Board’s notice effective 1 June 2026 confirms that pre-shipment inspection is mandatory for used vehicles shipped from Japan. If a required PSI certificate is missing, the notice describes a vehicle-history verification process and a USD 500 fee; this is a non-compliance charge, not a standard import fee. Vehicle age limits vary by class and must be checked against the current Trade Board table.",
     checks: [
       "Obtain the required Trade Board import licence before arranging shipment.",
       "Confirm the currently authorised pre-shipment inspection provider for Japan and obtain the valid certificate before loading.",
@@ -1311,14 +1402,20 @@ export const COUNTRY_LANDING_PAGES: CountryLandingPage[] = [
         url: "https://www.tradeboard.gov.jm/",
         authority: "Jamaica Trade Board",
       },
+      {
+        label: "Jamaica Trade Board — 2026 mandatory pre-shipment inspection notice",
+        url: "https://www.tradeboard.gov.jm/ttbl/NewsArticle.php?no=52",
+        authority: "Jamaica Trade Board Limited",
+      },
     ],
-    reviewedOn: "2026-11-10",
+    reviewedOn: "2026-11-11",
     indexable: true,
   },
   {
     slug: "guyana",
     name: "Guyana",
     region: "Caribbean & South America",
+    seoTier: 2,
     title: "Japanese Car Import Guide for Guyana | Wazir Trading",
     description:
       "Plan a Japanese used-car import to Guyana with GRA vehicle inspection, ASYCUDA declaration and engine/age-based duty checks.",
@@ -1359,6 +1456,7 @@ export const COUNTRY_LANDING_PAGES: CountryLandingPage[] = [
     slug: "trinidad-and-tobago",
     name: "Trinidad and Tobago",
     region: "Caribbean",
+    seoTier: 2,
     title: "Japanese Car Import Guide for Trinidad and Tobago | Wazir Trading",
     description:
       "Check Trinidad and Tobago Trade Licence Unit procedures for personally importing used right-hand-drive vehicles from Japan.",
@@ -1399,6 +1497,7 @@ export const COUNTRY_LANDING_PAGES: CountryLandingPage[] = [
     slug: "barbados",
     name: "Barbados",
     region: "Caribbean",
+    seoTier: 3,
     title: "Japanese Car Import Guide for Barbados | Wazir Trading",
     description:
       "Plan a Japanese used-car import to Barbados with official vehicle registration documents and customs clearance checks.",
@@ -1434,6 +1533,7 @@ export const COUNTRY_LANDING_PAGES: CountryLandingPage[] = [
     slug: "cameroon",
     name: "Cameroon",
     region: "Central Africa",
+    seoTier: 3,
     title: "Japanese Car Import Guide for Cameroon | Wazir Trading",
     description:
       "Plan a Japanese used-vehicle enquiry for Cameroon with official customs guidance on import declarations, used-vehicle identification and destination clearance.",
@@ -1474,6 +1574,7 @@ export const COUNTRY_LANDING_PAGES: CountryLandingPage[] = [
     slug: "lesotho",
     name: "Lesotho",
     region: "Southern Africa",
+    seoTier: 3,
     title: "Japanese Car Import Guide for Lesotho | Wazir Trading",
     description:
       "Prepare a Japanese used-car import enquiry for Lesotho with official guidance on vehicle import permits, customs clearance and registration documents.",
@@ -1514,6 +1615,7 @@ export const COUNTRY_LANDING_PAGES: CountryLandingPage[] = [
     slug: "bahamas",
     name: "The Bahamas",
     region: "Caribbean",
+    seoTier: 2,
     title: "Japanese Car Import Guide for The Bahamas | Wazir Trading",
     description:
       "Prepare a Japanese vehicle import to The Bahamas with official import declaration, shipping-document and customs-duty guidance.",
