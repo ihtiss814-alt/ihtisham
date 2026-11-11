@@ -251,6 +251,116 @@ if (enrichedSlugs.size !== 10) {
   errors.push("Expected exactly 10 Tier 1 enrichments; found " + enrichedSlugs.size);
 }
 
+
+const tierTwoPath = new URL("../src/lib/country-tier-two-content.ts", import.meta.url);
+const tierTwoSource = readFileSync(tierTwoPath, "utf8");
+const tierTwoFile = ts.createSourceFile(
+  "country-tier-two-content.ts",
+  tierTwoSource,
+  ts.ScriptTarget.Latest,
+  true,
+  ts.ScriptKind.TS,
+);
+let tierTwoInitializer;
+function visitTierOne(node) {
+  if (ts.isVariableDeclaration(node) && propertyName(node.name) === "COUNTRY_TIER_TWO_CONTENT") {
+    tierTwoInitializer = node.initializer;
+  }
+  ts.forEachChild(node, visitTierOne);
+}
+visitTierOne(tierTwoFile);
+
+const tierTwoCountries = new Set(
+  countries.filter((country) => country.seoTier === 2).map((country) => country.slug),
+);
+const tierTwoEntries =
+  tierTwoInitializer && ts.isObjectLiteralExpression(tierTwoInitializer)
+    ? tierTwoInitializer.properties.filter(ts.isPropertyAssignment)
+    : [];
+const enrichedSlugs = new Set();
+
+if (!tierTwoInitializer || !ts.isObjectLiteralExpression(tierTwoInitializer)) {
+  errors.push(
+    "Could not find COUNTRY_TIER_TWO_CONTENT object in src/lib/country-tier-two-content.ts",
+  );
+}
+
+for (const entry of tierTwoEntries) {
+  const slug = propertyName(entry.name);
+  const value = entry.initializer;
+  if (!slug || !ts.isObjectLiteralExpression(value)) {
+    errors.push("Each Tier 2 enrichment must be a keyed object");
+    continue;
+  }
+  if (enrichedSlugs.has(slug)) errors.push("Duplicate Tier 2 enrichment: " + slug);
+  enrichedSlugs.add(slug);
+  if (!tierTwoCountries.has(slug)) {
+    errors.push(slug + ": enrichment does not match a Tier 2 country");
+  }
+
+  const heading = stringValue(getProperty(value, "pageHeading"));
+  const overview = stringValue(getProperty(value, "marketOverview"));
+  const logistics = stringValue(getProperty(value, "logisticsSummary"));
+  const enquiryNote = stringValue(getProperty(value, "enquiryNote"));
+  const themes = arrayValues(getProperty(value, "searchThemes"));
+  const steps = arrayValues(getProperty(value, "planningSteps"));
+  const localChecks = arrayValues(getProperty(value, "localChecks"));
+  const costs = arrayValues(getProperty(value, "costFactors"));
+  const faqs = arrayValues(getProperty(value, "faqs"));
+
+  if (!heading || heading.length < 30 || heading.length > 90) {
+    errors.push(slug + ": missing or unsuitable Tier 2 page heading");
+  }
+  if (!overview || overview.length < 250) {
+    errors.push(slug + ": market overview must provide substantial destination-specific guidance");
+  }
+  if (!logistics || logistics.length < 160) errors.push(slug + ": logistics summary is too short");
+  if (!enquiryNote || enquiryNote.length < 70) {
+    errors.push(slug + ": enquiry guidance is too short");
+  }
+  if (themes.length < 4) {
+    errors.push(slug + ": at least four internal keyword/search-intent themes are required");
+  }
+  if (steps.length < 4) {
+    errors.push(slug + ": at least four buyer planning steps are required");
+  }
+  if (localChecks.length < 3) {
+    errors.push(slug + ": at least three local compliance checks are required");
+  }
+  if (costs.length < 4) {
+    errors.push(slug + ": at least four landed-cost factors are required");
+  }
+  if (faqs.length < 4) {
+    errors.push(slug + ": at least four visible buyer FAQs are required");
+  }
+  for (const [index, step] of steps.entries()) {
+    if (
+      !ts.isObjectLiteralExpression(step) ||
+      !stringValue(getProperty(step, "title")) ||
+      !stringValue(getProperty(step, "detail"))
+    ) {
+      errors.push(slug + ": planning step " + (index + 1) + " needs a title and detail");
+    }
+  }
+  for (const [index, faq] of faqs.entries()) {
+    if (
+      !ts.isObjectLiteralExpression(faq) ||
+      !stringValue(getProperty(faq, "question")) ||
+      !stringValue(getProperty(faq, "answer"))
+    ) {
+      errors.push(slug + ": FAQ " + (index + 1) + " needs a question and answer");
+    }
+  }
+}
+
+for (const slug of tierTwoCountries) {
+  if (!enrichedSlugs.has(slug)) errors.push(slug + ": missing Tier 2 enrichment");
+}
+if (enrichedSlugs.size !== 13) {
+  errors.push("Expected exactly 13 Tier 2 enrichments; found " + enrichedSlugs.size);
+}
+
+
 if (errors.length) {
   console.error(`Country landing-page validation failed (${errors.length} issue(s)):`);
   for (const error of errors) console.error(`- ${error}`);

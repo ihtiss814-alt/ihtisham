@@ -14,7 +14,7 @@ export interface CountryTierOneFaq {
   answer: string;
 }
 
-export interface CountryTierOneContent {
+export interface CountryPriorityContent {
   pageHeading: string;
   /** Search-intent themes for editorial planning; never emit as keyword lists in HTML. */
   searchThemes: string[];
@@ -26,6 +26,8 @@ export interface CountryTierOneContent {
   faqs: CountryTierOneFaq[];
   enquiryNote: string;
 }
+
+export type CountryTierOneContent = CountryPriorityContent;
 
 export const COUNTRY_TIER_ONE_CONTENT: Record<string, CountryTierOneContent> = {
   kenya: {
