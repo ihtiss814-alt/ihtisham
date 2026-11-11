@@ -49,7 +49,12 @@ export const VEHICLE_TIER_THREE_CONTENT: Record<string, VehicleTierThreeContent>
       "Verify gross vehicle weight and payload from the vehicle plate or official documents.",
       "Inspect frame, underbody, suspension, brakes, tyres and fitted equipment.",
     ],
-    ["Mitsubishi Fuso trucks from Japan", "used Fuso Canter export", "Japanese Fuso commercial vehicles", "Fuso truck chassis and payload checks"],
+    [
+      "Mitsubishi Fuso trucks from Japan",
+      "used Fuso Canter export",
+      "Japanese Fuso commercial vehicles",
+      "Fuso truck chassis and payload checks",
+    ],
     [
       {
         question: "Is Mitsubishi Fuso the same make as Mitsubishi?",
@@ -85,7 +90,12 @@ export const VEHICLE_TIER_THREE_CONTENT: Record<string, VehicleTierThreeContent>
       "Use documented weight ratings; do not estimate payload from photographs.",
       "Inspect frame, suspension, brakes, tyres, cargo body and visible commercial wear.",
     ],
-    ["Hino trucks from Japan", "Japanese Hino commercial vehicle export", "used Hino truck chassis details", "Hino truck weight and body comparison"],
+    [
+      "Hino trucks from Japan",
+      "Japanese Hino commercial vehicle export",
+      "used Hino truck chassis details",
+      "Hino truck weight and body comparison",
+    ],
     [
       {
         question: "Which Hino truck should I choose?",
@@ -121,7 +131,12 @@ export const VEHICLE_TIER_THREE_CONTENT: Record<string, VehicleTierThreeContent>
       "Check sliding-door operation, seating, cabin access and safety equipment.",
       "Confirm destination treatment of kei-class vehicles before arranging export.",
     ],
-    ["Daihatsu Tanto from Japan", "used Daihatsu Tanto kei car export", "Tanto Custom 660cc Japan", "Japanese Tanto grade and model-code comparison"],
+    [
+      "Daihatsu Tanto from Japan",
+      "used Daihatsu Tanto kei car export",
+      "Tanto Custom 660cc Japan",
+      "Japanese Tanto grade and model-code comparison",
+    ],
     [
       {
         question: "What is the difference between Tanto and Tanto Custom?",
@@ -157,7 +172,12 @@ export const VEHICLE_TIER_THREE_CONTENT: Record<string, VehicleTierThreeContent>
       "Confirm the fitted body, dimensions, gross weight and payload from documentation.",
       "Inspect frame, underbody, suspension, brakes, tyres and cargo equipment.",
     ],
-    ["Toyota Dyna trucks from Japan", "used Toyota Dyna Truck export", "Japanese Dyna flatbed and carrier", "Toyota Dyna chassis and payload"],
+    [
+      "Toyota Dyna trucks from Japan",
+      "used Toyota Dyna Truck export",
+      "Japanese Dyna flatbed and carrier",
+      "Toyota Dyna chassis and payload",
+    ],
     [
       {
         question: "Are Toyota Dyna and Dyna Truck separate model pages?",
@@ -193,7 +213,12 @@ export const VEHICLE_TIER_THREE_CONTENT: Record<string, VehicleTierThreeContent>
       "Confirm EyeSight and other safety equipment from the vehicle-specific record.",
       "Inspect tyres, suspension, underbody, warning indicators and available service evidence.",
     ],
-    ["Subaru XV from Japan", "used Subaru XV export", "Japanese Subaru XV AWD specification", "Subaru XV EyeSight grade comparison"],
+    [
+      "Subaru XV from Japan",
+      "used Subaru XV export",
+      "Japanese Subaru XV AWD specification",
+      "Subaru XV EyeSight grade comparison",
+    ],
     [
       {
         question: "Are all Subaru XV vehicles equipped with identical AWD systems?",
@@ -229,7 +254,12 @@ export const VEHICLE_TIER_THREE_CONTENT: Record<string, VehicleTierThreeContent>
       "Inspect body and roof panels, tyres, suspension, cabin electronics and warning lights.",
       "Verify destination age, emissions, safety and registration requirements.",
     ],
-    ["Audi TT from Japan", "used Audi TT Coupe export", "Japanese Audi TT generation comparison", "Audi TT engine and grade checks"],
+    [
+      "Audi TT from Japan",
+      "used Audi TT Coupe export",
+      "Japanese Audi TT generation comparison",
+      "Audi TT engine and grade checks",
+    ],
     [
       {
         question: "Are Audi TT and TT Coupe different pages?",
@@ -265,7 +295,12 @@ export const VEHICLE_TIER_THREE_CONTENT: Record<string, VehicleTierThreeContent>
       "Distinguish AMG Line equipment from other AMG model designations.",
       "Inspect electronics, suspension, tyres, cargo area where applicable and service evidence.",
     ],
-    ["Mercedes-Benz C-Class from Japan", "used C-Class estate export", "Japanese Mercedes C-Class AMG Line", "C-Class generation and engine comparison"],
+    [
+      "Mercedes-Benz C-Class from Japan",
+      "used C-Class estate export",
+      "Japanese Mercedes C-Class AMG Line",
+      "C-Class generation and engine comparison",
+    ],
     [
       {
         question: "Does every C-Class listing represent an AMG model?",
@@ -301,7 +336,12 @@ export const VEHICLE_TIER_THREE_CONTENT: Record<string, VehicleTierThreeContent>
       "Request documented gross weight and payload; do not infer them from model name.",
       "Inspect frame, underbody, suspension, brakes, tyres and signs of commercial wear.",
     ],
-    ["Mitsubishi Canter from Japan", "used Mitsubishi Canter truck export", "Japanese Canter flatbed and carrier", "Mitsubishi Canter chassis and payload"],
+    [
+      "Mitsubishi Canter from Japan",
+      "used Mitsubishi Canter truck export",
+      "Japanese Canter flatbed and carrier",
+      "Mitsubishi Canter chassis and payload",
+    ],
     [
       {
         question: "Is Mitsubishi Canter the same as Mitsubishi Fuso Canter?",
@@ -337,7 +377,12 @@ export const VEHICLE_TIER_THREE_CONTENT: Record<string, VehicleTierThreeContent>
       "Inspect bed, frame, underbody, suspension, tyres, brakes and corrosion.",
       "Check destination kei-vehicle classification, commercial permits and registration rules.",
     ],
-    ["Mitsubishi Minicab Truck from Japan", "used Minicab kei truck export", "Japanese 660cc Minicab pickup", "Mitsubishi Minicab 4WD truck checks"],
+    [
+      "Mitsubishi Minicab Truck from Japan",
+      "used Minicab kei truck export",
+      "Japanese 660cc Minicab pickup",
+      "Mitsubishi Minicab 4WD truck checks",
+    ],
     [
       {
         question: "Are all Minicab Truck listings 4WD?",
@@ -373,7 +418,12 @@ export const VEHICLE_TIER_THREE_CONTENT: Record<string, VehicleTierThreeContent>
       "Inspect door mechanisms, cabin access, seating, safety equipment and condition.",
       "Check destination classification, engine-size, age and dimension requirements.",
     ],
-    ["Daihatsu Move Canbus from Japan", "used Move Canbus kei car export", "Move Canbus Stripes and Theory grades", "Japanese 660cc Move Canbus CVT"],
+    [
+      "Daihatsu Move Canbus from Japan",
+      "used Move Canbus kei car export",
+      "Move Canbus Stripes and Theory grades",
+      "Japanese 660cc Move Canbus CVT",
+    ],
     [
       {
         question: "What do Stripes and Theory mean on a Move Canbus listing?",
@@ -409,7 +459,12 @@ export const VEHICLE_TIER_THREE_CONTENT: Record<string, VehicleTierThreeContent>
       "Review service evidence, mileage, interior, bodywork, tyres and warning indicators.",
       "For hybrid models, request available battery diagnostics and check destination rules.",
     ],
-    ["Lexus LS from Japan", "used Lexus LS hybrid export", "Japanese Lexus LS F Sport", "Lexus LS engine and grade comparison"],
+    [
+      "Lexus LS from Japan",
+      "used Lexus LS hybrid export",
+      "Japanese Lexus LS F Sport",
+      "Lexus LS engine and grade comparison",
+    ],
     [
       {
         question: "Are all Lexus LS listings hybrids?",
