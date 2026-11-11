@@ -193,8 +193,7 @@ check(
   "Inventory calculator is not connected to free-text destination and saved preference.",
 );
 check(
-  cars.includes("QUOTE REQUIRED") &&
-    /will not substitute a generic freight price/i.test(cars),
+  cars.includes("QUOTE REQUIRED") && /will not substitute a generic freight price/i.test(cars),
   "Inventory calculator must request a quote instead of estimating an unknown route.",
 );
 check(
