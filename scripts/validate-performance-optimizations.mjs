@@ -23,7 +23,8 @@ const vercel = read("vercel.json");
 if (
   !home.includes("getAvailableStockCount()") ||
   !home.includes("getHomepageInventoryCounts(") ||
-  !home.includes('"homepage:featured-vehicles"') || !home.includes("cachedRequest(")
+  !home.includes('"homepage:featured-vehicles"') ||
+  !home.includes("cachedRequest(")
 ) {
   fail("Homepage must share cached stock/category counts and cache featured inventory.");
 } else {
@@ -42,7 +43,7 @@ if (
 if (
   !home.includes("IntersectionObserver") ||
   !home.includes('rootMargin: "500px 0px"') ||
-  !homepageCache.includes(".select(\"id\", { count: \"exact\", head: true })")
+  !homepageCache.includes('.select("id", { count: "exact", head: true })')
 ) {
   fail("Homepage category counts must be deferred near the viewport and remain exact DB counts.");
 } else {
@@ -57,7 +58,9 @@ if (
 ) {
   fail("Hero images must use smaller progressive slide loading and respect reduced motion.");
 } else {
-  pass("Hero image payload is reduced, slides load progressively, and reduced-motion is respected.");
+  pass(
+    "Hero image payload is reduced, slides load progressively, and reduced-motion is respected.",
+  );
 }
 
 if (
@@ -82,7 +85,8 @@ if (
 for (const cacheKey of ["cars:filter-options", "cars:tab-counts", "cars:models:"]) {
   if (!cars.includes(cacheKey)) fail(`Inventory query cache is missing: ${cacheKey}.`);
 }
-if (failures.length === 0) pass("Inventory filter metadata, tab counts, and model options are cached.");
+if (failures.length === 0)
+  pass("Inventory filter metadata, tab counts, and model options are cached.");
 
 if (
   !card.includes("getResponsiveImageSrcSet") ||
@@ -90,19 +94,25 @@ if (
   !card.includes("width={640}") ||
   !gallery.includes("getResponsiveImageSrcSet")
 ) {
-  fail("Vehicle cards and detail gallery must use responsive sources and intrinsic image dimensions.");
+  fail(
+    "Vehicle cards and detail gallery must use responsive sources and intrinsic image dimensions.",
+  );
 } else {
   pass("Vehicle cards and detail gallery use responsive image delivery and intrinsic dimensions.");
 }
 
 if (
-  !imageDelivery.includes('url.hostname !== CLOUDINARY_HOST') ||
+  !imageDelivery.includes("url.hostname !== CLOUDINARY_HOST") ||
   !imageDelivery.includes("f_auto,q_auto,w_") ||
   !imageDelivery.includes("?? imageUrl")
 ) {
-  fail("Responsive image transformations must be restricted to Cloudinary and preserve other providers.");
+  fail(
+    "Responsive image transformations must be restricted to Cloudinary and preserve other providers.",
+  );
 } else {
-  pass("Responsive transformations are restricted to Cloudinary; unknown image URLs are preserved.");
+  pass(
+    "Responsive transformations are restricted to Cloudinary; unknown image URLs are preserved.",
+  );
 }
 
 if (

@@ -273,7 +273,10 @@ export default function ContactPage() {
                   <p className="text-xs text-muted-foreground leading-relaxed">
                     By sending this form, you agree that Wazir Trading LLC may use the information
                     you provide to review and respond to your enquiry. See our{" "}
-                    <Link href="/privacy-policy" className="text-primary underline underline-offset-2">
+                    <Link
+                      href="/privacy-policy"
+                      className="text-primary underline underline-offset-2"
+                    >
                       Privacy Policy
                     </Link>
                     .

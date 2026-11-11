@@ -50,8 +50,7 @@ function ScrollToTop() {
       value && typeof value === "object" ? (value as Record<string, unknown>) : {};
     const newKey = () => `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}`;
     const initial = stateOf(window.history.state);
-    let activeKey =
-      typeof initial[keyName] === "string" ? (initial[keyName] as string) : newKey();
+    let activeKey = typeof initial[keyName] === "string" ? (initial[keyName] as string) : newKey();
 
     if (typeof initial[keyName] !== "string") {
       nativeReplace.call(
@@ -79,8 +78,7 @@ function ScrollToTop() {
 
     window.history.replaceState = function (state, unused, url) {
       const next = stateOf(state);
-      const nextKey =
-        typeof next[keyName] === "string" ? (next[keyName] as string) : activeKey;
+      const nextKey = typeof next[keyName] === "string" ? (next[keyName] as string) : activeKey;
       const result = nativeReplace.call(
         window.history,
         { ...next, [keyName]: nextKey },

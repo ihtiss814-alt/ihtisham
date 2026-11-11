@@ -468,7 +468,10 @@ export default function PaymentInformationPage() {
             Buyer Information
           </Link>{" "}
           and{" "}
-          <Link href="/terms-and-conditions" className="text-[#C8102E] underline underline-offset-2">
+          <Link
+            href="/terms-and-conditions"
+            className="text-[#C8102E] underline underline-offset-2"
+          >
             Terms &amp; Conditions
           </Link>
           .

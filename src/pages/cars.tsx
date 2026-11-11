@@ -2238,11 +2238,16 @@ export default function CarsPage() {
       const counts = await cachedRequest(
         "cars:tab-counts",
         async () => {
-          const tabConfigs: Array<{ key: string; apply: (query: CarsCountQuery) => CarsCountQuery }> = [
+          const tabConfigs: Array<{
+            key: string;
+            apply: (query: CarsCountQuery) => CarsCountQuery;
+          }> = [
             {
               key: "new_arrivals",
               apply: (q: CarsCountQuery) =>
-                q.gte("created_at", newArrivalCutoffIso()).lte("created_at", new Date().toISOString()),
+                q
+                  .gte("created_at", newArrivalCutoffIso())
+                  .lte("created_at", new Date().toISOString()),
             },
             { key: "clearance", apply: (q: CarsCountQuery) => q.ilike("collection", "clearance") },
             { key: "japan", apply: (q: CarsCountQuery) => q.ilike("stock_location", "Japan") },
