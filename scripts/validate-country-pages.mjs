@@ -471,7 +471,6 @@ if (tierThreeEnrichedSlugs.size !== 17) {
   errors.push("Expected exactly 17 Tier 3 enrichments; found " + tierThreeEnrichedSlugs.size);
 }
 
-
 if (errors.length) {
   console.error(`Country landing-page validation failed (${errors.length} issue(s)):`);
   for (const error of errors) console.error(`- ${error}`);

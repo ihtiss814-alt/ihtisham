@@ -341,7 +341,8 @@ export const COUNTRY_LANDING_PAGES: CountryLandingPage[] = [
         authority: "Bahrain Government",
       },
       {
-        label: "Bahrain Legislation and Legal Opinion Commission — Interior Ministry Decision 17/2021 amending Traffic Regulation Article 98",
+        label:
+          "Bahrain Legislation and Legal Opinion Commission — Interior Ministry Decision 17/2021 amending Traffic Regulation Article 98",
         url: "https://lloc.gov.bh/Legislation/HTM/RINT1721",
         authority: "Legislation and Legal Opinion Commission, Bahrain",
       },
@@ -1073,7 +1074,8 @@ export const COUNTRY_LANDING_PAGES: CountryLandingPage[] = [
         authority: "Liberia Revenue Authority",
       },
       {
-        label: "Liberia Ministry of Transport — Administrative regulation for vehicle dealerships and used-vehicle import conditions",
+        label:
+          "Liberia Ministry of Transport — Administrative regulation for vehicle dealerships and used-vehicle import conditions",
         url: "https://mot.gov.lr/sites/default/files/documents/ADMINISTRATIVE%2520REGULATION%2520%2520AA%2520June%252017%252C%25202016%2520-%2520Copy.pdf",
         authority: "Ministry of Transport, Liberia",
       },
@@ -1656,7 +1658,8 @@ export const COUNTRY_LANDING_PAGES: CountryLandingPage[] = [
         authority: "Barbados Revenue Authority",
       },
       {
-        label: "Barbados Government Information Service — Changes to used-vehicle importation policy",
+        label:
+          "Barbados Government Information Service — Changes to used-vehicle importation policy",
         url: "https://gisbarbados.gov.bb/blog/changes-to-used-vehicle-importation-policy/",
         authority: "Government Information Service, Barbados",
       },
