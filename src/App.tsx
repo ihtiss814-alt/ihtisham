@@ -49,11 +49,7 @@ function NativeDocumentNavigation() {
 
       if (!(event.target instanceof Element)) return;
       const anchor = event.target.closest<HTMLAnchorElement>("a[href]");
-      if (
-        !anchor ||
-        anchor.hasAttribute("download") ||
-        anchor.relList.contains("external")
-      ) {
+      if (!anchor || anchor.hasAttribute("download") || anchor.relList.contains("external")) {
         return;
       }
 
