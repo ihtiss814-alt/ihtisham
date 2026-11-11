@@ -444,7 +444,6 @@ for (const [key, content] of Object.entries(tierOneContent)) {
   }
 }
 
-
 const expectedTierTwoMakes = new Set([
   "subaru",
   "mitsubishi",
@@ -492,9 +491,7 @@ const tierTwoMakeSlugs = new Set(
   makes.filter((page) => page.seoTier === 2).map((page) => page.slug),
 );
 const tierTwoModelKeys = new Set(
-  models
-    .filter((page) => page.seoTier === 2)
-    .map((page) => page.makeSlug + "/" + page.slug),
+  models.filter((page) => page.seoTier === 2).map((page) => page.makeSlug + "/" + page.slug),
 );
 if (
   tierTwoMakeSlugs.size !== expectedTierTwoMakes.size ||

@@ -1410,10 +1410,12 @@ const makePages: VehicleLandingPage[] = makeContent.map((item) => ({
     VEHICLE_TIER_ONE_CONTENT[`make:${item.slug}`]?.description ??
     VEHICLE_TIER_TWO_CONTENT[`make:${item.slug}`]?.description ??
     `Compare Japanese ${item.name} used-car listings by model, year, grade, mileage and condition. Review available stock and request an export quotation.`,
-  intro: VEHICLE_TIER_ONE_CONTENT[`make:${item.slug}`]?.intro ??
+  intro:
+    VEHICLE_TIER_ONE_CONTENT[`make:${item.slug}`]?.intro ??
     VEHICLE_TIER_TWO_CONTENT[`make:${item.slug}`]?.intro ??
     item.intro,
-  buyerGuide: VEHICLE_TIER_ONE_CONTENT[`make:${item.slug}`]?.buyerGuide ??
+  buyerGuide:
+    VEHICLE_TIER_ONE_CONTENT[`make:${item.slug}`]?.buyerGuide ??
     VEHICLE_TIER_TWO_CONTENT[`make:${item.slug}`]?.buyerGuide ??
     item.buyerGuide,
   focusPoints: [
@@ -1448,7 +1450,8 @@ const modelPages: VehicleLandingPage[] = modelContent.map((item) => ({
     VEHICLE_TIER_ONE_CONTENT[`model:${item.makeSlug}/${item.slug}`]?.description ??
     VEHICLE_TIER_TWO_CONTENT[`model:${item.makeSlug}/${item.slug}`]?.description ??
     `Compare Japanese ${item.make} ${item.model} listings by year, grade, powertrain, mileage and condition. Review stock details and request an export quotation.`,
-  intro: VEHICLE_TIER_ONE_CONTENT[`model:${item.makeSlug}/${item.slug}`]?.intro ??
+  intro:
+    VEHICLE_TIER_ONE_CONTENT[`model:${item.makeSlug}/${item.slug}`]?.intro ??
     VEHICLE_TIER_TWO_CONTENT[`model:${item.makeSlug}/${item.slug}`]?.intro ??
     item.intro,
   buyerGuide:
