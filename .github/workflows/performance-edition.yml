@@ -1,0 +1,35 @@
+name: Performance edition validation and ZIP
+
+on:
+  push:
+    branches: [performance-instant-navigation]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify-and-package:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run typecheck
+      - run: npm run lint
+      - run: npm run validate:country-pages
+      - run: npm run validate:vehicle-pages
+      - run: node scripts/validate-vehicle-detail-redesign.mjs
+      - run: npm run build
+      - name: Create source archive
+        run: git archive --format=zip --output=Wazir-Trading-Performance-Edition.zip HEAD
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Wazir-Trading-Performance-Edition
+          path: Wazir-Trading-Performance-Edition.zip
+          if-no-files-found: error
+          retention-days: 14

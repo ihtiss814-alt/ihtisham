@@ -1,4 +1,5 @@
 import { isSupabaseConfigured, supabase } from "@/lib/supabase";
+import { cachedRequest } from "@/lib/request-cache";
 
 /**
  * Shipping rates and landed-cost maths.
@@ -160,14 +161,20 @@ export async function fetchShippingRate(
   const countryKey = canonicalCountry(country);
   if (!countryKey || !port || !portsFor(countryKey).includes(port)) return null;
   if (!isSupabaseConfigured) return null;
-  const { data, error } = await supabase
-    .from("shipping_rates")
-    .select("country, port, freight_usd, inspection_fee, insurance_rate")
-    .eq("country", countryKey)
-    .eq("port", port)
-    .maybeSingle();
-  if (error) return null;
-  return (data as ShippingRate) ?? null;
+  return cachedRequest(
+    `shipping-rate:${countryKey}:${port}`,
+    async () => {
+      const { data, error } = await supabase
+        .from("shipping_rates")
+        .select("country, port, freight_usd, inspection_fee, insurance_rate")
+        .eq("country", countryKey)
+        .eq("port", port)
+        .maybeSingle();
+      if (error) return null;
+      return (data as ShippingRate) ?? null;
+    },
+    5 * 60_000,
+  );
 }
 
 export interface LandedCostOptions {

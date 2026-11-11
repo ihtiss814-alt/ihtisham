@@ -45,7 +45,9 @@ import {
   computeLandedCost,
   type ShippingRate,
 } from "@/lib/shipping";
-import { VEHICLE_DETAIL_SELECT, VEHICLE_RELATED_SELECT } from "@/lib/vehicle-detail-data";
+import { VEHICLE_RELATED_SELECT } from "@/lib/vehicle-detail-data";
+import { getCachedVehicleDetail } from "@/lib/vehicle-request-cache";
+import { cachedRequest } from "@/lib/request-cache";
 import "./car-detail.css";
 
 type DetailCar = Omit<Car, "car_images" | "chassis_number"> &
@@ -255,12 +257,7 @@ export default function CarDetailPage() {
       }
       setLoading(true);
       try {
-        const { data, error } = await supabase
-          .from("cars")
-          .select(VEHICLE_DETAIL_SELECT)
-          .eq("ref_number", ref)
-          .maybeSingle();
-        if (error) throw error;
+        const data = await getCachedVehicleDetail(ref);
         if (active) setCar(data as DetailCar | null);
       } catch (error) {
         console.warn("Could not load vehicle details:", error);
@@ -354,29 +351,40 @@ export default function CarDetailPage() {
     }
     let active = true;
     const loadRelated = async () => {
-      const queries = [
-        supabase
-          .from("cars")
-          .select(VEHICLE_RELATED_SELECT)
-          .eq("make", car.make)
-          .eq("model", car.model),
-        supabase.from("cars").select(VEHICLE_RELATED_SELECT).eq("make", car.make),
-        ...(car.body_type
-          ? [supabase.from("cars").select(VEHICLE_RELATED_SELECT).eq("body_type", car.body_type)]
-          : []),
-      ];
-      const results = await Promise.all(
-        queries.map((query) =>
-          query
-            .neq("id", car.id)
-            .eq("status", "available")
-            .order("year", { ascending: false })
-            .limit(16)
-            .returns<Car[]>(),
-        ),
+      const candidates = await cachedRequest(
+        `vehicle:related:${car.id}:${car.make}:${car.model}:${car.body_type ?? ""}`,
+        async () => {
+          const queries = [
+            supabase
+              .from("cars")
+              .select(VEHICLE_RELATED_SELECT)
+              .eq("make", car.make)
+              .eq("model", car.model),
+            supabase.from("cars").select(VEHICLE_RELATED_SELECT).eq("make", car.make),
+            ...(car.body_type
+              ? [
+                  supabase
+                    .from("cars")
+                    .select(VEHICLE_RELATED_SELECT)
+                    .eq("body_type", car.body_type),
+                ]
+              : []),
+          ];
+          const results = await Promise.all(
+            queries.map((query) =>
+              query
+                .neq("id", car.id)
+                .eq("status", "available")
+                .order("year", { ascending: false })
+                .limit(16)
+                .returns<Car[]>(),
+            ),
+          );
+          return results.flatMap((result) => result.data ?? []);
+        },
+        60_000,
       );
       if (!active) return;
-      const candidates = results.flatMap((result) => result.data ?? []);
       const ranked = rankRelatedVehicles(car, candidates, 6) as Car[];
       setSimilarCars(
         ranked.map((item) => ({ ...item, primaryImage: validImageUrls(item)[0] ?? undefined })),

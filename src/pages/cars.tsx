@@ -37,6 +37,7 @@ import {
   CircleDot,
 } from "lucide-react";
 import { isSupabaseConfigured, supabase } from "@/lib/supabase";
+import { cachedRequest } from "@/lib/request-cache";
 import CarCard, { resolvePrimaryImage, type Car } from "@/components/CarCard";
 import "./cars.css";
 import { useExchangeRate } from "@/hooks/useExchangeRate";
@@ -1622,7 +1623,7 @@ type CarsListQuery = ReturnType<typeof createCarsListQuery>;
 function createCarsCountQuery() {
   return supabase
     .from("cars")
-    .select("*", { count: "exact", head: true })
+    .select("id", { count: "exact", head: true })
     .eq("status", "available");
 }
 
@@ -1812,6 +1813,68 @@ function applyFiltersToQuery(
   }
 
   return query;
+}
+
+type CarsPageCacheResult = { cars: CarWithImage[]; totalCount: number };
+
+const EMPTY_FILTERS: Filters = {
+  q: "",
+  searchText: "",
+  make: "",
+  price: "",
+  body: "",
+  category: "",
+  location: "",
+  year: "",
+  drive: "",
+  trans: "",
+  engine: "",
+  fuel: "",
+  mileage: "",
+  steering: "",
+  destination: "",
+  minPrice: "",
+  maxPrice: "",
+  advModel: "",
+  advYearFrom: "",
+  advYearTo: "",
+  advMinPrice: "",
+  advMaxPrice: "",
+  advColor: "",
+  advMinMil: "",
+  advMaxMil: "",
+  advMinEng: "",
+  advMaxEng: "",
+  smartFuel: "",
+  smartTrans: "",
+  smartDrive: "",
+  smartMinMileage: "",
+  smartMaxMileage: "",
+  smartMinEngine: "",
+  smartMaxEngine: "",
+};
+
+function carsPageCacheKey(filters: Filters, tab: string, sort: string, page: number): string {
+  return `cars:list:${JSON.stringify([filters, tab, sort, page])}`;
+}
+
+export function prefetchCarsPage(): void {
+  if (!isSupabaseConfigured) return;
+  void cachedRequest<CarsPageCacheResult>(
+    carsPageCacheKey(EMPTY_FILTERS, "", "Newest First", 1),
+    async () => {
+      const query = applyFiltersToQuery(
+        createCarsListQuery(),
+        EMPTY_FILTERS,
+        "",
+        "Newest First",
+      ).range(0, PAGE_SIZE - 1);
+      const { data, count, error } = await query;
+      if (error) throw error;
+      return { cars: (data ?? []) as CarWithImage[], totalCount: count ?? 0 };
+    },
+    25_000,
+  ).catch(() => undefined);
 }
 
 /* ─────────────────────────────────────────────────────────────── */
@@ -2049,24 +2112,25 @@ export default function CarsPage() {
         return;
       }
       try {
-        let query = supabase
-          .from("cars")
-          // The inventory count and rows intentionally come from the same
-          // Supabase dataset. Do not apply a separate client-side quality gate
-          // that can make the website count differ from the backend inventory.
-          .select("*, car_images(image_url, is_primary, display_order)", { count: "exact" })
-          .eq("status", "available");
-
-        query = applyFiltersToQuery(query, currentFilters, currentTab, currentSort);
-
-        const from = (currentPage - 1) * PAGE_SIZE;
-        const to = from + PAGE_SIZE - 1;
-        query = query.range(from, to);
-
-        const { data, count, error } = await query;
-        if (error) throw error;
-        setCars((data as CarWithImage[]) || []);
-        setTotalCount(count ?? 0);
+        const result = await cachedRequest<CarsPageCacheResult>(
+          carsPageCacheKey(currentFilters, currentTab, currentSort, currentPage),
+          async () => {
+            let query = supabase
+              .from("cars")
+              // Counts and inventory rows intentionally come from the same live dataset.
+              .select("*, car_images(image_url, is_primary, display_order)", { count: "exact" })
+              .eq("status", "available");
+            query = applyFiltersToQuery(query, currentFilters, currentTab, currentSort);
+            const from = (currentPage - 1) * PAGE_SIZE;
+            query = query.range(from, from + PAGE_SIZE - 1);
+            const { data, count, error } = await query;
+            if (error) throw error;
+            return { cars: (data ?? []) as CarWithImage[], totalCount: count ?? 0 };
+          },
+          25_000,
+        );
+        setCars(result.cars);
+        setTotalCount(result.totalCount);
       } catch (err) {
         console.error("Failed to fetch cars:", err);
         setCars([]);
@@ -2176,7 +2240,7 @@ export default function CarsPage() {
           apply(
             supabase
               .from("cars")
-              .select("*", { count: "exact", head: true })
+              .select("id", { count: "exact", head: true })
               .eq("status", "available"),
           ).then(({ count }) => ({ key, count: count || 0 })),
         ),

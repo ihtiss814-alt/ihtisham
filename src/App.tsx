@@ -25,6 +25,8 @@ import TermsAndConditionsPage from "@/pages/terms-and-conditions";
 import PrivacyPolicyPage from "@/pages/privacy-policy";
 import NotFound from "@/pages/not-found";
 import AdminBulkUpload from "@/pages/admin/bulk-upload";
+import { prefetchCarsPage } from "@/pages/cars";
+import { prefetchVehicleDetail } from "@/lib/vehicle-request-cache";
 import { CountryDirectoryPage, CountryLandingPageRoute } from "@/pages/country-landing-pages";
 import {
   VehicleBodyTypeLandingRoute,
@@ -35,9 +37,124 @@ import {
 
 function ScrollToTop() {
   const [location] = useLocation();
+  const positions = React.useRef(new Map<string, number>());
+  const restoring = React.useRef(false);
   useEffect(() => {
-    window.scrollTo({ top: 0, left: 0, behavior: "instant" });
+    const keyName = "__wazirScrollEntry";
+    const nativePush = window.history.pushState;
+    const nativeReplace = window.history.replaceState;
+    const previous = window.history.scrollRestoration;
+    const stateOf = (value: unknown): Record<string, unknown> =>
+      value && typeof value === "object" ? (value as Record<string, unknown>) : {};
+    const newKey = () => `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}`;
+    const initial = stateOf(window.history.state);
+    let activeKey = typeof initial[keyName] === "string" ? (initial[keyName] as string) : newKey();
+    if (typeof initial[keyName] !== "string")
+      nativeReplace.call(
+        window.history,
+        { ...initial, [keyName]: activeKey },
+        "",
+        window.location.href,
+      );
+    const save = () => positions.current.set(activeKey, window.scrollY);
+    window.history.pushState = function (state, unused, url) {
+      save();
+      const nextKey = newKey();
+      const result = nativePush.call(
+        window.history,
+        { ...stateOf(state), [keyName]: nextKey },
+        unused,
+        url,
+      );
+      activeKey = nextKey;
+      return result;
+    };
+    window.history.replaceState = function (state, unused, url) {
+      const next = stateOf(state);
+      const nextKey = typeof next[keyName] === "string" ? (next[keyName] as string) : activeKey;
+      const result = nativeReplace.call(
+        window.history,
+        { ...next, [keyName]: nextKey },
+        unused,
+        url,
+      );
+      activeKey = nextKey;
+      return result;
+    };
+    const pop = (event: PopStateEvent) => {
+      const state = stateOf(event.state);
+      if (typeof state[keyName] === "string") activeKey = state[keyName] as string;
+      restoring.current = true;
+      requestAnimationFrame(() => {
+        window.scrollTo({
+          top: positions.current.get(activeKey) ?? 0,
+          left: 0,
+          behavior: "instant",
+        });
+        restoring.current = false;
+      });
+    };
+    window.history.scrollRestoration = "manual";
+    window.addEventListener("scroll", save, { passive: true });
+    window.addEventListener("popstate", pop);
+    return () => {
+      window.removeEventListener("scroll", save);
+      window.removeEventListener("popstate", pop);
+      window.history.pushState = nativePush;
+      window.history.replaceState = nativeReplace;
+      window.history.scrollRestoration = previous;
+    };
+  }, []);
+  useEffect(() => {
+    if (!restoring.current) window.scrollTo({ top: 0, left: 0, behavior: "instant" });
   }, [location]);
+  return null;
+}
+
+function NavigationPrefetcher() {
+  useEffect(() => {
+    const seen = new Map<string, number>();
+    const prefetch = (event: Event) => {
+      if (!(event.target instanceof Element)) return;
+      const anchor = event.target.closest<HTMLAnchorElement>("a[href]");
+      if (!anchor || anchor.target === "_blank" || anchor.hasAttribute("download")) return;
+      let url: URL;
+      try {
+        url = new URL(anchor.href, window.location.href);
+      } catch {
+        return;
+      }
+      if (url.origin !== window.location.origin) return;
+      let run: (() => void) | null = null;
+      if (url.pathname === "/cars" && !url.search) run = prefetchCarsPage;
+      else {
+        const match = url.pathname.match(/^\/cars\/([^/]+)\/?$/);
+        if (match) {
+          try {
+            const ref = decodeURIComponent(match[1]);
+            run = () => prefetchVehicleDetail(ref);
+          } catch {
+            return;
+          }
+        }
+      }
+      if (!run) return;
+      const key = url.pathname + url.search;
+      if (Date.now() - (seen.get(key) ?? 0) < 15000) return;
+      seen.set(key, Date.now());
+      const idle = window as Window & {
+        requestIdleCallback?: (cb: () => void, options?: { timeout: number }) => number;
+      };
+      if (idle.requestIdleCallback) idle.requestIdleCallback(run, { timeout: 900 });
+      else window.setTimeout(run, 100);
+    };
+    document.addEventListener("pointerover", prefetch, { passive: true });
+    document.addEventListener("focusin", prefetch);
+    return () => {
+      document.removeEventListener("pointerover", prefetch);
+      document.removeEventListener("focusin", prefetch);
+    };
+  }, []);
   return null;
 }
 
@@ -158,6 +275,7 @@ function AppShell() {
     return (
       <>
         <ScrollToTop />
+        <NavigationPrefetcher />
         <Router />
       </>
     );
@@ -166,6 +284,7 @@ function AppShell() {
   return (
     <>
       <ScrollToTop />
+      <NavigationPrefetcher />
       <div className="flex flex-col min-h-[100dvh]">
         <Navbar />
         <main className="flex-1">
