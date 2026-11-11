@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
   verify-and-package:
@@ -19,16 +19,6 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
-      - name: Format performance changes and commit formatting
-        run: |
-          npx prettier --write src/App.tsx src/components/Navbar.tsx src/lib/inventory-cache.ts src/lib/request-cache.ts src/lib/shipping.ts src/lib/vehicle-request-cache.ts src/pages/car-detail.tsx src/pages/cars.tsx src/router.tsx src/routes/__root.tsx scripts/validate-vehicle-detail-redesign.mjs
-          git add -- src/App.tsx src/components/Navbar.tsx src/lib/inventory-cache.ts src/lib/request-cache.ts src/lib/shipping.ts src/lib/vehicle-request-cache.ts src/pages/car-detail.tsx src/pages/cars.tsx src/router.tsx src/routes/__root.tsx scripts/validate-vehicle-detail-redesign.mjs
-          if ! git diff --cached --quiet; then
-            git config user.name "github-actions[bot]"
-            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-            git commit -m "Format performance optimization changes"
-            git push origin HEAD:performance-instant-navigation
-          fi
       - run: npm run typecheck
       - run: npm run lint
       - run: npm run validate:country-pages

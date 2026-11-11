@@ -9,6 +9,7 @@ const pass = (message) => console.log(`PASS ${message}`);
 const fail = (message) => failures.push(message);
 
 const detail = read("src/pages/car-detail.tsx");
+const vehicleRequestCache = read("src/lib/vehicle-request-cache.ts");
 const bootstrap = read("src/lib/seo-bootstrap.ts");
 const select = read("src/lib/vehicle-detail-data.ts");
 const gallery = read("src/components/VehiclePhotoGallery.tsx");
@@ -24,11 +25,12 @@ if (detail.includes(".select('*')") || detail.includes('.select("*")'))
 else pass("Vehicle detail page uses an explicit Supabase select.");
 
 if (
-  !detail.includes(".select(VEHICLE_DETAIL_SELECT)") ||
+  !detail.includes("getCachedVehicleDetail(ref)") ||
+  !vehicleRequestCache.includes(".select(VEHICLE_DETAIL_SELECT)") ||
   !bootstrap.includes(".select(VEHICLE_DETAIL_SELECT)")
 ) {
-  fail("Both client and server vehicle detail queries must share the public field allowlist.");
-} else pass("Client and server vehicle detail queries share the explicit allowlist.");
+  fail("Client detail loader and server bootstrap must share the public field allowlist.");
+} else pass("Client detail cache and server bootstrap share the explicit public field allowlist.");
 
 if (select.includes("chassis_number"))
   fail("Public vehicle detail projection must not include chassis_number.");
