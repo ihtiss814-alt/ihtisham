@@ -194,8 +194,8 @@ check(
 );
 check(
   cars.includes("const calculatorId = useId();") &&
-    cars.includes('name={`${calculatorId}-calc-inspection`}') &&
-    cars.includes('name={`${calculatorId}-calc-insurance`}'),
+    cars.includes("name={`${calculatorId}-calc-inspection`}") &&
+    cars.includes("name={`${calculatorId}-calc-insurance`}"),
   "Each responsive calculator instance must have unique radio groups and must not hard-code duplicate destination element IDs.",
 );
 check(
@@ -203,8 +203,7 @@ check(
   "Responsive calculator instances must use generated unique destination field IDs.",
 );
 check(
-  cars.includes("QUOTE REQUIRED") &&
-    /will not substitute a generic freight price/i.test(cars),
+  cars.includes("QUOTE REQUIRED") && /will not substitute a generic freight price/i.test(cars),
   "Inventory calculator must request a quote instead of estimating an unknown route.",
 );
 check(
