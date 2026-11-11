@@ -132,10 +132,12 @@ for (const [index, entry] of arrayValues(registryInitializer).entries()) {
   countries.push({ slug, name, seoTier, titleLength: title?.length ?? 0, sources: sources.length });
 }
 
-if (countries.length !== 40) errors.push("Expected exactly 40 countries; found " + countries.length);
+if (countries.length !== 40) {
+  errors.push("Expected exactly 40 countries; found " + countries.length);
+}
 
-const tierCounts = [1, 2, 3].map((tier) =>
-  countries.filter((country) => country.seoTier === tier).length,
+const tierCounts = [1, 2, 3].map(
+  (tier) => countries.filter((country) => country.seoTier === tier).length,
 );
 if (tierCounts[0] !== 10 || tierCounts[1] !== 13 || tierCounts[2] !== 17) {
   errors.push("Expected SEO tier counts 10/13/17; found " + tierCounts.join("/"));
@@ -204,7 +206,9 @@ for (const entry of tierOneEntries) {
     errors.push(slug + ": market overview must provide substantial destination-specific guidance");
   }
   if (!logistics || logistics.length < 160) errors.push(slug + ": logistics summary is too short");
-  if (!enquiryNote || enquiryNote.length < 70) errors.push(slug + ": enquiry guidance is too short");
+  if (!enquiryNote || enquiryNote.length < 70) {
+    errors.push(slug + ": enquiry guidance is too short");
+  }
   if (themes.length < 4) {
     errors.push(slug + ": at least four internal keyword/search-intent themes are required");
   }
