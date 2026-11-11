@@ -1401,12 +1401,20 @@ const makePages: VehicleLandingPage[] = makeContent.map((item) => ({
   make: item.name,
   makeAliases: [item.name],
   directoryVisible: "directoryVisible" in item ? item.directoryVisible !== false : true,
-  title: VEHICLE_TIER_ONE_CONTENT[`make:${item.slug}`]?.title ?? `${item.name} Used Cars from Japan | Wazir Trading`,
-  description: VEHICLE_TIER_ONE_CONTENT[`make:${item.slug}`]?.description ?? `Compare Japanese ${item.name} used-car listings by model, year, grade, mileage and condition. Review available stock and request an export quotation.`,
+  title:
+    VEHICLE_TIER_ONE_CONTENT[`make:${item.slug}`]?.title ??
+    `${item.name} Used Cars from Japan | Wazir Trading`,
+  description:
+    VEHICLE_TIER_ONE_CONTENT[`make:${item.slug}`]?.description ??
+    `Compare Japanese ${item.name} used-car listings by model, year, grade, mileage and condition. Review available stock and request an export quotation.`,
   intro: VEHICLE_TIER_ONE_CONTENT[`make:${item.slug}`]?.intro ?? item.intro,
   buyerGuide: VEHICLE_TIER_ONE_CONTENT[`make:${item.slug}`]?.buyerGuide ?? item.buyerGuide,
-  focusPoints: [...(VEHICLE_TIER_ONE_CONTENT[`make:${item.slug}`]?.focusPoints ?? item.focusPoints)],
-  faqs: VEHICLE_TIER_ONE_CONTENT[`make:${item.slug}`]?.faqs ?? makeFaqs(item.name, item.buyerGuide, item.intro),
+  focusPoints: [
+    ...(VEHICLE_TIER_ONE_CONTENT[`make:${item.slug}`]?.focusPoints ?? item.focusPoints),
+  ],
+  faqs:
+    VEHICLE_TIER_ONE_CONTENT[`make:${item.slug}`]?.faqs ??
+    makeFaqs(item.name, item.buyerGuide, item.intro),
 }));
 
 const modelPages: VehicleLandingPage[] = modelContent.map((item) => ({
@@ -1422,12 +1430,22 @@ const modelPages: VehicleLandingPage[] = modelContent.map((item) => ({
     ...("modelAliases" in item && item.modelAliases ? item.modelAliases : [item.model]),
   ],
   directoryVisible: "directoryVisible" in item ? item.directoryVisible !== false : true,
-  title: VEHICLE_TIER_ONE_CONTENT[`model:${item.makeSlug}/${item.slug}`]?.title ?? `${item.make} ${item.model} from Japan | Wazir Trading`,
-  description: VEHICLE_TIER_ONE_CONTENT[`model:${item.makeSlug}/${item.slug}`]?.description ?? `Compare Japanese ${item.make} ${item.model} listings by year, grade, powertrain, mileage and condition. Review stock details and request an export quotation.`,
+  title:
+    VEHICLE_TIER_ONE_CONTENT[`model:${item.makeSlug}/${item.slug}`]?.title ??
+    `${item.make} ${item.model} from Japan | Wazir Trading`,
+  description:
+    VEHICLE_TIER_ONE_CONTENT[`model:${item.makeSlug}/${item.slug}`]?.description ??
+    `Compare Japanese ${item.make} ${item.model} listings by year, grade, powertrain, mileage and condition. Review stock details and request an export quotation.`,
   intro: VEHICLE_TIER_ONE_CONTENT[`model:${item.makeSlug}/${item.slug}`]?.intro ?? item.intro,
-  buyerGuide: VEHICLE_TIER_ONE_CONTENT[`model:${item.makeSlug}/${item.slug}`]?.buyerGuide ?? item.buyerGuide,
-  focusPoints: [...(VEHICLE_TIER_ONE_CONTENT[`model:${item.makeSlug}/${item.slug}`]?.focusPoints ?? item.focusPoints)],
-  faqs: VEHICLE_TIER_ONE_CONTENT[`model:${item.makeSlug}/${item.slug}`]?.faqs ?? makeFaqs(`${item.make} ${item.model}`, item.buyerGuide, item.intro),
+  buyerGuide:
+    VEHICLE_TIER_ONE_CONTENT[`model:${item.makeSlug}/${item.slug}`]?.buyerGuide ?? item.buyerGuide,
+  focusPoints: [
+    ...(VEHICLE_TIER_ONE_CONTENT[`model:${item.makeSlug}/${item.slug}`]?.focusPoints ??
+      item.focusPoints),
+  ],
+  faqs:
+    VEHICLE_TIER_ONE_CONTENT[`model:${item.makeSlug}/${item.slug}`]?.faqs ??
+    makeFaqs(`${item.make} ${item.model}`, item.buyerGuide, item.intro),
 }));
 
 const bodyPages: VehicleLandingPage[] = bodyContent.map((item) => ({

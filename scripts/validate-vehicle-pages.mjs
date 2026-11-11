@@ -277,15 +277,7 @@ if (registry.vehicleLandingCarsFilterPath(modelPage) !== "/cars?make=Toyota&advM
   fail("Model landing page must link to the matching inventory filters.");
 }
 
-
-const expectedTierOneMakes = new Set([
-  "toyota",
-  "nissan",
-  "honda",
-  "suzuki",
-  "mazda",
-  "lexus",
-]);
+const expectedTierOneMakes = new Set(["toyota", "nissan", "honda", "suzuki", "mazda", "lexus"]);
 const expectedTierOneModels = new Set([
   "toyota/prius",
   "toyota/aqua",
@@ -313,9 +305,8 @@ const expectedTierOneModels = new Set([
   "lexus/nx",
 ]);
 
-const tierCounts = (items) => [1, 2, 3].map(
-  (tier) => items.filter((item) => item.seoTier === tier).length,
-);
+const tierCounts = (items) =>
+  [1, 2, 3].map((tier) => items.filter((item) => item.seoTier === tier).length);
 const makeTierCounts = tierCounts(makes);
 const modelTierCounts = tierCounts(models);
 
@@ -332,9 +323,7 @@ const tierOneMakeSlugs = new Set(
   makes.filter((page) => page.seoTier === 1).map((page) => page.slug),
 );
 const tierOneModelKeys = new Set(
-  models
-    .filter((page) => page.seoTier === 1)
-    .map((page) => page.makeSlug + "/" + page.slug),
+  models.filter((page) => page.seoTier === 1).map((page) => page.makeSlug + "/" + page.slug),
 );
 if (
   tierOneMakeSlugs.size !== expectedTierOneMakes.size ||
@@ -377,7 +366,11 @@ for (const [key, content] of Object.entries(tierOneContent)) {
   if (!content.title || content.title.length > 70) {
     fail("Tier 1 SEO title must be present and at most 70 characters: " + key);
   }
-  if (!content.description || content.description.length < 110 || content.description.length > 175) {
+  if (
+    !content.description ||
+    content.description.length < 110 ||
+    content.description.length > 175
+  ) {
     fail("Tier 1 meta description must be 110–175 characters: " + key);
   }
   if (!content.intro || content.intro.length < 180) {
@@ -409,7 +402,10 @@ for (const [key, content] of Object.entries(tierOneContent)) {
   if (page.intro !== content.intro || page.buyerGuide !== content.buyerGuide) {
     fail("Tier 1 editorial content was not applied to the generated page: " + key);
   }
-  if (page.focusPoints?.length !== content.focusPoints?.length || page.faqs?.length !== content.faqs?.length) {
+  if (
+    page.focusPoints?.length !== content.focusPoints?.length ||
+    page.faqs?.length !== content.faqs?.length
+  ) {
     fail("Tier 1 buyer checklist/FAQ content was not applied to the generated page: " + key);
   }
   if (page.directoryVisible === false) {
@@ -417,10 +413,7 @@ for (const [key, content] of Object.entries(tierOneContent)) {
   }
 }
 
-if (
-  routePageSource.includes("searchThemes") ||
-  routePageSource.includes("searchThemes.join")
-) {
+if (routePageSource.includes("searchThemes") || routePageSource.includes("searchThemes.join")) {
   fail("Editorial search themes must not be rendered as hidden or visible keyword lists.");
 }
 if (
@@ -428,7 +421,9 @@ if (
   !routePageSource.includes("page.directoryVisible === false") ||
   registry.MIN_INDEXABLE_LANDING_STOCK !== 5
 ) {
-  fail("Tier metadata must not bypass the five-qualifying-vehicle indexation/visibility safeguards.");
+  fail(
+    "Tier metadata must not bypass the five-qualifying-vehicle indexation/visibility safeguards.",
+  );
 }
 
 if (failures.length) {
