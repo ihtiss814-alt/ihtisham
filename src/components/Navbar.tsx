@@ -231,8 +231,11 @@ export default function Navbar() {
             <div className="flex items-center gap-1 min-w-0">
               <Clock size={9} className="text-gray-400 flex-shrink-0" />
               <span className="text-[9.5px] font-medium text-gray-400 whitespace-nowrap">JST</span>
-              <span className="text-[9.5px] font-bold text-gray-700 tabular-nums truncate">
-                {japanTime || "--"}
+              <span
+                className="text-[9.5px] font-bold text-gray-700 tabular-nums truncate"
+                suppressHydrationWarning
+              >
+                {japanTime}
               </span>
             </div>
 
