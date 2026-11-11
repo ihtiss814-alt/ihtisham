@@ -8,8 +8,6 @@ import { useMeta } from "@/lib/use-meta";
 import { isSupabaseConfigured, supabase } from "@/lib/supabase";
 import { isIndexableVehicle, type VehicleSeoCar } from "@/lib/vehicle-seo";
 import {
-  BODY_TYPE_LANDING_PAGES,
-  MAKE_LANDING_PAGES,
   MIN_INDEXABLE_LANDING_STOCK,
   MODEL_LANDING_PAGES,
   summarizeVehicleLandingInventory,
@@ -19,6 +17,7 @@ import {
   getMakeLandingPage,
   getModelLandingPage,
   vehicleLandingCarsFilterPath,
+  vehicleLandingDirectoryCounts,
   vehicleLandingDirectorySections,
   type VehicleLandingInventorySummary,
   type VehicleLandingPage,
@@ -66,6 +65,7 @@ export function VehicleLandingDirectoryPage() {
     noindex: hasQuery,
   });
   const sections = vehicleLandingDirectorySections();
+  const directoryCounts = vehicleLandingDirectoryCounts();
 
   return (
     <div className="min-h-screen bg-background">
@@ -77,8 +77,8 @@ export function VehicleLandingDirectoryPage() {
       <main className="container mx-auto px-4 md:px-8 py-12 md:py-16">
         <div className="max-w-3xl mb-10">
           <div className="flex items-center gap-2 text-primary text-sm font-semibold mb-3">
-            <CarFront size={17} /> {MAKE_LANDING_PAGES.length} manufacturers ·{" "}
-            {MODEL_LANDING_PAGES.length} models · {BODY_TYPE_LANDING_PAGES.length} body styles
+            <CarFront size={17} /> {directoryCounts.makes} manufacturers · {directoryCounts.models}{" "}
+            models · {directoryCounts.bodyTypes} body styles
           </div>
           <h2 className="text-2xl md:text-3xl font-serif font-bold text-foreground">
             Browse vehicle guides
