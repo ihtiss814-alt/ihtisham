@@ -1,40 +1,69 @@
-# Vehicle make/model landing-page workflow
+# Vehicle landing page workflow — Phase 4
 
-The make/model landing pages use a typed registry in `src/lib/vehicle-landing-pages.ts`, a shared route template in `src/pages/vehicle-landing-pages.tsx`, server SEO bootstrap in `src/lib/seo-bootstrap.ts`, and the dynamic sitemap in `src/routes/sitemap[.]xml.ts`.
+## Current architecture
 
-## Tiered editorial content
+Vehicle SEO pages are data-driven from `src/lib/vehicle-landing-pages.ts` and use the existing Wouter application inside the TanStack Start catch-all route. The directory is `/used-japanese-cars`. The current registry contains 14 manufacturer pages, 51 model pages and the existing body-style pages.
 
-- Tier 1: `src/lib/vehicle-tier-one-content.ts` — 6 manufacturer pages and 24 model pages.
-- Tier 2: `src/lib/vehicle-tier-two-content.ts` — 6 manufacturer pages and 18 model pages.
-- Tier 3: `src/lib/vehicle-tier-three-content.ts` — 2 manufacturer pages and 9 model pages.
-- The registry contains 14 manufacturer pages and 51 model pages overall. Body-style pages are managed separately and are not assigned to these make/model tiers.
+- Manufacturer pages: `/used-japanese-cars/{make-slug}`
+- Model pages: `/used-japanese-cars/{make-slug}/{model-slug}`
+- Body-style pages: `/used-japanese-cars/body-type/{body-slug}`
 
-Each enriched page needs a distinct title and meta description, original introduction, practical buyer guide, at least four buyer checks, at least four visible FAQs, and at least four editorial search-intent themes. Search themes are internal planning data only and must never be rendered as hidden keyword lists.
+The current registry includes 14 manufacturers, 51 models and the existing body-style guides (75 detail pages when the 10 body-style routes are included). The detail-page component, metadata loader and sitemap integration are shared; future pages should normally require only registry content. Unknown paths inside this namespace are handled as noindex 404s. When visitors navigate internally with Wouter, the page fetches its own matching inventory if the current server bootstrap belongs to another route.
 
-## Adding or changing a page
+## Publication and indexing policy
 
-1. Review current inventory taxonomy and actual matching vehicle records. Do not claim stock volumes, model-year ranges, grades, equipment or technical specifications unless supported by the current records or reliable documentation.
-2. Keep one canonical URL for a make/model family. Use aliases to map verified raw inventory labels to the existing page rather than creating near-duplicate routes.
-3. Prioritise by business relevance and verified stock/search evidence. Do not present internal tiers as measured search volume or ranking forecasts.
-4. Preserve existing URL paths, canonical metadata, server-rendered SEO bootstrap, structured data, directory links and sitemap integration.
-5. Keep the five-qualifying-available-vehicle threshold. Tier assignment must never bypass inventory quality or availability checks. Retired legacy routes remain resolvable/noindex and must not be promoted into the directory or sitemap.
-6. Do not add make × model × country permutations unless each page has distinct, useful information and a genuine inventory/use case.
-7. Run `npm run validate:vehicle-pages`, `npm run validate:country-pages`, `npm run typecheck`, `npm run lint` and `npm run build`.
-8. Inspect server-rendered output, canonical/robots tags, structured data, internal links and sitemap entries. Follow with live browser checks and Search Console monitoring; a successful build alone does not prove production rendering, indexing or organic performance.
+A registered URL is not automatically indexable. The server loads matching rows from the public `cars` table using `status = available`, then applies the existing `isIndexableVehicle` quality gate. That gate requires a valid vehicle reference, make, model, numeric year, available status, at least one meaningful specification and at least one valid image.
 
-## Current priority split
+A detail page is indexable only when at least **5** matching rows pass that gate. The same threshold is used in the metadata loader and sitemap aggregation. Pages below the threshold remain accessible as useful guides but receive `noindex, follow` and are omitted from the sitemap. Query-string variants are also noindex and canonicalize to the clean registry path.
 
-| Page type | Tier 1 | Tier 2 | Tier 3 | Total |
-|---|---:|---:|---:|---:|
-| Manufacturers | 6 | 6 | 2 | 14 |
-| Models | 24 | 18 | 9 | 51 |
+The inventory query is capped at the 200 newest matching rows for page rendering and indexability evaluation. The sitemap scans the broader inventory but caps its per-page `scanned` count at the same 200 newest matching rows, so its indexation threshold mirrors the page loader. If the catalogue grows substantially, increase or paginate both sides together and consider splitting the sitemap before relaxing the quality threshold.
 
-Tier 1 manufacturers: Toyota, Nissan, Honda, Suzuki, Mazda and Lexus.
+## Make/model SEO priority tiers
 
-Tier 2 manufacturers: Subaru, Mitsubishi, Daihatsu, Isuzu, Audi and Mercedes-Benz.
+`seoTier` is internal editorial prioritisation and does not change a route, canonical URL or indexation by itself. The current 14 manufacturers use a 6/6/2 split and the 51 models use a 24/18/9 split. Tier 1 contains Toyota, Nissan, Honda, Suzuki, Mazda and Lexus, plus 24 existing model pages with dedicated content in `src/lib/vehicle-tier-one-content.ts`. Tier 2 contains Subaru, Mitsubishi, Daihatsu, Isuzu, Audi and Mercedes-Benz, plus 18 existing model pages with dedicated content in `src/lib/vehicle-tier-two-content.ts`. Tier 3 contains Mitsubishi Fuso and Hino, plus nine existing model pages with dedicated content in `src/lib/vehicle-tier-three-content.ts`.
 
-Tier 3 manufacturers: Mitsubishi Fuso and Hino.
+The Tier 1 shortlist uses a combination of Japanese market/sales signals, existing catalogue coverage and commercial search intent. Tier 2 and Tier 3 use the remaining curated catalogue coverage and specific inventory-backed model families. It is not represented as measured Wazir Trading inventory demand or Search Console keyword volume. Reassess the assignments using Search Console impressions/clicks, qualified available stock, enquiry conversion and destination mix when those first-party measurements are available. Do not unhide retired model URLs or lower the five-qualifying-vehicle indexation threshold to make a page indexable.
 
-Tier 3 model pages: Daihatsu Tanto, Toyota Dyna, Subaru XV, Audi TT, Mercedes-Benz C-Class, Mitsubishi Canter, Mitsubishi Minicab Truck, Daihatsu Move Canbus and Lexus LS.
+All three tiers include a unique title, description, introduction, buyer guide, at least four buyer checks, at least four visible FAQs and editorial search-intent themes. Search themes live only in editorial data and must never be rendered as hidden keyword blocks. Tier 2 editorial content does not change the visibility of any legacy route: the existing hidden/noindex model set remains hidden until a separate data-backed review authorises promotion.
 
-These tiers are internal editorial priorities, not assertions about measured search demand. Revisit them when verified Search Console and inventory data are available.
+## Adding a manufacturer
+
+1. Add one item to `makeContent` in `src/lib/vehicle-landing-pages.ts`.
+2. Use the exact normalized manufacturer value stored in `cars.make` for `name`.
+3. Write a manufacturer-specific introduction and buyer guide. Do not invent current stock, dealership coverage, warranty, reliability, shipping availability or manufacturer approval.
+4. Include at least three practical checks. The shared FAQ builder adds purchase and quotation questions.
+5. Set the internal `seoTier` and add a curated `make:{slug}` entry to the matching tier module: `src/lib/vehicle-tier-one-content.ts`, `src/lib/vehicle-tier-two-content.ts` or `src/lib/vehicle-tier-three-content.ts`. Keep titles within 70 characters and descriptions between 110 and 175 characters. Do not render search themes as keyword lists.
+6. Run `npm run validate:vehicle-pages`.
+
+## Adding a model
+
+1. Confirm the parent make slug already exists in `makeContent`.
+2. Add an item to `modelContent` with `makeSlug`, `make`, `model` and a unique model `slug`.
+3. Match the value in `model` to the value stored in `cars.model` (case-insensitive match is used). Do not combine aliases or generations unless the database actually uses the same model value.
+4. Describe only the distinctions a buyer should verify. For hybrid, plug-in hybrid and electric models, request unit-specific battery or charging details instead of implying a standard battery condition.
+5. Set the internal `seoTier` and add a curated `model:{makeSlug}/{slug}` entry to the matching tier module: `src/lib/vehicle-tier-one-content.ts`, `src/lib/vehicle-tier-two-content.ts` or `src/lib/vehicle-tier-three-content.ts`. Include vehicle-specific selection checks and FAQs; do not add unsupported mechanical claims or destination guarantees.
+6. Run the validator and confirm that the model path maps to its parent make page.
+
+## Adding a body style
+
+1. Add a record to `bodyContent`.
+2. Match `bodyType` to the exact label used in `cars.body_type`; matching is case-insensitive but otherwise exact.
+3. Keep the guidance tied to the body configuration: dimensions, seat count, cargo layout, weight/payload or drivetrain as relevant.
+4. Do not add broad taxonomy terms unless inventory uses that value consistently.
+
+## Validation and launch
+
+```bash
+npm install
+npm run validate:country-pages
+npm run validate:vehicle-pages
+npm run typecheck
+npm run lint
+npm run build
+```
+
+After deploying to the canonical host, verify representative make, model and body-style URLs in rendered HTML. Check unique title and description, one canonical, server-rendered inventory cards, robots meta, JSON-LD, and the sitemap. Test each page below the stock threshold to confirm it is noindex and absent from the sitemap. Recheck after stock changes because these pages can enter or leave the sitemap as qualifying vehicles are added or sold.
+
+## Design protection
+
+Vehicle landing pages reuse the current navy/red palette, typography utilities, existing `CarCard` component and existing layout patterns. No new CSS file or design token is required. Tier 1 enhances content and metadata within the shared template; it does not introduce a separate visual design. Do not alter existing global styles or the current home, inventory or vehicle-detail page layout when adding registry entries.
