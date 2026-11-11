@@ -1,4 +1,5 @@
 import { SITE_URL, type VehicleSeoCar } from "./vehicle-seo";
+import { VEHICLE_TIER_ONE_CONTENT } from "./vehicle-tier-one-content";
 
 export const VEHICLE_LANDING_DIRECTORY_PATH = "/used-japanese-cars";
 export const MIN_INDEXABLE_LANDING_STOCK = 5;
@@ -6,6 +7,7 @@ export const VEHICLE_LANDING_CAR_LIMIT = 200;
 export const VEHICLE_LANDING_CARDS_LIMIT = 8;
 
 export type VehicleLandingKind = "make" | "model" | "body-type";
+export type VehicleSeoTier = 1 | 2 | 3;
 
 export interface VehicleLandingFaq {
   question: string;
@@ -14,6 +16,8 @@ export interface VehicleLandingFaq {
 
 export interface VehicleLandingPage {
   kind: VehicleLandingKind;
+  /** Internal prioritisation; does not bypass inventory indexation checks. */
+  seoTier?: VehicleSeoTier;
   slug: string;
   path: string;
   label: string;
@@ -44,6 +48,7 @@ export interface VehicleLandingDirectoryEntry {
 const makeContent = [
   {
     slug: "toyota",
+    seoTier: 1,
     name: "Toyota",
     intro:
       "Browse Japanese Toyota vehicle records in one place and compare the specifications shown on each available listing. The catalogue can include different body styles, model years, engine choices and equipment grades, so use the exact vehicle record rather than the badge alone when deciding whether a car suits your requirements.",
@@ -57,6 +62,7 @@ const makeContent = [
   },
   {
     slug: "nissan",
+    seoTier: 1,
     name: "Nissan",
     intro:
       "Explore available Nissan vehicles sourced from Japan and compare each record by model, year, trim, powertrain and condition. Nissan inventory may span compact cars, family vans, SUVs and electric vehicles; specifications and equipment vary by model year and individual vehicle.",
@@ -70,6 +76,7 @@ const makeContent = [
   },
   {
     slug: "honda",
+    seoTier: 1,
     name: "Honda",
     intro:
       "Compare Japanese Honda used-car listings by model, year, grade, engine, transmission and photographed condition. The range represented in stock may include compact hatchbacks, sedans, crossovers and multi-purpose vehicles, with meaningful differences between model generations and trim levels.",
@@ -83,6 +90,7 @@ const makeContent = [
   },
   {
     slug: "suzuki",
+    seoTier: 1,
     name: "Suzuki",
     intro:
       "Review available Suzuki vehicles from Japan, including compact cars and other body styles represented in current stock. Compare the specifications and photographs attached to each vehicle because engine size, drivetrain, seating and equipment can differ significantly between variants.",
@@ -96,6 +104,7 @@ const makeContent = [
   },
   {
     slug: "mazda",
+    seoTier: 1,
     name: "Mazda",
     intro:
       "Browse current Mazda vehicle records sourced from Japan and compare year, model, trim, engine, transmission and condition. Listings may include compact cars, passenger vehicles and SUVs; always use the individual specification sheet to distinguish different generations and equipment packages.",
@@ -109,6 +118,7 @@ const makeContent = [
   },
   {
     slug: "subaru",
+    seoTier: 2,
     name: "Subaru",
     intro:
       "Compare Subaru listings from Japan using the model, year, grade, engine, drivetrain and condition information recorded for each vehicle. Subaru vehicles may have different drivetrain and engine configurations across generations, so do not assume a specification from the nameplate alone.",
@@ -122,6 +132,7 @@ const makeContent = [
   },
   {
     slug: "mitsubishi",
+    seoTier: 2,
     name: "Mitsubishi",
     intro:
       "Explore Japanese Mitsubishi used vehicles and compare the available records by model, year, trim, engine, drivetrain and condition. Listings can differ by vehicle category and powertrain, and individual equipment should be confirmed from the published vehicle details.",
@@ -135,6 +146,7 @@ const makeContent = [
   },
   {
     slug: "daihatsu",
+    seoTier: 2,
     name: "Daihatsu",
     intro:
       "Review available Daihatsu vehicles from Japan with attention to the exact model code, engine size, year, grade and condition. Compact vehicle specifications can be closely tied to local vehicle classifications, so check the destination authority’s rules before selecting a particular unit.",
@@ -148,6 +160,7 @@ const makeContent = [
   },
   {
     slug: "lexus",
+    seoTier: 1,
     name: "Lexus",
     intro:
       "Compare available Lexus vehicles sourced from Japan by model, year, grade, powertrain and condition. Equipment and specification can vary considerably between trims, option packages and model generations, so verify the exact vehicle record and request clarification about features important to you.",
@@ -161,6 +174,7 @@ const makeContent = [
   },
   {
     slug: "isuzu",
+    seoTier: 2,
     name: "Isuzu",
     intro:
       "Browse Isuzu commercial-vehicle records from Japan and compare the exact model, year, chassis, cab and body configuration. Commercial vehicles require more than a model-name comparison: payload, dimensions, axle configuration and intended operating class must be checked for the individual unit.",
@@ -174,6 +188,7 @@ const makeContent = [
   },
   {
     slug: "audi",
+    seoTier: 2,
     name: "Audi",
     intro:
       "Explore the Audi vehicles currently represented in Wazir Trading’s Japan inventory. The available catalogue spans several A- and Q-series designations and includes hatchback, sedan, wagon, SUV and coupe configurations. Because the stock is spread across different models and years, compare the individual vehicle record rather than assuming that equipment or powertrain is shared across the range.",
@@ -187,6 +202,7 @@ const makeContent = [
   },
   {
     slug: "mercedes-benz",
+    seoTier: 2,
     name: "Mercedes-Benz",
     intro:
       "Browse the Mercedes-Benz vehicles currently listed from Japan, including several passenger-car and SUV nameplates. The current inventory is distributed across multiple model families and body configurations, so a manufacturer-level guide is more useful than creating a separate thin page for every single vehicle designation. Use each vehicle reference to compare the exact year, grade, engine, fuel and condition.",
@@ -200,6 +216,7 @@ const makeContent = [
   },
   {
     slug: "mitsubishi-fuso",
+    seoTier: 3,
     name: "Mitsubishi Fuso",
     intro:
       "Explore Mitsubishi Fuso commercial trucks available in Wazir Trading’s Japan inventory. The current records are centred on the Canter family, with additional specialist truck configurations represented by their individual listing descriptions. For commercial vehicles, the chassis, body, cab, axle, rated weight and intended operating use matter as much as the model name.",
@@ -213,6 +230,7 @@ const makeContent = [
   },
   {
     slug: "hino",
+    seoTier: 3,
     name: "Hino",
     intro:
       "Review the Hino commercial vehicles represented in Wazir Trading’s current Japanese inventory. The available stock is spread across several truck designations rather than one high-volume model, so this manufacturer guide groups the relevant commercial listings without creating separate pages for models supported by only one or two vehicles.",
@@ -232,6 +250,7 @@ const modelContent = [
     make: "Toyota",
     model: "Prius",
     slug: "prius",
+    seoTier: 1,
     intro:
       "Compare Toyota Prius listings by generation, grade, model year and hybrid-system specification. A Prius nameplate alone does not identify the exact battery, equipment or vehicle configuration, so review the individual record and request unit-specific condition information.",
     buyerGuide:
@@ -247,6 +266,7 @@ const modelContent = [
     make: "Toyota",
     model: "Aqua",
     slug: "aqua",
+    seoTier: 1,
     intro:
       "Review Toyota Aqua compact hybrid listings from Japan and compare year, grade, mileage, hybrid-system details and condition. Equipment and specifications can change between model updates, so verify the exact vehicle rather than relying on a generic model description.",
     buyerGuide:
@@ -262,6 +282,7 @@ const modelContent = [
     make: "Toyota",
     model: "Corolla",
     slug: "corolla",
+    seoTier: 2,
     directoryVisible: false,
     intro:
       "Explore Toyota Corolla listings from Japan and distinguish each unit by model generation, body style, grade, year and powertrain. Corolla specifications are not identical across markets or generations, so the individual chassis and vehicle record should guide your comparison.",
@@ -278,6 +299,7 @@ const modelContent = [
     make: "Toyota",
     model: "Vitz",
     slug: "vitz",
+    seoTier: 2,
     directoryVisible: false,
     intro:
       "Compare Toyota Vitz compact hatchback listings by model year, grade, engine, transmission and condition. Model naming can differ by market and generation, so confirm the exact chassis and documentation when comparing a Vitz with similarly named Yaris variants.",
@@ -294,6 +316,7 @@ const modelContent = [
     make: "Toyota",
     model: "Harrier",
     slug: "harrier",
+    seoTier: 2,
     directoryVisible: false,
     intro:
       "Review Toyota Harrier SUV listings sourced from Japan and compare generation, grade, engine or hybrid configuration, drivetrain and condition. Features and mechanical specifications vary between versions, so use the listing’s details as the reference for each vehicle.",
@@ -310,6 +333,7 @@ const modelContent = [
     make: "Toyota",
     model: "Hiace",
     slug: "hiace",
+    seoTier: 1,
     modelAliases: ["Hiace", "Hiace Wagon"],
     directoryVisible: true,
     intro:
@@ -327,6 +351,7 @@ const modelContent = [
     make: "Toyota",
     model: "Voxy",
     slug: "voxy",
+    seoTier: 1,
     intro:
       "Explore Toyota Voxy minivan listings and compare seating layout, grade, model year, engine, transmission and equipment. Family-oriented features can differ by trim and generation, so verify that the specific vehicle includes the configuration you need.",
     buyerGuide:
@@ -342,6 +367,7 @@ const modelContent = [
     make: "Toyota",
     model: "Land Cruiser",
     slug: "land-cruiser",
+    seoTier: 1,
     modelAliases: ["Land Cruiser", "Land Cruiser Wagon", "Land Cruiser Cygnus"],
     directoryVisible: true,
     intro:
@@ -359,6 +385,7 @@ const modelContent = [
     make: "Nissan",
     model: "Note",
     slug: "note",
+    seoTier: 1,
     intro:
       "Review Nissan Note compact-car listings and compare year, grade, engine or e-POWER configuration, transmission and condition. Powertrain details vary, so confirm the exact system fitted to the individual car rather than assuming all Note models are the same.",
     buyerGuide:
@@ -374,6 +401,7 @@ const modelContent = [
     make: "Nissan",
     model: "X-Trail",
     slug: "x-trail",
+    seoTier: 2,
     directoryVisible: false,
     intro:
       "Compare Nissan X-Trail SUV records by generation, grade, model year, engine or hybrid system, drivetrain and seating. The model has changed over time, so identify the exact version and do not infer equipment or four-wheel drive from the badge alone.",
@@ -390,6 +418,7 @@ const modelContent = [
     make: "Nissan",
     model: "Serena",
     slug: "serena",
+    seoTier: 1,
     intro:
       "Browse Nissan Serena minivan listings and compare seat configuration, model year, grade, engine, transmission and equipment. Seating layouts and driver-assistance features vary by generation and trim, so inspect the exact vehicle details before purchase.",
     buyerGuide:
@@ -405,6 +434,7 @@ const modelContent = [
     make: "Nissan",
     model: "Leaf",
     slug: "leaf",
+    seoTier: 2,
     directoryVisible: false,
     intro:
       "Compare Nissan Leaf electric-vehicle listings from Japan by model year, battery specification, grade, mileage and charging equipment. Battery capacity and usable condition are central to an EV purchase and should be confirmed for the exact vehicle.",
@@ -421,6 +451,7 @@ const modelContent = [
     make: "Honda",
     model: "Fit",
     slug: "fit",
+    seoTier: 2,
     directoryVisible: false,
     intro:
       "Review Honda Fit compact hatchback listings from Japan and compare generation, grade, engine or hybrid configuration, transmission and mileage. Vehicle equipment and powertrain options vary, so check the full model designation and specification for the exact unit.",
@@ -437,6 +468,7 @@ const modelContent = [
     make: "Honda",
     model: "Vezel",
     slug: "vezel",
+    seoTier: 1,
     intro:
       "Compare Honda Vezel compact SUV listings by model year, grade, engine or hybrid system, drivetrain and condition. Specifications can differ across generations and trim packages, so verify the actual equipment and powertrain on the vehicle record.",
     buyerGuide:
@@ -452,6 +484,7 @@ const modelContent = [
     make: "Honda",
     model: "Civic",
     slug: "civic",
+    seoTier: 2,
     directoryVisible: false,
     intro:
       "Explore Honda Civic listings from Japan and compare the exact body style, generation, model year, grade, engine, transmission and condition. Civic variants differ across years and body configurations, so the vehicle record should determine the comparison.",
@@ -468,6 +501,7 @@ const modelContent = [
     make: "Honda",
     model: "Freed",
     slug: "freed",
+    seoTier: 2,
     directoryVisible: false,
     intro:
       "Compare Honda Freed compact MPV listings by seat count, seating layout, grade, model year and powertrain. The Freed is offered in different configurations, so confirm the specific passenger arrangement and access features shown for each vehicle.",
@@ -484,6 +518,7 @@ const modelContent = [
     make: "Suzuki",
     model: "Swift",
     slug: "swift",
+    seoTier: 1,
     modelAliases: ["Swift", "Swif"],
     directoryVisible: true,
     intro:
@@ -501,6 +536,7 @@ const modelContent = [
     make: "Suzuki",
     model: "Jimny",
     slug: "jimny",
+    seoTier: 2,
     directoryVisible: false,
     intro:
       "Compare Suzuki Jimny compact off-road vehicle listings by generation, body configuration, engine, transmission and drivetrain. Confirm whether the exact car is a 4WD version and review its chassis and underbody condition before making a purchase decision.",
@@ -517,6 +553,7 @@ const modelContent = [
     make: "Mazda",
     model: "Demio",
     slug: "demio",
+    seoTier: 1,
     intro:
       "Browse Mazda Demio compact hatchback listings sourced from Japan and compare year, grade, engine, transmission and condition. Some markets use the Mazda2 name for related vehicles, so match the actual model and chassis information on the export documents.",
     buyerGuide:
@@ -532,6 +569,7 @@ const modelContent = [
     make: "Mazda",
     model: "CX-5",
     slug: "cx-5",
+    seoTier: 2,
     directoryVisible: false,
     intro:
       "Compare Mazda CX-5 SUV records by model generation, year, grade, engine, transmission and drivetrain. Petrol and diesel specifications, equipment packages and drive configurations differ, so use the exact listing details when comparing vehicles.",
@@ -548,6 +586,7 @@ const modelContent = [
     make: "Subaru",
     model: "Forester",
     slug: "forester",
+    seoTier: 2,
     directoryVisible: false,
     intro:
       "Review Subaru Forester SUV listings by generation, year, engine, transmission, drivetrain and grade. Confirm the exact mechanical layout and equipment, since specifications and safety features vary between model years and individual vehicles.",
@@ -564,6 +603,7 @@ const modelContent = [
     make: "Mitsubishi",
     model: "Outlander",
     slug: "outlander",
+    seoTier: 2,
     modelAliases: ["Outlander", "Outlander PHEV"],
     directoryVisible: true,
     intro:
@@ -581,6 +621,7 @@ const modelContent = [
     make: "Daihatsu",
     model: "Mira",
     slug: "mira",
+    seoTier: 2,
     modelAliases: ["Mira", "Mira e:S"],
     directoryVisible: false,
     intro:
@@ -598,6 +639,7 @@ const modelContent = [
     make: "Lexus",
     model: "RX",
     slug: "rx",
+    seoTier: 2,
     directoryVisible: false,
     intro:
       "Compare Lexus RX SUV listings from Japan by generation, grade, engine or hybrid configuration, drivetrain and equipment. The RX family includes different powertrain and trim combinations, so confirm the exact specification, condition and included features for each vehicle.",
@@ -614,6 +656,7 @@ const modelContent = [
     make: "Isuzu",
     model: "Elf",
     slug: "elf",
+    seoTier: 2,
     modelAliases: ["Elf", "Elf Truck"],
     directoryVisible: true,
     intro:
@@ -631,6 +674,7 @@ const modelContent = [
     make: "Toyota",
     model: "Corolla Fielder",
     slug: "corolla-fielder",
+    seoTier: 1,
     intro:
       "The Toyota Corolla Fielder is one of the largest individual model groups in the current Wazir Trading inventory. The available records identify it as a wagon and span model years 2006–2023, with multiple grades and both conventional and hybrid-labelled powertrain records. Compare the exact chassis code and grade because the 1.5-litre and 1.8-litre examples are not interchangeable.",
     buyerGuide:
@@ -646,6 +690,7 @@ const modelContent = [
     make: "Toyota",
     model: "Yaris",
     slug: "yaris",
+    seoTier: 1,
     intro:
       "Wazir Trading’s current Toyota Yaris records are hatchbacks spanning model years 2020–2023. The inventory includes 1.0-litre and 1.5-litre examples, with a smaller number of hybrid-labelled records. Grade names such as X, G, Z and RZ appear in the listings, so buyers should compare the exact version rather than treating every Yaris as the same specification.",
     buyerGuide:
@@ -661,6 +706,7 @@ const modelContent = [
     make: "Toyota",
     model: "RAV4",
     slug: "rav4",
+    seoTier: 1,
     intro:
       "The Toyota RAV4 inventory currently includes SUV listings from model years 2019–2026. The available records show both 2.0-litre and 2.5-litre engine specifications and a mix of gasoline and hybrid entries. Grades recorded in stock include G, Adventure, G Z, X and Z, making grade and powertrain verification important when comparing vehicles.",
     buyerGuide:
@@ -676,6 +722,7 @@ const modelContent = [
     make: "Toyota",
     model: "Raize",
     slug: "raize",
+    seoTier: 1,
     intro:
       "Toyota Raize listings in the current inventory are compact SUVs from model years 2020–2026. The records include 1.0-litre and 1.2-litre engine entries, gasoline and hybrid-labelled examples, and several grades including Z, X, G and XS. Buyers should compare the precise engine and grade because the model name alone does not establish the powertrain or equipment.",
     buyerGuide:
@@ -691,6 +738,7 @@ const modelContent = [
     make: "Toyota",
     model: "Premio",
     slug: "premio",
+    seoTier: 1,
     intro:
       "The Toyota Premio records in current stock are sedans spanning model years 2003–2021. The inventory includes 1.5-, 1.8- and 2.0-litre gasoline examples and several grade or package names, including 1.5F EX Package and 1.8X L Package. Compare the year and grade closely because the equipment and engine differ across the stock range.",
     buyerGuide:
@@ -706,6 +754,7 @@ const modelContent = [
     make: "Lexus",
     model: "NX",
     slug: "nx",
+    seoTier: 1,
     intro:
       "Lexus NX vehicles in the current inventory are SUVs recorded from model years 2015 onward. The available entries include 2.0-litre gasoline and 2.5-litre hybrid specifications, with F-Sport, Version L and I Package designations. One supplied record carries a 2027 model year and should be verified against its original documentation before that year is repeated in marketing copy.",
     buyerGuide:
@@ -721,6 +770,7 @@ const modelContent = [
     make: "Mitsubishi Fuso",
     model: "Canter",
     slug: "canter",
+    seoTier: 2,
     modelAliases: ["Canter"],
     intro:
       "Mitsubishi Fuso Canter is a commercial-truck model group in the current inventory, separate from Mitsubishi-branded Canter listings. The available Fuso records span model years 1990–2026 and include diesel engine entries around 3.0- and 4.9-litre, manual and automatic transmissions, and specialist bodies such as refrigerator/freezer trucks and car transporters.",
@@ -737,6 +787,7 @@ const modelContent = [
     make: "Nissan",
     model: "Cube",
     slug: "cube",
+    seoTier: 2,
     intro:
       "The Nissan Cube stock group contains hatchbacks from model years 2009–2019, with 1.2- and 1.5-litre engine records and several trim designations. The model has distinctive cabin and body proportions, but buyers should still compare the precise grade, year and equipment shown for each vehicle rather than relying on general model descriptions.",
     buyerGuide:
@@ -752,6 +803,7 @@ const modelContent = [
     make: "Toyota",
     model: "Prius Alpha",
     slug: "prius-a",
+    seoTier: 1,
     modelAliases: ["Prius A", "Prius Alpha"],
     intro:
       "The Toyota Prius A / Prius Alpha is kept as a separate model guide from the standard Prius page because the inventory uses these distinct nameplates and model-year groups. Current records span 2012–2017 and include 1.8-litre hybrid-labelled examples with multiple grades. Verify the exact designation printed on each vehicle’s documentation.",
@@ -768,6 +820,7 @@ const modelContent = [
     make: "Toyota",
     model: "Yaris Cross",
     slug: "yaris-cross",
+    seoTier: 1,
     intro:
       "Toyota Yaris Cross listings in the current inventory span model years 2020–2026 and include 1.5-litre gasoline and hybrid-labelled records. The source data classifies some examples as SUV and others as hatchback, so this guide intentionally groups the model by its nameplate while showing the recorded body classification for each individual vehicle.",
     buyerGuide:
@@ -783,6 +836,7 @@ const modelContent = [
     make: "Toyota",
     model: "Esquire",
     slug: "esquire",
+    seoTier: 2,
     intro:
       "Toyota Esquire vehicles in the current inventory are family-oriented minivan/van listings from model years 2015–2021. The records include 1.8- and 2.0-litre gasoline or hybrid-labelled specifications and predominantly Gi grade examples. The source classifies most as minivans and one as a van, which should remain visible as a record-level distinction.",
     buyerGuide:
@@ -798,6 +852,7 @@ const modelContent = [
     make: "Daihatsu",
     model: "Tanto",
     slug: "tanto",
+    seoTier: 3,
     intro:
       "Daihatsu Tanto is a compact wagon group in the current inventory with records from model years 2013–2026. All supplied examples show a 660 cc engine and CVT transmission, with several regular and Custom grades. The exact grade, model code and equipment should still be checked because doors, cabin features and safety systems vary by generation.",
     buyerGuide:
@@ -813,6 +868,7 @@ const modelContent = [
     make: "Toyota",
     model: "Hilux",
     slug: "hilux",
+    seoTier: 1,
     intro:
       "The current Toyota Hilux inventory consists of pickup-truck listings from model years 2021–2023. The supplied records show 2.4-litre diesel specifications and Z-grade examples. Buyers should verify the precise cab, bed, drivetrain and payload documentation for the individual truck rather than assuming all Hilux listings have the same configuration.",
     buyerGuide:
@@ -828,6 +884,7 @@ const modelContent = [
     make: "Toyota",
     model: "Dyna",
     slug: "dyna",
+    seoTier: 3,
     modelAliases: ["Dyna", "Dyna Truck"],
     intro:
       "Toyota Dyna and Dyna Truck records are grouped under one commercial-truck guide to avoid splitting the same model family across separate near-duplicate pages. The current inventory includes several model years and engine sizes from approximately 2.0 to 4.9 litres, with diesel and gasoline entries and a range of cargo-body configurations.",
@@ -844,6 +901,7 @@ const modelContent = [
     make: "Honda",
     model: "ZR-V",
     slug: "zr-v",
+    seoTier: 1,
     intro:
       "Honda ZR-V is represented by SUV listings from model years 2022–2025. The current inventory includes 2.0-litre hybrid-labelled and 1.5-litre gasoline entries, with the Z grade recorded for the available examples. The Toyota-tagged ZR-V record is not included in this Honda page until its manufacturer assignment is verified.",
     buyerGuide:
@@ -859,6 +917,7 @@ const modelContent = [
     make: "Subaru",
     model: "XV",
     slug: "xv",
+    seoTier: 3,
     intro:
       "Subaru XV is represented in the current inventory by SUV records from model years 2013–2019, with 2.0-litre gasoline and hybrid-labelled entries. The source includes several grade and EyeSight designations. A separate Suzuki-tagged XV record is excluded from this page pending manufacturer verification.",
     buyerGuide:
@@ -874,6 +933,7 @@ const modelContent = [
     make: "Audi",
     model: "TT",
     slug: "tt",
+    seoTier: 3,
     modelAliases: ["TT", "TT Coupe"],
     intro:
       "Audi TT and TT Coupe records are grouped under one coupe guide because the supplied inventory uses both labels for the same model family. The current examples span model years 2004–2012 and include petrol engine records around 1.8 and 2.0 litres. Verify the generation, engine and trim for each individual vehicle.",
@@ -890,6 +950,7 @@ const modelContent = [
     make: "Mercedes-Benz",
     model: "C-Class",
     slug: "c-class",
+    seoTier: 3,
     modelAliases: [
       "C-Class",
       "C-Class M-AMG",
@@ -911,6 +972,7 @@ const modelContent = [
     make: "Toyota",
     model: "Alphard",
     slug: "alphard",
+    seoTier: 1,
     intro:
       "Toyota Alphard listings in the current inventory span model years 2018–2025 and are classified as MPV or van. The records include 2.5-litre gasoline and hybrid-labelled entries as well as multiple grades. Buyers should compare seating, access and powertrain details from each individual vehicle rather than infer the specification from the Alphard name.",
     buyerGuide:
@@ -926,6 +988,7 @@ const modelContent = [
     make: "Toyota",
     model: "Sienta",
     slug: "sienta",
+    seoTier: 1,
     intro:
       "Toyota Sienta inventory currently consists of MPV listings from model years 2015–2024 with 1.5-litre engine records. The available examples include gasoline and hybrid-labelled versions and several grades. Compare the exact seat layout, grade and powertrain because the Sienta’s family-use configuration can vary by generation.",
     buyerGuide:
@@ -941,6 +1004,7 @@ const modelContent = [
     make: "Nissan",
     model: "March",
     slug: "march",
+    seoTier: 1,
     intro:
       "The Nissan March inventory includes hatchbacks from model years 1997–2021, with 1.2-, 1.3- and 1.5-litre engine records and a broad range of trim designations. The large year span means buyers should compare generation, chassis code and grade rather than assuming that all March listings have the same equipment or safety specification.",
     buyerGuide:
@@ -956,6 +1020,7 @@ const modelContent = [
     make: "Suzuki",
     model: "Wagon R",
     slug: "wagon-r",
+    seoTier: 1,
     intro:
       "Suzuki Wagon R listings in the current inventory are 660 cc compact wagons from model years 2012–2022. The available records include FX, FZ, T, FA and X grades, with gasoline and hybrid-labelled fuel entries. Because this is a kei-class vehicle, the exact dimensions, engine and destination classification should be confirmed for each listing.",
     buyerGuide:
@@ -971,6 +1036,7 @@ const modelContent = [
     make: "Mitsubishi",
     model: "Canter",
     slug: "canter",
+    seoTier: 3,
     modelAliases: ["Canter", "Canter Guts"],
     intro:
       "Mitsubishi Canter is a light commercial truck represented by a substantial group of Wazir Trading inventory from Japan. The current records span model years 1997–2021 and include diesel examples with different engine sizes, manual and automatic transmission entries, and work bodies such as standard cab, carrier, flat body and refuse-truck configurations. Because a truck body can materially change its use and dimensions, compare the exact vehicle rather than selecting by the Canter name alone.",
@@ -987,6 +1053,7 @@ const modelContent = [
     make: "Mitsubishi",
     model: "Minicab Truck",
     slug: "minicab-truck",
+    seoTier: 3,
     intro:
       "The Mitsubishi Minicab Truck inventory consists of Japanese kei-class commercial pickups from model years 1998–2013. The available records use 660 cc engines and include manual and automatic transmission entries, with several 4WD-labelled variants. Confirm the individual cab, bed, drive and equipment details from the listing and documents.",
     buyerGuide:
@@ -1002,6 +1069,7 @@ const modelContent = [
     make: "Daihatsu",
     model: "Move Canbus",
     slug: "move-canbus",
+    seoTier: 3,
     intro:
       "Daihatsu Move Canbus listings in the current inventory span model years 2017–2025 and use 660 cc gasoline engines with CVT transmissions. The records include several G, Stripes, Theory and Turbo-labelled grades. Check the exact generation and equipment package because the name alone does not confirm the fitted convenience or safety features.",
     buyerGuide:
@@ -1017,6 +1085,7 @@ const modelContent = [
     make: "Lexus",
     model: "LS",
     slug: "ls",
+    seoTier: 3,
     intro:
       "Lexus LS inventory includes large sedans from model years 2012–2023, with 3.5-, 4.6- and 5.0-litre engine entries and both gasoline and hybrid-labelled examples. F-Sport, Executive Package, I Package and Version C records appear in the current catalogue, so verify the exact engine and equipment before comparing prices.",
     buyerGuide:
@@ -1325,22 +1394,32 @@ function makeFaqs(
 
 const makePages: VehicleLandingPage[] = makeContent.map((item) => ({
   kind: "make",
+  seoTier: item.seoTier,
   slug: item.slug,
   path: `${VEHICLE_LANDING_DIRECTORY_PATH}/${item.slug}`,
   label: item.name,
   make: item.name,
   makeAliases: [item.name],
   directoryVisible: "directoryVisible" in item ? item.directoryVisible !== false : true,
-  title: `${item.name} Used Cars from Japan | Wazir Trading`,
-  description: `Compare Japanese ${item.name} used-car listings by model, year, grade, mileage and condition. Review available stock and request an export quotation.`,
-  intro: item.intro,
-  buyerGuide: item.buyerGuide,
-  focusPoints: [...item.focusPoints],
-  faqs: makeFaqs(item.name, item.buyerGuide, item.intro),
+  title:
+    VEHICLE_TIER_ONE_CONTENT[`make:${item.slug}`]?.title ??
+    `${item.name} Used Cars from Japan | Wazir Trading`,
+  description:
+    VEHICLE_TIER_ONE_CONTENT[`make:${item.slug}`]?.description ??
+    `Compare Japanese ${item.name} used-car listings by model, year, grade, mileage and condition. Review available stock and request an export quotation.`,
+  intro: VEHICLE_TIER_ONE_CONTENT[`make:${item.slug}`]?.intro ?? item.intro,
+  buyerGuide: VEHICLE_TIER_ONE_CONTENT[`make:${item.slug}`]?.buyerGuide ?? item.buyerGuide,
+  focusPoints: [
+    ...(VEHICLE_TIER_ONE_CONTENT[`make:${item.slug}`]?.focusPoints ?? item.focusPoints),
+  ],
+  faqs:
+    VEHICLE_TIER_ONE_CONTENT[`make:${item.slug}`]?.faqs ??
+    makeFaqs(item.name, item.buyerGuide, item.intro),
 }));
 
 const modelPages: VehicleLandingPage[] = modelContent.map((item) => ({
   kind: "model",
+  seoTier: item.seoTier,
   slug: item.slug,
   path: `${VEHICLE_LANDING_DIRECTORY_PATH}/${item.makeSlug}/${item.slug}`,
   label: `${item.make} ${item.model}`,
@@ -1351,12 +1430,22 @@ const modelPages: VehicleLandingPage[] = modelContent.map((item) => ({
     ...("modelAliases" in item && item.modelAliases ? item.modelAliases : [item.model]),
   ],
   directoryVisible: "directoryVisible" in item ? item.directoryVisible !== false : true,
-  title: `${item.make} ${item.model} from Japan | Wazir Trading`,
-  description: `Compare Japanese ${item.make} ${item.model} listings by year, grade, powertrain, mileage and condition. Review stock details and request an export quotation.`,
-  intro: item.intro,
-  buyerGuide: item.buyerGuide,
-  focusPoints: [...item.focusPoints],
-  faqs: makeFaqs(`${item.make} ${item.model}`, item.buyerGuide, item.intro),
+  title:
+    VEHICLE_TIER_ONE_CONTENT[`model:${item.makeSlug}/${item.slug}`]?.title ??
+    `${item.make} ${item.model} from Japan | Wazir Trading`,
+  description:
+    VEHICLE_TIER_ONE_CONTENT[`model:${item.makeSlug}/${item.slug}`]?.description ??
+    `Compare Japanese ${item.make} ${item.model} listings by year, grade, powertrain, mileage and condition. Review stock details and request an export quotation.`,
+  intro: VEHICLE_TIER_ONE_CONTENT[`model:${item.makeSlug}/${item.slug}`]?.intro ?? item.intro,
+  buyerGuide:
+    VEHICLE_TIER_ONE_CONTENT[`model:${item.makeSlug}/${item.slug}`]?.buyerGuide ?? item.buyerGuide,
+  focusPoints: [
+    ...(VEHICLE_TIER_ONE_CONTENT[`model:${item.makeSlug}/${item.slug}`]?.focusPoints ??
+      item.focusPoints),
+  ],
+  faqs:
+    VEHICLE_TIER_ONE_CONTENT[`model:${item.makeSlug}/${item.slug}`]?.faqs ??
+    makeFaqs(`${item.make} ${item.model}`, item.buyerGuide, item.intro),
 }));
 
 const bodyPages: VehicleLandingPage[] = bodyContent.map((item) => ({
