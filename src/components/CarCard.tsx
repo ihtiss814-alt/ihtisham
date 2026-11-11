@@ -38,7 +38,11 @@ export interface Car {
   interior_grade?: string;
   lot_number?: string;
   manufacture_month?: string | number;
-  car_images?: Array<{ image_url: string; is_primary?: boolean }>;
+  car_images?: Array<{
+    image_url: string;
+    is_primary?: boolean;
+    display_order?: number | null;
+  }>;
 }
 
 export type CarCardVariant = "row" | "grid" | "compact";

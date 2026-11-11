@@ -5,10 +5,13 @@ on:
     branches:
       - main
       - performance-final-pass
+  pull_request:
+    branches:
+      - main
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   verify-and-package:
@@ -26,6 +29,18 @@ jobs:
 
       - name: Install locked dependencies
         run: npm ci
+
+      - name: Format changed performance source and commit on branch pushes
+        if: github.event_name == 'push' && github.ref == 'refs/heads/performance-final-pass'
+        run: |
+          npx prettier --write src/App.tsx src/components/CarCard.tsx src/components/VehiclePhotoGallery.tsx src/lib/homepage-inventory-cache.ts src/lib/image-delivery.ts src/pages/home.tsx src/pages/cars.tsx src/pages/contact.tsx src/pages/payment-information.tsx src/routes/index.tsx src/routes/__root.tsx scripts/validate-performance-optimizations.mjs vercel.json
+          git add -- src/App.tsx src/components/CarCard.tsx src/components/VehiclePhotoGallery.tsx src/lib/homepage-inventory-cache.ts src/lib/image-delivery.ts src/pages/home.tsx src/pages/cars.tsx src/pages/contact.tsx src/pages/payment-information.tsx src/routes/index.tsx src/routes/__root.tsx scripts/validate-performance-optimizations.mjs vercel.json
+          if ! git diff --cached --quiet; then
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git commit -m "Format final performance optimization changes"
+            git push origin HEAD:performance-final-pass
+          fi
 
       - name: TypeScript validation
         run: npm run typecheck
