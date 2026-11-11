@@ -20,11 +20,11 @@ The inventory query is capped at the 200 newest matching rows for page rendering
 
 ## Make/model SEO priority tiers
 
-`seoTier` is internal editorial prioritisation and does not change a route, canonical URL or indexation by itself. The current 14 manufacturers use a 6/6/2 split and the 51 models use a 24/18/9 split. Tier 1 contains Toyota, Nissan, Honda, Suzuki, Mazda and Lexus, plus 24 existing model pages with dedicated content in `src/lib/vehicle-tier-one-content.ts`. Tier 2 contains Subaru, Mitsubishi, Daihatsu, Isuzu, Audi and Mercedes-Benz, plus 18 existing model pages with dedicated content in `src/lib/vehicle-tier-two-content.ts`. Tier 3 remains in the registry for its own later editorial pass.
+`seoTier` is internal editorial prioritisation and does not change a route, canonical URL or indexation by itself. The current 14 manufacturers use a 6/6/2 split and the 51 models use a 24/18/9 split. Tier 1 contains Toyota, Nissan, Honda, Suzuki, Mazda and Lexus, plus 24 existing model pages with dedicated content in `src/lib/vehicle-tier-one-content.ts`. Tier 2 contains Subaru, Mitsubishi, Daihatsu, Isuzu, Audi and Mercedes-Benz, plus 18 existing model pages with dedicated content in `src/lib/vehicle-tier-two-content.ts`. Tier 3 contains Mitsubishi Fuso and Hino, plus nine existing model pages with dedicated content in `src/lib/vehicle-tier-three-content.ts`.
 
-The Tier 1 shortlist uses a combination of current Japanese market/sales signals, existing catalogue coverage and commercial search intent. It is not represented as measured Wazir Trading inventory demand or Search Console keyword volume. Reassess the assignments using Search Console impressions/clicks, qualified available stock, enquiry conversion and destination mix when those first-party measurements are available. Do not unhide retired model URLs or lower the five-qualifying-vehicle indexation threshold to make a page indexable.
+The Tier 1 shortlist uses a combination of Japanese market/sales signals, existing catalogue coverage and commercial search intent. Tier 2 and Tier 3 use the remaining curated catalogue coverage and specific inventory-backed model families. It is not represented as measured Wazir Trading inventory demand or Search Console keyword volume. Reassess the assignments using Search Console impressions/clicks, qualified available stock, enquiry conversion and destination mix when those first-party measurements are available. Do not unhide retired model URLs or lower the five-qualifying-vehicle indexation threshold to make a page indexable.
 
-Tier 1 and Tier 2 content each include a unique title, description, introduction, buyer guide, at least four buyer checks, at least four visible FAQs and editorial search-intent themes. Search themes live only in editorial data and must never be rendered as hidden keyword blocks. Tier 2 editorial content does not change the visibility of any legacy route: the existing hidden/noindex model set remains hidden until a separate data-backed review authorises promotion.
+All three tiers include a unique title, description, introduction, buyer guide, at least four buyer checks, at least four visible FAQs and editorial search-intent themes. Search themes live only in editorial data and must never be rendered as hidden keyword blocks. Tier 2 editorial content does not change the visibility of any legacy route: the existing hidden/noindex model set remains hidden until a separate data-backed review authorises promotion.
 
 ## Adding a manufacturer
 
@@ -32,7 +32,7 @@ Tier 1 and Tier 2 content each include a unique title, description, introduction
 2. Use the exact normalized manufacturer value stored in `cars.make` for `name`.
 3. Write a manufacturer-specific introduction and buyer guide. Do not invent current stock, dealership coverage, warranty, reliability, shipping availability or manufacturer approval.
 4. Include at least three practical checks. The shared FAQ builder adds purchase and quotation questions.
-5. Set the internal `seoTier` and, for Tier 1 makes, add a curated `make:{slug}` entry to `src/lib/vehicle-tier-one-content.ts`; for Tier 2 makes, use `src/lib/vehicle-tier-two-content.ts`. Keep titles within 70 characters and descriptions between 110 and 175 characters. Do not render search themes as keyword lists.
+5. Set the internal `seoTier` and add a curated `make:{slug}` entry to the matching tier module: `src/lib/vehicle-tier-one-content.ts`, `src/lib/vehicle-tier-two-content.ts` or `src/lib/vehicle-tier-three-content.ts`. Keep titles within 70 characters and descriptions between 110 and 175 characters. Do not render search themes as keyword lists.
 6. Run `npm run validate:vehicle-pages`.
 
 ## Adding a model
@@ -41,7 +41,7 @@ Tier 1 and Tier 2 content each include a unique title, description, introduction
 2. Add an item to `modelContent` with `makeSlug`, `make`, `model` and a unique model `slug`.
 3. Match the value in `model` to the value stored in `cars.model` (case-insensitive match is used). Do not combine aliases or generations unless the database actually uses the same model value.
 4. Describe only the distinctions a buyer should verify. For hybrid, plug-in hybrid and electric models, request unit-specific battery or charging details instead of implying a standard battery condition.
-5. Set the internal `seoTier` and, for Tier 1 models, add a curated `model:{makeSlug}/{slug}` entry to `src/lib/vehicle-tier-one-content.ts`; for Tier 2 models, use `src/lib/vehicle-tier-two-content.ts`. Include vehicle-specific selection checks and FAQs; do not add unsupported mechanical claims or destination guarantees.
+5. Set the internal `seoTier` and add a curated `model:{makeSlug}/{slug}` entry to the matching tier module: `src/lib/vehicle-tier-one-content.ts`, `src/lib/vehicle-tier-two-content.ts` or `src/lib/vehicle-tier-three-content.ts`. Include vehicle-specific selection checks and FAQs; do not add unsupported mechanical claims or destination guarantees.
 6. Run the validator and confirm that the model path maps to its parent make page.
 
 ## Adding a body style

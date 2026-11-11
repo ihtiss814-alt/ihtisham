@@ -1,6 +1,7 @@
 import { SITE_URL, type VehicleSeoCar } from "./vehicle-seo";
 import { VEHICLE_TIER_ONE_CONTENT } from "./vehicle-tier-one-content";
 import { VEHICLE_TIER_TWO_CONTENT } from "./vehicle-tier-two-content";
+import { VEHICLE_TIER_THREE_CONTENT } from "./vehicle-tier-three-content";
 
 export const VEHICLE_LANDING_DIRECTORY_PATH = "/used-japanese-cars";
 export const MIN_INDEXABLE_LANDING_STOCK = 5;
@@ -1405,27 +1406,33 @@ const makePages: VehicleLandingPage[] = makeContent.map((item) => ({
   title:
     VEHICLE_TIER_ONE_CONTENT[`make:${item.slug}`]?.title ??
     VEHICLE_TIER_TWO_CONTENT[`make:${item.slug}`]?.title ??
+    VEHICLE_TIER_THREE_CONTENT[`make:${item.slug}`]?.title ??
     `${item.name} Used Cars from Japan | Wazir Trading`,
   description:
     VEHICLE_TIER_ONE_CONTENT[`make:${item.slug}`]?.description ??
     VEHICLE_TIER_TWO_CONTENT[`make:${item.slug}`]?.description ??
+    VEHICLE_TIER_THREE_CONTENT[`make:${item.slug}`]?.description ??
     `Compare Japanese ${item.name} used-car listings by model, year, grade, mileage and condition. Review available stock and request an export quotation.`,
   intro:
     VEHICLE_TIER_ONE_CONTENT[`make:${item.slug}`]?.intro ??
     VEHICLE_TIER_TWO_CONTENT[`make:${item.slug}`]?.intro ??
+    VEHICLE_TIER_THREE_CONTENT[`make:${item.slug}`]?.intro ??
     item.intro,
   buyerGuide:
     VEHICLE_TIER_ONE_CONTENT[`make:${item.slug}`]?.buyerGuide ??
     VEHICLE_TIER_TWO_CONTENT[`make:${item.slug}`]?.buyerGuide ??
+    VEHICLE_TIER_THREE_CONTENT[`make:${item.slug}`]?.buyerGuide ??
     item.buyerGuide,
   focusPoints: [
     ...(VEHICLE_TIER_ONE_CONTENT[`make:${item.slug}`]?.focusPoints ??
       VEHICLE_TIER_TWO_CONTENT[`make:${item.slug}`]?.focusPoints ??
+      VEHICLE_TIER_THREE_CONTENT[`make:${item.slug}`]?.focusPoints ??
       item.focusPoints),
   ],
   faqs:
     VEHICLE_TIER_ONE_CONTENT[`make:${item.slug}`]?.faqs ??
     VEHICLE_TIER_TWO_CONTENT[`make:${item.slug}`]?.faqs ??
+    VEHICLE_TIER_THREE_CONTENT[`make:${item.slug}`]?.faqs ??
     makeFaqs(item.name, item.buyerGuide, item.intro),
 }));
 
@@ -1445,27 +1452,33 @@ const modelPages: VehicleLandingPage[] = modelContent.map((item) => ({
   title:
     VEHICLE_TIER_ONE_CONTENT[`model:${item.makeSlug}/${item.slug}`]?.title ??
     VEHICLE_TIER_TWO_CONTENT[`model:${item.makeSlug}/${item.slug}`]?.title ??
+    VEHICLE_TIER_THREE_CONTENT[`model:${item.makeSlug}/${item.slug}`]?.title ??
     `${item.make} ${item.model} from Japan | Wazir Trading`,
   description:
     VEHICLE_TIER_ONE_CONTENT[`model:${item.makeSlug}/${item.slug}`]?.description ??
     VEHICLE_TIER_TWO_CONTENT[`model:${item.makeSlug}/${item.slug}`]?.description ??
+    VEHICLE_TIER_THREE_CONTENT[`model:${item.makeSlug}/${item.slug}`]?.description ??
     `Compare Japanese ${item.make} ${item.model} listings by year, grade, powertrain, mileage and condition. Review stock details and request an export quotation.`,
   intro:
     VEHICLE_TIER_ONE_CONTENT[`model:${item.makeSlug}/${item.slug}`]?.intro ??
     VEHICLE_TIER_TWO_CONTENT[`model:${item.makeSlug}/${item.slug}`]?.intro ??
+    VEHICLE_TIER_THREE_CONTENT[`model:${item.makeSlug}/${item.slug}`]?.intro ??
     item.intro,
   buyerGuide:
     VEHICLE_TIER_ONE_CONTENT[`model:${item.makeSlug}/${item.slug}`]?.buyerGuide ??
     VEHICLE_TIER_TWO_CONTENT[`model:${item.makeSlug}/${item.slug}`]?.buyerGuide ??
+    VEHICLE_TIER_THREE_CONTENT[`model:${item.makeSlug}/${item.slug}`]?.buyerGuide ??
     item.buyerGuide,
   focusPoints: [
     ...(VEHICLE_TIER_ONE_CONTENT[`model:${item.makeSlug}/${item.slug}`]?.focusPoints ??
       VEHICLE_TIER_TWO_CONTENT[`model:${item.makeSlug}/${item.slug}`]?.focusPoints ??
+      VEHICLE_TIER_THREE_CONTENT[`model:${item.makeSlug}/${item.slug}`]?.focusPoints ??
       item.focusPoints),
   ],
   faqs:
     VEHICLE_TIER_ONE_CONTENT[`model:${item.makeSlug}/${item.slug}`]?.faqs ??
     VEHICLE_TIER_TWO_CONTENT[`model:${item.makeSlug}/${item.slug}`]?.faqs ??
+    VEHICLE_TIER_THREE_CONTENT[`model:${item.makeSlug}/${item.slug}`]?.faqs ??
     makeFaqs(`${item.make} ${item.model}`, item.buyerGuide, item.intro),
 }));
 
