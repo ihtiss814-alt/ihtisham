@@ -116,7 +116,7 @@ if (!tierThreeContent || typeof tierThreeContent !== "object") {
 }
 
 const tierThreeImportPattern =
-  /^import\\s+\\{\\s*VEHICLE_TIER_THREE_CONTENT\\s*\\}\\s+from\\s+['"]\\.\\/vehicle-tier-three-content['"]\\s*;?\\s*$/m;
+  /^import\s+\{\s*VEHICLE_TIER_THREE_CONTENT\s*\}\s+from\s+['"]\.\/vehicle-tier-three-content['"]\s*;?\s*$/m;
 if (!tierThreeImportPattern.test(source)) {
   console.error("Could not locate the Tier 3 content import in vehicle-landing-pages.ts.");
   process.exit(1);
@@ -151,7 +151,7 @@ if (!Array.isArray(pages) || pages.length < 40)
   fail("At least 40 vehicle landing pages are required.");
 if (makes.length < 8) fail("At least 8 manufacturer landing pages are required.");
 if (models.length < 20) fail("At least 20 model landing pages are required.");
-if (bodyTypes.length < 8) fail("At least 8 body-style landing pages are required.");
+if (bodyTypes.length !== 12) fail("The body-style registry should contain exactly 12 body-style pages.");
 if (registry.MIN_INDEXABLE_LANDING_STOCK !== 5)
   fail("Landing-page indexation threshold must be 5 qualifying vehicles.");
 
@@ -718,8 +718,8 @@ for (const [key, content] of Object.entries(tierThreeContent)) {
     fail("Tier 3 content must not promote a retired hidden route: " + key);
   }
 }
-if (pages.length !== 75) {
-  fail("Expected 75 vehicle detail pages (14 makes, 51 models and 10 body styles).");
+if (pages.length !== 77) {
+  fail("Expected 77 vehicle detail pages (14 makes, 51 models and 12 body styles).");
 }
 
 if (routePageSource.includes("searchThemes") || routePageSource.includes("searchThemes.join")) {

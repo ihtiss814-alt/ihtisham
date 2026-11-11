@@ -21,6 +21,7 @@ const homeRoute = read("src/routes/index.tsx");
 const contact = read("src/pages/contact.tsx");
 const payment = read("src/pages/payment-information.tsx");
 const vercel = read("vercel.json");
+const navbar = read("src/components/Navbar.tsx");
 
 if (
   !home.includes("getAvailableStockCount()") ||
@@ -115,6 +116,20 @@ if (
   pass(
     "Responsive transformations are restricted to Cloudinary; unknown image URLs are preserved.",
   );
+}
+
+if (
+  !navbar.includes("useSeoBootstrap()") ||
+  !navbar.includes("stockCountResolved") ||
+  !navbar.includes("inventoryResolved") ||
+  !navbar.includes("vehicleLandingResolved") ||
+  !navbar.includes("formatJapanTime(new Date())") ||
+  !navbar.includes("suppressHydrationWarning") ||
+  navbar.includes('japanTime || "--"')
+) {
+  fail("Navbar should render server-known stock totals and a real JST time instead of SSR placeholders.");
+} else {
+  pass("Navbar uses SEO bootstrap stock totals and renders JST time in the initial HTML.");
 }
 
 if (

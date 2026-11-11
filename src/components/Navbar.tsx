@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { Link, useLocation } from "wouter";
 import { Menu, X, ChevronRight, ChevronDown, Clock, Car, Mail } from "lucide-react";
 import { getAvailableStockCount } from "@/lib/inventory-cache";
+import { useSeoBootstrap } from "@/lib/seo-bootstrap-context";
 import { useExchangeRate } from "@/hooks/useExchangeRate";
 
 // ─── Brand tokens ────────────────────────────────────────────────
@@ -26,22 +27,25 @@ const HELP_LINKS = [
   { label: "FAQs", href: "/faqs" },
 ];
 
+function formatJapanTime(now: Date): string {
+  const weekday = now.toLocaleDateString("en-US", { timeZone: "Asia/Tokyo", weekday: "short" });
+  const month = now.toLocaleDateString("en-US", { timeZone: "Asia/Tokyo", month: "2-digit" });
+  const day = now.toLocaleDateString("en-US", { timeZone: "Asia/Tokyo", day: "2-digit" });
+  const time = now.toLocaleTimeString("en-US", {
+    timeZone: "Asia/Tokyo",
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: true,
+  });
+  return `${weekday}, ${month}/${day}, ${time}`;
+}
+
 function useJapanTime() {
-  const [display, setDisplay] = useState("");
+  // Render a real JST value in the server HTML instead of a "--" placeholder.
+  // Suppress the rare minute-boundary difference during browser hydration.
+  const [display, setDisplay] = useState(() => formatJapanTime(new Date()));
   useEffect(() => {
-    const tick = () => {
-      const now = new Date();
-      const weekday = now.toLocaleDateString("en-US", { timeZone: "Asia/Tokyo", weekday: "short" });
-      const month = now.toLocaleDateString("en-US", { timeZone: "Asia/Tokyo", month: "2-digit" });
-      const day = now.toLocaleDateString("en-US", { timeZone: "Asia/Tokyo", day: "2-digit" });
-      const time = now.toLocaleTimeString("en-US", {
-        timeZone: "Asia/Tokyo",
-        hour: "2-digit",
-        minute: "2-digit",
-        hour12: true,
-      });
-      setDisplay(`${weekday}, ${month}/${day}, ${time}`);
-    };
+    const tick = () => setDisplay(formatJapanTime(new Date()));
     tick();
     const id = setInterval(tick, 60_000);
     return () => clearInterval(id);
@@ -50,7 +54,17 @@ function useJapanTime() {
 }
 
 function useStockCount() {
-  const [count, setCount] = useState<number | null>(null);
+  const bootstrap = useSeoBootstrap();
+  const bootstrapCount =
+    bootstrap?.stockCountResolved && typeof bootstrap.stockCount === "number"
+      ? bootstrap.stockCount
+      : bootstrap?.inventoryResolved && typeof bootstrap.inventoryCount === "number"
+        ? bootstrap.inventoryCount
+        : bootstrap?.vehicleLandingResolved &&
+            typeof bootstrap.vehicleLandingAvailableCount === "number"
+          ? bootstrap.vehicleLandingAvailableCount
+          : null;
+  const [count, setCount] = useState<number | null>(bootstrapCount);
   useEffect(() => {
     let active = true;
     getAvailableStockCount()
@@ -179,8 +193,8 @@ export default function Navbar() {
               <span className="text-[10px] tracking-[0.1em] text-gray-400 font-medium whitespace-nowrap">
                 Japan Standard Time
               </span>
-              <span className="text-[10.5px] font-semibold text-gray-700 tabular-nums whitespace-nowrap">
-                {japanTime || "--"}
+              <span className="text-[10.5px] font-semibold text-gray-700 tabular-nums whitespace-nowrap" suppressHydrationWarning>
+                {japanTime}
               </span>
             </div>
 
