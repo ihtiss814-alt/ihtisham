@@ -95,6 +95,37 @@ source = source.replace(
   "const VEHICLE_TIER_TWO_CONTENT = " + JSON.stringify(tierTwoContent) + ";",
 );
 
+const tierThreeContentPath = path.resolve("src/lib/vehicle-tier-three-content.ts");
+const tierThreeContentSource = fs.readFileSync(tierThreeContentPath, "utf8");
+const tierThreeContentCompiled = ts.transpileModule(tierThreeContentSource, {
+  compilerOptions: {
+    module: ts.ModuleKind.CommonJS,
+    target: ts.ScriptTarget.ES2022,
+    strict: true,
+  },
+}).outputText;
+const tierThreeContentModule = { exports: {} };
+new Function("exports", "module", tierThreeContentCompiled)(
+  tierThreeContentModule.exports,
+  tierThreeContentModule,
+);
+const tierThreeContent = tierThreeContentModule.exports.VEHICLE_TIER_THREE_CONTENT;
+if (!tierThreeContent || typeof tierThreeContent !== "object") {
+  console.error("Could not load VEHICLE_TIER_THREE_CONTENT.");
+  process.exit(1);
+}
+
+const tierThreeImportPattern =
+  /^import\\s+\\{\\s*VEHICLE_TIER_THREE_CONTENT\\s*\\}\\s+from\\s+['"]\\.\\/vehicle-tier-three-content['"]\\s*;?\\s*$/m;
+if (!tierThreeImportPattern.test(source)) {
+  console.error("Could not locate the Tier 3 content import in vehicle-landing-pages.ts.");
+  process.exit(1);
+}
+source = source.replace(
+  tierThreeImportPattern,
+  "const VEHICLE_TIER_THREE_CONTENT = " + JSON.stringify(tierThreeContent) + ";",
+);
+
 const compiled = ts.transpileModule(source, {
   compilerOptions: {
     module: ts.ModuleKind.CommonJS,
@@ -581,6 +612,114 @@ for (const [key, content] of Object.entries(tierTwoContent)) {
   ) {
     fail("Tier 2 must preserve the existing model route visibility state: " + key);
   }
+}
+
+
+const expectedTierThreeMakes = new Set(["mitsubishi-fuso", "hino"]);
+const expectedTierThreeModels = new Set([
+  "daihatsu/tanto",
+  "toyota/dyna",
+  "subaru/xv",
+  "audi/tt",
+  "mercedes-benz/c-class",
+  "mitsubishi/canter",
+  "mitsubishi/minicab-truck",
+  "daihatsu/move-canbus",
+  "lexus/ls",
+]);
+const tierThreeMakeSlugs = new Set(
+  makes.filter((page) => page.seoTier === 3).map((page) => page.slug),
+);
+const tierThreeModelKeys = new Set(
+  models.filter((page) => page.seoTier === 3).map((page) => page.makeSlug + "/" + page.slug),
+);
+if (
+  tierThreeMakeSlugs.size !== expectedTierThreeMakes.size ||
+  [...expectedTierThreeMakes].some((slug) => !tierThreeMakeSlugs.has(slug))
+) {
+  fail("Tier 3 manufacturer assignment does not match the approved two-make shortlist.");
+}
+if (
+  tierThreeModelKeys.size !== expectedTierThreeModels.size ||
+  [...expectedTierThreeModels].some((key) => !tierThreeModelKeys.has(key))
+) {
+  fail("Tier 3 model assignment does not match the approved nine-model shortlist.");
+}
+const expectedTierThreeContentKeys = new Set([
+  ...[...expectedTierThreeMakes].map((slug) => "make:" + slug),
+  ...[...expectedTierThreeModels].map((key) => "model:" + key),
+]);
+const tierThreeContentKeys = Object.keys(tierThreeContent);
+if (
+  tierThreeContentKeys.length !== expectedTierThreeContentKeys.size ||
+  [...expectedTierThreeContentKeys].some((key) => !Object.hasOwn(tierThreeContent, key)) ||
+  tierThreeContentKeys.some((key) => !expectedTierThreeContentKeys.has(key))
+) {
+  fail("Tier 3 editorial content must cover exactly two makes and nine models with no extras.");
+}
+for (const [key, content] of Object.entries(tierThreeContent)) {
+  const page = key.startsWith("make:")
+    ? makes.find((item) => item.slug === key.slice("make:".length))
+    : models.find((item) => key === "model:" + item.makeSlug + "/" + item.slug);
+
+  if (!page) {
+    fail("Tier 3 content has no matching registry page: " + key);
+    continue;
+  }
+  if (content.seoTier !== 3 || content.kind !== page.kind || page.seoTier !== 3) {
+    fail("Tier 3 kind/priority metadata does not match the registry page: " + key);
+  }
+  if (!content.title || content.title.length > 70) {
+    fail("Tier 3 SEO title must be present and at most 70 characters: " + key);
+  }
+  if (
+    !content.description ||
+    content.description.length < 110 ||
+    content.description.length > 175
+  ) {
+    fail("Tier 3 meta description must be 110–175 characters: " + key);
+  }
+  if (!content.intro || content.intro.length < 180) {
+    fail("Tier 3 page introduction is too short: " + key);
+  }
+  if (!content.buyerGuide || content.buyerGuide.length < 180) {
+    fail("Tier 3 buyer guide is too short: " + key);
+  }
+  if (!Array.isArray(content.searchThemes) || content.searchThemes.length < 4) {
+    fail("Tier 3 page needs at least four editorial search-intent themes: " + key);
+  }
+  if (!Array.isArray(content.focusPoints) || content.focusPoints.length < 4) {
+    fail("Tier 3 page needs at least four distinct buyer checks: " + key);
+  }
+  if (!Array.isArray(content.faqs) || content.faqs.length < 4) {
+    fail("Tier 3 page needs at least four model/make-specific FAQs: " + key);
+  }
+  for (const faq of content.faqs ?? []) {
+    if (!faq.question?.trim() || !faq.answer?.trim()) {
+      fail("Tier 3 FAQ question/answer missing: " + key);
+    }
+  }
+  if (content.searchThemes?.some((theme) => !theme?.trim())) {
+    fail("Tier 3 search-intent theme must not be blank: " + key);
+  }
+  if (page.title !== content.title || page.description !== content.description) {
+    fail("Tier 3 SEO metadata was not applied to the generated page: " + key);
+  }
+  if (page.intro !== content.intro || page.buyerGuide !== content.buyerGuide) {
+    fail("Tier 3 editorial content was not applied to the generated page: " + key);
+  }
+  if (
+    page.focusPoints?.length !== content.focusPoints?.length ||
+    page.faqs?.length !== content.faqs?.length
+  ) {
+    fail("Tier 3 buyer checklist/FAQ content was not applied to the generated page: " + key);
+  }
+  if (page.directoryVisible === false) {
+    fail("Tier 3 content must not promote a retired hidden route: " + key);
+  }
+}
+if (pages.length !== 75) {
+  fail("Expected 75 vehicle detail pages (14 makes, 51 models and 10 body styles).");
 }
 
 if (routePageSource.includes("searchThemes") || routePageSource.includes("searchThemes.join")) {
