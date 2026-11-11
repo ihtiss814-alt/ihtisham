@@ -8,7 +8,7 @@ Vehicle SEO pages are data-driven from `src/lib/vehicle-landing-pages.ts` and us
 - Model pages: `/used-japanese-cars/{make-slug}/{model-slug}`
 - Body-style pages: `/used-japanese-cars/body-type/{body-slug}`
 
-The current registry includes 10 manufacturers, 25 models and 10 body styles (45 detail pages). The detail-page component, metadata loader and sitemap integration are shared; future pages should normally require only registry content. Unknown paths inside this namespace are handled as noindex 404s. When visitors navigate internally with Wouter, the page fetches its own matching inventory if the current server bootstrap belongs to another route.
+The current registry includes 14 manufacturers, 51 models and the existing body-style guides (75 detail pages when the 10 body-style routes are included). The detail-page component, metadata loader and sitemap integration are shared; future pages should normally require only registry content. Unknown paths inside this namespace are handled as noindex 404s. When visitors navigate internally with Wouter, the page fetches its own matching inventory if the current server bootstrap belongs to another route.
 
 ## Publication and indexing policy
 
