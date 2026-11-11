@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from "react";
 
 /**
  * Reveal an element once it scrolls into view.
@@ -20,8 +20,8 @@ export function useReveal<T extends HTMLElement = HTMLDivElement>() {
     if (!el) return;
 
     if (
-      typeof IntersectionObserver === 'undefined' ||
-      window.matchMedia('(prefers-reduced-motion: reduce)').matches
+      typeof IntersectionObserver === "undefined" ||
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches
     ) {
       setRevealed(true);
       return;
@@ -33,7 +33,7 @@ export function useReveal<T extends HTMLElement = HTMLDivElement>() {
         setRevealed(true);
         obs.disconnect();
       },
-      { rootMargin: '0px 0px -12% 0px' },
+      { rootMargin: "0px 0px -12% 0px" },
     );
     obs.observe(el);
     return () => obs.disconnect();

@@ -1,8 +1,8 @@
-import { createFileRoute, notFound } from '@tanstack/react-router';
-import WazirApp from '../components/WazirApp';
-import { buildSeoHead, loadSeoBootstrap } from '../lib/seo-bootstrap';
+import { createFileRoute, notFound } from "@tanstack/react-router";
+import WazirApp from "../components/WazirApp";
+import { buildSeoHead, loadSeoBootstrap } from "../lib/seo-bootstrap";
 
-export const Route = createFileRoute('/$')({
+export const Route = createFileRoute("/$")({
   loader: async ({ location }) => {
     const bootstrap = await loadSeoBootstrap(location.pathname, location.searchStr);
     if (bootstrap.notFound) throw notFound();

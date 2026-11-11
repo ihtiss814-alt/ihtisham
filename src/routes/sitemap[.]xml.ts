@@ -1,72 +1,83 @@
-import { createFileRoute } from '@tanstack/react-router';
-import { supabase, isSupabaseConfigured } from '../lib/supabase';
-import { SITE_URL, isIndexableVehicle, validImageUrls, type VehicleSeoCar } from '../lib/vehicle-seo';
-import { COUNTRY_LANDING_PAGES, countryLandingPath } from '../lib/country-landing-pages';
+import { createFileRoute } from "@tanstack/react-router";
+import { supabase, isSupabaseConfigured } from "../lib/supabase";
+import {
+  SITE_URL,
+  isIndexableVehicle,
+  validImageUrls,
+  verifiedVehicleModifiedAt,
+  type VehicleSeoCar,
+} from "../lib/vehicle-seo";
+import { COUNTRY_LANDING_PAGES, countryLandingPath } from "../lib/country-landing-pages";
 import {
   ALL_VEHICLE_LANDING_PAGES,
   MIN_INDEXABLE_LANDING_STOCK,
   VEHICLE_LANDING_CAR_LIMIT,
   VEHICLE_LANDING_DIRECTORY_PATH,
   vehicleLandingPagesForVehicle,
-} from '../lib/vehicle-landing-pages';
+} from "../lib/vehicle-landing-pages";
 
 const STATIC_PATHS = [
-  '/',
-  '/cars',
-  '/import-japanese-cars',
+  "/",
+  "/cars",
+  "/import-japanese-cars",
   VEHICLE_LANDING_DIRECTORY_PATH,
-  '/about',
-  '/how-it-works',
-  '/auto-parts',
-  '/shipping-information',
-  '/contact',
-  '/faqs',
-  '/payment-information',
-  '/buyer-information',
-  '/terms-and-conditions',
-  '/privacy-policy',
+  "/about",
+  "/how-it-works",
+  "/auto-parts",
+  "/shipping-information",
+  "/contact",
+  "/faqs",
+  "/payment-information",
+  "/buyer-information",
+  "/terms-and-conditions",
+  "/privacy-policy",
 ] as const;
 
 const PAGE_SIZE = 1000;
 // Keep vehicle URLs below the protocol limit, leaving room for static pages.
 const MAX_PAGES = 49;
 const SITEMAP_VEHICLE_SELECT =
-  'ref_number,make,model,variant,year,mileage_km,engine_cc,fuel_type,transmission,body_type,drive,color,auction_grade,status,updated_at,car_images(image_url,is_primary,display_order)';
+  "ref_number,make,model,variant,year,mileage_km,engine_cc,fuel_type,transmission,body_type,drive,color,auction_grade,status,created_at,updated_at,car_images(image_url,is_primary,display_order)";
 
 function escapeXml(value: string): string {
   return value
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&apos;');
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&apos;");
 }
 
 function validLastModified(value: unknown): string | null {
-  if (typeof value !== 'string') return null;
+  if (typeof value !== "string") return null;
   const date = new Date(value);
   return Number.isNaN(date.getTime()) ? null : date.toISOString();
 }
 
 function renderUrl(loc: string, lastmod?: string | null, image?: string | null): string {
-  const lastmodNode = lastmod ? `<lastmod>${escapeXml(lastmod)}</lastmod>` : '';
+  const lastmodNode = lastmod ? `<lastmod>${escapeXml(lastmod)}</lastmod>` : "";
   const imageNode = image
     ? `<image:image><image:loc>${escapeXml(image)}</image:loc></image:image>`
-    : '';
+    : "";
   return `<url><loc>${escapeXml(loc)}</loc>${lastmodNode}${imageNode}</url>`;
 }
 
 async function buildSitemap(): Promise<string> {
-  const urls = STATIC_PATHS
-    .filter((path) => path !== '/cars')
-    .map((path) => renderUrl(`${SITE_URL}${path === '/' ? '/' : path}`));
+  const urls = STATIC_PATHS.filter((path) => path !== "/cars").map((path) =>
+    renderUrl(`${SITE_URL}${path === "/" ? "/" : path}`),
+  );
   for (const country of COUNTRY_LANDING_PAGES) {
     if (!country.indexable) continue;
-    urls.push(renderUrl(`${SITE_URL}${countryLandingPath(country)}`, `${country.reviewedOn}T00:00:00.000Z`));
+    urls.push(
+      renderUrl(`${SITE_URL}${countryLandingPath(country)}`, `${country.reviewedOn}T00:00:00.000Z`),
+    );
   }
 
   const emittedVehicleRefs = new Set<string>();
-  const vehicleLandingStats = new Map<string, { scanned: number; count: number; lastmod: string | null }>();
+  const vehicleLandingStats = new Map<
+    string,
+    { scanned: number; count: number; lastmod: string | null }
+  >();
   let hasIndexableCatalogPage = false;
 
   if (isSupabaseConfigured) {
@@ -74,14 +85,14 @@ async function buildSitemap(): Promise<string> {
       const from = page * PAGE_SIZE;
       const to = from + PAGE_SIZE - 1;
       const { data, error } = await supabase
-        .from('cars')
+        .from("cars")
         .select(SITEMAP_VEHICLE_SELECT)
-        .eq('status', 'available')
-        .order('created_at', { ascending: false })
+        .eq("status", "available")
+        .order("created_at", { ascending: false })
         .range(from, to);
 
       if (error) {
-        console.error('Sitemap inventory query failed:', error.message);
+        console.error("Sitemap inventory query failed:", error.message);
         break;
       }
 
@@ -96,14 +107,19 @@ async function buildSitemap(): Promise<string> {
         // Mirror the landing-page loader: both evaluate the newest 200
         // available rows that match each make/model/body-style filter.
         for (const landingPage of vehicleLandingPagesForVehicle(car)) {
-          const previous = vehicleLandingStats.get(landingPage.path) ?? { scanned: 0, count: 0, lastmod: null };
+          const previous = vehicleLandingStats.get(landingPage.path) ?? {
+            scanned: 0,
+            count: 0,
+            lastmod: null,
+          };
           if (previous.scanned >= VEHICLE_LANDING_CAR_LIMIT) continue;
           const scanned = previous.scanned + 1;
           const count = previous.count + (indexable ? 1 : 0);
-          const modified = indexable ? validLastModified(car.updated_at) : null;
-          const lastmod = modified && (!previous.lastmod || modified > previous.lastmod)
-            ? modified
-            : previous.lastmod;
+          const modified = indexable ? verifiedVehicleModifiedAt(car) : null;
+          const lastmod =
+            modified && (!previous.lastmod || modified > previous.lastmod)
+              ? modified
+              : previous.lastmod;
           vehicleLandingStats.set(landingPage.path, { scanned, count, lastmod });
         }
         if (!indexable) continue;
@@ -112,23 +128,20 @@ async function buildSitemap(): Promise<string> {
         emittedVehicleRefs.add(rawRef);
         const ref = encodeURIComponent(rawRef);
         const image = validImageUrls(car)[0] ?? null;
-        urls.push(
-          renderUrl(
-            `${SITE_URL}/cars/${ref}`,
-            validLastModified(car.updated_at),
-            image,
-          ),
-        );
+        urls.push(renderUrl(`${SITE_URL}/cars/${ref}`, verifiedVehicleModifiedAt(car), image));
       }
 
       if (rows.length < PAGE_SIZE) break;
       if (page === MAX_PAGES - 1) {
-        console.warn(`Sitemap reached its ${MAX_PAGES * PAGE_SIZE} vehicle URL safety cap; split into sitemap index files if inventory grows further.`);
+        console.warn(
+          `Sitemap reached its ${MAX_PAGES * PAGE_SIZE} vehicle URL safety cap; split into sitemap index files if inventory grows further.`,
+        );
       }
     }
   }
 
   for (const landingPage of ALL_VEHICLE_LANDING_PAGES) {
+    if (landingPage.directoryVisible === false) continue;
     const stats = vehicleLandingStats.get(landingPage.path);
     if (!stats || stats.count < MIN_INDEXABLE_LANDING_STOCK) continue;
     urls.push(renderUrl(`${SITE_URL}${landingPage.path}`, stats.lastmod));
@@ -143,11 +156,11 @@ async function buildSitemap(): Promise<string> {
     '<?xml version="1.0" encoding="UTF-8"?>',
     '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">',
     ...urls,
-    '</urlset>',
-  ].join('');
+    "</urlset>",
+  ].join("");
 }
 
-export const Route = createFileRoute('/sitemap.xml')({
+export const Route = createFileRoute("/sitemap.xml")({
   server: {
     handlers: {
       GET: async () => {
@@ -156,30 +169,33 @@ export const Route = createFileRoute('/sitemap.xml')({
           return new Response(xml, {
             status: 200,
             headers: {
-              'Content-Type': 'application/xml; charset=utf-8',
-              'Cache-Control': 'public, s-maxage=3600, stale-while-revalidate=86400',
-              'X-Content-Type-Options': 'nosniff',
+              "Content-Type": "application/xml; charset=utf-8",
+              "Cache-Control": "public, s-maxage=3600, stale-while-revalidate=86400",
+              "X-Content-Type-Options": "nosniff",
             },
           });
         } catch (error) {
-          console.error('Could not generate sitemap:', error);
+          console.error("Could not generate sitemap:", error);
           const fallback = [
             '<?xml version="1.0" encoding="UTF-8"?>',
             '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">',
-            ...STATIC_PATHS
-              .filter((path) => path !== '/cars')
-              .map((path) => renderUrl(`${SITE_URL}${path === '/' ? '/' : path}`)),
-            ...COUNTRY_LANDING_PAGES
-              .filter((country) => country.indexable)
-              .map((country) => renderUrl(`${SITE_URL}${countryLandingPath(country)}`, `${country.reviewedOn}T00:00:00.000Z`)),
-            '</urlset>',
-          ].join('');
+            ...STATIC_PATHS.filter((path) => path !== "/cars").map((path) =>
+              renderUrl(`${SITE_URL}${path === "/" ? "/" : path}`),
+            ),
+            ...COUNTRY_LANDING_PAGES.filter((country) => country.indexable).map((country) =>
+              renderUrl(
+                `${SITE_URL}${countryLandingPath(country)}`,
+                `${country.reviewedOn}T00:00:00.000Z`,
+              ),
+            ),
+            "</urlset>",
+          ].join("");
           return new Response(fallback, {
             status: 200,
             headers: {
-              'Content-Type': 'application/xml; charset=utf-8',
-              'Cache-Control': 'public, s-maxage=300, stale-while-revalidate=1800',
-              'X-Content-Type-Options': 'nosniff',
+              "Content-Type": "application/xml; charset=utf-8",
+              "Cache-Control": "public, s-maxage=300, stale-while-revalidate=1800",
+              "X-Content-Type-Options": "nosniff",
             },
           });
         }

@@ -1,5 +1,5 @@
-import { useEffect } from 'react';
-import { Link } from 'wouter';
+import { useEffect } from "react";
+import { Link } from "wouter";
 
 /**
  * Client-side 404. Marked noindex so thin error pages never enter the index,
@@ -8,20 +8,23 @@ import { Link } from 'wouter';
 export default function NotFound() {
   useEffect(() => {
     const prevTitle = document.title;
-    document.title = 'Page Not Found | Wazir Trading LLC';
+    document.title = "Page Not Found | Wazir Trading LLC";
 
     let robots = document.querySelector<HTMLMetaElement>('meta[name="robots"]');
-    const prevRobots = robots?.getAttribute('content') ?? '';
+    const prevRobots = robots?.getAttribute("content") ?? "";
     if (!robots) {
-      robots = document.createElement('meta');
-      robots.name = 'robots';
+      robots = document.createElement("meta");
+      robots.name = "robots";
       document.head.appendChild(robots);
     }
-    robots.setAttribute('content', 'noindex, follow');
+    robots.setAttribute("content", "noindex, follow");
 
     return () => {
       document.title = prevTitle;
-      robots?.setAttribute('content', prevRobots || 'index, follow, max-image-preview:large, max-snippet:-1');
+      robots?.setAttribute(
+        "content",
+        prevRobots || "index, follow, max-image-preview:large, max-snippet:-1",
+      );
     };
   }, []);
 
@@ -31,12 +34,10 @@ export default function NotFound() {
         <p className="mb-2 text-[11px] font-bold uppercase tracking-[0.25em] text-[#C8102E]">
           Wazir Trading LLC
         </p>
-        <h1 className="mb-3 font-serif text-3xl font-bold text-[#0D1B3E]">
-          Page not found
-        </h1>
+        <h1 className="mb-3 font-serif text-3xl font-bold text-[#0D1B3E]">Page not found</h1>
         <p className="mb-8 text-sm leading-6 text-gray-500">
-          The page you are looking for no longer exists or has moved. Browse our
-          current Japanese vehicle stock or contact our export team for help.
+          The page you are looking for no longer exists or has moved. Browse our current Japanese
+          vehicle stock or contact our export team for help.
         </p>
         <nav aria-label="Helpful links" className="flex flex-col justify-center gap-3 sm:flex-row">
           <Link

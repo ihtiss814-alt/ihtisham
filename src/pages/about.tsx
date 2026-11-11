@@ -1,45 +1,49 @@
-import React from 'react';
-import { Shield, Award, Clock, Globe, Building2, MapPin } from 'lucide-react';
-import { useMeta } from '@/lib/use-meta';
-import ShippingRouteCanvas from '@/components/ShippingRouteCanvas';
-import { useReveal } from '@/hooks/useReveal';
+import React from "react";
+import { Shield, Award, Clock, Globe, Building2, MapPin } from "lucide-react";
+import { useMeta } from "@/lib/use-meta";
+import ShippingRouteCanvas from "@/components/ShippingRouteCanvas";
+import { useReveal } from "@/hooks/useReveal";
 
 const operatingInformation = [
   {
-    name: 'Japan Business Base',
-    location: 'Kuwana, Mie, Japan',
-    role: 'Published company contact address',
+    name: "Japan Business Base",
+    location: "Kuwana, Mie, Japan",
+    role: "Published company contact address",
   },
   {
-    name: 'Vehicle Listing Records',
-    location: 'Reference and specifications shown on each vehicle page',
-    role: 'Review the record and confirm details before purchase',
+    name: "Vehicle Listing Records",
+    location: "Reference and specifications shown on each vehicle page",
+    role: "Review the record and confirm details before purchase",
   },
   {
-    name: 'Written Export Quotation',
-    location: 'Prepared for the specific vehicle and destination enquiry',
-    role: 'Price basis, included items, exclusions and payment milestones',
+    name: "Written Export Quotation",
+    location: "Prepared for the specific vehicle and destination enquiry",
+    role: "Price basis, included items, exclusions and payment milestones",
   },
   {
-    name: 'Shipping Coordination',
-    location: 'Method, route and port confirmed for each quotation',
-    role: 'Carrier schedule and document scope confirmed before booking',
+    name: "Shipping Coordination",
+    location: "Method, route and port confirmed for each quotation",
+    role: "Carrier schedule and document scope confirmed before booking",
   },
 ];
 
 export default function AboutPage() {
   useMeta({
-    title: 'About Us | Wazir Trading LLC — Japanese Car Exporters',
-    description: 'Learn how Wazir Trading LLC helps buyers review Japanese used vehicle listings, understand export steps, and request shipping information.',
-    canonical: 'https://www.wazirtradingllc.com/about',
+    title: "About Us | Wazir Trading LLC — Japanese Car Exporters",
+    description:
+      "Learn how Wazir Trading LLC helps buyers review Japanese used vehicle listings, understand export steps, and request shipping information.",
+    canonical: "https://www.wazirtradingllc.com/about",
   });
-  const story  = useReveal<HTMLDivElement>();
+  const story = useReveal<HTMLDivElement>();
   const values = useReveal<HTMLDivElement>();
 
   return (
-    <div className="min-h-screen bg-background" style={{ paddingTop: 'var(--header-h)' }}>
+    <div className="min-h-screen bg-background" style={{ paddingTop: "var(--header-h)" }}>
       {/* Hero Section */}
-      <section className="text-white py-24 relative overflow-hidden" style={{ background: 'var(--brand-navy)' }}>
+      <section
+        className="text-white py-24 relative overflow-hidden"
+        style={{ background: "var(--brand-navy)" }}
+      >
         {/* Live chart of our export routes out of Japan — replaces a stock photo
             of a city we do not operate from. */}
         <div className="absolute inset-0 z-0">
@@ -50,15 +54,18 @@ export default function AboutPage() {
             className="absolute inset-0 pointer-events-none"
             style={{
               background:
-                'linear-gradient(90deg, var(--brand-navy) 0%, rgba(13,27,62,0.90) 28%, rgba(13,27,62,0.45) 62%, rgba(13,27,62,0.10) 100%)',
+                "linear-gradient(90deg, var(--brand-navy) 0%, rgba(13,27,62,0.90) 28%, rgba(13,27,62,0.45) 62%, rgba(13,27,62,0.10) 100%)",
             }}
           />
         </div>
         <div className="container mx-auto px-4 md:px-8 relative z-10">
           <div className="max-w-3xl">
-            <h1 className="text-4xl md:text-6xl font-serif font-bold mb-6 leading-tight">Driven by Excellence. Sourced in Japan.</h1>
+            <h1 className="text-4xl md:text-6xl font-serif font-bold mb-6 leading-tight">
+              Driven by Excellence. Sourced in Japan.
+            </h1>
             <p className="text-lg text-white/80 leading-relaxed">
-              Wazir Trading LLC helps buyers review Japanese used vehicle listings and request export information from its Japan-based operation.
+              Wazir Trading LLC helps buyers review Japanese used vehicle listings and request
+              export information from its Japan-based operation.
             </p>
           </div>
         </div>
@@ -69,11 +76,11 @@ export default function AboutPage() {
         <div className="container mx-auto px-4 md:px-8">
           <div
             ref={story.ref}
-            className={`reveal ${story.revealed ? 'is-revealed' : ''} flex flex-col md:flex-row gap-16 items-center`}
+            className={`reveal ${story.revealed ? "is-revealed" : ""} flex flex-col md:flex-row gap-16 items-center`}
           >
             <div className="md:w-1/2">
-              <img 
-                src="https://images.unsplash.com/photo-1616455579100-2ceaa4eb2d37?q=80&w=1887&auto=format&fit=crop" 
+              <img
+                src="https://images.unsplash.com/photo-1616455579100-2ceaa4eb2d37?q=80&w=1887&auto=format&fit=crop"
                 alt="Japanese vehicle prepared for export"
                 className="w-full h-[600px] object-cover shadow-2xl border border-border"
                 width="1887"
@@ -87,17 +94,22 @@ export default function AboutPage() {
             <div className="md:w-1/2 space-y-6">
               <h2 className="text-3xl font-serif font-bold text-foreground">What we do</h2>
               <div className="w-12 h-1 bg-primary mb-8"></div>
-              
+
               <p className="text-muted-foreground leading-relaxed">
-                Wazir Trading LLC helps buyers review Japanese used vehicle listings and request export information from its Japan-based operation.
-              </p>
-              
-              <p className="text-muted-foreground leading-relaxed">
-                Buying a used vehicle from Japan involves reviewing the available vehicle record, confirming the terms of sale, and checking the shipping and import requirements for the destination. We keep those steps connected to the listing and inquiry process.
+                Wazir Trading LLC helps buyers review Japanese used vehicle listings and request
+                export information from its Japan-based operation.
               </p>
 
               <p className="text-muted-foreground leading-relaxed">
-                Vehicle pages show the available reference, specifications, images, and pricing fields for each listing. Buyers can contact us to confirm availability, shipping options, and the documents required for their destination.
+                Buying a used vehicle from Japan involves reviewing the available vehicle record,
+                confirming the terms of sale, and checking the shipping and import requirements for
+                the destination. We keep those steps connected to the listing and inquiry process.
+              </p>
+
+              <p className="text-muted-foreground leading-relaxed">
+                Vehicle pages show the available reference, specifications, images, and pricing
+                fields for each listing. Buyers can contact us to confirm availability, shipping
+                options, and the documents required for their destination.
               </p>
             </div>
           </div>
@@ -107,16 +119,27 @@ export default function AboutPage() {
       {/* CEO / Leadership */}
       <section className="py-20 md:py-24">
         <div className="container mx-auto px-4 md:px-8">
-          <div className="max-w-6xl mx-auto overflow-hidden border border-border shadow-xl" style={{ background: 'var(--brand-navy)' }}>
+          <div
+            className="max-w-6xl mx-auto overflow-hidden border border-border shadow-xl"
+            style={{ background: "var(--brand-navy)" }}
+          >
             <div className="grid grid-cols-1 md:grid-cols-2 items-stretch">
               <div className="flex flex-col justify-center p-8 sm:p-10 md:p-12 lg:p-14 text-white">
-                <p className="text-xs uppercase tracking-[0.25em] text-primary font-bold mb-4">Leadership</p>
-                <h2 className="text-3xl md:text-4xl font-serif font-bold leading-tight mb-3">Meet Our CEO</h2>
+                <p className="text-xs uppercase tracking-[0.25em] text-primary font-bold mb-4">
+                  Leadership
+                </p>
+                <h2 className="text-3xl md:text-4xl font-serif font-bold leading-tight mb-3">
+                  Meet Our CEO
+                </h2>
                 <div className="w-12 h-1 bg-primary mb-6" />
                 <h3 className="text-2xl font-semibold mb-1">Mr. Mumtaz Khan</h3>
-                <p className="text-sm uppercase tracking-[0.16em] text-white/65 font-semibold mb-6">Chief Executive Officer</p>
+                <p className="text-sm uppercase tracking-[0.16em] text-white/65 font-semibold mb-6">
+                  Chief Executive Officer
+                </p>
                 <p className="text-white/80 leading-relaxed">
-                  Wazir Trading LLC helps buyers navigate Japanese vehicle listings, understand export details, and explore shipping information. Mr. Mumtaz Khan leads the company as Chief Executive Officer.
+                  Wazir Trading LLC helps buyers navigate Japanese vehicle listings, understand
+                  export details, and explore shipping information. Mr. Mumtaz Khan leads the
+                  company as Chief Executive Officer.
                 </p>
               </div>
               <div className="relative min-h-[300px] sm:min-h-[380px] md:min-h-[440px] bg-black/10">
@@ -141,31 +164,33 @@ export default function AboutPage() {
         <div className="container mx-auto px-4 md:px-8">
           <div className="text-center mb-16">
             <h2 className="text-3xl font-serif font-bold mb-4">Our Commitment</h2>
-            <p className="text-muted-foreground max-w-2xl mx-auto">The principles that guide every vehicle we export.</p>
+            <p className="text-muted-foreground max-w-2xl mx-auto">
+              The principles that guide every vehicle we export.
+            </p>
           </div>
 
           <div
             ref={values.ref}
-            className={`reveal ${values.revealed ? 'is-revealed' : ''} grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8`}
+            className={`reveal ${values.revealed ? "is-revealed" : ""} grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8`}
           >
             <ValueCard
-              icon={<Shield />} 
-              title="Absolute Transparency" 
+              icon={<Shield />}
+              title="Absolute Transparency"
               desc="Review the reference, specifications, images, and available grade fields shown for each listing."
             />
-            <ValueCard 
-              icon={<Award />} 
-              title="Premium Selection" 
+            <ValueCard
+              icon={<Award />}
+              title="Premium Selection"
               desc="Use the current inventory and its recorded specifications to compare vehicles against your requirements."
             />
-            <ValueCard 
-              icon={<Globe />} 
-              title="Destination Enquiries" 
+            <ValueCard
+              icon={<Globe />}
+              title="Destination Enquiries"
               desc="Ask about available RoRo or container options and the destination costs for a specific vehicle."
             />
-            <ValueCard 
-              icon={<Clock />} 
-              title="Export Coordination" 
+            <ValueCard
+              icon={<Clock />}
+              title="Export Coordination"
               desc="Contact us for availability, shipping options, and the documents required for your destination."
             />
           </div>
@@ -176,10 +201,16 @@ export default function AboutPage() {
       <section className="py-24">
         <div className="container mx-auto px-4 md:px-8">
           <div className="text-center mb-14">
-            <p className="text-xs uppercase tracking-[0.25em] text-primary font-bold mb-3">Company information</p>
-            <h2 className="text-3xl md:text-4xl font-serif font-bold mb-4">Japan Base. Clear Transaction Details.</h2>
+            <p className="text-xs uppercase tracking-[0.25em] text-primary font-bold mb-3">
+              Company information
+            </p>
+            <h2 className="text-3xl md:text-4xl font-serif font-bold mb-4">
+              Japan Base. Clear Transaction Details.
+            </h2>
             <p className="text-muted-foreground max-w-2xl mx-auto leading-relaxed">
-              Our published business contact address is in Japan. Vehicle availability, sourcing options, payment milestones and shipping arrangements are confirmed in writing for each enquiry.
+              Our published business contact address is in Japan. Vehicle availability, sourcing
+              options, payment milestones and shipping arrangements are confirmed in writing for
+              each enquiry.
             </p>
           </div>
 
@@ -188,7 +219,7 @@ export default function AboutPage() {
               <div
                 key={office.name}
                 className={`relative bg-card border p-6 md:p-7 shadow-sm transition-all hover:-translate-y-1 hover:shadow-md ${
-                  index === 0 ? 'border-primary/50' : 'border-border'
+                  index === 0 ? "border-primary/50" : "border-border"
                 }`}
               >
                 {index === 0 && (
@@ -213,21 +244,38 @@ export default function AboutPage() {
 
           <div className="max-w-4xl mx-auto bg-card border border-border p-8 md:p-12 shadow-sm text-center">
             <h3 className="text-xl font-bold mb-1">Japan Business Address</h3>
-            <p className="text-muted-foreground mb-1 text-sm">Heights Mizutani 1C, 158-1 Jizou, Kuwana-City, Mie-Pref, Japan</p>
+            <p className="text-muted-foreground mb-1 text-sm">
+              Heights Mizutani 1C, 158-1 Jizou, Kuwana-City, Mie-Pref, Japan
+            </p>
             <p className="text-xs text-muted-foreground/60 mb-8">Visits by appointment only</p>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-sm">
               <div>
-                <div className="uppercase tracking-widest text-xs text-primary font-bold mb-2">Buyer Enquiries</div>
-                <p className="text-muted-foreground">Tell us the vehicle and destination you have in mind. We will confirm what can be offered before you commit.</p>
+                <div className="uppercase tracking-widest text-xs text-primary font-bold mb-2">
+                  Buyer Enquiries
+                </div>
+                <p className="text-muted-foreground">
+                  Tell us the vehicle and destination you have in mind. We will confirm what can be
+                  offered before you commit.
+                </p>
               </div>
               <div>
-                <div className="uppercase tracking-widest text-xs text-primary font-bold mb-2">Vehicle Sourcing</div>
-                <p className="text-muted-foreground">For a vehicle not shown in current stock, send your requirements. Any sourcing route, availability, fees and timing must be confirmed in a written quotation.</p>
+                <div className="uppercase tracking-widest text-xs text-primary font-bold mb-2">
+                  Vehicle Sourcing
+                </div>
+                <p className="text-muted-foreground">
+                  For a vehicle not shown in current stock, send your requirements. Any sourcing
+                  route, availability, fees and timing must be confirmed in a written quotation.
+                </p>
               </div>
               <div>
-                <div className="uppercase tracking-widest text-xs text-primary font-bold mb-2">Shipping Details</div>
-                <p className="text-muted-foreground">The proposed method, departure and destination ports, carrier schedule, freight and included documents are identified for each confirmed shipment.</p>
+                <div className="uppercase tracking-widest text-xs text-primary font-bold mb-2">
+                  Shipping Details
+                </div>
+                <p className="text-muted-foreground">
+                  The proposed method, departure and destination ports, carrier schedule, freight
+                  and included documents are identified for each confirmed shipment.
+                </p>
               </div>
             </div>
           </div>
@@ -238,7 +286,7 @@ export default function AboutPage() {
               src="https://www.google.com/maps/embed?pb=!1m17!1m12!1m3!1d3265.8895035567575!2d136.6993446757601!3d35.05950157279439!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m2!1m1!2zMzXCsDAzJzM0LjIiTiAxMzbCsDQyJzA2LjkiRQ!5e0!3m2!1sen!2sus!4v1785990086147!5m2!1sen!2sus"
               width="100%"
               height="420"
-              style={{ border: 0, display: 'block' }}
+              style={{ border: 0, display: "block" }}
               allowFullScreen
               loading="lazy"
               referrerPolicy="strict-origin-when-cross-origin"
@@ -251,7 +299,7 @@ export default function AboutPage() {
   );
 }
 
-function ValueCard({ icon, title, desc }: { icon: React.ReactNode, title: string, desc: string }) {
+function ValueCard({ icon, title, desc }: { icon: React.ReactNode; title: string; desc: string }) {
   return (
     <div className="bg-card border border-border p-8 text-center hover:border-primary/50 transition-colors">
       <div className="w-16 h-16 rounded-full bg-primary/10 text-primary flex items-center justify-center mx-auto mb-6">

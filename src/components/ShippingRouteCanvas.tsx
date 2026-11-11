@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef } from "react";
 
 /**
  * Animated chart of the export routes out of Japan.
@@ -17,29 +17,29 @@ import { useEffect, useRef } from 'react';
  * motion. Several destination markets buy over cellular, so idle cost matters.
  */
 
-const ORIGIN = { name: 'Yokohama', lat: 35.44, lng: 139.64 };
+const ORIGIN = { name: "Yokohama", lat: 35.44, lng: 139.64 };
 
 /** Real ports we ship to — coordinates are the actual harbours. */
 const PORTS = [
-  { name: 'Vladivostok',   lat:  43.12, lng: 131.89 },
-  { name: 'Chittagong',    lat:  22.33, lng:  91.81 },
-  { name: 'Colombo',       lat:   6.93, lng:  79.86 },
-  { name: 'Karachi',       lat:  24.86, lng:  67.01 },
-  { name: 'Dubai',         lat:  25.27, lng:  55.30 },
-  { name: 'Mombasa',       lat:  -4.04, lng:  39.67 },
-  { name: 'Dar es Salaam', lat:  -6.82, lng:  39.28 },
-  { name: 'Durban',        lat: -29.87, lng:  31.02 },
-  { name: 'Lagos',         lat:   6.45, lng:   3.39 },
-  { name: 'Tema',          lat:   5.62, lng:   0.02 },
-  { name: 'Southampton',   lat:  50.90, lng:  -1.40 },
-  { name: 'Auckland',      lat: -36.84, lng: 174.76 },
-  { name: 'Port Moresby',  lat:  -9.44, lng: 147.18 },
-  { name: 'Georgetown',    lat:   6.80, lng: -58.16 },
-  { name: 'Kingston',      lat:  17.97, lng: -76.79 },
-  { name: 'Port of Spain', lat:  10.65, lng: -61.51 },
+  { name: "Vladivostok", lat: 43.12, lng: 131.89 },
+  { name: "Chittagong", lat: 22.33, lng: 91.81 },
+  { name: "Colombo", lat: 6.93, lng: 79.86 },
+  { name: "Karachi", lat: 24.86, lng: 67.01 },
+  { name: "Dubai", lat: 25.27, lng: 55.3 },
+  { name: "Mombasa", lat: -4.04, lng: 39.67 },
+  { name: "Dar es Salaam", lat: -6.82, lng: 39.28 },
+  { name: "Durban", lat: -29.87, lng: 31.02 },
+  { name: "Lagos", lat: 6.45, lng: 3.39 },
+  { name: "Tema", lat: 5.62, lng: 0.02 },
+  { name: "Southampton", lat: 50.9, lng: -1.4 },
+  { name: "Auckland", lat: -36.84, lng: 174.76 },
+  { name: "Port Moresby", lat: -9.44, lng: 147.18 },
+  { name: "Georgetown", lat: 6.8, lng: -58.16 },
+  { name: "Kingston", lat: 17.97, lng: -76.79 },
+  { name: "Port of Spain", lat: 10.65, lng: -61.51 },
 ];
 
-const CRIMSON = '#C8102E';
+const CRIMSON = "#C8102E";
 /**
  * Keeps the outermost ports off the canvas edge. Latitude is exaggerated
  * relative to longitude — our ports sit between roughly 51°N and 37°S, so at a
@@ -48,7 +48,10 @@ const CRIMSON = '#C8102E';
 const SPREAD_X = 0.9;
 const SPREAD_Y = 1.12;
 
-interface Pt { x: number; y: number }
+interface Pt {
+  x: number;
+  y: number;
+}
 
 function project(lat: number, lng: number, w: number, h: number): Pt {
   // Wrap into [-180, 180) relative to the origin meridian.
@@ -79,16 +82,16 @@ function bezier(a: Pt, c: Pt, b: Pt, t: number): Pt {
   };
 }
 
-export default function ShippingRouteCanvas({ className = '' }: { className?: string }) {
+export default function ShippingRouteCanvas({ className = "" }: { className?: string }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
-    const ctx = canvas.getContext('2d');
+    const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
-    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+    const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
     let width = 0;
     let height = 0;
     let frame = 0;
@@ -104,7 +107,7 @@ export default function ShippingRouteCanvas({ className = '' }: { className?: st
       const origin = project(ORIGIN.lat, ORIGIN.lng, width, height);
 
       // ── Graticule ──
-      ctx.strokeStyle = 'rgba(255,255,255,0.05)';
+      ctx.strokeStyle = "rgba(255,255,255,0.05)";
       ctx.lineWidth = 1;
       for (let lat = -60; lat <= 60; lat += 30) {
         const y = project(lat, ORIGIN.lng, width, height).y;
@@ -126,7 +129,7 @@ export default function ShippingRouteCanvas({ className = '' }: { className?: st
         const dest = project(port.lat, port.lng, width, height);
         const ctrl = controlPoint(origin, dest);
 
-        ctx.strokeStyle = 'rgba(255,255,255,0.16)';
+        ctx.strokeStyle = "rgba(255,255,255,0.16)";
         ctx.lineWidth = 1;
         ctx.beginPath();
         ctx.moveTo(origin.x, origin.y);
@@ -134,7 +137,7 @@ export default function ShippingRouteCanvas({ className = '' }: { className?: st
         ctx.stroke();
 
         // Destination port marker
-        ctx.fillStyle = 'rgba(255,255,255,0.55)';
+        ctx.fillStyle = "rgba(255,255,255,0.55)";
         ctx.beginPath();
         ctx.arc(dest.x, dest.y, 2, 0, Math.PI * 2);
         ctx.fill();
@@ -142,7 +145,7 @@ export default function ShippingRouteCanvas({ className = '' }: { className?: st
         if (!animate) return;
 
         // Pulse in transit, with a short tail behind it.
-        const t = ((time / 14000) + phases[i]) % 1;
+        const t = (time / 14000 + phases[i]) % 1;
         const head = bezier(origin, ctrl, dest, t);
         const tailLen = 0.06;
 
@@ -179,7 +182,7 @@ export default function ShippingRouteCanvas({ className = '' }: { className?: st
       ctx.beginPath();
       ctx.arc(origin.x, origin.y, 4.5, 0, Math.PI * 2);
       ctx.fill();
-      ctx.strokeStyle = 'rgba(255,255,255,0.85)';
+      ctx.strokeStyle = "rgba(255,255,255,0.85)";
       ctx.lineWidth = 1.5;
       ctx.beginPath();
       ctx.arc(origin.x, origin.y, 8, 0, Math.PI * 2);
@@ -231,17 +234,20 @@ export default function ShippingRouteCanvas({ className = '' }: { className?: st
       else stop();
     };
 
-    const io = new IntersectionObserver(([entry]) => {
-      onScreen = entry.isIntersecting;
-      if (onScreen) start();
-      else stop();
-    }, { rootMargin: '100px' });
+    const io = new IntersectionObserver(
+      ([entry]) => {
+        onScreen = entry.isIntersecting;
+        if (onScreen) start();
+        else stop();
+      },
+      { rootMargin: "100px" },
+    );
 
     const ro = new ResizeObserver(resize);
     ro.observe(canvas);
     io.observe(canvas);
-    document.addEventListener('visibilitychange', onVisibility);
-    reduceMotion.addEventListener('change', onMotionPrefChange);
+    document.addEventListener("visibilitychange", onVisibility);
+    reduceMotion.addEventListener("change", onMotionPrefChange);
 
     resize();
     if (reduceMotion.matches) draw(0, false);
@@ -251,17 +257,10 @@ export default function ShippingRouteCanvas({ className = '' }: { className?: st
       stop();
       ro.disconnect();
       io.disconnect();
-      document.removeEventListener('visibilitychange', onVisibility);
-      reduceMotion.removeEventListener('change', onMotionPrefChange);
+      document.removeEventListener("visibilitychange", onVisibility);
+      reduceMotion.removeEventListener("change", onMotionPrefChange);
     };
   }, []);
 
-  return (
-    <canvas
-      ref={canvasRef}
-      className={className}
-      aria-hidden="true"
-      role="presentation"
-    />
-  );
+  return <canvas ref={canvasRef} className={className} aria-hidden="true" role="presentation" />;
 }

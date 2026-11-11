@@ -1,45 +1,59 @@
 export function normalizedStatus(car) {
-  return String(car?.status ?? '').trim().toLowerCase();
+  return String(car?.status ?? "")
+    .trim()
+    .toLowerCase();
 }
 
 export function isAvailableVehicle(car) {
-  return normalizedStatus(car) === 'available';
+  return normalizedStatus(car) === "available";
 }
 
 export function isSoldVehicle(car) {
-  return ['sold', 'unavailable'].includes(normalizedStatus(car));
+  return ["sold", "unavailable"].includes(normalizedStatus(car));
 }
 
 function hasText(value) {
-  if (typeof value === 'string') return value.trim().length > 0;
-  return typeof value === 'number' ? Number.isFinite(value) : value != null;
+  if (typeof value === "string") return value.trim().length > 0;
+  return typeof value === "number" ? Number.isFinite(value) : value != null;
 }
 
 function hasFiniteNumber(value) {
-  return typeof value === 'number' && Number.isFinite(value);
+  return typeof value === "number" && Number.isFinite(value);
 }
 
 export function validImageUrls(car) {
   const images = (car?.car_images ?? [])
-    .filter(image => /^https?:\/\//i.test(image?.image_url ?? ''))
-    .sort((a, b) => Number(Boolean(b.is_primary)) - Number(Boolean(a.is_primary))
-      || (a.display_order ?? 0) - (b.display_order ?? 0));
-  return [...new Set(images.map(image => image.image_url))];
+    .filter((image) => /^https?:\/\//i.test(image?.image_url ?? ""))
+    .sort(
+      (a, b) =>
+        Number(Boolean(b.is_primary)) - Number(Boolean(a.is_primary)) ||
+        (a.display_order ?? 0) - (b.display_order ?? 0),
+    );
+  return [...new Set(images.map((image) => image.image_url))];
 }
 
 export function vehicleQualityIssues(car) {
   const issues = [];
-  if (!car || !hasText(car.ref_number) || /[\\/]/.test(String(car.ref_number).trim())) issues.push('invalid-reference');
-  if (!hasText(car?.make)) issues.push('missing-make');
-  if (!hasText(car?.model)) issues.push('missing-model');
-  if (!hasFiniteNumber(car?.year)) issues.push('missing-year');
-  if (!isAvailableVehicle(car)) issues.push('not-available');
+  if (!car || !hasText(car.ref_number) || /[\\/]/.test(String(car.ref_number).trim()))
+    issues.push("invalid-reference");
+  if (!hasText(car?.make)) issues.push("missing-make");
+  if (!hasText(car?.model)) issues.push("missing-model");
+  if (!hasFiniteNumber(car?.year)) issues.push("missing-year");
+  else if (car.year > new Date().getFullYear()) issues.push("future-model-year");
+  if (!isAvailableVehicle(car)) issues.push("not-available");
   const hasMeaningfulSpecification = [
-    car?.variant, car?.mileage_km, car?.engine_cc, car?.fuel_type,
-    car?.transmission, car?.body_type, car?.drive, car?.color, car?.auction_grade,
+    car?.variant,
+    car?.mileage_km,
+    car?.engine_cc,
+    car?.fuel_type,
+    car?.transmission,
+    car?.body_type,
+    car?.drive,
+    car?.color,
+    car?.auction_grade,
   ].some(hasText);
-  if (!hasMeaningfulSpecification) issues.push('missing-specifications');
-  if (!validImageUrls(car).length) issues.push('missing-image');
+  if (!hasMeaningfulSpecification) issues.push("missing-specifications");
+  if (!validImageUrls(car).length) issues.push("missing-image");
   return issues;
 }
 
@@ -48,15 +62,18 @@ export function isIndexableVehicle(car) {
 }
 
 export function vehicleName(car) {
-  return [car?.make, car?.model, car?.variant, car?.year ? String(car.year) : '']
+  return [car?.make, car?.model, car?.variant, car?.year ? String(car.year) : ""]
     .filter(Boolean)
-    .join(' ')
+    .join(" ")
     .trim();
 }
 
 function trimToWordBoundary(value, maxLength) {
   if (value.length <= maxLength) return value;
-  const clipped = value.slice(0, Math.max(1, maxLength - 1)).replace(/\s+\S*$/, '').trim();
+  const clipped = value
+    .slice(0, Math.max(1, maxLength - 1))
+    .replace(/\s+\S*$/, "")
+    .trim();
   return `${clipped || value.slice(0, maxLength - 1).trim()}…`;
 }
 
@@ -66,13 +83,13 @@ function trimToWordBoundary(value, maxLength) {
  * stock records distinguishable without changing the visible vehicle name.
  */
 export function vehicleTitle(car) {
-  const reference = String(car?.ref_number ?? '').trim();
-  const suffix = reference ? ` | ${reference} | Wazir Trading` : ' | Wazir Trading';
+  const reference = String(car?.ref_number ?? "").trim();
+  const suffix = reference ? ` | ${reference} | Wazir Trading` : " | Wazir Trading";
   const maxNameLength = Math.max(16, 65 - suffix.length);
   const fullName = vehicleName(car);
-  const conciseName = [car?.make, car?.model, car?.year ? String(car.year) : '']
+  const conciseName = [car?.make, car?.model, car?.year ? String(car.year) : ""]
     .filter(Boolean)
-    .join(' ')
+    .join(" ")
     .trim();
   const name = trimToWordBoundary(
     fullName.length <= maxNameLength ? fullName : conciseName,
@@ -83,32 +100,33 @@ export function vehicleTitle(car) {
 
 export function vehicleDescription(car) {
   const name = vehicleName(car);
-  const reference = String(car?.ref_number ?? '').trim();
-  const referenceText = reference ? ` (Ref ${reference})` : '';
+  const reference = String(car?.ref_number ?? "").trim();
+  const referenceText = reference ? ` (Ref ${reference})` : "";
   const details = [
-    car?.mileage_km != null ? `${Number(car.mileage_km).toLocaleString('en-US')} km` : null,
+    car?.mileage_km != null ? `${Number(car.mileage_km).toLocaleString("en-US")} km` : null,
     car?.transmission || null,
     car?.fuel_type || null,
     car?.body_type || null,
     car?.color ? `${car.color} exterior` : null,
   ].filter(Boolean);
-  const detailText = details.length ? ` ${details.join(', ')}.` : '';
-  const priceText = Number.isFinite(car?.fob_price_usd) && car.fob_price_usd > 0
-    ? ` FOB $${Number(car.fob_price_usd).toLocaleString('en-US', { maximumFractionDigits: 0 })}.`
-    : '';
+  const detailText = details.length ? ` ${details.join(", ")}.` : "";
+  const priceText =
+    Number.isFinite(car?.fob_price_usd) && car.fob_price_usd > 0
+      ? ` FOB $${Number(car.fob_price_usd).toLocaleString("en-US", { maximumFractionDigits: 0 })}.`
+      : "";
   const statusText = isSoldVehicle(car)
-    ? ' Sold record.'
-    : ' Ask Wazir Trading about export and shipping.';
+    ? " Sold record."
+    : " Ask Wazir Trading about export and shipping.";
   const text = `${name}${referenceText} from Japan.${detailText}${priceText}${statusText}`
-    .replace(/\s+/g, ' ')
+    .replace(/\s+/g, " ")
     .trim();
   return trimToWordBoundary(text, 160);
 }
 
 function joinFacts(facts) {
-  if (facts.length < 2) return facts[0] ?? '';
+  if (facts.length < 2) return facts[0] ?? "";
   if (facts.length === 2) return `${facts[0]} and ${facts[1]}`;
-  return `${facts.slice(0, -1).join(', ')}, and ${facts[facts.length - 1]}`;
+  return `${facts.slice(0, -1).join(", ")}, and ${facts[facts.length - 1]}`;
 }
 
 export function vehicleSummary(car) {
@@ -120,7 +138,9 @@ export function vehicleSummary(car) {
     car?.transmission ? `${String(car.transmission).toLowerCase()} transmission` : null,
   ].filter(Boolean);
   const specificationFacts = [
-    car?.mileage_km != null ? `${Number(car.mileage_km).toLocaleString('en-US')} km recorded mileage` : null,
+    car?.mileage_km != null
+      ? `${Number(car.mileage_km).toLocaleString("en-US")} km recorded mileage`
+      : null,
     car?.engine_cc != null ? `${car.engine_cc} cc engine` : null,
     car?.drive ? `${car.drive} drive` : null,
     car?.color ? `${String(car.color).toLowerCase()} exterior colour` : null,
@@ -131,16 +151,12 @@ export function vehicleSummary(car) {
     : `${name} is listed in the Wazir Trading vehicle inventory.`;
   const secondSentence = specificationFacts.length
     ? `The available record shows ${joinFacts(specificationFacts)}.`
-    : '';
-  return [firstSentence, secondSentence]
-    .filter(Boolean)
-    .join(' ')
-    .replace(/\s+/g, ' ')
-    .trim();
+    : "";
+  return [firstSentence, secondSentence].filter(Boolean).join(" ").replace(/\s+/g, " ").trim();
 }
 
-export function vehicleImageAlt(car, index, suffix = 'vehicle photo') {
-  const position = index > 0 ? ` ${index + 1}` : '';
+export function vehicleImageAlt(car, index, suffix = "vehicle photo") {
+  const position = index > 0 ? ` ${index + 1}` : "";
   return `${vehicleName(car)} — ${suffix}${position}`.trim();
 }
 
@@ -165,15 +181,23 @@ export function relatedVehicleScore(current, candidate) {
 export function rankRelatedVehicles(current, candidates, limit = 6) {
   const unique = new Map();
   for (const candidate of candidates) {
-    if (candidate?.ref_number && !unique.has(candidate.ref_number)) unique.set(candidate.ref_number, candidate);
+    if (candidate?.ref_number && !unique.has(candidate.ref_number))
+      unique.set(candidate.ref_number, candidate);
   }
   return [...unique.values()]
-    .map((candidate, index) => ({ candidate, index, score: relatedVehicleScore(current, candidate) }))
-    .filter(item => item.score >= 0)
-    .sort((a, b) => b.score - a.score
-      || Number(b.candidate.year ?? 0) - Number(a.candidate.year ?? 0)
-      || String(a.candidate.ref_number).localeCompare(String(b.candidate.ref_number))
-      || a.index - b.index)
+    .map((candidate, index) => ({
+      candidate,
+      index,
+      score: relatedVehicleScore(current, candidate),
+    }))
+    .filter((item) => item.score >= 0)
+    .sort(
+      (a, b) =>
+        b.score - a.score ||
+        Number(b.candidate.year ?? 0) - Number(a.candidate.year ?? 0) ||
+        String(a.candidate.ref_number).localeCompare(String(b.candidate.ref_number)) ||
+        a.index - b.index,
+    )
     .slice(0, limit)
-    .map(item => item.candidate);
+    .map((item) => item.candidate);
 }

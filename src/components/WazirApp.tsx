@@ -1,6 +1,6 @@
-import App from '../App';
-import { SeoBootstrapProvider } from '../lib/seo-bootstrap-context';
-import type { SeoBootstrapData } from '../lib/seo-bootstrap';
+import App from "../App";
+import { SeoBootstrapProvider } from "../lib/seo-bootstrap-context";
+import type { SeoBootstrapData } from "../lib/seo-bootstrap";
 
 /**
  * Render the existing Wouter application during the TanStack Start request.

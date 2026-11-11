@@ -1,42 +1,42 @@
-import React, { useEffect } from 'react';
-import { Toaster } from '@/components/ui/toaster';
-import { TooltipProvider } from '@/components/ui/tooltip';
-import { Route, Switch, Router as WouterRouter, useLocation, useRoute } from 'wouter';
+import React, { useEffect } from "react";
+import { Toaster } from "@/components/ui/toaster";
+import { TooltipProvider } from "@/components/ui/tooltip";
+import { Route, Switch, Router as WouterRouter, useLocation, useRoute } from "wouter";
 
 // Components always needed — load eagerly
-import Navbar from '@/components/Navbar';
-import Footer from '@/components/Footer';
-import HomePage from '@/pages/home';
+import Navbar from "@/components/Navbar";
+import Footer from "@/components/Footer";
+import HomePage from "@/pages/home";
 
 // Load route pages eagerly instead of creating browser-side dynamic chunks.
 // This avoids a deployment/CDN mismatch where /assets/<route-hash>.js is
 // rewritten to HTML and the route crashes before it can render.
-import CarsPage from '@/pages/cars';
-import CarDetailPage from '@/pages/car-detail';
-import AboutPage from '@/pages/about';
-import HowItWorksPage from '@/pages/how-it-works';
-import AutoPartsPage from '@/pages/auto-parts';
-import ShippingInformationPage from '@/pages/shipping-information';
-import ContactPage from '@/pages/contact';
-import FaqsPage from '@/pages/faqs';
-import PaymentInformationPage from '@/pages/payment-information';
-import BuyerInformationPage from '@/pages/buyer-information';
-import TermsAndConditionsPage from '@/pages/terms-and-conditions';
-import PrivacyPolicyPage from '@/pages/privacy-policy';
-import NotFound from '@/pages/not-found';
-import AdminBulkUpload from '@/pages/admin/bulk-upload';
-import { CountryDirectoryPage, CountryLandingPageRoute } from '@/pages/country-landing-pages';
+import CarsPage from "@/pages/cars";
+import CarDetailPage from "@/pages/car-detail";
+import AboutPage from "@/pages/about";
+import HowItWorksPage from "@/pages/how-it-works";
+import AutoPartsPage from "@/pages/auto-parts";
+import ShippingInformationPage from "@/pages/shipping-information";
+import ContactPage from "@/pages/contact";
+import FaqsPage from "@/pages/faqs";
+import PaymentInformationPage from "@/pages/payment-information";
+import BuyerInformationPage from "@/pages/buyer-information";
+import TermsAndConditionsPage from "@/pages/terms-and-conditions";
+import PrivacyPolicyPage from "@/pages/privacy-policy";
+import NotFound from "@/pages/not-found";
+import AdminBulkUpload from "@/pages/admin/bulk-upload";
+import { CountryDirectoryPage, CountryLandingPageRoute } from "@/pages/country-landing-pages";
 import {
   VehicleBodyTypeLandingRoute,
   VehicleLandingDirectoryPage,
   VehicleMakeLandingRoute,
   VehicleModelLandingRoute,
-} from '@/pages/vehicle-landing-pages';
+} from "@/pages/vehicle-landing-pages";
 
 function ScrollToTop() {
   const [location] = useLocation();
   useEffect(() => {
-    window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+    window.scrollTo({ top: 0, left: 0, behavior: "instant" });
   }, [location]);
   return null;
 }
@@ -48,10 +48,7 @@ type AppErrorBoundaryState = { hasError: boolean };
  * record has an unexpected value. The route still logs the original error,
  * while giving visitors a recoverable screen instead of an empty document.
  */
-class AppErrorBoundary extends React.Component<
-  React.PropsWithChildren,
-  AppErrorBoundaryState
-> {
+class AppErrorBoundary extends React.Component<React.PropsWithChildren, AppErrorBoundaryState> {
   state: AppErrorBoundaryState = { hasError: false };
 
   static getDerivedStateFromError(): AppErrorBoundaryState {
@@ -59,7 +56,7 @@ class AppErrorBoundary extends React.Component<
   }
 
   componentDidCatch(error: Error, info: React.ErrorInfo) {
-    console.error('Unhandled application error:', error, info);
+    console.error("Unhandled application error:", error, info);
   }
 
   render() {
@@ -75,8 +72,7 @@ class AppErrorBoundary extends React.Component<
             This page needs a refresh
           </h1>
           <p className="mb-6 text-sm leading-6 text-gray-500">
-            We couldn’t load this page correctly. Please try again or return to
-            the home page.
+            We couldn’t load this page correctly. Please try again or return to the home page.
           </p>
           <div className="flex flex-col justify-center gap-3 sm:flex-row">
             <button
@@ -88,7 +84,9 @@ class AppErrorBoundary extends React.Component<
             </button>
             <button
               type="button"
-              onClick={() => { window.location.href = '/'; }}
+              onClick={() => {
+                window.location.href = "/";
+              }}
               className="rounded-sm border border-gray-200 px-5 py-2.5 text-sm font-semibold text-gray-700 transition-colors hover:border-gray-400"
             >
               Go home
@@ -101,25 +99,25 @@ class AppErrorBoundary extends React.Component<
 }
 
 function CountrySlugRoute() {
-  const [match, params] = useRoute('/import-japanese-cars/:slug');
+  const [match, params] = useRoute("/import-japanese-cars/:slug");
   if (!match || !params?.slug) return <NotFound />;
   return <CountryLandingPageRoute slug={params.slug} />;
 }
 
 function VehicleMakePathRoute() {
-  const [match, params] = useRoute('/used-japanese-cars/:makeSlug');
+  const [match, params] = useRoute("/used-japanese-cars/:makeSlug");
   if (!match || !params?.makeSlug) return <NotFound />;
   return <VehicleMakeLandingRoute slug={params.makeSlug} />;
 }
 
 function VehicleModelPathRoute() {
-  const [match, params] = useRoute('/used-japanese-cars/:makeSlug/:modelSlug');
+  const [match, params] = useRoute("/used-japanese-cars/:makeSlug/:modelSlug");
   if (!match || !params?.makeSlug || !params?.modelSlug) return <NotFound />;
   return <VehicleModelLandingRoute makeSlug={params.makeSlug} modelSlug={params.modelSlug} />;
 }
 
 function VehicleBodyTypePathRoute() {
-  const [match, params] = useRoute('/used-japanese-cars/body-type/:bodySlug');
+  const [match, params] = useRoute("/used-japanese-cars/body-type/:bodySlug");
   if (!match || !params?.bodySlug) return <NotFound />;
   return <VehicleBodyTypeLandingRoute slug={params.bodySlug} />;
 }
@@ -127,34 +125,34 @@ function VehicleBodyTypePathRoute() {
 function Router() {
   return (
     <Switch>
-        <Route path="/" component={HomePage} />
-        <Route path="/cars" component={CarsPage} />
-        <Route path="/cars/:ref" component={CarDetailPage} />
-        <Route path="/import-japanese-cars" component={CountryDirectoryPage} />
-        <Route path="/import-japanese-cars/:slug" component={CountrySlugRoute} />
-        <Route path="/used-japanese-cars" component={VehicleLandingDirectoryPage} />
-        <Route path="/used-japanese-cars/body-type/:bodySlug" component={VehicleBodyTypePathRoute} />
-        <Route path="/used-japanese-cars/:makeSlug/:modelSlug" component={VehicleModelPathRoute} />
-        <Route path="/used-japanese-cars/:makeSlug" component={VehicleMakePathRoute} />
-        <Route path="/about" component={AboutPage} />
-        <Route path="/how-it-works" component={HowItWorksPage} />
-        <Route path="/auto-parts" component={AutoPartsPage} />
-        <Route path="/shipping-information" component={ShippingInformationPage} />
-        <Route path="/contact" component={ContactPage} />
-        <Route path="/faqs" component={FaqsPage} />
-        <Route path="/payment-information" component={PaymentInformationPage} />
-        <Route path="/buyer-information" component={BuyerInformationPage} />
-        <Route path="/terms-and-conditions" component={TermsAndConditionsPage} />
-        <Route path="/privacy-policy" component={PrivacyPolicyPage} />
-        <Route path="/admin/bulk-upload" component={AdminBulkUpload} />
-        <Route component={NotFound} />
+      <Route path="/" component={HomePage} />
+      <Route path="/cars" component={CarsPage} />
+      <Route path="/cars/:ref" component={CarDetailPage} />
+      <Route path="/import-japanese-cars" component={CountryDirectoryPage} />
+      <Route path="/import-japanese-cars/:slug" component={CountrySlugRoute} />
+      <Route path="/used-japanese-cars" component={VehicleLandingDirectoryPage} />
+      <Route path="/used-japanese-cars/body-type/:bodySlug" component={VehicleBodyTypePathRoute} />
+      <Route path="/used-japanese-cars/:makeSlug/:modelSlug" component={VehicleModelPathRoute} />
+      <Route path="/used-japanese-cars/:makeSlug" component={VehicleMakePathRoute} />
+      <Route path="/about" component={AboutPage} />
+      <Route path="/how-it-works" component={HowItWorksPage} />
+      <Route path="/auto-parts" component={AutoPartsPage} />
+      <Route path="/shipping-information" component={ShippingInformationPage} />
+      <Route path="/contact" component={ContactPage} />
+      <Route path="/faqs" component={FaqsPage} />
+      <Route path="/payment-information" component={PaymentInformationPage} />
+      <Route path="/buyer-information" component={BuyerInformationPage} />
+      <Route path="/terms-and-conditions" component={TermsAndConditionsPage} />
+      <Route path="/privacy-policy" component={PrivacyPolicyPage} />
+      <Route path="/admin/bulk-upload" component={AdminBulkUpload} />
+      <Route component={NotFound} />
     </Switch>
   );
 }
 
 function AppShell() {
   const [location] = useLocation();
-  const isAdmin = location.startsWith('/admin');
+  const isAdmin = location.startsWith("/admin");
 
   if (isAdmin) {
     return (
@@ -179,11 +177,11 @@ function AppShell() {
   );
 }
 
-function App({ ssrPath = '/' }: { ssrPath?: string }) {
+function App({ ssrPath = "/" }: { ssrPath?: string }) {
   return (
     <AppErrorBoundary>
       <TooltipProvider>
-        <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, '')} ssrPath={ssrPath}>
+        <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")} ssrPath={ssrPath}>
           <AppShell />
         </WouterRouter>
         <Toaster />

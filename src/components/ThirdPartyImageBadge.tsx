@@ -1,4 +1,4 @@
-import React from 'react';
+import React from "react";
 
 const WTL_THIRD_PARTY_RANGES = [
   [1, 295],
@@ -11,7 +11,7 @@ const WTL_THIRD_PARTY_RANGES = [
  * database migration or manual attribution flag.
  */
 export function isThirdPartyListing(refNumber: string | null | undefined): boolean {
-  const match = /^WTL-(\d+)$/i.exec(refNumber?.trim() ?? '');
+  const match = /^WTL-(\d+)$/i.exec(refNumber?.trim() ?? "");
   if (!match) return false;
 
   const number = Number(match[1]);
@@ -21,11 +21,7 @@ export function isThirdPartyListing(refNumber: string | null | undefined): boole
   );
 }
 
-export function ThirdPartyImageBadge({
-  className = '',
-}: {
-  className?: string;
-}) {
+export function ThirdPartyImageBadge({ className = "" }: { className?: string }) {
   return (
     <span
       className={`absolute z-20 inline-flex items-center rounded-sm bg-black/75 px-2.5 py-1 text-[10px] font-semibold tracking-wide text-white shadow-sm backdrop-blur-sm ${className}`}

@@ -1,8 +1,17 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { supabase } from '@/lib/supabase';
-import { ChevronLeft, ChevronRight, X, Maximize2, Download, Images, Camera, Map } from 'lucide-react';
-import { isThirdPartyListing, ThirdPartyImageBadge } from '@/components/ThirdPartyImageBadge';
-import { vehicleImageAlt } from '@/lib/vehicle-seo';
+import React, { useState, useEffect, useCallback } from "react";
+import { supabase } from "@/lib/supabase";
+import {
+  ChevronLeft,
+  ChevronRight,
+  X,
+  Maximize2,
+  Download,
+  Images,
+  Camera,
+  Map,
+} from "lucide-react";
+import { isThirdPartyListing, ThirdPartyImageBadge } from "@/components/ThirdPartyImageBadge";
+import { vehicleImageAlt } from "@/lib/vehicle-seo";
 
 interface ImageGalleryProps {
   carId: string;
@@ -13,31 +22,38 @@ interface ImageGalleryProps {
   variant?: string | null;
 }
 
-type ImgStatus = 'pending' | 'loaded' | 'error';
+type ImgStatus = "pending" | "loaded" | "error";
 
 /**
  * Injects Cloudinary transformation params into a raw upload URL.
  * Handles both /image/upload/PUBLIC_ID and /image/upload/v123/PUBLIC_ID.
  * Skips URLs that already carry transformation segments.
  */
-function withTransforms(url: string, transforms = 'f_auto,q_auto,w_800'): string {
-  const marker = '/image/upload/';
+function withTransforms(url: string, transforms = "f_auto,q_auto,w_800"): string {
+  const marker = "/image/upload/";
   const idx = url.indexOf(marker);
   if (idx === -1) return url; // not a Cloudinary URL
   const after = url.slice(idx + marker.length);
   // Already has a transformation segment (contains a comma or known param)
   if (/^[a-z]_/.test(after)) return url;
-  return url.slice(0, idx + marker.length) + transforms + '/' + after;
+  return url.slice(0, idx + marker.length) + transforms + "/" + after;
 }
 
 /** Returns true when a URL's filename ends in _map (e.g. ref-1_map.jpg) */
 function isMapImage(url: string) {
-  const path = url.split('?')[0];
-  const filename = path.split('/').pop() ?? '';
+  const path = url.split("?")[0];
+  const filename = path.split("/").pop() ?? "";
   return /_map(\.[^.]+)?$/i.test(filename);
 }
 
-export default function ImageGallery({ carId, refNumber, make, model, year, variant }: ImageGalleryProps) {
+export default function ImageGallery({
+  carId,
+  refNumber,
+  make,
+  model,
+  year,
+  variant,
+}: ImageGalleryProps) {
   // Regular gallery images
   const [candidates, setCandidates] = useState<string[]>([]);
   const [statuses, setStatuses] = useState<ImgStatus[]>([]);
@@ -45,7 +61,7 @@ export default function ImageGallery({ carId, refNumber, make, model, year, vari
 
   // Damage / inspection map image (separate)
   const [mapUrl, setMapUrl] = useState<string | null>(null);
-  const [mapStatus, setMapStatus] = useState<ImgStatus>('pending');
+  const [mapStatus, setMapStatus] = useState<ImgStatus>("pending");
   const [mapZoom, setMapZoom] = useState(false);
 
   // activeIndex is an index into the `valid` array (loaded images only)
@@ -62,58 +78,64 @@ export default function ImageGallery({ carId, refNumber, make, model, year, vari
       setStatuses([]);
       setActiveIdx(0);
       setMapUrl(null);
-      setMapStatus('pending');
+      setMapStatus("pending");
 
       try {
         const { data, error } = await supabase
-          .from('car_images')
-          .select('image_url, display_order, is_primary')
-          .eq('car_id', carId)
-          .order('display_order');
+          .from("car_images")
+          .select("image_url, display_order, is_primary")
+          .eq("car_id", carId)
+          .order("display_order");
 
         if (cancelled) return;
 
         if (!error && data && data.length > 0) {
           const allUrls = data.map((r: { image_url: string }) => withTransforms(r.image_url));
           const regular = allUrls.filter((u: string) => !isMapImage(u));
-          const maps    = allUrls.filter((u: string) => isMapImage(u));
+          const maps = allUrls.filter((u: string) => isMapImage(u));
           setCandidates(regular);
-          setStatuses(regular.map(() => 'pending' as ImgStatus));
+          setStatuses(regular.map(() => "pending" as ImgStatus));
           if (maps.length > 0) {
             setMapUrl(maps[0]);
-            setMapStatus('pending');
+            setMapStatus("pending");
           } else {
-            setMapStatus('error');
+            setMapStatus("error");
           }
         } else {
           // No images in car_images table — show placeholder
           setCandidates([]);
           setStatuses([]);
-          setMapStatus('error');
+          setMapStatus("error");
         }
       } catch {
-        if (!cancelled) { setCandidates([]); setStatuses([]); setMapStatus('error'); }
+        if (!cancelled) {
+          setCandidates([]);
+          setStatuses([]);
+          setMapStatus("error");
+        }
       } finally {
         if (!cancelled) setFetching(false);
       }
     }
     load();
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+    };
   }, [carId, refNumber]);
 
   /* ── status updaters ── */
   const markLoaded = useCallback((i: number) => {
-    setStatuses(prev => {
+    setStatuses((prev) => {
       const next = [...prev];
-      next[i] = 'loaded';
+      next[i] = "loaded";
       return next;
     });
   }, []);
 
   const markError = useCallback((i: number) => {
-    setStatuses(prev => {
+    setStatuses((prev) => {
       const next = [...prev];
-      next[i] = 'error';
+      next[i] = "error";
       return next;
     });
   }, []);
@@ -121,50 +143,67 @@ export default function ImageGallery({ carId, refNumber, make, model, year, vari
   /* ── derived ── */
   const valid = candidates
     .map((url, i) => ({ url, origIdx: i }))
-    .filter((_, i) => statuses[i] === 'loaded');
+    .filter((_, i) => statuses[i] === "loaded");
 
-  const totalResolved = statuses.filter(s => s !== 'pending').length;
+  const totalResolved = statuses.filter((s) => s !== "pending").length;
   const allResolved = totalResolved === candidates.length;
   const noImages = allResolved && valid.length === 0;
 
   const safeActive = valid.length > 0 ? Math.min(activeIdx, valid.length - 1) : 0;
 
   /* ── navigation ── */
-  const prev = useCallback(() => setActiveIdx(i => (i - 1 + Math.max(valid.length, 1)) % Math.max(valid.length, 1)), [valid.length]);
-  const next = useCallback(() => setActiveIdx(i => (i + 1) % Math.max(valid.length, 1)), [valid.length]);
-  const lbPrev = useCallback(() => setLightboxIdx(i => (i - 1 + Math.max(valid.length, 1)) % Math.max(valid.length, 1)), [valid.length]);
-  const lbNext = useCallback(() => setLightboxIdx(i => (i + 1) % Math.max(valid.length, 1)), [valid.length]);
+  const prev = useCallback(
+    () => setActiveIdx((i) => (i - 1 + Math.max(valid.length, 1)) % Math.max(valid.length, 1)),
+    [valid.length],
+  );
+  const next = useCallback(
+    () => setActiveIdx((i) => (i + 1) % Math.max(valid.length, 1)),
+    [valid.length],
+  );
+  const lbPrev = useCallback(
+    () => setLightboxIdx((i) => (i - 1 + Math.max(valid.length, 1)) % Math.max(valid.length, 1)),
+    [valid.length],
+  );
+  const lbNext = useCallback(
+    () => setLightboxIdx((i) => (i + 1) % Math.max(valid.length, 1)),
+    [valid.length],
+  );
 
-  const openLightbox = (idx: number) => { setLightboxIdx(idx); setLightboxOpen(true); };
+  const openLightbox = (idx: number) => {
+    setLightboxIdx(idx);
+    setLightboxOpen(true);
+  };
 
   /* ── keyboard (gallery lightbox) ── */
   useEffect(() => {
     if (!lightboxOpen) return;
     const h = (e: KeyboardEvent) => {
-      if (e.key === 'ArrowLeft') lbPrev();
-      if (e.key === 'ArrowRight') lbNext();
-      if (e.key === 'Escape') setLightboxOpen(false);
+      if (e.key === "ArrowLeft") lbPrev();
+      if (e.key === "ArrowRight") lbNext();
+      if (e.key === "Escape") setLightboxOpen(false);
     };
-    window.addEventListener('keydown', h);
-    return () => window.removeEventListener('keydown', h);
+    window.addEventListener("keydown", h);
+    return () => window.removeEventListener("keydown", h);
   }, [lightboxOpen, lbPrev, lbNext]);
 
   /* ── keyboard (map zoom) ── */
   useEffect(() => {
     if (!mapZoom) return;
-    const h = (e: KeyboardEvent) => { if (e.key === 'Escape') setMapZoom(false); };
-    window.addEventListener('keydown', h);
-    return () => window.removeEventListener('keydown', h);
+    const h = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setMapZoom(false);
+    };
+    window.addEventListener("keydown", h);
+    return () => window.removeEventListener("keydown", h);
   }, [mapZoom]);
 
   /* ── download ── */
   const handleDownloadAll = () => {
     valid.forEach(({ url }, i) => {
-      const a = document.createElement('a');
+      const a = document.createElement("a");
       a.href = url;
       a.download = `${make}-${model}-${refNumber}-${i + 1}.jpg`;
-      a.target = '_blank';
-      a.rel = 'noopener noreferrer';
+      a.target = "_blank";
+      a.rel = "noopener noreferrer";
       a.click();
     });
   };
@@ -184,15 +223,15 @@ export default function ImageGallery({ carId, refNumber, make, model, year, vari
         />
       ))}
       {/* Preload map image too */}
-      {mapUrl && mapStatus === 'pending' && (
+      {mapUrl && mapStatus === "pending" && (
         <img
           key={mapUrl}
           src={mapUrl}
           alt=""
           loading="lazy"
           decoding="async"
-          onLoad={() => setMapStatus('loaded')}
-          onError={() => setMapStatus('error')}
+          onLoad={() => setMapStatus("loaded")}
+          onError={() => setMapStatus("error")}
         />
       )}
     </div>
@@ -208,8 +247,11 @@ export default function ImageGallery({ carId, refNumber, make, model, year, vari
             <Camera size={32} className="text-gray-300" />
           </div>
           <div className="flex gap-2">
-            {[1, 2, 3, 4].map(n => (
-              <div key={n} className="w-16 h-12 bg-gray-100 animate-pulse rounded-sm flex-shrink-0" />
+            {[1, 2, 3, 4].map((n) => (
+              <div
+                key={n}
+                className="w-16 h-12 bg-gray-100 animate-pulse rounded-sm flex-shrink-0"
+              />
             ))}
           </div>
         </div>
@@ -225,7 +267,9 @@ export default function ImageGallery({ carId, refNumber, make, model, year, vari
         <div className="aspect-[16/10] bg-gray-50 border border-gray-200 flex flex-col items-center justify-center rounded-sm gap-3">
           <Camera size={40} className="text-gray-200" />
           <div className="text-center">
-            <p className="font-serif text-lg text-gray-300 font-medium">{make} {model}</p>
+            <p className="font-serif text-lg text-gray-300 font-medium">
+              {make} {model}
+            </p>
             <p className="text-xs text-gray-300 mt-1">Photos coming soon</p>
           </div>
         </div>
@@ -241,14 +285,12 @@ export default function ImageGallery({ carId, refNumber, make, model, year, vari
     <>
       {Preloader}
       <div className="space-y-3">
-
         {/* ── Main image ── */}
         <div className="relative w-full h-[300px] sm:h-[380px] lg:h-[500px] overflow-hidden rounded-sm group flex items-center justify-center">
-
           {/* Photo count badge */}
           <div className="absolute top-3 left-3 z-10 bg-black/70 text-white text-xs font-semibold px-2.5 py-1 rounded-sm flex items-center gap-1.5 backdrop-blur-sm">
             <Images size={12} />
-            {valid.length} {valid.length === 1 ? 'Photo' : 'Photos'}
+            {valid.length} {valid.length === 1 ? "Photo" : "Photos"}
           </div>
 
           {/* Main image */}
@@ -311,7 +353,7 @@ export default function ImageGallery({ carId, refNumber, make, model, year, vari
                   key={idx}
                   onClick={() => setActiveIdx(idx)}
                   aria-label={`Go to photo ${idx + 1}`}
-                  className={`w-1.5 h-1.5 rounded-full transition-all ${idx === safeActive ? 'bg-white scale-125' : 'bg-white/50 hover:bg-white/80'}`}
+                  className={`w-1.5 h-1.5 rounded-full transition-all ${idx === safeActive ? "bg-white scale-125" : "bg-white/50 hover:bg-white/80"}`}
                 />
               ))}
             </div>
@@ -328,18 +370,18 @@ export default function ImageGallery({ carId, refNumber, make, model, year, vari
                 aria-label={`View photo ${idx + 1}`}
                 className={`flex-shrink-0 w-16 h-12 relative overflow-hidden rounded-sm border-2 transition-all duration-150 ${
                   idx === safeActive
-                    ? 'border-[#C8102E] opacity-100 shadow-sm'
-                    : 'border-transparent opacity-55 hover:opacity-90 hover:border-gray-300'
+                    ? "border-[#C8102E] opacity-100 shadow-sm"
+                    : "border-transparent opacity-55 hover:opacity-90 hover:border-gray-300"
                 }`}
               >
                 <img
                   src={url}
-                   alt={vehicleImageAlt(seoCar, idx, 'thumbnail')}
+                  alt={vehicleImageAlt(seoCar, idx, "thumbnail")}
                   className="w-full h-full object-contain"
-                   width="64"
-                   height="48"
-                   loading="lazy"
-                   decoding="async"
+                  width="64"
+                  height="48"
+                  loading="lazy"
+                  decoding="async"
                 />
               </button>
             ))}
@@ -359,7 +401,7 @@ export default function ImageGallery({ carId, refNumber, make, model, year, vari
         )}
 
         {/* ── Auction Inspection Map ── */}
-        {mapStatus === 'loaded' && mapUrl && (
+        {mapStatus === "loaded" && mapUrl && (
           <div className="border border-amber-200 rounded-sm overflow-hidden bg-amber-50/40">
             {/* Header */}
             <div className="flex items-center justify-between px-4 py-2.5 bg-amber-50 border-b border-amber-200">
@@ -387,10 +429,10 @@ export default function ImageGallery({ carId, refNumber, make, model, year, vari
                 src={mapUrl}
                 alt={`${make} ${model} auction inspection damage map`}
                 className="w-full max-h-[480px] object-contain bg-white transition-opacity group-hover:opacity-90"
-              width="800"
-              height="600"
-              loading="lazy"
-              decoding="async"
+                width="800"
+                height="600"
+                loading="lazy"
+                decoding="async"
               />
             </button>
 
@@ -429,7 +471,7 @@ export default function ImageGallery({ carId, refNumber, make, model, year, vari
           {/* Main lightbox image */}
           <div
             className="relative max-w-5xl w-full h-[70vh] sm:h-[80vh] px-16"
-            onClick={e => e.stopPropagation()}
+            onClick={(e) => e.stopPropagation()}
           >
             <img
               key={valid[lightboxIdx]?.url}
@@ -448,14 +490,20 @@ export default function ImageGallery({ carId, refNumber, make, model, year, vari
           {valid.length > 1 && (
             <>
               <button
-                onClick={e => { e.stopPropagation(); lbPrev(); }}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  lbPrev();
+                }}
                 className="absolute left-4 top-1/2 -translate-y-1/2 w-12 h-12 bg-white/10 hover:bg-white/25 text-white flex items-center justify-center rounded-full transition-colors"
                 aria-label="Previous"
               >
                 <ChevronLeft size={26} />
               </button>
               <button
-                onClick={e => { e.stopPropagation(); lbNext(); }}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  lbNext();
+                }}
                 className="absolute right-4 top-1/2 -translate-y-1/2 w-12 h-12 bg-white/10 hover:bg-white/25 text-white flex items-center justify-center rounded-full transition-colors"
                 aria-label="Next"
               >
@@ -469,13 +517,26 @@ export default function ImageGallery({ carId, refNumber, make, model, year, vari
             {valid.map(({ url }, idx) => (
               <button
                 key={url}
-                onClick={e => { e.stopPropagation(); setLightboxIdx(idx); }}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setLightboxIdx(idx);
+                }}
                 aria-label={`View photo ${idx + 1}`}
                 className={`flex-shrink-0 w-14 h-10 overflow-hidden rounded-sm border-2 transition-all ${
-                  idx === lightboxIdx ? 'border-[#C8102E] opacity-100' : 'border-transparent opacity-45 hover:opacity-80'
+                  idx === lightboxIdx
+                    ? "border-[#C8102E] opacity-100"
+                    : "border-transparent opacity-45 hover:opacity-80"
                 }`}
               >
-                 <img src={url} alt="" className="w-full h-full object-contain" width="56" height="40" loading="lazy" decoding="async" />
+                <img
+                  src={url}
+                  alt=""
+                  className="w-full h-full object-contain"
+                  width="56"
+                  height="40"
+                  loading="lazy"
+                  decoding="async"
+                />
               </button>
             ))}
           </div>
@@ -502,7 +563,7 @@ export default function ImageGallery({ carId, refNumber, make, model, year, vari
 
           <div
             className="relative max-w-4xl w-full max-h-[90vh] overflow-auto"
-            onClick={e => e.stopPropagation()}
+            onClick={(e) => e.stopPropagation()}
           >
             <img
               src={mapUrl}

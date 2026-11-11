@@ -1,12 +1,9 @@
-import { createFileRoute } from '@tanstack/react-router';
-import WazirApp from '../components/WazirApp';
-import {
-  buildSeoHead,
-  loadSeoBootstrap,
-} from '../lib/seo-bootstrap';
+import { createFileRoute } from "@tanstack/react-router";
+import WazirApp from "../components/WazirApp";
+import { buildSeoHead, loadSeoBootstrap } from "../lib/seo-bootstrap";
 
-export const Route = createFileRoute('/')({
-  loader: () => loadSeoBootstrap('/', ''),
+export const Route = createFileRoute("/")({
+  loader: () => loadSeoBootstrap("/", ""),
   head: ({ loaderData }) => ({
     ...buildSeoHead(loaderData),
   }),

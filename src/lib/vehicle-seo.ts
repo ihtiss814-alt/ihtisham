@@ -1,5 +1,5 @@
-export const SITE_URL = 'https://www.wazirtradingllc.com';
-export const ORGANIZATION_NAME = 'Wazir Trading LLC';
+export const SITE_URL = "https://www.wazirtradingllc.com";
+export const ORGANIZATION_NAME = "Wazir Trading LLC";
 import {
   normalizedStatus as coreNormalizedStatus,
   isAvailableVehicle as coreIsAvailableVehicle,
@@ -13,7 +13,7 @@ import {
   vehicleSummary as coreVehicleSummary,
   vehicleImageAlt as coreVehicleImageAlt,
   rankRelatedVehicles,
-} from './vehicle-seo-core.mjs';
+} from "./vehicle-seo-core.mjs";
 
 export interface VehicleSeoImage {
   image_url: string;
@@ -45,8 +45,41 @@ export interface VehicleSeoCar {
   color?: string | null;
   fob_price_usd?: number | null;
   status?: string | null;
+  created_at?: string | null;
   updated_at?: string | null;
   car_images?: VehicleSeoImage[] | null;
+}
+
+/** Treat a listing as a new arrival only during a real, bounded recency window.
+ * The legacy is_new_arrival database flag is currently TRUE on every record,
+ * so it must not be used as a user-facing freshness signal.
+ */
+export const NEW_ARRIVAL_WINDOW_DAYS = 30;
+
+export function newArrivalCutoffIso(now = new Date()): string {
+  return new Date(now.getTime() - NEW_ARRIVAL_WINDOW_DAYS * 24 * 60 * 60 * 1000).toISOString();
+}
+
+export function isRecentInventoryListing(
+  createdAt: string | null | undefined,
+  now = new Date(),
+): boolean {
+  if (!createdAt) return false;
+  const created = new Date(createdAt);
+  if (Number.isNaN(created.getTime())) return false;
+  const age = now.getTime() - created.getTime();
+  return age >= 0 && age <= NEW_ARRIVAL_WINDOW_DAYS * 24 * 60 * 60 * 1000;
+}
+
+/** Only publish dateModified when it represents a real post-creation change. */
+export function verifiedVehicleModifiedAt(
+  car: Pick<VehicleSeoCar, "created_at" | "updated_at">,
+): string | null {
+  if (!car.created_at || !car.updated_at) return null;
+  const created = new Date(car.created_at);
+  const updated = new Date(car.updated_at);
+  if (Number.isNaN(created.getTime()) || Number.isNaN(updated.getTime())) return null;
+  return updated.getTime() > created.getTime() ? updated.toISOString() : null;
 }
 
 export function normalizedStatus(car: VehicleSeoCar): string {
@@ -62,12 +95,12 @@ export function isSoldVehicle(car: VehicleSeoCar): boolean {
 }
 
 function hasText(value: unknown): boolean {
-  if (typeof value === 'string') return value.trim().length > 0;
-  return typeof value === 'number' ? Number.isFinite(value) : value != null;
+  if (typeof value === "string") return value.trim().length > 0;
+  return typeof value === "number" ? Number.isFinite(value) : value != null;
 }
 
 function hasFiniteNumber(value: unknown): boolean {
-  return typeof value === 'number' && Number.isFinite(value);
+  return typeof value === "number" && Number.isFinite(value);
 }
 
 /**
@@ -96,9 +129,9 @@ export function vehicleDescription(car: VehicleSeoCar): string {
 }
 
 function joinFacts(facts: string[]): string {
-  if (facts.length < 2) return facts[0] ?? '';
+  if (facts.length < 2) return facts[0] ?? "";
   if (facts.length === 2) return `${facts[0]} and ${facts[1]}`;
-  return `${facts.slice(0, -1).join(', ')}, and ${facts[facts.length - 1]}`;
+  return `${facts.slice(0, -1).join(", ")}, and ${facts[facts.length - 1]}`;
 }
 
 /**
@@ -109,7 +142,11 @@ export function vehicleSummary(car: VehicleSeoCar): string {
   return coreVehicleSummary(car);
 }
 
-export function vehicleImageAlt(car: VehicleSeoCar, index: number, suffix = 'vehicle photo'): string {
+export function vehicleImageAlt(
+  car: VehicleSeoCar,
+  index: number,
+  suffix = "vehicle photo",
+): string {
   return coreVehicleImageAlt(car, index, suffix);
 }
 
@@ -123,16 +160,19 @@ export function validImageUrls(car: VehicleSeoCar): string[] {
 
 export { rankRelatedVehicles };
 
-export function vehicleJsonLd(car: VehicleSeoCar, imageUrls = validImageUrls(car)): Record<string, unknown> {
+export function vehicleJsonLd(
+  car: VehicleSeoCar,
+  imageUrls = validImageUrls(car),
+): Record<string, unknown> {
   const jsonLd: Record<string, unknown> = {
-    '@context': 'https://schema.org',
-    '@type': ['Product', 'Car'],
+    "@context": "https://schema.org",
+    "@type": ["Product", "Car"],
     name: vehicleName(car),
     description: vehicleDescription(car),
     sku: car.ref_number,
-    brand: { '@type': 'Brand', name: car.make },
+    brand: { "@type": "Brand", name: car.make },
     model: car.model,
-    itemCondition: 'https://schema.org/UsedCondition',
+    itemCondition: "https://schema.org/UsedCondition",
     url: vehicleCanonical(car.ref_number),
   };
   if (imageUrls.length) jsonLd.image = imageUrls;
@@ -140,9 +180,9 @@ export function vehicleJsonLd(car: VehicleSeoCar, imageUrls = validImageUrls(car
   if (car.year != null) jsonLd.vehicleModelDate = String(car.year);
   if (car.mileage_km != null) {
     jsonLd.mileageFromOdometer = {
-      '@type': 'QuantitativeValue',
+      "@type": "QuantitativeValue",
       value: car.mileage_km,
-      unitCode: 'KMT',
+      unitCode: "KMT",
     };
   }
   if (car.transmission) jsonLd.vehicleTransmission = car.transmission;
@@ -150,41 +190,46 @@ export function vehicleJsonLd(car: VehicleSeoCar, imageUrls = validImageUrls(car
   if (car.color) jsonLd.color = car.color;
   if (car.engine_cc != null) {
     jsonLd.vehicleEngine = {
-      '@type': 'EngineSpecification',
+      "@type": "EngineSpecification",
       engineDisplacement: {
-        '@type': 'QuantitativeValue',
+        "@type": "QuantitativeValue",
         value: car.engine_cc,
-        unitCode: 'CMQ',
+        unitCode: "CMQ",
       },
     };
   }
-  if (typeof car.fob_price_usd === 'number' && Number.isFinite(car.fob_price_usd) && car.fob_price_usd > 0) {
+  if (
+    typeof car.fob_price_usd === "number" &&
+    Number.isFinite(car.fob_price_usd) &&
+    car.fob_price_usd > 0
+  ) {
     jsonLd.offers = {
-      '@type': 'Offer',
+      "@type": "Offer",
       price: car.fob_price_usd,
-      priceCurrency: 'USD',
+      priceCurrency: "USD",
       availability: isAvailableVehicle(car)
-        ? 'https://schema.org/InStock'
-        : 'https://schema.org/OutOfStock',
+        ? "https://schema.org/InStock"
+        : "https://schema.org/OutOfStock",
       url: vehicleCanonical(car.ref_number),
-      seller: { '@id': `${SITE_URL}/#organization` },
+      seller: { "@id": `${SITE_URL}/#organization` },
     };
   }
-  if (car.updated_at) jsonLd.dateModified = car.updated_at;
+  const modifiedAt = verifiedVehicleModifiedAt(car);
+  if (modifiedAt) jsonLd.dateModified = modifiedAt;
   return jsonLd;
 }
 
 export function breadcrumbJsonLd(car: VehicleSeoCar): Record<string, unknown> {
   const items = [
-    { name: 'Home', item: `${SITE_URL}/` },
-    { name: 'Cars', item: `${SITE_URL}/cars` },
+    { name: "Home", item: `${SITE_URL}/` },
+    { name: "Cars", item: `${SITE_URL}/cars` },
     { name: vehicleName(car), item: vehicleCanonical(car.ref_number) },
   ];
   return {
-    '@context': 'https://schema.org',
-    '@type': 'BreadcrumbList',
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
     itemListElement: items.map((item, index) => ({
-      '@type': 'ListItem',
+      "@type": "ListItem",
       position: index + 1,
       name: item.name,
       item: item.item,

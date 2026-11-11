@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
-import { isSupabaseConfigured, supabase } from '@/lib/supabase';
-import { Mail, MapPin, Phone, Check, CarFront, Ship, CreditCard, CircleHelp } from 'lucide-react';
-import { useMeta } from '@/lib/use-meta';
-import { DEST_COUNTRIES } from '@/lib/shipping';
+import React, { useState } from "react";
+import { isSupabaseConfigured, supabase } from "@/lib/supabase";
+import { Mail, MapPin, Phone, Check, CarFront, Ship, CreditCard, CircleHelp } from "lucide-react";
+import { useMeta } from "@/lib/use-meta";
+import { DEST_COUNTRIES } from "@/lib/shipping";
 
 function WhatsAppIcon({ size = 20 }: { size?: number }) {
   return (
@@ -14,55 +14,58 @@ function WhatsAppIcon({ size = 20 }: { size?: number }) {
 
 export default function ContactPage() {
   useMeta({
-    title: 'Contact Wazir Trading LLC | Japanese Car Export',
-    description: 'Contact Wazir Trading LLC by WhatsApp, email, or inquiry form about Japanese used car exports, vehicle pricing, and shipping.',
-    canonical: 'https://www.wazirtradingllc.com/contact',
+    title: "Contact Wazir Trading LLC | Japanese Car Export",
+    description:
+      "Contact Wazir Trading LLC by WhatsApp, email, or inquiry form about Japanese used car exports, vehicle pricing, and shipping.",
+    canonical: "https://www.wazirtradingllc.com/contact",
   });
-  const [status, setStatus] = useState<'idle' | 'submitting' | 'success' | 'error'>('idle');
-  const [inquiryType, setInquiryType] = useState('general');
-  const waNumber = import.meta.env.VITE_WHATSAPP_NUMBER || '818089227375';
+  const [status, setStatus] = useState<"idle" | "submitting" | "success" | "error">("idle");
+  const [inquiryType, setInquiryType] = useState("general");
+  const waNumber = import.meta.env.VITE_WHATSAPP_NUMBER || "818089227375";
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setStatus('submitting');
-    
+    setStatus("submitting");
+
     const formData = new FormData(e.currentTarget);
     const data = {
-      name: formData.get('name') as string,
-      email: formData.get('email') as string,
-      phone: formData.get('phone') as string,
-      country: formData.get('country') as string,
-      message: formData.get('message') as string,
+      name: formData.get("name") as string,
+      email: formData.get("email") as string,
+      phone: formData.get("phone") as string,
+      country: formData.get("country") as string,
+      message: formData.get("message") as string,
       inquiry_type: inquiryType,
     };
 
     try {
       if (!isSupabaseConfigured) {
-        throw new Error('Inquiry service is not configured');
+        throw new Error("Inquiry service is not configured");
       }
-      const { error } = await supabase.from('inquiries').insert([data]);
+      const { error } = await supabase.from("inquiries").insert([data]);
       if (error) throw error;
-      setStatus('success');
+      setStatus("success");
       (e.target as HTMLFormElement).reset();
-      setInquiryType('general');
-      setTimeout(() => setStatus('idle'), 5000);
+      setInquiryType("general");
+      setTimeout(() => setStatus("idle"), 5000);
     } catch (err) {
       console.error(err);
-      setStatus('error');
+      setStatus("error");
     }
   };
 
   return (
-    <div className="min-h-screen bg-background pb-20" style={{ paddingTop: 'var(--header-h)' }}>
+    <div className="min-h-screen bg-background pb-20" style={{ paddingTop: "var(--header-h)" }}>
       <div className="container mx-auto px-4 md:px-8">
         <div className="max-w-4xl mx-auto">
           <div className="text-center mb-16">
             <h1 className="text-4xl md:text-5xl font-serif font-bold mb-4">Contact Us</h1>
-            <p className="text-muted-foreground">Get in touch with our Japan office for vehicle sourcing, shipping quotes, or general inquiries.</p>
+            <p className="text-muted-foreground">
+              Get in touch with our Japan office for vehicle sourcing, shipping quotes, or general
+              inquiries.
+            </p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-12 lg:gap-24">
-            
             {/* Contact Info */}
             <div className="space-y-10">
               <div>
@@ -75,22 +78,28 @@ export default function ContactPage() {
                     <div>
                       <h4 className="font-bold text-sm uppercase tracking-wider mb-1">Address</h4>
                       <p className="text-muted-foreground text-sm leading-relaxed">
-                        Heights Mizutani 1C, 158-1 Jizou<br/>
-                        Kuwana-City, Mie-Pref, Japan<br/>
+                        Heights Mizutani 1C, 158-1 Jizou
+                        <br />
+                        Kuwana-City, Mie-Pref, Japan
+                        <br />
                         <span className="text-xs opacity-70">(Visits by appointment only)</span>
                       </p>
                     </div>
                   </div>
-                  
+
                   <div className="flex items-start">
                     <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center text-primary flex-shrink-0 mr-4">
                       <Phone size={24} />
                     </div>
                     <div>
-                      <h4 className="font-bold text-sm uppercase tracking-wider mb-1">WhatsApp & Phone</h4>
+                      <h4 className="font-bold text-sm uppercase tracking-wider mb-1">
+                        WhatsApp & Phone
+                      </h4>
                       <p className="text-muted-foreground text-sm leading-relaxed">
-                        +{waNumber} <span className="text-xs opacity-70">(WhatsApp preferred)</span><br/>
-                        050-3740-8980 <span className="text-xs opacity-70">(Office)</span><br/>
+                        +{waNumber} <span className="text-xs opacity-70">(WhatsApp preferred)</span>
+                        <br />
+                        050-3740-8980 <span className="text-xs opacity-70">(Office)</span>
+                        <br />
                         050-3588-6588 <span className="text-xs opacity-70">(Fax)</span>
                       </p>
                     </div>
@@ -102,7 +111,9 @@ export default function ContactPage() {
                     </div>
                     <div>
                       <h4 className="font-bold text-sm uppercase tracking-wider mb-1">Email</h4>
-                      <p className="text-muted-foreground text-sm leading-relaxed">wazirtrading-pc@outlook.jp</p>
+                      <p className="text-muted-foreground text-sm leading-relaxed">
+                        wazirtrading-pc@outlook.jp
+                      </p>
                     </div>
                   </div>
                 </div>
@@ -110,10 +121,13 @@ export default function ContactPage() {
 
               <div className="bg-secondary text-white p-8 border border-secondary-border">
                 <h3 className="font-serif font-bold text-xl mb-4">Instant Assistance</h3>
-                <p className="text-white/70 text-sm mb-6">Use WhatsApp for direct enquiries about vehicle records, written quotations and destination-specific shipping questions.</p>
-                <a 
+                <p className="text-white/70 text-sm mb-6">
+                  Use WhatsApp for direct enquiries about vehicle records, written quotations and
+                  destination-specific shipping questions.
+                </p>
+                <a
                   href={`https://wa.me/${waNumber}`}
-                  target="_blank" 
+                  target="_blank"
                   rel="noopener noreferrer"
                   className="w-full bg-[#25D366] text-white py-3 font-medium flex items-center justify-center gap-2 hover:bg-[#20bd5a] transition-colors"
                 >
@@ -125,42 +139,48 @@ export default function ContactPage() {
             {/* Contact Form */}
             <div className="bg-card border border-border p-8 md:p-10 shadow-sm">
               <h2 className="text-2xl font-serif font-bold mb-6">Send a Message</h2>
-              
-              {status === 'success' ? (
+
+              {status === "success" ? (
                 <div className="h-full flex flex-col items-center justify-center text-center py-12">
                   <div className="w-16 h-16 bg-primary/20 text-primary rounded-full flex items-center justify-center mb-6">
                     <Check size={32} />
                   </div>
                   <h3 className="text-xl font-bold mb-2">Message Received</h3>
                   <p className="text-muted-foreground mb-3">
-                    Your enquiry has been received by the website. Our team will review the information and use the contact details you supplied to respond. Response times can vary.
+                    Your enquiry has been received by the website. Our team will review the
+                    information and use the contact details you supplied to respond. Response times
+                    can vary.
                   </p>
                   <p className="text-xs text-muted-foreground/60">
-                    You can also reach us at<br />
-                    <span className="font-semibold text-foreground/80">wazirtrading-pc@outlook.jp</span>
+                    You can also reach us at
+                    <br />
+                    <span className="font-semibold text-foreground/80">
+                      wazirtrading-pc@outlook.jp
+                    </span>
                   </p>
                 </div>
               ) : (
                 <form onSubmit={handleSubmit} className="space-y-5">
-
                   {/* Inquiry type selector */}
                   <div>
-                    <label className="block text-xs uppercase tracking-wider mb-2 font-medium text-foreground/80">What can we help you with?</label>
+                    <label className="block text-xs uppercase tracking-wider mb-2 font-medium text-foreground/80">
+                      What can we help you with?
+                    </label>
                     <div className="grid grid-cols-2 gap-2">
                       {[
-                        { value: 'sourcing',  label: 'Vehicle Sourcing', icon: CarFront },
-                        { value: 'shipping',  label: 'Shipping Quote', icon: Ship },
-                        { value: 'payment',   label: 'Payment Info', icon: CreditCard },
-                        { value: 'general',   label: 'General Question', icon: CircleHelp },
-                      ].map(opt => (
+                        { value: "sourcing", label: "Vehicle Sourcing", icon: CarFront },
+                        { value: "shipping", label: "Shipping Quote", icon: Ship },
+                        { value: "payment", label: "Payment Info", icon: CreditCard },
+                        { value: "general", label: "General Question", icon: CircleHelp },
+                      ].map((opt) => (
                         <button
                           key={opt.value}
                           type="button"
                           onClick={() => setInquiryType(opt.value)}
                           className={`py-2.5 px-3 text-xs font-medium border text-left transition-colors ${
                             inquiryType === opt.value
-                              ? 'border-primary bg-primary/5 text-primary'
-                              : 'border-border text-muted-foreground hover:border-primary/40'
+                              ? "border-primary bg-primary/5 text-primary"
+                              : "border-border text-muted-foreground hover:border-primary/40"
                           }`}
                         >
                           <span className="inline-flex items-center gap-1.5">
@@ -173,68 +193,113 @@ export default function ContactPage() {
                   </div>
 
                   <div>
-                    <label className="block text-xs uppercase tracking-wider mb-2 font-medium text-foreground/80">Full Name *</label>
-                    <input required name="name" type="text" placeholder="e.g. Ahmed Al-Rashid" className="w-full border border-border bg-background p-3 focus:border-primary outline-none transition-colors" />
+                    <label className="block text-xs uppercase tracking-wider mb-2 font-medium text-foreground/80">
+                      Full Name *
+                    </label>
+                    <input
+                      required
+                      name="name"
+                      type="text"
+                      placeholder="e.g. Ahmed Al-Rashid"
+                      className="w-full border border-border bg-background p-3 focus:border-primary outline-none transition-colors"
+                    />
                   </div>
                   <div>
-                    <label className="block text-xs uppercase tracking-wider mb-2 font-medium text-foreground/80">Email Address *</label>
-                    <input required name="email" type="email" placeholder="your@email.com" className="w-full border border-border bg-background p-3 focus:border-primary outline-none transition-colors" />
+                    <label className="block text-xs uppercase tracking-wider mb-2 font-medium text-foreground/80">
+                      Email Address *
+                    </label>
+                    <input
+                      required
+                      name="email"
+                      type="email"
+                      placeholder="your@email.com"
+                      className="w-full border border-border bg-background p-3 focus:border-primary outline-none transition-colors"
+                    />
                   </div>
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-xs uppercase tracking-wider mb-2 font-medium text-foreground/80">WhatsApp / Phone</label>
-                      <input name="phone" type="tel" placeholder="+1 234 567 8900" className="w-full border border-border bg-background p-3 focus:border-primary outline-none transition-colors" />
+                      <label className="block text-xs uppercase tracking-wider mb-2 font-medium text-foreground/80">
+                        WhatsApp / Phone
+                      </label>
+                      <input
+                        name="phone"
+                        type="tel"
+                        placeholder="+1 234 567 8900"
+                        className="w-full border border-border bg-background p-3 focus:border-primary outline-none transition-colors"
+                      />
                     </div>
                     <div>
-                      <label className="block text-xs uppercase tracking-wider mb-2 font-medium text-foreground/80">Your Country *</label>
-                      <select required name="country" defaultValue="" className="w-full border border-border bg-background p-3 focus:border-primary outline-none transition-colors">
-                        <option value="" disabled>Select your destination country</option>
-                        {DEST_COUNTRIES.map(country => <option key={country} value={country}>{country}</option>)}
+                      <label className="block text-xs uppercase tracking-wider mb-2 font-medium text-foreground/80">
+                        Your Country *
+                      </label>
+                      <select
+                        required
+                        name="country"
+                        defaultValue=""
+                        className="w-full border border-border bg-background p-3 focus:border-primary outline-none transition-colors"
+                      >
+                        <option value="" disabled>
+                          Select your destination country
+                        </option>
+                        {DEST_COUNTRIES.map((country) => (
+                          <option key={country} value={country}>
+                            {country}
+                          </option>
+                        ))}
                       </select>
                     </div>
                   </div>
                   <div>
-                    <label className="block text-xs uppercase tracking-wider mb-2 font-medium text-foreground/80">Message *</label>
+                    <label className="block text-xs uppercase tracking-wider mb-2 font-medium text-foreground/80">
+                      Message *
+                    </label>
                     <textarea
                       required
                       name="message"
                       rows={5}
                       placeholder={
-                        inquiryType === 'sourcing'
+                        inquiryType === "sourcing"
                           ? "e.g. I'm looking for a Toyota Land Cruiser 2018–2020, budget around $12,000, shipping to Karachi. Please advise on availability and total price."
-                          : inquiryType === 'shipping'
-                          ? "e.g. I need a shipping quote for a Toyota Hilux (already purchased) to Mombasa, Kenya. Please include inspection and insurance options."
-                          : inquiryType === 'payment'
-                          ? "e.g. What payment methods do you accept? Can I pay by bank transfer from the UK, and when is payment due?"
-                          : "How can we help you? Please include as much detail as possible so we can give you a useful answer."
+                          : inquiryType === "shipping"
+                            ? "e.g. I need a shipping quote for a Toyota Hilux (already purchased) to Mombasa, Kenya. Please include inspection and insurance options."
+                            : inquiryType === "payment"
+                              ? "e.g. What payment methods do you accept? Can I pay by bank transfer from the UK, and when is payment due?"
+                              : "How can we help you? Please include as much detail as possible so we can give you a useful answer."
                       }
                       className="w-full border border-border bg-background p-3 focus:border-primary outline-none resize-none transition-colors"
                     />
                   </div>
                   <p className="text-xs text-muted-foreground leading-relaxed">
-                    By sending this form, you agree that Wazir Trading LLC may use the information you provide to review and respond to your enquiry. See our <a href="/privacy-policy" className="text-primary underline underline-offset-2">Privacy Policy</a>.
+                    By sending this form, you agree that Wazir Trading LLC may use the information
+                    you provide to review and respond to your enquiry. See our{" "}
+                    <a href="/privacy-policy" className="text-primary underline underline-offset-2">
+                      Privacy Policy
+                    </a>
+                    .
                   </p>
                   <button
                     type="submit"
-                    disabled={status === 'submitting'}
+                    disabled={status === "submitting"}
                     className="w-full bg-primary text-primary-foreground py-4 font-medium uppercase tracking-widest text-sm disabled:opacity-70 transition-colors"
                   >
-                    {status === 'submitting' ? 'Sending…' : 'Send My Inquiry'}
+                    {status === "submitting" ? "Sending…" : "Send My Inquiry"}
                   </button>
-                  {status === 'error' && (
+                  {status === "error" && (
                     <p className="text-destructive text-sm text-center">
-                      We could not submit your enquiry. You can try WhatsApp or email using the contact details shown on this page.
+                      We could not submit your enquiry. You can try WhatsApp or email using the
+                      contact details shown on this page.
                     </p>
                   )}
                 </form>
               )}
             </div>
-
           </div>
 
           {/* ── Google Maps ── */}
           <div className="mt-16">
-            <h2 className="text-2xl font-serif font-bold mb-2 text-center">Find Our Japan Office</h2>
+            <h2 className="text-2xl font-serif font-bold mb-2 text-center">
+              Find Our Japan Office
+            </h2>
             <p className="text-center text-muted-foreground text-sm mb-6">
               Heights Mizutani 1C, 158-1 Jizou, Kuwana-City, Mie-Pref, Japan
             </p>
@@ -243,7 +308,7 @@ export default function ContactPage() {
                 src="https://www.google.com/maps/embed?pb=!1m17!1m12!1m3!1d3265.8895035567575!2d136.6993446757601!3d35.05950157279439!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m2!1m1!2zMzXCsDAzJzM0LjIiTiAxMzbCsDQyJzA2LjkiRQ!5e0!3m2!1sen!2sus!4v1785990086147!5m2!1sen!2sus"
                 width="100%"
                 height="420"
-                style={{ border: 0, display: 'block' }}
+                style={{ border: 0, display: "block" }}
                 allowFullScreen
                 loading="lazy"
                 referrerPolicy="strict-origin-when-cross-origin"
@@ -251,7 +316,6 @@ export default function ContactPage() {
               />
             </div>
           </div>
-
         </div>
       </div>
     </div>

@@ -22,9 +22,9 @@ export type SmartSearchFilters = {
   advYearTo?: string;
   advMinPrice?: string;
   advMaxPrice?: string;
-  smartFuel?: 'hybrid' | 'gasoline' | 'electric' | 'diesel';
-  smartTrans?: 'automatic' | 'manual';
-  smartDrive?: '4wd' | '2wd';
+  smartFuel?: "hybrid" | "gasoline" | "electric" | "diesel";
+  smartTrans?: "automatic" | "manual";
+  smartDrive?: "4wd" | "2wd";
   smartMinMileage?: string;
   smartMaxMileage?: string;
   smartMinEngine?: string;
@@ -41,18 +41,98 @@ export type SmartSearchResult = {
 };
 
 const STOP_WORDS = new Set([
-  'a', 'an', 'and', 'any', 'are', 'at', 'car', 'cars', 'condition', 'find',
-  'for', 'from', 'good', 'have', 'i', 'in', 'looking', 'me', 'my', 'of',
-  'please', 'show', 'the', 'to', 'vehicle', 'vehicles', 'want', 'with',
-  'year', 'years', 'price', 'priced', 'under', 'below', 'less', 'than',
-  'over', 'above', 'up', 'upto', 'maximum', 'minimum', 'max', 'min',
-  'mileage', 'miles', 'kilometers', 'kilometres', 'km', 'engine', 'cc',
-  'cheap', 'cheapest', 'affordable', 'budget', 'new', 'used', 'automatic',
-  'family', 'large', 'small', 'best', 'low', 'high', 'clean', 'reliable',
-  'luxury', 'sport', 'sports',
-  'auto', 'manual', 'gear', 'transmission', 'petrol', 'gas', 'diesel',
-  'hybrid', 'electric', 'ev', 'awd', '4wd', '4x4', 'fwd', '2wd',
-  'lac', 'lakh', 'thousand', 'million', 'dollars', 'usd', 'pkr', 'rs',
+  "a",
+  "an",
+  "and",
+  "any",
+  "are",
+  "at",
+  "car",
+  "cars",
+  "condition",
+  "find",
+  "for",
+  "from",
+  "good",
+  "have",
+  "i",
+  "in",
+  "looking",
+  "me",
+  "my",
+  "of",
+  "please",
+  "show",
+  "the",
+  "to",
+  "vehicle",
+  "vehicles",
+  "want",
+  "with",
+  "year",
+  "years",
+  "price",
+  "priced",
+  "under",
+  "below",
+  "less",
+  "than",
+  "over",
+  "above",
+  "up",
+  "upto",
+  "maximum",
+  "minimum",
+  "max",
+  "min",
+  "mileage",
+  "miles",
+  "kilometers",
+  "kilometres",
+  "km",
+  "engine",
+  "cc",
+  "cheap",
+  "cheapest",
+  "affordable",
+  "budget",
+  "new",
+  "used",
+  "automatic",
+  "family",
+  "large",
+  "small",
+  "best",
+  "low",
+  "high",
+  "clean",
+  "reliable",
+  "luxury",
+  "sport",
+  "sports",
+  "auto",
+  "manual",
+  "gear",
+  "transmission",
+  "petrol",
+  "gas",
+  "diesel",
+  "hybrid",
+  "electric",
+  "ev",
+  "awd",
+  "4wd",
+  "4x4",
+  "fwd",
+  "2wd",
+  "lac",
+  "lakh",
+  "thousand",
+  "million",
+  "dollars",
+  "usd",
+  "pkr",
+  "rs",
 ]);
 
 const ALIASES: Array<{
@@ -60,33 +140,57 @@ const ALIASES: Array<{
   filter: SmartSearchFilters;
   label: string;
 }> = [
-  { terms: ['automatic', 'auto', 'automatic transmission'], filter: { smartTrans: 'automatic' }, label: 'automatic transmission' },
-  { terms: ['manual', 'manual gear', 'stick shift'], filter: { smartTrans: 'manual' }, label: 'manual transmission' },
-  { terms: ['4wd', '4x4', 'awd', 'four wheel drive', 'four wheel'], filter: { smartDrive: '4wd' }, label: '4WD / AWD' },
-  { terms: ['2wd', 'fwd', 'two wheel drive', 'front wheel drive'], filter: { smartDrive: '2wd' }, label: '2WD / FWD' },
-  { terms: ['hybrid', 'hybrids'], filter: { smartFuel: 'hybrid' }, label: 'hybrid fuel' },
-  { terms: ['petrol', 'gas', 'gasoline'], filter: { smartFuel: 'gasoline' }, label: 'gasoline / petrol' },
-  { terms: ['electric', 'ev', 'electric vehicle'], filter: { smartFuel: 'electric' }, label: 'electric fuel' },
-  { terms: ['diesel'], filter: { smartFuel: 'diesel' }, label: 'diesel fuel' },
+  {
+    terms: ["automatic", "auto", "automatic transmission"],
+    filter: { smartTrans: "automatic" },
+    label: "automatic transmission",
+  },
+  {
+    terms: ["manual", "manual gear", "stick shift"],
+    filter: { smartTrans: "manual" },
+    label: "manual transmission",
+  },
+  {
+    terms: ["4wd", "4x4", "awd", "four wheel drive", "four wheel"],
+    filter: { smartDrive: "4wd" },
+    label: "4WD / AWD",
+  },
+  {
+    terms: ["2wd", "fwd", "two wheel drive", "front wheel drive"],
+    filter: { smartDrive: "2wd" },
+    label: "2WD / FWD",
+  },
+  { terms: ["hybrid", "hybrids"], filter: { smartFuel: "hybrid" }, label: "hybrid fuel" },
+  {
+    terms: ["petrol", "gas", "gasoline"],
+    filter: { smartFuel: "gasoline" },
+    label: "gasoline / petrol",
+  },
+  {
+    terms: ["electric", "ev", "electric vehicle"],
+    filter: { smartFuel: "electric" },
+    label: "electric fuel",
+  },
+  { terms: ["diesel"], filter: { smartFuel: "diesel" }, label: "diesel fuel" },
 ];
 
 function normalize(value: string): string {
   return value
     .toLocaleLowerCase()
-    .normalize('NFKD')
-    .replace(/[\u0300-\u036f]/g, '')
-    .replace(/&/g, ' and ')
-    .replace(/[^a-z0-9]+/g, ' ')
+    .normalize("NFKD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/&/g, " and ")
+    .replace(/[^a-z0-9]+/g, " ")
     .trim()
-    .replace(/\s+/g, ' ');
+    .replace(/\s+/g, " ");
 }
 
 function tokens(value: string): string[] {
-  return normalize(value).split(' ').filter(Boolean);
+  return normalize(value).split(" ").filter(Boolean);
 }
 
 function unique(values: string[]): string[] {
-  return [...new Set(values.map(value => value.trim()).filter(Boolean))];
+  return [...new Set(values.map((value) => value.trim()).filter(Boolean))];
 }
 
 function editDistance(a: string, b: string): number {
@@ -96,9 +200,10 @@ function editDistance(a: string, b: string): number {
     previous[0] = i;
     for (let j = 1; j <= b.length; j += 1) {
       const saved = previous[j];
-      previous[j] = a[i - 1] === b[j - 1]
-        ? diagonal
-        : Math.min(previous[j] + 1, previous[j - 1] + 1, diagonal + 1);
+      previous[j] =
+        a[i - 1] === b[j - 1]
+          ? diagonal
+          : Math.min(previous[j] + 1, previous[j - 1] + 1, diagonal + 1);
       diagonal = saved;
     }
   }
@@ -109,7 +214,7 @@ function similarity(a: string, b: string): number {
   if (a === b) return 1;
   if (!a || !b) return 0;
   if (a.includes(b) || b.includes(a)) {
-    return Math.min(a.length, b.length) / Math.max(a.length, b.length) * 0.1 + 0.88;
+    return (Math.min(a.length, b.length) / Math.max(a.length, b.length)) * 0.1 + 0.88;
   }
   return 1 - editDistance(a, b) / Math.max(a.length, b.length);
 }
@@ -136,17 +241,24 @@ type ValueMatch = {
   corrected: boolean;
 };
 
-function findValueMatch(queryTokens: string[], values: string[], consumed: Set<number>): ValueMatch | null {
+function findValueMatch(
+  queryTokens: string[],
+  values: string[],
+  consumed: Set<number>,
+): ValueMatch | null {
   const candidates = unique(values)
-    .map(value => ({ value, normalized: tokens(value) }))
-    .filter(candidate => candidate.normalized.length > 0)
+    .map((value) => ({ value, normalized: tokens(value) }))
+    .filter((candidate) => candidate.normalized.length > 0)
     .sort((a, b) => b.normalized.length - a.normalized.length || b.value.length - a.value.length);
 
   let best: ValueMatch | null = null;
 
   for (const candidate of candidates) {
     const exactStart = hasWordPhrase(queryTokens, candidate.normalized);
-    if (exactStart >= 0 && candidate.normalized.every((_, offset) => !consumed.has(exactStart + offset))) {
+    if (
+      exactStart >= 0 &&
+      candidate.normalized.every((_, offset) => !consumed.has(exactStart + offset))
+    ) {
       return {
         value: candidate.value,
         start: exactStart,
@@ -181,7 +293,7 @@ function findValueMatch(queryTokens: string[], values: string[], consumed: Set<n
 }
 
 function findAlias(queryTokens: string[], consumed: Set<number>) {
-  let best: { alias: typeof ALIASES[number]; start: number; length: number } | null = null;
+  let best: { alias: (typeof ALIASES)[number]; start: number; length: number } | null = null;
   for (const alias of ALIASES) {
     for (const term of alias.terms) {
       const phraseTokens = tokens(term);
@@ -199,21 +311,21 @@ function findAlias(queryTokens: string[], consumed: Set<number>) {
 }
 
 function toNumber(value: string): number {
-  return Number(value.replace(/,/g, ''));
+  return Number(value.replace(/,/g, ""));
 }
 
 function parseAmount(raw: string, pkrRate: number): number | null {
   const match = raw
     .toLocaleLowerCase()
-    .replace(/,/g, '')
+    .replace(/,/g, "")
     .match(/(?:rs\.?|pkr|₨|\$|usd|dollars?)?\s*(\d+(?:\.\d+)?)\s*(k|thousand|lac|lakh|million|m)?/);
   if (!match) return null;
 
   let amount = Number(match[1]);
   const unit = match[2];
-  if (unit === 'k' || unit === 'thousand') amount *= 1_000;
-  if (unit === 'million' || unit === 'm') amount *= 1_000_000;
-  if (unit === 'lac' || unit === 'lakh') amount *= 100_000 / pkrRate;
+  if (unit === "k" || unit === "thousand") amount *= 1_000;
+  if (unit === "million" || unit === "m") amount *= 1_000_000;
+  if (unit === "lac" || unit === "lakh") amount *= 100_000 / pkrRate;
   if (!Number.isFinite(amount) || amount <= 0) return null;
   return Math.round(amount);
 }
@@ -226,18 +338,26 @@ function addNumberIntent(
   queryTokens: string[],
   interpretations: string[],
 ) {
-  const hasExplicitPriceUnit = /[$₨]|(?:usd|dollars?|pkr|rs\.?|lac|lakh|thousand|million)\b|\bk\b/i.test(raw);
+  const hasExplicitPriceUnit =
+    /[$₨]|(?:usd|dollars?|pkr|rs\.?|lac|lakh|thousand|million)\b|\bk\b/i.test(raw);
   const isYearOnly = (value: string) => /^(?:19|20)\d{2}$/.test(value.trim());
   if (!hasExplicitPriceUnit && [...raw.matchAll(/\b(?:19|20)\d{2}\b/g)].length > 0) {
     // "from 2018 to 2020" is a year range, not a $2,018–$2,020 price range.
     // Bare year phrases should be handled only by the year parser below.
-    const numericMatches = [...raw.matchAll(/\b(?:19|20)\d{2}\b/g)].map(match => match[0]);
+    const numericMatches = [...raw.matchAll(/\b(?:19|20)\d{2}\b/g)].map((match) => match[0]);
     if (numericMatches.length >= 1 && numericMatches.every(isYearOnly)) return false;
   }
-  const amountPattern = '(?:\\$|rs\\.?|pkr|₨|usd)?\\s*\\d[\\d,]*(?:\\.\\d+)?\\s*(?:k|thousand|lac|lakh|million|m)?';
-  const range = raw.match(new RegExp(`(?:between|from)\\s+(${amountPattern})\\s+(?:and|to)\\s+(${amountPattern})`, 'i'));
-  const max = raw.match(new RegExp(`(?:under|below|up to|upto|less than|maximum|max)\\s+(${amountPattern})`, 'i'));
-  const min = raw.match(new RegExp(`(?:over|above|more than|minimum|min|starting at|from)\\s+(${amountPattern})`, 'i'));
+  const amountPattern =
+    "(?:\\$|rs\\.?|pkr|₨|usd)?\\s*\\d[\\d,]*(?:\\.\\d+)?\\s*(?:k|thousand|lac|lakh|million|m)?";
+  const range = raw.match(
+    new RegExp(`(?:between|from)\\s+(${amountPattern})\\s+(?:and|to)\\s+(${amountPattern})`, "i"),
+  );
+  const max = raw.match(
+    new RegExp(`(?:under|below|up to|upto|less than|maximum|max)\\s+(${amountPattern})`, "i"),
+  );
+  const min = raw.match(
+    new RegExp(`(?:over|above|more than|minimum|min|starting at|from)\\s+(${amountPattern})`, "i"),
+  );
 
   const setBounds = (low: string | undefined, high: string | undefined) => {
     const minValue = low ? parseAmount(low, pkrRate) : null;
@@ -264,7 +384,7 @@ function addNumberIntent(
   }
 
   queryTokens.forEach((token, index) => {
-    if (/^\d/.test(token) || /^\d/.test(token.replace(/^(rs|pkr|usd)$/, ''))) consumed.add(index);
+    if (/^\d/.test(token) || /^\d/.test(token.replace(/^(rs|pkr|usd)$/, ""))) consumed.add(index);
   });
   return true;
 }
@@ -276,7 +396,9 @@ function addNumericBounds(
   queryTokens: string[],
   interpretations: string[],
 ) {
-  const mileage = raw.match(/(?:under|below|less than|max(?:imum)?)\s+([\d,]+)\s*(?:k|thousand)?\s*(?:km|kilometers?|miles?)/i);
+  const mileage = raw.match(
+    /(?:under|below|less than|max(?:imum)?)\s+([\d,]+)\s*(?:k|thousand)?\s*(?:km|kilometers?|miles?)/i,
+  );
   const engine = raw.match(/(?:around|about|with|engine)?\s*([\d,.]+)\s*(?:cc|l|litre|liter)\b/i);
   let found = false;
 
@@ -289,7 +411,7 @@ function addNumericBounds(
     found = true;
   }
   if (engine) {
-    let value = Number(engine[1].replace(/,/g, ''));
+    let value = Number(engine[1].replace(/,/g, ""));
     if (/\bl\b|\blitre\b|\bliter\b/i.test(engine[0])) value *= 1_000;
     if (Number.isFinite(value) && value > 0) {
       const lower = Math.max(0, Math.round(value - 100));
@@ -317,7 +439,7 @@ export function parseSmartSearch(
   if (!raw) {
     return {
       filters: {},
-      cleanedQuery: '',
+      cleanedQuery: "",
       corrections: [],
       interpretations: [],
       confidence: 1,
@@ -344,11 +466,11 @@ export function parseSmartSearch(
     values: string[];
     label: string;
   }> = [
-    { key: 'make', values: vocabulary.makes, label: 'make' },
-    { key: 'advModel', values: vocabulary.models, label: 'model' },
-    { key: 'body', values: vocabulary.bodyTypes, label: 'body type' },
-    { key: 'advColor', values: vocabulary.colors, label: 'color' },
-    { key: 'location', values: vocabulary.locations, label: 'location' },
+    { key: "make", values: vocabulary.makes, label: "make" },
+    { key: "advModel", values: vocabulary.models, label: "model" },
+    { key: "body", values: vocabulary.bodyTypes, label: "body type" },
+    { key: "advColor", values: vocabulary.colors, label: "color" },
+    { key: "location", values: vocabulary.locations, label: "location" },
   ];
 
   for (const field of valueFields) {
@@ -385,7 +507,7 @@ export function parseSmartSearch(
   }
 
   const yearRange = raw.match(/\b((?:19|20)\d{2})\s*(?:-|to|through)\s*((?:19|20)\d{2})\b/i);
-  const years = [...raw.matchAll(/\b((?:19|20)\d{2})\b/g)].map(match => match[1]);
+  const years = [...raw.matchAll(/\b((?:19|20)\d{2})\b/g)].map((match) => match[1]);
   if (yearRange) {
     filters.advYearFrom = yearRange[1];
     filters.advYearTo = yearRange[2];
@@ -403,8 +525,10 @@ export function parseSmartSearch(
   addNumericBounds(raw, filters, consumed, queryTokens, interpretations);
 
   const residual = queryTokens
-    .filter((token, index) => !consumed.has(index) && !STOP_WORDS.has(token) && !/^\d+$/.test(token))
-    .join(' ');
+    .filter(
+      (token, index) => !consumed.has(index) && !STOP_WORDS.has(token) && !/^\d+$/.test(token),
+    )
+    .join(" ");
   const hasIntent = interpretations.length > 0;
   const confidence = hasIntent
     ? Math.min(0.99, 0.7 + interpretations.length * 0.06 + corrections.length * 0.04)

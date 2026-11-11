@@ -1,6 +1,6 @@
-import { useEffect, useMemo, useRef } from 'react';
-import { useLocation } from 'wouter';
-import './how-to-buy.css';
+import { useEffect, useMemo, useRef } from "react";
+import { useLocation } from "wouter";
+import "./how-to-buy.css";
 
 const HTML = `<section class="wt-htb" id="how-to-buy" aria-labelledby="wt-htb-title">
   <div class="wt-htb__wrap">
@@ -413,61 +413,61 @@ export default function HowToBuy() {
   const hostRef = useRef<HTMLDivElement>(null);
   const [, navigate] = useLocation();
 
-  const waNumber = import.meta.env.VITE_WHATSAPP_NUMBER || '818089227375';
+  const waNumber = import.meta.env.VITE_WHATSAPP_NUMBER || "818089227375";
   const waLink = `https://wa.me/${waNumber}?text=${encodeURIComponent(
     "Hello, I'd like an estimate for a Japanese used car from Wazir Trading LLC.",
   )}`;
-  const html = useMemo(() => HTML.split('__WA__').join(waLink), [waLink]);
+  const html = useMemo(() => HTML.split("__WA__").join(waLink), [waLink]);
 
   // scroll-linked timeline, step reveal, and pausing off-screen animations
   useEffect(() => {
-    const root = hostRef.current?.querySelector<HTMLElement>('.wt-htb');
-    if (!root || !('IntersectionObserver' in window)) return;
-    const list = root.querySelector<HTMLElement>('.wt-htb__steps');
-    const fill = root.querySelector<HTMLElement>('.wt-htb__fill');
+    const root = hostRef.current?.querySelector<HTMLElement>(".wt-htb");
+    if (!root || !("IntersectionObserver" in window)) return;
+    const list = root.querySelector<HTMLElement>(".wt-htb__steps");
+    const fill = root.querySelector<HTMLElement>(".wt-htb__fill");
     if (!list || !fill) return;
-    const steps = Array.from(root.querySelectorAll<HTMLElement>('.wt-htb__step'));
-    root.classList.add('wt-htb--js');
+    const steps = Array.from(root.querySelectorAll<HTMLElement>(".wt-htb__step"));
+    root.classList.add("wt-htb--js");
 
     const live = new IntersectionObserver(
-      entries => entries.forEach(e => e.target.classList.toggle('is-live', e.isIntersecting)),
+      (entries) => entries.forEach((e) => e.target.classList.toggle("is-live", e.isIntersecting)),
       { threshold: 0.1 },
     );
-    root.querySelectorAll('.wt-htb__hero,.wt-htb__art').forEach(el => live.observe(el));
+    root.querySelectorAll(".wt-htb__hero,.wt-htb__art").forEach((el) => live.observe(el));
 
     const reveal = new IntersectionObserver(
-      entries =>
-        entries.forEach(e => {
+      (entries) =>
+        entries.forEach((e) => {
           if (e.isIntersecting) {
-            e.target.classList.add('is-in');
+            e.target.classList.add("is-in");
             reveal.unobserve(e.target);
           }
         }),
-      { threshold: 0.12, rootMargin: '0px 0px -6% 0px' },
+      { threshold: 0.12, rootMargin: "0px 0px -6% 0px" },
     );
-    steps.forEach(st => reveal.observe(st));
+    steps.forEach((st) => reveal.observe(st));
 
     let ticking = false;
     const update = () => {
       ticking = false;
-      const off = parseFloat(getComputedStyle(list).getPropertyValue('--line-offset')) || 28;
+      const off = parseFloat(getComputedStyle(list).getPropertyValue("--line-offset")) || 28;
       const mid = window.innerHeight * 0.6;
       const lr = list.getBoundingClientRect();
-      fill.style.height = Math.max(0, Math.min(lr.height - off * 2, mid - lr.top - off)) + 'px';
+      fill.style.height = Math.max(0, Math.min(lr.height - off * 2, mid - lr.top - off)) + "px";
       let current: HTMLElement | null = null;
-      steps.forEach(st => {
-        const num = st.querySelector<HTMLElement>('.wt-htb__num');
+      steps.forEach((st) => {
+        const num = st.querySelector<HTMLElement>(".wt-htb__num");
         if (!num) return;
         const n = num.getBoundingClientRect();
         const done = n.top + n.height / 2 < mid;
-        st.classList.toggle('is-done', done);
-        st.classList.remove('is-current');
-        st.removeAttribute('aria-current');
+        st.classList.toggle("is-done", done);
+        st.classList.remove("is-current");
+        st.removeAttribute("aria-current");
         if (done) current = st;
       });
       if (current) {
-        (current as HTMLElement).classList.add('is-current');
-        (current as HTMLElement).setAttribute('aria-current', 'step');
+        (current as HTMLElement).classList.add("is-current");
+        (current as HTMLElement).setAttribute("aria-current", "step");
       }
     };
     const req = () => {
@@ -476,25 +476,25 @@ export default function HowToBuy() {
         requestAnimationFrame(update);
       }
     };
-    window.addEventListener('scroll', req, { passive: true });
-    window.addEventListener('resize', req);
+    window.addEventListener("scroll", req, { passive: true });
+    window.addEventListener("resize", req);
     update();
 
     return () => {
-      window.removeEventListener('scroll', req);
-      window.removeEventListener('resize', req);
+      window.removeEventListener("scroll", req);
+      window.removeEventListener("resize", req);
       live.disconnect();
       reveal.disconnect();
-      root.classList.remove('wt-htb--js');
+      root.classList.remove("wt-htb--js");
     };
   }, []);
 
   const onClick = (e: React.MouseEvent<HTMLDivElement>) => {
     if (e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
-    const a = (e.target as HTMLElement).closest<HTMLAnchorElement>('a[data-wt-nav]');
+    const a = (e.target as HTMLElement).closest<HTMLAnchorElement>("a[data-wt-nav]");
     if (!a) return;
     e.preventDefault();
-    navigate(a.getAttribute('href') || '/');
+    navigate(a.getAttribute("href") || "/");
     window.scrollTo({ top: 0 });
   };
 

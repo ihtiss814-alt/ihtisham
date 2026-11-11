@@ -1,8 +1,8 @@
-import { memo, useState } from 'react';
-import { Link } from 'wouter';
-import { Heart, ImageOff, Eye } from 'lucide-react';
-import { isThirdPartyListing, ThirdPartyImageBadge } from '@/components/ThirdPartyImageBadge';
-import { vehicleImageAlt } from '@/lib/vehicle-seo';
+import { memo, useState } from "react";
+import { Link } from "wouter";
+import { Heart, ImageOff, Eye } from "lucide-react";
+import { isThirdPartyListing, ThirdPartyImageBadge } from "@/components/ThirdPartyImageBadge";
+import { isRecentInventoryListing, vehicleImageAlt } from "@/lib/vehicle-seo";
 
 export interface Car {
   id: string;
@@ -40,14 +40,14 @@ export interface Car {
   car_images?: Array<{ image_url: string; is_primary?: boolean }>;
 }
 
-export type CarCardVariant = 'row' | 'grid' | 'compact';
+export type CarCardVariant = "row" | "grid" | "compact";
 
 /** Prefer the DB-flagged primary image, falling back to the first image seen. */
 export function resolvePrimaryImage(
   images?: Array<{ image_url: string; is_primary?: boolean }> | null,
 ): string | null {
   if (!images || images.length === 0) return null;
-  return images.find(i => i.is_primary)?.image_url ?? images[0].image_url ?? null;
+  return images.find((i) => i.is_primary)?.image_url ?? images[0].image_url ?? null;
 }
 
 function WhatsAppIcon({ size = 14 }: { size?: number }) {
@@ -68,12 +68,12 @@ function PhotoPlaceholder({ label }: { label?: string }) {
 }
 
 function fmtUSD(price: number | null | undefined): string {
-  if (price == null) return '—';
+  if (price == null) return "—";
   return `$${price.toLocaleString()}`;
 }
 
 function waTitle(car: Car): string {
-  return `${car.make} ${car.model}${car.variant ? ' ' + car.variant : ''} ${car.year ?? ''}`.trim();
+  return `${car.make} ${car.model}${car.variant ? " " + car.variant : ""} ${car.year ?? ""}`.trim();
 }
 
 interface CarCardProps {
@@ -91,9 +91,14 @@ interface CarCardProps {
 }
 
 function CarCard({
-  car, variant, primaryImage = null,
-  waNumber = import.meta.env.VITE_WHATSAPP_NUMBER || '818089227375',
-  onOfferPrice, isFavorite, onToggleFavorite, hideBadges = false,
+  car,
+  variant,
+  primaryImage = null,
+  waNumber = import.meta.env.VITE_WHATSAPP_NUMBER || "818089227375",
+  onOfferPrice,
+  isFavorite,
+  onToggleFavorite,
+  hideBadges = false,
 }: CarCardProps) {
   const [imgError, setImgError] = useState(false);
   const href = `/cars/${car.ref_number}`;
@@ -101,12 +106,13 @@ function CarCard({
     `Hi, I am interested in ${waTitle(car)}\nReference: ${car.ref_number}\nPlease share more details.`,
   );
   const waLink = `https://wa.me/${waNumber}?text=${waMsg}`;
-  const isSold = car.status === 'sold';
-  const isClearance = car.collection?.toLowerCase() === 'clearance';
+  const isSold = car.status === "sold";
+  const isClearance = car.collection?.toLowerCase() === "clearance";
+  const isNewArrival = isRecentInventoryListing(car.created_at);
   const showImage = primaryImage && !imgError;
 
   /* ── Row — used on the /cars listing ─────────────────────────────── */
-  if (variant === 'row') {
+  if (variant === "row") {
     const badges = [
       car.year ? String(car.year) : null,
       car.mileage_km ? `${car.mileage_km.toLocaleString()} km` : null,
@@ -123,18 +129,27 @@ function CarCard({
       <div className="car-card car-card-row">
         <Link href={href} className="car-card-image-link">
           <div className="car-img">
-            {(car.is_new_arrival || isClearance) && (
+            {(isNewArrival || isClearance) && (
               <div
                 className="car-badge"
-                style={{ background: isClearance ? '#D97706' : '#16A34A' }}>
-                {isClearance ? 'CLEARANCE' : 'New Arrival'}
+                style={{ background: isClearance ? "#D97706" : "#16A34A" }}
+              >
+                {isClearance ? "CLEARANCE" : "Recently Listed"}
               </div>
             )}
             {showImage ? (
-              <img src={primaryImage!} alt={vehicleImageAlt(car, 0)} onError={() => setImgError(true)}
-                className="car-img-photo" loading="lazy" decoding="async" />
+              <img
+                src={primaryImage!}
+                alt={vehicleImageAlt(car, 0)}
+                onError={() => setImgError(true)}
+                className="car-img-photo"
+                loading="lazy"
+                decoding="async"
+              />
             ) : (
-              <div className="absolute inset-0"><PhotoPlaceholder label="Photo Coming Soon" /></div>
+              <div className="absolute inset-0">
+                <PhotoPlaceholder label="Photo Coming Soon" />
+              </div>
             )}
             {showImage && isThirdPartyListing(car.ref_number) && (
               <ThirdPartyImageBadge className="bottom-2 left-2" />
@@ -147,18 +162,22 @@ function CarCard({
           <div className="car-card-heading">
             <Link href={href}>
               <h3 className="car-name">
-                {car.make} {car.model}{car.variant ? ` ${car.variant}` : ''}
+                {car.make} {car.model}
+                {car.variant ? ` ${car.variant}` : ""}
               </h3>
             </Link>
             <div className="car-meta">
               <span className="origin-dot" />
-              <span className="car-origin">{car.stock_location || 'Japan'}</span>
+              <span className="car-origin">{car.stock_location || "Japan"}</span>
             </div>
           </div>
 
           <div className="specs">
             {badges.map((b, i) => (
-              <span key={i} className={`st st-${['year', 'km', 'cc', 'trans', 'fuel', 'body', 'drive', 'color'][i] ?? 'color'}`}>
+              <span
+                key={i}
+                className={`st st-${["year", "km", "cc", "trans", "fuel", "body", "drive", "color"][i] ?? "color"}`}
+              >
                 {b}
               </span>
             ))}
@@ -166,22 +185,20 @@ function CarCard({
 
           <div className="car-foot">
             <div className="price-block">
-              <div className="price-usd">
-                {fmtUSD(car.fob_price_usd)}
-              </div>
+              <div className="price-usd">{fmtUSD(car.fob_price_usd)}</div>
             </div>
 
             <div className="car-actions">
               <Link href={href} className="bsm bsm-view">
                 <Eye size={13} />
-              View Details
+                View Details
               </Link>
               <a href={waLink} target="_blank" rel="noopener noreferrer" className="bsm bsm-wa">
-              <WhatsAppIcon size={12} /> WhatsApp
+                <WhatsAppIcon size={12} /> WhatsApp
               </a>
               {onOfferPrice && (
                 <button onClick={() => onOfferPrice(car)} className="bsm bsm-offer">
-                Offer Price
+                  Offer Price
                 </button>
               )}
             </div>
@@ -192,38 +209,63 @@ function CarCard({
   }
 
   /* ── Compact — similar-cars rail on the detail page ──────────────── */
-  if (variant === 'compact') {
+  if (variant === "compact") {
     return (
       <div className="flex-shrink-0 w-52 bg-white border border-gray-200 rounded-sm overflow-hidden hover:shadow-md transition-shadow">
         <Link href={href}>
           <div className="relative aspect-[4/3] bg-gray-100 overflow-hidden">
-            <span className="absolute top-2 left-2 z-10 bg-[#0D1B3E] text-white text-[10px] font-bold px-2 py-0.5">{car.year}</span>
+            <span className="absolute top-2 left-2 z-10 bg-[#0D1B3E] text-white text-[10px] font-bold px-2 py-0.5">
+              {car.year}
+            </span>
             {car.engine_cc != null && (
-              <span className="absolute top-2 right-2 z-10 bg-black/70 text-white text-[10px] font-bold px-2 py-0.5">{car.engine_cc}CC</span>
+              <span className="absolute top-2 right-2 z-10 bg-black/70 text-white text-[10px] font-bold px-2 py-0.5">
+                {car.engine_cc}CC
+              </span>
             )}
             {showImage ? (
-              <img src={primaryImage!} alt={vehicleImageAlt(car, 0)} onError={() => setImgError(true)}
-                className="w-full h-full object-cover hover:scale-105 transition-transform duration-500" loading="lazy" decoding="async" />
+              <img
+                src={primaryImage!}
+                alt={vehicleImageAlt(car, 0)}
+                onError={() => setImgError(true)}
+                className="w-full h-full object-cover hover:scale-105 transition-transform duration-500"
+                loading="lazy"
+                decoding="async"
+              />
             ) : (
               <div className="w-full h-full flex items-center justify-center bg-gray-50">
-                <span className="text-xs text-gray-300 font-serif">{car.make} {car.model}</span>
+                <span className="text-xs text-gray-300 font-serif">
+                  {car.make} {car.model}
+                </span>
               </div>
             )}
           </div>
         </Link>
         <div className="p-3">
-          <Link href={href} className="block font-serif font-bold text-[#0D1B3E] text-sm leading-tight hover:text-[#C8102E] transition-colors mb-0.5 line-clamp-1">
+          <Link
+            href={href}
+            className="block font-serif font-bold text-[#0D1B3E] text-sm leading-tight hover:text-[#C8102E] transition-colors mb-0.5 line-clamp-1"
+          >
             {car.year} {car.make} {car.model}
           </Link>
           <p className="text-[10px] text-gray-400 mb-2">REF #{car.ref_number}</p>
-          <p className="text-base font-mono font-bold text-[#C8102E]">{fmtUSD(car.fob_price_usd)}</p>
+          <p className="text-base font-mono font-bold text-[#C8102E]">
+            {fmtUSD(car.fob_price_usd)}
+          </p>
           <div className="flex gap-1.5">
-            <Link href={href} className="flex-1 text-center text-[10px] font-bold py-1.5 text-white rounded-sm" style={{ background: '#C8102E' }}>
+            <Link
+              href={href}
+              className="flex-1 text-center text-[10px] font-bold py-1.5 text-white rounded-sm"
+              style={{ background: "#C8102E" }}
+            >
               Inquire
             </Link>
-            <a href={waLink} target="_blank" rel="noopener noreferrer"
+            <a
+              href={waLink}
+              target="_blank"
+              rel="noopener noreferrer"
               className="flex-1 text-center text-[10px] font-bold py-1.5 text-white rounded-sm flex items-center justify-center gap-1"
-              style={{ background: '#25D366' }}>
+              style={{ background: "#25D366" }}
+            >
               <WhatsAppIcon size={10} /> WA
             </a>
           </div>
@@ -233,15 +275,23 @@ function CarCard({
   }
 
   /* ── Grid — home page collections (Featured / Best Sellers) ──────── */
-  const showFavorite = typeof onToggleFavorite === 'function';
+  const showFavorite = typeof onToggleFavorite === "function";
   return (
-    <div className="group flex flex-col rounded-2xl overflow-hidden bg-white transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
-      style={{ border: '1px solid #EEF2F7', boxShadow: '0 2px 10px rgba(0,0,0,0.05)' }}>
-      <div className="relative overflow-hidden bg-gray-100" style={{ aspectRatio: '4/3' }}>
+    <div
+      className="group flex flex-col rounded-2xl overflow-hidden bg-white transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
+      style={{ border: "1px solid #EEF2F7", boxShadow: "0 2px 10px rgba(0,0,0,0.05)" }}
+    >
+      <div className="relative overflow-hidden bg-gray-100" style={{ aspectRatio: "4/3" }}>
         <Link href={href} className="block w-full h-full">
           {showImage ? (
-              <img src={primaryImage!} alt={vehicleImageAlt(car, 0)} loading="lazy" decoding="async" onError={() => setImgError(true)}
-              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+            <img
+              src={primaryImage!}
+              alt={vehicleImageAlt(car, 0)}
+              loading="lazy"
+              decoding="async"
+              onError={() => setImgError(true)}
+              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+            />
           ) : (
             <PhotoPlaceholder />
           )}
@@ -251,26 +301,38 @@ function CarCard({
         )}
 
         {isSold && (
-          <div className="absolute inset-0 flex items-center justify-center" style={{ background: 'rgba(0,0,0,0.45)' }}>
-            <span className="px-4 py-1.5 rounded-full text-xs font-black tracking-widest uppercase text-white"
-              style={{ background: '#16A34A', letterSpacing: '0.18em' }}>Sold</span>
+          <div
+            className="absolute inset-0 flex items-center justify-center"
+            style={{ background: "rgba(0,0,0,0.45)" }}
+          >
+            <span
+              className="px-4 py-1.5 rounded-full text-xs font-black tracking-widest uppercase text-white"
+              style={{ background: "#16A34A", letterSpacing: "0.18em" }}
+            >
+              Sold
+            </span>
           </div>
         )}
 
-        {!hideBadges && (car.is_new_arrival && !isSold ? (
-          <span className="absolute top-2.5 left-2.5 z-10 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider text-white"
-            style={{ background: '#16A34A' }}>
-            New Arrival
-          </span>
-        ) : (
-          <span className="absolute top-2.5 left-2.5 z-10 bg-black/70 text-white text-[10px] font-bold px-2 py-0.5 rounded-md backdrop-blur-sm tracking-wider">
-            {car.year}
-          </span>
-        ))}
+        {!hideBadges &&
+          (isNewArrival && !isSold ? (
+            <span
+              className="absolute top-2.5 left-2.5 z-10 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider text-white"
+              style={{ background: "#16A34A" }}
+            >
+              Recently Listed
+            </span>
+          ) : (
+            <span className="absolute top-2.5 left-2.5 z-10 bg-black/70 text-white text-[10px] font-bold px-2 py-0.5 rounded-md backdrop-blur-sm tracking-wider">
+              {car.year}
+            </span>
+          ))}
 
         {!hideBadges && car.engine_cc != null && (
-          <span className="absolute top-2.5 right-2.5 z-10 text-white text-[10px] font-bold px-2 py-0.5 rounded-md backdrop-blur-sm tracking-wider"
-            style={{ background: 'rgba(200,16,46,0.88)', marginTop: showFavorite ? '2.25rem' : 0 }}>
+          <span
+            className="absolute top-2.5 right-2.5 z-10 text-white text-[10px] font-bold px-2 py-0.5 rounded-md backdrop-blur-sm tracking-wider"
+            style={{ background: "rgba(200,16,46,0.88)", marginTop: showFavorite ? "2.25rem" : 0 }}
+          >
             {car.engine_cc} cc
           </span>
         )}
@@ -279,9 +341,19 @@ function CarCard({
           <button
             onClick={() => onToggleFavorite!(car.id)}
             className="absolute top-2 right-2 z-10 w-7 h-7 rounded-full flex items-center justify-center transition-all duration-200 border-0"
-            style={{ background: isFavorite ? '#C8102E' : 'rgba(255,255,255,0.85)', backdropFilter: 'blur(4px)', boxShadow: '0 1px 6px rgba(0,0,0,0.15)' }}
-            aria-label="Save to favourites">
-            <Heart size={13} fill={isFavorite ? 'white' : 'none'} stroke={isFavorite ? 'white' : '#9CA3AF'} strokeWidth={2} />
+            style={{
+              background: isFavorite ? "#C8102E" : "rgba(255,255,255,0.85)",
+              backdropFilter: "blur(4px)",
+              boxShadow: "0 1px 6px rgba(0,0,0,0.15)",
+            }}
+            aria-label="Save to favourites"
+          >
+            <Heart
+              size={13}
+              fill={isFavorite ? "white" : "none"}
+              stroke={isFavorite ? "white" : "#9CA3AF"}
+              strokeWidth={2}
+            />
           </button>
         )}
       </div>
@@ -290,28 +362,47 @@ function CarCard({
         <div>
           <Link href={href}>
             <h3 className="font-bold text-gray-900 text-[13.5px] leading-snug line-clamp-1 hover:text-[#C8102E] transition-colors">
-              {car.make} {car.model}{car.variant ? ` ${car.variant}` : ''}
+              {car.make} {car.model}
+              {car.variant ? ` ${car.variant}` : ""}
             </h3>
           </Link>
-          <p className="text-[10px] font-mono text-gray-400 mt-0.5 tracking-wider">{car.ref_number}</p>
+          <p className="text-[10px] font-mono text-gray-400 mt-0.5 tracking-wider">
+            {car.ref_number}
+          </p>
         </div>
 
         <div className="flex-1">
-          <p className="text-[9px] uppercase tracking-[0.2em] text-gray-400 font-semibold">FOB Price · Japan</p>
-          <p className="text-[20px] font-mono font-bold leading-tight tracking-tight" style={{ color: '#C8102E' }}>
+          <p className="text-[9px] uppercase tracking-[0.2em] text-gray-400 font-semibold">
+            FOB Price · Japan
+          </p>
+          <p
+            className="text-[20px] font-mono font-bold leading-tight tracking-tight"
+            style={{ color: "#C8102E" }}
+          >
             {fmtUSD(car.fob_price_usd)}
           </p>
         </div>
 
         <div className="flex gap-2 pt-1">
-          <Link href={href} aria-disabled={isSold}
+          <Link
+            href={href}
+            aria-disabled={isSold}
             className="flex-1 text-center py-2 text-[11px] font-bold rounded-lg text-white transition-colors"
-            style={{ background: isSold ? '#9CA3AF' : '#C8102E', pointerEvents: isSold ? 'none' : 'auto' }}>
-            {isSold ? 'Sold Out' : 'Inquire Now'}
+            style={{
+              background: isSold ? "#9CA3AF" : "#C8102E",
+              pointerEvents: isSold ? "none" : "auto",
+            }}
+          >
+            {isSold ? "Sold Out" : "Inquire Now"}
           </Link>
-          <a href={waLink} target="_blank" rel="noopener noreferrer" aria-label="WhatsApp"
+          <a
+            href={waLink}
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="WhatsApp"
             className="w-9 h-9 flex-shrink-0 flex items-center justify-center rounded-lg transition-colors hover:opacity-90"
-            style={{ background: '#25D366' }}>
+            style={{ background: "#25D366" }}
+          >
             <WhatsAppIcon size={15} />
           </a>
         </div>

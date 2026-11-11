@@ -7,9 +7,7 @@ import {
   searchResources,
 } from "@/lib/cloudinary.server";
 
-export const Route = createFileRoute(
-  "/api/public/cloudinary/resources/$dateFolder/$subfolder",
-)({
+export const Route = createFileRoute("/api/public/cloudinary/resources/$dateFolder/$subfolder")({
   server: {
     handlers: {
       GET: async ({ params }) => {
