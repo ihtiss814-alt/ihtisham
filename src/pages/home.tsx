@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import { Link, useLocation } from "wouter";
+import { Link } from "wouter";
 import { useReveal } from "@/hooks/useReveal";
 import {
   ArrowRight,
@@ -165,7 +165,6 @@ function FlagImg({ code, name }: { code: string; name: string }) {
 }
 
 function DestinationCountriesSection() {
-  const [, navigate] = useLocation();
   // Duplicate list so the marquee loops seamlessly
   const track = [...DESTINATIONS, ...DESTINATIONS];
 
@@ -200,9 +199,9 @@ function DestinationCountriesSection() {
 
         <div className="flex marquee-track gap-4 px-4" style={{ width: "max-content" }}>
           {track.map(({ name, code }, i) => (
-            <button
+            <a
               key={`${code}-${i}`}
-              onClick={() => navigate(`/cars?destination=${encodeURIComponent(name)}`)}
+              href={`/cars?destination=${encodeURIComponent(name)}`}
               className="dest-card group flex-shrink-0 flex flex-col items-center gap-3 w-[108px] py-5 px-3 rounded-[8px] border border-white/10 bg-white/5 hover:bg-white/10 hover:border-[#C8102E]/60 transition-all duration-200 cursor-pointer"
             >
               {/* Country flag — matched by the ISO code with emoji fallback */}
@@ -219,7 +218,7 @@ function DestinationCountriesSection() {
               <span className="text-[9px] tracking-[0.2em] uppercase text-[#C8102E]/60 group-hover:text-[#C8102E] font-bold transition-colors">
                 REQUEST OPTIONS
               </span>
-            </button>
+            </a>
           ))}
         </div>
       </div>
@@ -332,7 +331,6 @@ function accentToFilter(hex: string): string {
 }
 
 function ShopByMakeSection() {
-  const [, navigate] = useLocation();
   const sectionRef = React.useRef<HTMLElement>(null);
   const [makeCounts, setMakeCounts] = React.useState<Record<string, number>>({});
   const [countsLoading, setCountsLoading] = React.useState(true);
@@ -408,9 +406,9 @@ function ShopByMakeSection() {
           {POPULAR_BRANDS.map(({ name, slug, accent }) => {
             const count = makeCounts[name];
             return (
-              <button
+              <a
                 key={name}
-                onClick={() => navigate(`/cars?make=${encodeURIComponent(name)}`)}
+                href={`/cars?make=${encodeURIComponent(name)}`}
                 className="group flex min-w-0 min-h-[148px] flex-col items-center justify-between gap-2 rounded-xl border border-gray-200/90 bg-white px-3 py-4 shadow-[0_2px_8px_rgba(15,23,42,0.04)] hover:-translate-y-1 hover:border-[#C8102E]/50 hover:shadow-[0_12px_28px_rgba(200,16,46,0.12)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#C8102E] focus-visible:ring-offset-2 transition-all duration-200 cursor-pointer"
               >
                 {/* Logo box */}
@@ -434,7 +432,7 @@ function ShopByMakeSection() {
                       ? "Stock unavailable"
                       : `${(count ?? 0).toLocaleString()} ${(count ?? 0) === 1 ? "vehicle" : "vehicles"} in stock`}
                 </span>
-              </button>
+              </a>
             );
           })}
         </div>
@@ -634,7 +632,6 @@ function HowToBuySection() {
 }
 
 function ShopByBodyTypeSection() {
-  const [, navigate] = useLocation();
   const sectionRef = React.useRef<HTMLElement>(null);
   const [bodyCounts, setBodyCounts] = React.useState<Record<string, number>>({});
   const [countsLoading, setCountsLoading] = React.useState(true);
@@ -706,9 +703,9 @@ function ShopByBodyTypeSection() {
           {POPULAR_BODY_TYPES.map(({ name, accent, icon }) => {
             const count = bodyCounts[name];
             return (
-              <button
+              <a
                 key={name}
-                onClick={() => navigate(`/cars?body=${encodeURIComponent(name)}`)}
+                href={`/cars?body=${encodeURIComponent(name)}`}
                 className="group flex min-w-0 min-h-[176px] flex-col items-center justify-between gap-3 rounded-xl border border-gray-200/90 bg-white px-3 py-4 shadow-[0_2px_8px_rgba(15,23,42,0.04)] hover:-translate-y-1 hover:border-[#C8102E]/50 hover:shadow-[0_12px_28px_rgba(200,16,46,0.12)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#C8102E] focus-visible:ring-offset-2 transition-all duration-200 cursor-pointer"
               >
                 <span
@@ -741,7 +738,7 @@ function ShopByBodyTypeSection() {
                       ? "Stock unavailable"
                       : `${(count ?? 0).toLocaleString()} ${(count ?? 0) === 1 ? "vehicle" : "vehicles"} in stock`}
                 </span>
-              </button>
+              </a>
             );
           })}
         </div>

@@ -1,5 +1,4 @@
 import { useEffect, useMemo, useRef } from "react";
-import { useLocation } from "wouter";
 import "./how-to-buy.css";
 
 const HTML = `<section class="wt-htb" id="how-to-buy" aria-labelledby="wt-htb-title">
@@ -100,7 +99,7 @@ const HTML = `<section class="wt-htb" id="how-to-buy" aria-labelledby="wt-htb-ti
       </div>
 
       <div class="wt-htb__actions">
-        <a class="wt-htb__btn wt-htb__btn--primary" href="/cars" data-wt-nav>Browse available cars</a>
+        <a class="wt-htb__btn wt-htb__btn--primary" href="/cars">Browse available cars</a>
         <a class="wt-htb__btn wt-htb__btn--ghost" href="__WA__" target="_blank" rel="noopener noreferrer">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M20.5 3.5A11 11 0 003.3 16.8L2 22l5.3-1.4A11 11 0 0020.5 3.5zM12 20.2a9 9 0 01-4.6-1.3l-.3-.2-3.1.8.8-3-.2-.3A9 9 0 1112 20.2zm5-6.7c-.3-.1-1.6-.8-1.9-.9-.3-.1-.5-.1-.7.1l-.9 1.1c-.2.2-.3.2-.6.1a7.4 7.4 0 01-3.7-3.2c-.3-.5.3-.5.8-1.5.1-.2 0-.4 0-.5l-.9-2.1c-.2-.5-.4-.4-.6-.4h-.5a1 1 0 00-.7.3 3 3 0 00-.9 2.2 5.2 5.2 0 001.1 2.8 11.9 11.9 0 004.6 4.1c1.7.7 2.4.8 3.2.7.5-.1 1.6-.7 1.8-1.3.2-.6.2-1.2.2-1.3-.1-.1-.3-.2-.6-.3z"/></svg>
           Ask us on WhatsApp
@@ -395,7 +394,7 @@ const HTML = `<section class="wt-htb" id="how-to-buy" aria-labelledby="wt-htb-ti
       <h3>Ready to find your car?</h3>
       <p>Tell us your budget and destination port. We will reply with real options and a full cost estimate, with no obligation.</p>
       <div class="wt-htb__actions">
-        <a class="wt-htb__btn wt-htb__btn--primary" href="/cars" data-wt-nav>Browse available cars <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+        <a class="wt-htb__btn wt-htb__btn--primary" href="/cars">Browse available cars <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
         <a class="wt-htb__btn wt-htb__btn--light" href="__WA__" target="_blank" rel="noopener noreferrer"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M20.5 3.5A11 11 0 003.3 16.8L2 22l5.3-1.4A11 11 0 0020.5 3.5zM12 20.2a9 9 0 01-4.6-1.3l-.3-.2-3.1.8.8-3-.2-.3A9 9 0 1112 20.2zm5-6.7c-.3-.1-1.6-.8-1.9-.9-.3-.1-.5-.1-.7.1l-.9 1.1c-.2.2-.3.2-.6.1a7.4 7.4 0 01-3.7-3.2c-.3-.5.3-.5.8-1.5.1-.2 0-.4 0-.5l-.9-2.1c-.2-.5-.4-.4-.6-.4h-.5a1 1 0 00-.7.3 3 3 0 00-.9 2.2 5.2 5.2 0 001.1 2.8 11.9 11.9 0 004.6 4.1c1.7.7 2.4.8 3.2.7.5-.1 1.6-.7 1.8-1.3.2-.6.2-1.2.2-1.3-.1-.1-.3-.2-.6-.3z"/></svg> Get an estimate on WhatsApp</a>
       </div>
     </div>
@@ -406,12 +405,11 @@ const HTML = `<section class="wt-htb" id="how-to-buy" aria-labelledby="wt-htb-ti
 
 /**
  * "How to buy" section. Markup and styles are scoped under .wt-htb so they
- * cannot leak into the rest of the site. Internal links (data-wt-nav) go
- * through the client router instead of a full page load.
+ * cannot leak into the rest of the site. Internal links remain ordinary
+ * anchors so the browser performs full document navigation.
  */
 export default function HowToBuy() {
   const hostRef = useRef<HTMLDivElement>(null);
-  const [, navigate] = useLocation();
 
   const waNumber = import.meta.env.VITE_WHATSAPP_NUMBER || "818089227375";
   const waLink = `https://wa.me/${waNumber}?text=${encodeURIComponent(
@@ -489,14 +487,5 @@ export default function HowToBuy() {
     };
   }, []);
 
-  const onClick = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
-    const a = (e.target as HTMLElement).closest<HTMLAnchorElement>("a[data-wt-nav]");
-    if (!a) return;
-    e.preventDefault();
-    navigate(a.getAttribute("href") || "/");
-    window.scrollTo({ top: 0 });
-  };
-
-  return <div ref={hostRef} onClick={onClick} dangerouslySetInnerHTML={{ __html: html }} />;
+  return <div ref={hostRef} dangerouslySetInnerHTML={{ __html: html }} />;
 }
