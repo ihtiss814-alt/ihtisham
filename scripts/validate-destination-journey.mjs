@@ -193,7 +193,18 @@ check(
   "Inventory calculator is not connected to free-text destination and saved preference.",
 );
 check(
-  cars.includes("QUOTE REQUIRED") && /will not substitute a generic freight price/i.test(cars),
+  cars.includes("const calculatorId = useId();") &&
+    cars.includes('name={`${calculatorId}-calc-inspection`}') &&
+    cars.includes('name={`${calculatorId}-calc-insurance`}'),
+  "Each responsive calculator instance must have unique radio groups and must not hard-code duplicate destination element IDs.",
+);
+check(
+  !cars.includes('idPrefix="inventory-calculator"'),
+  "Responsive calculator instances must use generated unique destination field IDs.",
+);
+check(
+  cars.includes("QUOTE REQUIRED") &&
+    /will not substitute a generic freight price/i.test(cars),
   "Inventory calculator must request a quote instead of estimating an unknown route.",
 );
 check(

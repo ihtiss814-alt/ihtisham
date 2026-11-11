@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useRef } from "react";
+import React, { useState, useEffect, useCallback, useRef, useId } from "react";
 import { useMeta } from "@/lib/use-meta";
 import { useSeoBootstrap } from "@/lib/seo-bootstrap-context";
 import { isIndexableVehicle, newArrivalCutoffIso, type VehicleSeoCar } from "@/lib/vehicle-seo";
@@ -1128,6 +1128,7 @@ function BodyTypeCarousel({ setActiveBody }: { setActiveBody: (v: string) => voi
 /* TOTAL PRICE CALCULATOR (Supabase-connected)                      */
 /* ─────────────────────────────────────────────────────────────── */
 function TotalPriceCalculator({ initialCountry }: { initialCountry?: string }) {
+  const calculatorId = useId();
   const preference = useDestinationPreference();
   const [country, setCountry] = useState(initialCountry ? canonicalCountry(initialCountry) : "");
   const [port, setPort] = useState("");
@@ -1252,7 +1253,6 @@ function TotalPriceCalculator({ initialCountry }: { initialCountry?: string }) {
             port={port}
             onCountryChange={handleCountryChange}
             onPortChange={handlePortChange}
-            idPrefix="inventory-calculator"
             dark
           />
           {inputError && (
@@ -1271,7 +1271,7 @@ function TotalPriceCalculator({ initialCountry }: { initialCountry?: string }) {
                 <label key={option} className="flex cursor-pointer items-center gap-2">
                   <input
                     type="radio"
-                    name="calc-inspection"
+                    name={`${calculatorId}-calc-inspection`}
                     value={option}
                     checked={inspection === option}
                     onChange={() => {
@@ -1294,7 +1294,7 @@ function TotalPriceCalculator({ initialCountry }: { initialCountry?: string }) {
                 <label key={option} className="flex cursor-pointer items-center gap-2">
                   <input
                     type="radio"
-                    name="calc-insurance"
+                    name={`${calculatorId}-calc-insurance`}
                     value={option}
                     checked={insurance === option}
                     onChange={() => {
