@@ -251,7 +251,6 @@ if (enrichedSlugs.size !== 10) {
   errors.push("Expected exactly 10 Tier 1 enrichments; found " + enrichedSlugs.size);
 }
 
-
 const tierTwoPath = new URL("../src/lib/country-tier-two-content.ts", import.meta.url);
 const tierTwoSource = readFileSync(tierTwoPath, "utf8");
 const tierTwoFile = ts.createSourceFile(
@@ -361,7 +360,6 @@ for (const slug of tierTwoCountries) {
 if (tierTwoEnrichedSlugs.size !== 13) {
   errors.push("Expected exactly 13 Tier 2 enrichments; found " + tierTwoEnrichedSlugs.size);
 }
-
 
 if (errors.length) {
   console.error(`Country landing-page validation failed (${errors.length} issue(s)):`);

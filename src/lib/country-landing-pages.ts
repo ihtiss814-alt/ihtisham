@@ -1644,7 +1644,8 @@ export const COUNTRY_LANDING_PAGES: CountryLandingPage[] = [
         authority: "Government of The Bahamas",
       },
       {
-        label: "International Trade Administration — Bahamas import tariff and restricted vehicle guidance (2026)",
+        label:
+          "International Trade Administration — Bahamas import tariff and restricted vehicle guidance (2026)",
         url: "https://www.trade.gov/country-commercial-guides/bahamas-import-tariffs",
         authority: "U.S. Department of Commerce, International Trade Administration",
       },
