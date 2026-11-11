@@ -1,4 +1,5 @@
 import { useState, useCallback } from "react";
+import { Link } from "wouter";
 import {
   Copy,
   Check,
@@ -463,13 +464,16 @@ export default function PaymentInformationPage() {
       <section className="py-6 bg-white border-t border-gray-100">
         <div className="container mx-auto px-4 md:px-8 max-w-2xl text-center text-sm text-gray-500">
           Before paying, review our{" "}
-          <a href="/buyer-information" className="text-[#C8102E] underline underline-offset-2">
+          <Link href="/buyer-information" className="text-[#C8102E] underline underline-offset-2">
             Buyer Information
-          </a>{" "}
+          </Link>{" "}
           and{" "}
-          <a href="/terms-and-conditions" className="text-[#C8102E] underline underline-offset-2">
+          <Link
+            href="/terms-and-conditions"
+            className="text-[#C8102E] underline underline-offset-2"
+          >
             Terms &amp; Conditions
-          </a>
+          </Link>
           .
         </div>
       </section>

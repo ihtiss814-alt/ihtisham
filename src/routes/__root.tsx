@@ -100,6 +100,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" as const },
       { rel: "preconnect", href: "https://flagcdn.com", crossOrigin: "anonymous" as const },
       { rel: "preconnect", href: "https://images.unsplash.com", crossOrigin: "anonymous" as const },
+      { rel: "preconnect", href: "https://res.cloudinary.com", crossOrigin: "anonymous" as const },
       ...(import.meta.env.VITE_SUPABASE_URL
         ? [
             {

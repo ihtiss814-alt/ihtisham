@@ -1,17 +1,31 @@
 # Wazir Trading LLC — Performance Edition
 
-This branch preserves the current TanStack Start + Wouter + Supabase architecture, visual design, public routes, SEO work and live inventory source of truth.
+This edition preserves the existing TanStack Start + Wouter + Supabase architecture, visual identity, SEO routes, and live inventory source of truth.
 
-## Included changes
-- Shared, short-lived in-tab request cache with concurrent-request deduplication.
-- Homepage and navbar use one shared live stock-count request.
-- Vehicle detail reads and related-vehicle lookups are cached; detail prefetch helper is available.
-- Inventory result pages can be prefetched before navigation; list results are cached for 25 seconds.
-- Exact-count inventory queries select only the id column.
-- Published shipping rates are cached for five minutes without inventing fallback prices.
-- Japan clock refreshes once per minute instead of every second.
-- Common font, flag, Unsplash and configured Supabase hosts are preconnected.
-- Browser history scroll restoration and hover/focus prefetch for inventory and vehicle-detail links.
-- Vehicle detail visual design and existing SEO routes are preserved.
+## Navigation and data
 
-The cache is memory-only and clears on reload/tab close. The workflow validates TypeScript, lint, SEO validators, detail validator and production build before creating the full tracked-source ZIP. It excludes node_modules, .git, local environment files and generated build output.
+- Internal navigation remains client-side; inventory and vehicle-detail data prefetch on pointer hover or keyboard focus.
+- Browser Back/Forward restores the prior scroll position.
+- Successful read requests share an in-tab cache and concurrent callers share the same in-flight request.
+- Vehicle detail, related vehicles, inventory pages, filter metadata, tab counts, model options, homepage stock/category counts, featured vehicles, and published shipping rates are cached for short, explicit periods.
+- The inventory list uses a public field allowlist instead of selecting every database column; chassis numbers are not fetched into public listing cards.
+- Homepage stock counts and the persistent navigation header use the same available-stock count request.
+
+## Homepage and images
+
+- The first hero image is preloaded for the initial page render.
+- Hero images use a 1920px, lower-quality CDN variant and load progressively; the page no longer preloads all six backgrounds immediately.
+- Hero autoplay pauses in hidden tabs and respects reduced-motion preferences.
+- Homepage make/body-type counts are deferred until their sections approach the viewport and cached for reuse.
+- Featured vehicle records and their photo relation are fetched in one Supabase query.
+- Vehicle cards and galleries use Cloudinary responsive candidates when the source is a Cloudinary image URL. Non-Cloudinary image URLs are left unchanged.
+- Vehicle images reserve intrinsic dimensions to reduce layout movement.
+- Public Vite assets, local manufacturer logos, body-style icons, and images have browser cache headers.
+
+## Cache freshness
+
+The request cache is memory-only and clears when a browser tab is closed or reloaded. Current TTLs: shared stock count 30 seconds; vehicle detail 45 seconds; homepage featured inventory 45 seconds; inventory page results 25 seconds; related vehicles 60 seconds; homepage category counts 90 seconds; inventory filter metadata/model options and published shipping rates five minutes. Failed reads are not cached.
+
+## Verification
+
+GitHub Actions runs TypeScript, ESLint, the country/vehicle SEO validators, the vehicle detail validator, performance regression guards, and the production build on both `main` and the performance completion branch. A full source ZIP is uploaded only after every validation and the build pass.
