@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { Link, useLocation } from "wouter";
 import { Menu, X, ChevronRight, ChevronDown, Clock, Car, Mail } from "lucide-react";
-import { isSupabaseConfigured, supabase } from "@/lib/supabase";
+import { getAvailableStockCount } from "@/lib/inventory-cache";
 import { useExchangeRate } from "@/hooks/useExchangeRate";
 
 // ─── Brand tokens ────────────────────────────────────────────────
@@ -43,7 +43,7 @@ function useJapanTime() {
       setDisplay(`${weekday}, ${month}/${day}, ${time}`);
     };
     tick();
-    const id = setInterval(tick, 1000);
+    const id = setInterval(tick, 60_000);
     return () => clearInterval(id);
   }, []);
   return display;
@@ -52,14 +52,11 @@ function useJapanTime() {
 function useStockCount() {
   const [count, setCount] = useState<number | null>(null);
   useEffect(() => {
-    if (!isSupabaseConfigured) return;
-    supabase
-      .from("cars")
-      .select("id", { count: "exact", head: true })
-      .eq("status", "available")
-      .then(({ count: c }) => {
-        if (c !== null) setCount(c);
-      });
+    let active = true;
+    getAvailableStockCount().then((value) => {
+      if (active && value !== null) setCount(value);
+    }).catch((error: unknown) => console.warn("Could not load navigation stock count:", error));
+    return () => { active = false; };
   }, []);
   return count;
 }
@@ -263,7 +260,7 @@ export default function Navbar() {
                     className="h-[68px] md:h-[72px] w-auto transition-opacity duration-200 group-hover:opacity-85"
                     style={{ mixBlendMode: "multiply" }}
                     loading="eager"
-                    decoding="sync"
+                    decoding="async"
                     width="267"
                     height="178"
                   />
@@ -461,7 +458,7 @@ export default function Navbar() {
                 className="h-[68px] w-auto"
                 style={{ mixBlendMode: "multiply" }}
                 loading="eager"
-                decoding="sync"
+                decoding="async"
                 width="267"
                 height="178"
               />
