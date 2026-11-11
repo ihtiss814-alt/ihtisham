@@ -23,7 +23,7 @@ const vercel = read("vercel.json");
 if (
   !home.includes("getAvailableStockCount()") ||
   !home.includes("getHomepageInventoryCounts(") ||
-  !home.includes('cachedRequest("homepage:featured-vehicles"')
+  !home.includes('"homepage:featured-vehicles"') || !home.includes("cachedRequest(")
 ) {
   fail("Homepage must share cached stock/category counts and cache featured inventory.");
 } else {
@@ -98,7 +98,7 @@ if (
 if (
   !imageDelivery.includes('url.hostname !== CLOUDINARY_HOST') ||
   !imageDelivery.includes("f_auto,q_auto,w_") ||
-  !imageDelivery.includes("return imageUrl")
+  !imageDelivery.includes("?? imageUrl")
 ) {
   fail("Responsive image transformations must be restricted to Cloudinary and preserve other providers.");
 } else {

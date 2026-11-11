@@ -1612,7 +1612,7 @@ type Filters = {
 };
 
 const CARS_LIST_SELECT =
-  "id,ref_number,make,model,variant,year,engine_cc,fuel_type,transmission,body_type,color,drive,steering,seats,doors,mileage_km,auction_grade,fob_price_usd,stock_location,port_of_loading,shipment_method,status,collection,is_featured,is_new_arrival,features,created_at,exterior_grade,interior_grade,lot_number,manufacture_month,car_images(image_url,is_primary,display_order)";
+  "id,ref_number,make,model,variant,year,engine_cc,fuel_type,transmission,body_type,color,drive,steering,mileage_km,auction_grade,fob_price_usd,stock_location,status,collection,created_at,car_images(image_url,is_primary,display_order)";
 
 function createCarsListQuery() {
   return supabase
