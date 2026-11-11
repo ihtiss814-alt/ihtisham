@@ -247,7 +247,9 @@ function CountryPageContent({ country }: { country: CountryPageData }) {
                   >
                     Shipping and destination planning for {country.name}
                   </h2>
-                  <p className="text-muted-foreground leading-7">{tierOneContent.logisticsSummary}</p>
+                  <p className="text-muted-foreground leading-7">
+                    {tierOneContent.logisticsSummary}
+                  </p>
                   <h3 className="mt-6 text-lg font-semibold text-foreground">
                     Country-specific checks
                   </h3>
@@ -292,7 +294,10 @@ function CountryPageContent({ country }: { country: CountryPageData }) {
                   </h2>
                   <div className="space-y-3">
                     {tierOneContent.faqs.map((faq) => (
-                      <details key={faq.question} className="group border border-border bg-card p-4">
+                      <details
+                        key={faq.question}
+                        className="group border border-border bg-card p-4"
+                      >
                         <summary className="flex cursor-pointer list-none items-start justify-between gap-4 font-semibold text-foreground marker:hidden">
                           <span>{faq.question}</span>
                           <span
@@ -302,9 +307,7 @@ function CountryPageContent({ country }: { country: CountryPageData }) {
                             +
                           </span>
                         </summary>
-                        <p className="pt-3 text-sm leading-6 text-muted-foreground">
-                          {faq.answer}
-                        </p>
+                        <p className="pt-3 text-sm leading-6 text-muted-foreground">{faq.answer}</p>
                       </details>
                     ))}
                   </div>
