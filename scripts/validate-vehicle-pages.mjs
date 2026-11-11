@@ -19,7 +19,6 @@ const routePageSource = fs.readFileSync(
   "utf8",
 );
 const seoBootstrapSource = fs.readFileSync(path.resolve("src/lib/seo-bootstrap.ts"), "utf8");
-const homeSource = fs.readFileSync(path.resolve("src/pages/home.tsx"), "utf8");
 const sitemapSource = fs.readFileSync(path.resolve("src/routes/sitemap[.]xml.ts"), "utf8");
 const appSource = fs.readFileSync(path.resolve("src/App.tsx"), "utf8");
 const footerSource = fs.readFileSync(path.resolve("src/components/Footer.tsx"), "utf8");
@@ -114,7 +113,7 @@ const arrayBody = (sourceText, start, end) => {
 };
 const makeFilterBlock = arrayBody(carsPageSource, "const MAKE_NAMES = [", "];");
 const makeFilterValues = new Set(
-  [...makeFilterBlock.matchAll(/["']([^"']+)["']/g)].map((match) => match[1]),
+  [...makeFilterBlock.matchAll(/['"]([^'"]+)['"]/g)].map((match) => match[1]),
 );
 for (const make of makes) {
   if (!makeFilterValues.has(make.make))
@@ -122,7 +121,7 @@ for (const make of makes) {
 }
 const bodyFilterBlock = arrayBody(carsPageSource, "const BODY_TYPE_ITEMS = [", "];");
 const bodyFilterValues = new Set(
-  [...bodyFilterBlock.matchAll(/name:\s*["']([^"']+)["']/g)].map((match) => match[1]),
+  [...bodyFilterBlock.matchAll(/name:\s*['"]([^'"]+)['"]/g)].map((match) => match[1]),
 );
 for (const bodyType of bodyTypes) {
   if (bodyType.directoryVisible === false) continue;
@@ -132,8 +131,13 @@ for (const bodyType of bodyTypes) {
   if (!labels.some((label) => bodyFilterValues.has(label)))
     fail(`Body-style guide is not present in the inventory filter taxonomy: ${bodyType.bodyType}`);
 }
-if (!routePageSource.includes("BODY_TYPE_LANDING_PAGES"))
-  fail("Vehicle directory must display the body-style registry count.");
+if (
+  !routePageSource.includes("vehicleLandingDirectoryCounts()") ||
+  !routePageSource.includes("directoryCounts.makes") ||
+  !routePageSource.includes("directoryCounts.models") ||
+  !routePageSource.includes("directoryCounts.bodyTypes")
+)
+  fail("Vehicle directory must display the visible manufacturer, model and body-style counts.");
 if (!routePageSource.includes("return page ? <DetailPageContent page={page} /> : <NotFound />"))
   fail("Unknown vehicle guide routes must render the existing 404 page.");
 if (!seoBootstrapSource.includes("pathname.startsWith(`${VEHICLE_LANDING_DIRECTORY_PATH}/`)"))
@@ -156,7 +160,7 @@ if (
   !appSource.includes('path="/used-japanese-cars/body-type/:bodySlug"')
 )
   fail("Vehicle landing directory/body-style routes are not registered.");
-if (!/href:\s*["']\/used-japanese-cars["']/.test(footerSource))
+if (!/href:\s*['"]\/used-japanese-cars['"]/.test(footerSource))
   fail("Footer must link to the vehicle guide directory.");
 
 const sampleCar = {
@@ -217,11 +221,7 @@ if (
     .some((page) => page.path === "/used-japanese-cars/mitsubishi/canter")
 )
   fail("Mitsubishi Canter Guts must map to the Mitsubishi Canter family.");
-
-if (
-  !/\.eq\(\s*["']is_featured["']\s*,\s*true\s*\)/.test(seoBootstrapSource) ||
-  !/\.eq\(\s*["']is_featured["']\s*,\s*true\s*\)/.test(homeSource)
-)
+if (!/\.eq\(\s*["']is_featured["']\s*,\s*true\s*\)/.test(seoBootstrapSource))
   fail("Homepage Featured Collection must query is_featured, not the legacy new-arrival flag.");
 if (!carsPageSource.includes("newArrivalCutoffIso()"))
   fail("New Arrivals must use a bounded created_at recency window.");

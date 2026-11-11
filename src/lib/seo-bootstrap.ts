@@ -1,3 +1,4 @@
+import { VEHICLE_DETAIL_SELECT } from "@/lib/vehicle-detail-data";
 import { isSupabaseConfigured, supabase } from "./supabase";
 import { buildFaqStructuredData } from "../pages/faqs";
 import {
@@ -164,7 +165,6 @@ function basePayload(
   };
 }
 
-const VEHICLE_DETAIL_SELECT = "*, car_images(image_url, is_primary, display_order)";
 const INVENTORY_SELECT = "*, car_images(image_url, is_primary, display_order)";
 const FEATURED_SELECT =
   "id,ref_number,make,model,variant,year,engine_cc,fob_price_usd,is_featured,created_at,mileage_km,transmission,fuel_type,car_images(image_url,is_primary,display_order)";

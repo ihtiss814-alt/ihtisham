@@ -1,5 +1,6 @@
 import { Link } from "wouter";
 import { ArrowRight, ExternalLink, Globe2, ShieldCheck } from "lucide-react";
+import { CountryFlag } from "@/components/VehicleIdentity";
 import {
   COUNTRY_LANDING_PAGES,
   getCountryLandingPage,
@@ -79,7 +80,10 @@ export function CountryDirectoryPage() {
                       href={`${DIRECTORY_PATH}/${country.slug}`}
                       className="group flex items-center justify-between gap-3 border border-border bg-card px-4 py-4 hover:border-primary/50 transition-colors"
                     >
-                      <span className="font-semibold text-foreground">{country.name}</span>
+                      <span className="flex min-w-0 items-center gap-3">
+                        <CountryFlag slug={country.slug} country={country.name} />
+                        <span className="font-semibold text-foreground">{country.name}</span>
+                      </span>
                       <ArrowRight
                         size={17}
                         className="text-primary shrink-0 transition-transform group-hover:translate-x-1"
@@ -128,9 +132,12 @@ function CountryPageContent({ country }: { country: CountryPageData }) {
             <span className="mx-2">/</span>
             <span className="text-white">{country.name}</span>
           </nav>
-          <p className="text-xs font-bold uppercase tracking-[0.22em] text-white/65 mb-4">
-            {country.region} · Destination guide
-          </p>
+          <div className="mb-5 flex items-center gap-3">
+            <CountryFlag slug={country.slug} country={country.name} className="h-11 w-14" />
+            <p className="text-xs font-bold uppercase tracking-[0.22em] text-white/65">
+              {country.region} · Destination guide
+            </p>
+          </div>
           <h1 className="max-w-4xl text-3xl md:text-5xl font-serif font-bold leading-tight">
             {country.name}: Japanese Used Vehicle Import Guide
           </h1>

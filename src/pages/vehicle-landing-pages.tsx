@@ -2,16 +2,14 @@ import { useEffect, useState } from "react";
 import { Link, useLocation } from "wouter";
 import { ArrowRight, CarFront, ShieldCheck } from "lucide-react";
 import CarCard, { resolvePrimaryImage, type Car } from "@/components/CarCard";
+import { BodyTypeIcon, MakeLogo } from "@/components/VehicleIdentity";
 import NotFound from "@/pages/not-found";
 import { useSeoBootstrap } from "@/lib/seo-bootstrap-context";
 import { useMeta } from "@/lib/use-meta";
 import { isSupabaseConfigured, supabase } from "@/lib/supabase";
 import { isIndexableVehicle, type VehicleSeoCar } from "@/lib/vehicle-seo";
 import {
-  MIN_INDEXABLE_LANDING_STOCK,
   MODEL_LANDING_PAGES,
-  summarizeVehicleLandingInventory,
-  vehicleLandingAliasOrFilter,
   VEHICLE_LANDING_DIRECTORY_PATH,
   getBodyTypeLandingPage,
   getMakeLandingPage,
@@ -21,6 +19,9 @@ import {
   vehicleLandingDirectorySections,
   type VehicleLandingInventorySummary,
   type VehicleLandingPage,
+  MIN_INDEXABLE_LANDING_STOCK,
+  summarizeVehicleLandingInventory,
+  vehicleLandingAliasOrFilter,
 } from "@/lib/vehicle-landing-pages";
 
 function VehiclePageIntro({
@@ -110,14 +111,21 @@ export function VehicleLandingDirectoryPage() {
                     href={page.path}
                     className="group flex items-center justify-between gap-3 border border-border bg-card px-4 py-4 hover:border-primary/50 transition-colors"
                   >
-                    <span className="min-w-0">
-                      <span className="block font-semibold text-foreground">{page.label}</span>
-                      <span className="block mt-1 text-xs text-muted-foreground">
-                        {page.kind === "make"
-                          ? "Browse manufacturer stock"
-                          : page.kind === "model"
-                            ? `${page.make} model guide`
-                            : "Browse matching body style"}
+                    <span className="flex min-w-0 items-center gap-3">
+                      {page.kind === "body-type" ? (
+                        <BodyTypeIcon bodyType={page.bodyType || page.label} />
+                      ) : (
+                        <MakeLogo make={page.make || page.label} />
+                      )}
+                      <span className="min-w-0">
+                        <span className="block font-semibold text-foreground">{page.label}</span>
+                        <span className="block mt-1 text-xs text-muted-foreground">
+                          {page.kind === "make"
+                            ? "Browse manufacturer stock"
+                            : page.kind === "model"
+                              ? `${page.make} model guide`
+                              : "Browse matching body style"}
+                        </span>
                       </span>
                     </span>
                     <ArrowRight
@@ -254,17 +262,7 @@ function DetailPageContent({ page }: { page: VehicleLandingPage }) {
     return () => {
       active = false;
     };
-  }, [
-    page.path,
-    page.make,
-    page.model,
-    page.bodyType,
-    page.makeAliases,
-    page.modelAliases,
-    page.bodyTypeAliases,
-    serverInventoryResolved,
-    hasQuery,
-  ]);
+  }, [page.path, page.make, page.model, page.bodyType, serverInventoryResolved, hasQuery]);
 
   const activeClientInventory = clientInventory?.path === page.path ? clientInventory : null;
   const cars = serverInventoryResolved
@@ -334,13 +332,20 @@ function DetailPageContent({ page }: { page: VehicleLandingPage }) {
             )}
             <span className="text-white">{page.label}</span>
           </nav>
-          <p className="text-xs font-bold uppercase tracking-[0.22em] text-white/65 mb-4">
-            {page.kind === "make"
-              ? "Manufacturer guide"
-              : page.kind === "model"
-                ? "Model guide"
-                : "Body-style guide"}
-          </p>
+          <div className="mb-5 flex items-center gap-3">
+            {page.kind === "body-type" ? (
+              <BodyTypeIcon bodyType={page.bodyType || page.label} />
+            ) : (
+              <MakeLogo make={page.make || page.label} size="lg" />
+            )}
+            <p className="text-xs font-bold uppercase tracking-[0.22em] text-white/65">
+              {page.kind === "make"
+                ? "Manufacturer guide"
+                : page.kind === "model"
+                  ? "Model guide"
+                  : "Body-style guide"}
+            </p>
+          </div>
           <h1 className="max-w-4xl text-3xl md:text-5xl font-serif font-bold leading-tight">
             {page.kind === "body-type"
               ? `Japanese ${page.label} Vehicles for Export`
@@ -536,7 +541,10 @@ function DetailPageContent({ page }: { page: VehicleLandingPage }) {
                       href={related.path}
                       className="flex items-center justify-between gap-3 border border-border bg-card px-4 py-3 hover:border-primary/50 transition-colors"
                     >
-                      <span className="font-semibold text-foreground">{related.label}</span>
+                      <span className="flex min-w-0 items-center gap-3">
+                        <MakeLogo make={page.make || related.make || related.label} size="sm" />
+                        <span className="font-semibold text-foreground">{related.label}</span>
+                      </span>
                       <ArrowRight size={16} className="text-primary" />
                     </Link>
                   ))}
