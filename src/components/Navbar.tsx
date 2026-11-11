@@ -193,7 +193,10 @@ export default function Navbar() {
               <span className="text-[10px] tracking-[0.1em] text-gray-400 font-medium whitespace-nowrap">
                 Japan Standard Time
               </span>
-              <span className="text-[10.5px] font-semibold text-gray-700 tabular-nums whitespace-nowrap" suppressHydrationWarning>
+              <span
+                className="text-[10.5px] font-semibold text-gray-700 tabular-nums whitespace-nowrap"
+                suppressHydrationWarning
+              >
                 {japanTime}
               </span>
             </div>

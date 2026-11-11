@@ -127,7 +127,9 @@ if (
   !navbar.includes("suppressHydrationWarning") ||
   navbar.includes('japanTime || "--"')
 ) {
-  fail("Navbar should render server-known stock totals and a real JST time instead of SSR placeholders.");
+  fail(
+    "Navbar should render server-known stock totals and a real JST time instead of SSR placeholders.",
+  );
 } else {
   pass("Navbar uses SEO bootstrap stock totals and renders JST time in the initial HTML.");
 }

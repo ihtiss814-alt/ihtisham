@@ -151,7 +151,8 @@ if (!Array.isArray(pages) || pages.length < 40)
   fail("At least 40 vehicle landing pages are required.");
 if (makes.length < 8) fail("At least 8 manufacturer landing pages are required.");
 if (models.length < 20) fail("At least 20 model landing pages are required.");
-if (bodyTypes.length !== 12) fail("The body-style registry should contain exactly 12 body-style pages.");
+if (bodyTypes.length !== 12)
+  fail("The body-style registry should contain exactly 12 body-style pages.");
 if (registry.MIN_INDEXABLE_LANDING_STOCK !== 5)
   fail("Landing-page indexation threshold must be 5 qualifying vehicles.");
 
@@ -613,7 +614,6 @@ for (const [key, content] of Object.entries(tierTwoContent)) {
     fail("Tier 2 must preserve the existing model route visibility state: " + key);
   }
 }
-
 
 const expectedTierThreeMakes = new Set(["mitsubishi-fuso", "hino"]);
 const expectedTierThreeModels = new Set([
