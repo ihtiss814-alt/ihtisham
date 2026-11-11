@@ -105,8 +105,10 @@ check(
 check(
   destinationControl.includes(
     "Saving this preference does not confirm an available shipping route or a price.",
-  ),
-  "Header destination selector must explicitly avoid implying service or rate confirmation.",
+  ) &&
+    destinationControl.includes("onCountryChange={(nextCountry) => {") &&
+    destinationControl.includes('setPort("");'),
+  "Header destination selector must avoid route guarantees and clear a stale port when its country changes.",
 );
 check(
   links.includes("export function quoteRequestHref") && links.includes("countryGuidePathForName"),
@@ -133,8 +135,10 @@ check(
 );
 check(
   quotePage.includes("destination_port: form.port.trim()") &&
-    quotePage.includes("destination_country: form.country"),
-  "Guided quote submission is missing country/port context.",
+    quotePage.includes("destination_country: form.country") &&
+    quotePage.includes('const changeCountry = (country: string) => {') &&
+    quotePage.includes('setField("port", "");'),
+  "Guided quote submission is missing destination context or stale-port reset behavior.",
 );
 check(
   !quotePage.includes("full_name:") &&
@@ -231,8 +235,11 @@ check(
   "Vehicle detail page still limits destination input to the static route suggestion list.",
 );
 check(
-  contact.includes("DestinationFields") && contact.includes("destination_port"),
-  "Contact form does not capture a free-text preferred port/final city.",
+  contact.includes("DestinationFields") &&
+    contact.includes("destination_port") &&
+    contact.includes("onCountryChange={(nextCountry) => {") &&
+    contact.includes('setPort("");'),
+  "Contact form must capture a free-text location and clear an old port when its country changes.",
 );
 check(
   countryPages.includes("quoteRequestHref(") &&

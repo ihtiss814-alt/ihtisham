@@ -262,7 +262,8 @@ export default function ContactPage() {
                       port={port}
                       onCountryChange={(nextCountry) => {
                         setCountry(nextCountry);
-                        destination.setDestination({ country: nextCountry, port });
+                        setPort("");
+                        destination.setDestination({ country: nextCountry, port: "" });
                       }}
                       onPortChange={(nextPort) => {
                         setPort(nextPort);

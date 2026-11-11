@@ -122,7 +122,8 @@ export default function RequestQuotePage() {
   };
   const changeCountry = (country: string) => {
     setField("country", country);
-    preference.setDestination({ country, port: form.port });
+    setField("port", "");
+    preference.setDestination({ country, port: "" });
   };
   const changePort = (port: string) => {
     setField("port", port);

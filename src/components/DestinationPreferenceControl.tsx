@@ -80,7 +80,10 @@ export default function DestinationPreferenceControl({ mobile = false }: { mobil
           <DestinationFields
             country={country}
             port={port}
-            onCountryChange={setCountry}
+            onCountryChange={(nextCountry) => {
+              setCountry(nextCountry);
+              setPort("");
+            }}
             onPortChange={setPort}
             compact
             showGuidance={false}
