@@ -64,6 +64,37 @@ source = source.replace(
   "const VEHICLE_TIER_ONE_CONTENT = " + JSON.stringify(tierOneContent) + ";",
 );
 
+const tierTwoContentPath = path.resolve("src/lib/vehicle-tier-two-content.ts");
+const tierTwoContentSource = fs.readFileSync(tierTwoContentPath, "utf8");
+const tierTwoContentCompiled = ts.transpileModule(tierTwoContentSource, {
+  compilerOptions: {
+    module: ts.ModuleKind.CommonJS,
+    target: ts.ScriptTarget.ES2022,
+    strict: true,
+  },
+}).outputText;
+const tierTwoContentModule = { exports: {} };
+new Function("exports", "module", tierTwoContentCompiled)(
+  tierTwoContentModule.exports,
+  tierTwoContentModule,
+);
+const tierTwoContent = tierTwoContentModule.exports.VEHICLE_TIER_TWO_CONTENT;
+if (!tierTwoContent || typeof tierTwoContent !== "object") {
+  console.error("Could not load VEHICLE_TIER_TWO_CONTENT.");
+  process.exit(1);
+}
+
+const tierTwoImportPattern =
+  /^import\s+\{\s*VEHICLE_TIER_TWO_CONTENT\s*\}\s+from\s+['"]\.\/vehicle-tier-two-content['"]\s*;?\s*$/m;
+if (!tierTwoImportPattern.test(source)) {
+  console.error("Could not locate the Tier 2 content import in vehicle-landing-pages.ts.");
+  process.exit(1);
+}
+source = source.replace(
+  tierTwoImportPattern,
+  "const VEHICLE_TIER_TWO_CONTENT = " + JSON.stringify(tierTwoContent) + ";",
+);
+
 const compiled = ts.transpileModule(source, {
   compilerOptions: {
     module: ts.ModuleKind.CommonJS,
@@ -410,6 +441,148 @@ for (const [key, content] of Object.entries(tierOneContent)) {
   }
   if (page.directoryVisible === false) {
     fail("Tier 1 pages must not promote an intentionally retired legacy route: " + key);
+  }
+}
+
+
+const expectedTierTwoMakes = new Set([
+  "subaru",
+  "mitsubishi",
+  "daihatsu",
+  "isuzu",
+  "audi",
+  "mercedes-benz",
+]);
+const expectedTierTwoModels = new Set([
+  "toyota/corolla",
+  "toyota/vitz",
+  "toyota/harrier",
+  "nissan/x-trail",
+  "nissan/leaf",
+  "honda/fit",
+  "honda/civic",
+  "honda/freed",
+  "suzuki/jimny",
+  "mazda/cx-5",
+  "subaru/forester",
+  "mitsubishi/outlander",
+  "daihatsu/mira",
+  "lexus/rx",
+  "isuzu/elf",
+  "mitsubishi-fuso/canter",
+  "nissan/cube",
+  "toyota/esquire",
+]);
+const expectedTierTwoHiddenModels = new Set([
+  "toyota/corolla",
+  "toyota/vitz",
+  "toyota/harrier",
+  "nissan/x-trail",
+  "nissan/leaf",
+  "honda/fit",
+  "honda/civic",
+  "honda/freed",
+  "suzuki/jimny",
+  "mazda/cx-5",
+  "subaru/forester",
+  "daihatsu/mira",
+  "lexus/rx",
+]);
+const tierTwoMakeSlugs = new Set(
+  makes.filter((page) => page.seoTier === 2).map((page) => page.slug),
+);
+const tierTwoModelKeys = new Set(
+  models
+    .filter((page) => page.seoTier === 2)
+    .map((page) => page.makeSlug + "/" + page.slug),
+);
+if (
+  tierTwoMakeSlugs.size !== expectedTierTwoMakes.size ||
+  [...expectedTierTwoMakes].some((slug) => !tierTwoMakeSlugs.has(slug))
+) {
+  fail("Tier 2 manufacturer assignment does not match the approved six-make shortlist.");
+}
+if (
+  tierTwoModelKeys.size !== expectedTierTwoModels.size ||
+  [...expectedTierTwoModels].some((key) => !tierTwoModelKeys.has(key))
+) {
+  fail("Tier 2 model assignment does not match the approved 18-model shortlist.");
+}
+const expectedTierTwoContentKeys = new Set([
+  ...[...expectedTierTwoMakes].map((slug) => "make:" + slug),
+  ...[...expectedTierTwoModels].map((key) => "model:" + key),
+]);
+const tierTwoContentKeys = Object.keys(tierTwoContent);
+if (
+  tierTwoContentKeys.length !== expectedTierTwoContentKeys.size ||
+  [...expectedTierTwoContentKeys].some((key) => !Object.hasOwn(tierTwoContent, key)) ||
+  tierTwoContentKeys.some((key) => !expectedTierTwoContentKeys.has(key))
+) {
+  fail("Tier 2 editorial content must cover exactly six makes and 18 models with no extras.");
+}
+for (const [key, content] of Object.entries(tierTwoContent)) {
+  const page = key.startsWith("make:")
+    ? makes.find((item) => item.slug === key.slice("make:".length))
+    : models.find((item) => key === "model:" + item.makeSlug + "/" + item.slug);
+
+  if (!page) {
+    fail("Tier 2 content has no matching registry page: " + key);
+    continue;
+  }
+  if (content.seoTier !== 2 || content.kind !== page.kind || page.seoTier !== 2) {
+    fail("Tier 2 kind/priority metadata does not match the registry page: " + key);
+  }
+  if (!content.title || content.title.length > 70) {
+    fail("Tier 2 SEO title must be present and at most 70 characters: " + key);
+  }
+  if (
+    !content.description ||
+    content.description.length < 110 ||
+    content.description.length > 175
+  ) {
+    fail("Tier 2 meta description must be 110–175 characters: " + key);
+  }
+  if (!content.intro || content.intro.length < 180) {
+    fail("Tier 2 page introduction is too short: " + key);
+  }
+  if (!content.buyerGuide || content.buyerGuide.length < 180) {
+    fail("Tier 2 buyer guide is too short: " + key);
+  }
+  if (!Array.isArray(content.searchThemes) || content.searchThemes.length < 4) {
+    fail("Tier 2 page needs at least four editorial search-intent themes: " + key);
+  }
+  if (!Array.isArray(content.focusPoints) || content.focusPoints.length < 4) {
+    fail("Tier 2 page needs at least four distinct buyer checks: " + key);
+  }
+  if (!Array.isArray(content.faqs) || content.faqs.length < 4) {
+    fail("Tier 2 page needs at least four model/make-specific FAQs: " + key);
+  }
+  for (const faq of content.faqs ?? []) {
+    if (!faq.question?.trim() || !faq.answer?.trim()) {
+      fail("Tier 2 FAQ question/answer missing: " + key);
+    }
+  }
+  if (content.searchThemes?.some((theme) => !theme?.trim())) {
+    fail("Tier 2 search-intent theme must not be blank: " + key);
+  }
+  if (page.title !== content.title || page.description !== content.description) {
+    fail("Tier 2 SEO metadata was not applied to the generated page: " + key);
+  }
+  if (page.intro !== content.intro || page.buyerGuide !== content.buyerGuide) {
+    fail("Tier 2 editorial content was not applied to the generated page: " + key);
+  }
+  if (
+    page.focusPoints?.length !== content.focusPoints?.length ||
+    page.faqs?.length !== content.faqs?.length
+  ) {
+    fail("Tier 2 buyer checklist/FAQ content was not applied to the generated page: " + key);
+  }
+  if (
+    page.kind === "model" &&
+    expectedTierTwoHiddenModels.has(page.makeSlug + "/" + page.slug) !==
+      (page.directoryVisible === false)
+  ) {
+    fail("Tier 2 must preserve the existing model route visibility state: " + key);
   }
 }
 
