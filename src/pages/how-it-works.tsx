@@ -285,7 +285,7 @@ export default function HowItWorksPage() {
                 whether a suitable sourcing option, its costs and timing can be offered.
               </p>
               <Link
-                href="/contact"
+                href="/request-a-quote?type=sourcing"
                 className="inline-flex items-center gap-2 px-5 py-2.5 border border-[#0D1B3E] hover:bg-[#0D1B3E] text-[#0D1B3E] hover:text-white text-[11px] tracking-[0.18em] uppercase font-bold rounded-[2px] transition-all duration-150 self-start"
               >
                 Submit Request

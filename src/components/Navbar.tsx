@@ -3,6 +3,7 @@ import { Link, useLocation } from "wouter";
 import { Menu, X, ChevronRight, ChevronDown, Clock, Car, Mail } from "lucide-react";
 import { getAvailableStockCount } from "@/lib/inventory-cache";
 import { useExchangeRate } from "@/hooks/useExchangeRate";
+import DestinationPreferenceControl from "@/components/DestinationPreferenceControl";
 
 // ─── Brand tokens ────────────────────────────────────────────────
 // Primary:   #C8102E  (crimson — extracted from logo shield)
@@ -20,6 +21,10 @@ const NAV_LINKS = [
 ];
 
 const HELP_LINKS = [
+  { label: "Request a Quote", href: "/request-a-quote" },
+  { label: "Import by Country", href: "/import-japanese-cars" },
+  { label: "Makes & Models", href: "/used-japanese-cars" },
+  { label: "Buyer Information", href: "/buyer-information" },
   { label: "How It Works", href: "/how-it-works" },
   { label: "Shipping Information", href: "/shipping-information" },
   { label: "Payment Information", href: "/payment-information" },
@@ -272,7 +277,7 @@ export default function Navbar() {
               </Link>
 
               {/* Desktop nav */}
-              <nav className="hidden lg:flex items-center" aria-label="Main navigation">
+              <nav className="hidden xl:flex items-center" aria-label="Main navigation">
                 {NAV_LINKS.map((link) => {
                   const active = isActive(link.href);
                   return (
@@ -362,7 +367,16 @@ export default function Navbar() {
               </nav>
 
               {/* Desktop CTAs */}
-              <div className="hidden lg:flex items-center gap-2.5">
+              <div className="hidden xl:flex items-center gap-2.5">
+                <DestinationPreferenceControl />
+                <Link
+                  href="/request-a-quote"
+                  className="group flex items-center gap-1.5 px-4 py-2.5 border border-[#C8102E] text-[#C8102E] hover:bg-red-50 text-[10px] tracking-[0.12em] uppercase font-bold transition-colors duration-150 rounded-[2px]"
+                  data-testid="nav-request-quote-btn"
+                >
+                  Request a Quote
+                  <ChevronRight size={11} strokeWidth={2.5} />
+                </Link>
                 {/* View Inventory — crimson filled */}
                 <Link
                   href="/cars"
@@ -376,28 +390,12 @@ export default function Navbar() {
                     className="opacity-75 group-hover:translate-x-0.5 transition-transform duration-150"
                   />
                 </Link>
-
-                {/* WhatsApp — outlined */}
-                <a
-                  href={waLink}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="group flex items-center gap-2 px-5 py-2.5 border border-gray-300 hover:border-[#25D366] text-gray-700 hover:text-gray-900 text-[10.5px] tracking-[0.18em] uppercase font-semibold transition-all duration-150 rounded-[2px] hover:bg-[#F0FDF4]"
-                  data-testid="nav-whatsapp-btn"
-                >
-                  <span className="relative flex-shrink-0 w-2 h-2">
-                    <span className="absolute inset-0 rounded-full bg-[#25D366] animate-ping opacity-60" />
-                    <span className="relative block w-2 h-2 rounded-full bg-[#25D366]" />
-                  </span>
-                  <WhatsAppIcon size={13} className="text-[#25D366]" />
-                  <span>WhatsApp</span>
-                </a>
               </div>
 
               {/* Mobile hamburger — CSS-only icon swap, no JS animation library */}
               <button
                 onClick={() => setMobileOpen((v) => !v)}
-                className="lg:hidden w-10 h-10 flex items-center justify-center rounded-[2px] text-gray-700 border border-gray-200 hover:border-gray-400 hover:bg-gray-50 transition-all duration-150"
+                className="xl:hidden w-10 h-10 flex items-center justify-center rounded-[2px] text-gray-700 border border-gray-200 hover:border-gray-400 hover:bg-gray-50 transition-all duration-150"
                 aria-label="Toggle menu"
                 aria-expanded={mobileOpen}
                 aria-controls="mobile-navigation-drawer"
@@ -549,6 +547,9 @@ export default function Navbar() {
               </div>
             )}
           </div>
+          <div className="mt-4 border-t border-gray-100 pt-4">
+            <DestinationPreferenceControl mobile />
+          </div>
         </nav>
 
         {/* Live data strip */}
@@ -593,6 +594,14 @@ export default function Navbar() {
 
         {/* CTA buttons */}
         <div className="px-4 pb-8 pt-1 border-t border-gray-100 space-y-2.5 flex-shrink-0">
+          <Link
+            href="/request-a-quote"
+            onClick={() => setMobileOpen(false)}
+            className="flex items-center justify-center gap-2 w-full py-3 border border-[#C8102E] text-[#C8102E] text-[10.5px] tracking-[0.2em] uppercase font-bold rounded-[2px] transition-colors duration-150 hover:bg-red-50"
+          >
+            Request a Quote
+            <ChevronRight size={12} strokeWidth={2.5} />
+          </Link>
           <Link
             href="/cars"
             onClick={() => setMobileOpen(false)}

@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Link, useLocation } from "wouter";
 import { ArrowRight, CarFront, ShieldCheck } from "lucide-react";
 import CarCard, { resolvePrimaryImage, type Car } from "@/components/CarCard";
+import { quoteRequestHref } from "@/lib/destination-links";
 import { BodyTypeIcon, MakeLogo } from "@/components/VehicleIdentity";
 import NotFound from "@/pages/not-found";
 import { useSeoBootstrap } from "@/lib/seo-bootstrap-context";
@@ -362,7 +363,10 @@ function DetailPageContent({ page }: { page: VehicleLandingPage }) {
               View matching stock <ArrowRight size={16} />
             </Link>
             <Link
-              href="/contact"
+              href={quoteRequestHref({
+                vehicleModel: [page.make, page.model].filter(Boolean).join(" ") || page.label,
+                requestType: "sourcing",
+              })}
               className="inline-flex items-center gap-2 border border-white/30 text-white px-5 py-3 text-sm font-semibold hover:bg-white/10"
             >
               Ask about a vehicle
@@ -589,7 +593,10 @@ function DetailPageContent({ page }: { page: VehicleLandingPage }) {
                 description as a substitute for the vehicle-specific record.
               </p>
               <Link
-                href="/contact"
+                href={quoteRequestHref({
+                  vehicleModel: [page.make, page.model].filter(Boolean).join(" ") || page.label,
+                  requestType: "sourcing",
+                })}
                 className="inline-flex w-full items-center justify-center gap-2 mt-5 bg-primary px-4 py-3 text-sm font-bold text-primary-foreground hover:opacity-90"
               >
                 Contact our team <ArrowRight size={16} />
@@ -622,6 +629,14 @@ function DetailPageContent({ page }: { page: VehicleLandingPage }) {
                     className="text-muted-foreground hover:text-primary"
                   >
                     Buyer checklist
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    href="/import-japanese-cars"
+                    className="text-muted-foreground hover:text-primary"
+                  >
+                    Destination import guides
                   </Link>
                 </li>
                 <li>

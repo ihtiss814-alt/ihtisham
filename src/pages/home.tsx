@@ -26,7 +26,9 @@ import { getHomepageInventoryCounts } from "@/lib/homepage-inventory-cache";
 import CarCard, { Car } from "@/components/CarCard";
 import HowToBuy from "@/components/HowToBuy";
 import { TESTIMONIALS } from "@/lib/testimonials";
-import { DEST_COUNTRIES } from "@/lib/shipping";
+import DestinationPreferenceControl from "@/components/DestinationPreferenceControl";
+import { useDestinationPreference } from "@/hooks/useDestinationPreference";
+import { countryGuidePathForName, quoteRequestHref } from "@/lib/destination-links";
 import { useMeta } from "@/lib/use-meta";
 import { useSeoBootstrap } from "@/lib/seo-bootstrap-context";
 
@@ -198,28 +200,32 @@ function DestinationCountriesSection() {
         />
 
         <div className="flex marquee-track gap-4 px-4" style={{ width: "max-content" }}>
-          {track.map(({ name, code }, i) => (
-            <a
-              key={`${code}-${i}`}
-              href={`/cars?destination=${encodeURIComponent(name)}`}
-              className="dest-card group flex-shrink-0 flex flex-col items-center gap-3 w-[108px] py-5 px-3 rounded-[8px] border border-white/10 bg-white/5 hover:bg-white/10 hover:border-[#C8102E]/60 transition-all duration-200 cursor-pointer"
-            >
-              {/* Country flag — matched by the ISO code with emoji fallback */}
-              <div
-                className="overflow-hidden rounded-[4px] flex-shrink-0"
-                style={{ width: 72, height: 48, boxShadow: "0 2px 8px rgba(0,0,0,0.5)" }}
+          {track.map(({ name, code }, i) => {
+            const guidePath = countryGuidePathForName(name);
+            const href = guidePath ?? quoteRequestHref({ country: name, requestType: "shipping" });
+            return (
+              <Link
+                key={`${code}-${i}`}
+                href={href}
+                className="dest-card group flex-shrink-0 flex flex-col items-center gap-3 w-[108px] py-5 px-3 rounded-[8px] border border-white/10 bg-white/5 hover:bg-white/10 hover:border-[#C8102E]/60 transition-all duration-200 cursor-pointer"
               >
-                <FlagImg code={code} name={name} />
-              </div>
+                {/* Country flag — matched by the ISO code with emoji fallback */}
+                <div
+                  className="overflow-hidden rounded-[4px] flex-shrink-0"
+                  style={{ width: 72, height: 48, boxShadow: "0 2px 8px rgba(0,0,0,0.5)" }}
+                >
+                  <FlagImg code={code} name={name} />
+                </div>
 
-              <span className="text-[11px] font-bold text-white/90 tracking-wide text-center leading-tight">
-                {name}
-              </span>
-              <span className="text-[9px] tracking-[0.2em] uppercase text-[#C8102E]/60 group-hover:text-[#C8102E] font-bold transition-colors">
-                REQUEST OPTIONS
-              </span>
-            </a>
-          ))}
+                <span className="text-[11px] font-bold text-white/90 tracking-wide text-center leading-tight">
+                  {name}
+                </span>
+                <span className="text-[9px] tracking-[0.2em] uppercase text-[#C8102E]/60 group-hover:text-[#C8102E] font-bold transition-colors">
+                  {guidePath ? "IMPORT GUIDE" : "PLAN A QUOTE"}
+                </span>
+              </Link>
+            );
+          })}
         </div>
       </div>
     </section>
@@ -1007,617 +1013,88 @@ const SHIP_TO_COUNTRIES = [
   "Vanuatu",
 ] as const;
 
-const CFYC_BENEFITS = [
-  "Share the make, model, and destination you need",
-  "Review the available vehicle details before you decide",
-  "Request a quote for the vehicle and destination",
-  "Ask our team about sourcing options",
-] as const;
-
-type CfycForm = {
-  full_name: string;
-  email: string;
-  phone: string;
-  destination_country: string;
-  vehicle_model: string;
-  budget_usd: string;
-  requirements: string;
-};
-
-const CFYC_EMPTY: CfycForm = {
-  full_name: "",
-  email: "",
-  phone: "",
-  destination_country: "",
-  vehicle_model: "",
-  budget_usd: "",
-  requirements: "",
-};
-
 function CantFindCarSection() {
-  const [form, setForm] = React.useState<CfycForm>(CFYC_EMPTY);
-  const [submitting, setSubmitting] = React.useState(false);
-  const [success, setSuccess] = React.useState(false);
-  const [error, setError] = React.useState("");
-
-  const waNumber = "818089227375";
-  const email = "wazirtrading-pc@outlook.jp";
-
-  const set =
-    (k: keyof CfycForm) =>
-    (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) =>
-      setForm((f) => ({ ...f, [k]: e.target.value }));
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (
-      !form.full_name ||
-      !form.email ||
-      !form.phone ||
-      !form.destination_country ||
-      !form.vehicle_model
-    ) {
-      setError("Please fill in all required fields.");
-      return;
-    }
-    setError("");
-    setSubmitting(true);
-    try {
-      const { error: dbErr } = await supabase.from("inquiries").insert([
-        {
-          full_name: form.full_name,
-          email: form.email,
-          phone: form.phone,
-          destination_country: form.destination_country,
-          vehicle_model: form.vehicle_model,
-          budget_usd: form.budget_usd ? Number(form.budget_usd) : null,
-          requirements: form.requirements,
-          inquiry_type: "custom-request",
-        },
-      ]);
-      if (dbErr) throw dbErr;
-
-      // Open WhatsApp with pre-filled message
-      const waMsg = encodeURIComponent(
-        `New car request from ${form.full_name}. Looking for ${form.vehicle_model}` +
-          `${form.budget_usd ? ` with budget ${form.budget_usd}` : ""}. ` +
-          `Destination: ${form.destination_country}. Contact: ${form.phone}`,
-      );
-      window.open(`https://wa.me/${waNumber}?text=${waMsg}`, "_blank");
-
-      setSuccess(true);
-      setForm(CFYC_EMPTY);
-    } catch {
-      setError("Something went wrong. Please try again or contact us directly on WhatsApp.");
-    } finally {
-      setSubmitting(false);
-    }
-  };
-
-  /* shared input style */
-  const inp: React.CSSProperties = {
-    width: "100%",
-    padding: "10px 14px",
-    borderRadius: 10,
-    border: "1px solid #E2E8F0",
-    background: "#fff",
-    fontSize: 13.5,
-    color: "#1E293B",
-    outline: "none",
-    transition: "border-color 0.15s, box-shadow 0.15s",
-    boxSizing: "border-box",
-  };
-  const label: React.CSSProperties = {
-    display: "block",
-    fontSize: 11.5,
-    fontWeight: 700,
-    color: "#64748B",
-    letterSpacing: "0.06em",
-    textTransform: "uppercase",
-    marginBottom: 5,
-  };
+  const destination = useDestinationPreference();
+  const quoteHref = quoteRequestHref({
+    country: destination.country,
+    port: destination.port,
+    requestType: "sourcing",
+  });
 
   return (
-    <section className="py-20 relative overflow-hidden" style={{ background: "#F8FAFC" }}>
-      {/* Subtle top accent */}
+    <section className="relative overflow-hidden bg-[#F8FAFC] py-20">
       <div
-        className="absolute top-0 inset-x-0 h-px"
+        className="absolute inset-x-0 top-0 h-px"
         style={{
-          background:
-            "linear-gradient(to right, transparent 0%, rgba(200,16,46,0.35) 30%, rgba(200,16,46,0.35) 70%, transparent 100%)",
+          background: "linear-gradient(to right, transparent, rgba(200,16,46,0.4), transparent)",
         }}
       />
-
-      <div className="container mx-auto px-4 md:px-8">
-        {/* ── Centered heading ── */}
-        <div className="text-center mb-12">
-          <div className="flex items-center justify-center gap-3 mb-4">
-            <div
-              className="h-px w-10"
-              style={{ background: "linear-gradient(to right, transparent, #C8102E)" }}
-            />
-            <p className="text-[10px] tracking-[0.32em] uppercase font-bold text-[#C8102E]">
-              Custom Sourcing
-            </p>
-            <div
-              className="h-px w-10"
-              style={{ background: "linear-gradient(to left, transparent, #C8102E)" }}
-            />
-          </div>
-          <h2 className="text-3xl md:text-4xl font-serif font-bold text-gray-900 mb-3">
-            Can't Find Your Car?
-          </h2>
-          <p className="text-gray-400 text-sm md:text-base max-w-xl mx-auto">
-            Tell us the vehicle and destination you are considering. We will review your request and
-            confirm whether a suitable sourcing option can be offered.
+      <div className="container mx-auto grid max-w-6xl grid-cols-1 items-center gap-8 px-4 md:px-8 lg:grid-cols-[1.1fr_0.9fr]">
+        <div>
+          <p className="mb-3 text-[10px] font-bold uppercase tracking-[0.28em] text-[#C8102E]">
+            Guided vehicle sourcing
           </p>
+          <h2 className="max-w-xl font-serif text-3xl font-bold text-[#0D1B3E] md:text-4xl">
+            Looking for a vehicle that is not in today's listings?
+          </h2>
+          <p className="mt-4 max-w-xl text-sm leading-7 text-slate-600 md:text-base">
+            Tell us the make, model, year, budget and destination you have in mind. We will review
+            the brief and confirm whether a suitable sourcing option and written quotation can be
+            offered.
+          </p>
+          <ul className="mt-6 grid grid-cols-1 gap-3 text-sm text-slate-600 sm:grid-cols-2">
+            {[
+              "Describe the vehicle and important specifications",
+              "Choose any country or territory",
+              "Add a preferred port, border or final city",
+              "Receive a response based on the actual request",
+            ].map((item) => (
+              <li key={item} className="flex items-start gap-2">
+                <CheckCircle2 size={16} className="mt-0.5 shrink-0 text-[#C8102E]" />
+                <span>{item}</span>
+              </li>
+            ))}
+          </ul>
+          <div className="mt-7 flex flex-wrap items-center gap-4">
+            <Link
+              href={quoteHref}
+              className="inline-flex items-center gap-2 rounded-sm bg-[#C8102E] px-6 py-3.5 text-xs font-bold uppercase tracking-[0.14em] text-white transition-colors hover:bg-[#A50D25]"
+            >
+              Start a sourcing request <ArrowRight size={15} />
+            </Link>
+            <Link
+              href="/cars"
+              className="text-sm font-semibold text-[#0D1B3E] underline decoration-[#C8102E]/40 underline-offset-4 hover:text-[#C8102E]"
+            >
+              Browse current inventory
+            </Link>
+          </div>
         </div>
 
-        {/* ── Two-column layout: form + sidebar ── */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
-          {/* ── Form (2/3 width) ── */}
-          <div className="lg:col-span-2">
-            <div
-              className="rounded-2xl overflow-hidden"
-              style={{
-                background: "#fff",
-                border: "1px solid #E8ECF4",
-                boxShadow: "0 4px 24px rgba(0,0,0,0.06)",
-              }}
-            >
-              {/* Form header bar */}
-              <div className="px-7 py-5 border-b border-gray-100 flex items-center gap-3">
-                <div
-                  className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0"
-                  style={{ background: "rgba(200,16,46,0.1)", color: "#C8102E" }}
-                >
-                  <svg
-                    width="17"
-                    height="17"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  >
-                    <circle cx="11" cy="11" r="8" />
-                    <path d="m21 21-4.35-4.35" />
-                  </svg>
-                </div>
-                <div>
-                  <div className="font-bold text-gray-900 text-sm">Vehicle Request Form</div>
-                  <div className="text-xs text-gray-400">
-                    Share your requirements for a review and written quotation
-                  </div>
-                </div>
-              </div>
-
-              {success ? (
-                /* Success state */
-                <div className="px-7 py-14 flex flex-col items-center text-center">
-                  <div
-                    className="w-16 h-16 rounded-full flex items-center justify-center mb-5"
-                    style={{ background: "rgba(16,185,129,0.1)" }}
-                  >
-                    <svg
-                      width="32"
-                      height="32"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="#10B981"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    >
-                      <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
-                      <polyline points="22 4 12 14.01 9 11.01" />
-                    </svg>
-                  </div>
-                  <h3 className="font-serif font-bold text-xl text-gray-900 mb-2">We're On It!</h3>
-                  <p className="text-gray-500 text-sm max-w-sm mb-2">
-                    Your request has been recorded. We will review the details and contact you to
-                    confirm whether a matching vehicle or sourcing option can be offered.
-                  </p>
-                  <p className="text-xs text-gray-400 max-w-xs">
-                    Submitting a request does not reserve a vehicle or create a purchase contract.
-                    Do not make a payment until you have reviewed and accepted the written quotation
-                    and payment instructions.
-                  </p>
-                  <button
-                    onClick={() => setSuccess(false)}
-                    className="mt-6 px-6 py-2.5 rounded-full text-sm font-semibold text-white cursor-pointer"
-                    style={{ background: "#C8102E" }}
-                  >
-                    Submit Another Request
-                  </button>
-                </div>
-              ) : (
-                <form onSubmit={handleSubmit} className="px-7 py-7">
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-                    {/* Full Name */}
-                    <div>
-                      <label style={label}>
-                        Full Name <span style={{ color: "#C8102E" }}>*</span>
-                      </label>
-                      <input
-                        type="text"
-                        value={form.full_name}
-                        onChange={set("full_name")}
-                        placeholder="e.g. Ahmed Khan"
-                        style={inp}
-                        required
-                        onFocus={(e) => {
-                          e.target.style.borderColor = "#C8102E";
-                          e.target.style.boxShadow = "0 0 0 3px rgba(200,16,46,0.1)";
-                        }}
-                        onBlur={(e) => {
-                          e.target.style.borderColor = "#E2E8F0";
-                          e.target.style.boxShadow = "none";
-                        }}
-                      />
-                    </div>
-
-                    {/* Email */}
-                    <div>
-                      <label style={label}>
-                        Email Address <span style={{ color: "#C8102E" }}>*</span>
-                      </label>
-                      <input
-                        type="email"
-                        value={form.email}
-                        onChange={set("email")}
-                        placeholder="e.g. ahmed@email.com"
-                        style={inp}
-                        required
-                        onFocus={(e) => {
-                          e.target.style.borderColor = "#C8102E";
-                          e.target.style.boxShadow = "0 0 0 3px rgba(200,16,46,0.1)";
-                        }}
-                        onBlur={(e) => {
-                          e.target.style.borderColor = "#E2E8F0";
-                          e.target.style.boxShadow = "none";
-                        }}
-                      />
-                    </div>
-
-                    {/* Phone */}
-                    <div>
-                      <label style={label}>
-                        Contact Number (WhatsApp) <span style={{ color: "#C8102E" }}>*</span>
-                      </label>
-                      <input
-                        type="tel"
-                        value={form.phone}
-                        onChange={set("phone")}
-                        placeholder="e.g. +92 300 1234567"
-                        style={inp}
-                        required
-                        onFocus={(e) => {
-                          e.target.style.borderColor = "#C8102E";
-                          e.target.style.boxShadow = "0 0 0 3px rgba(200,16,46,0.1)";
-                        }}
-                        onBlur={(e) => {
-                          e.target.style.borderColor = "#E2E8F0";
-                          e.target.style.boxShadow = "none";
-                        }}
-                      />
-                    </div>
-
-                    {/* Destination Country */}
-                    <div>
-                      <label style={label}>
-                        Destination Country <span style={{ color: "#C8102E" }}>*</span>
-                      </label>
-                      <div className="relative">
-                        <select
-                          value={form.destination_country}
-                          onChange={set("destination_country")}
-                          required
-                          style={{
-                            ...inp,
-                            appearance: "none",
-                            paddingRight: 36,
-                            color: form.destination_country ? "#1E293B" : "#94A3B8",
-                          }}
-                          onFocus={(e) => {
-                            e.target.style.borderColor = "#C8102E";
-                            e.target.style.boxShadow = "0 0 0 3px rgba(200,16,46,0.1)";
-                          }}
-                          onBlur={(e) => {
-                            e.target.style.borderColor = "#E2E8F0";
-                            e.target.style.boxShadow = "none";
-                          }}
-                        >
-                          <option value="" disabled>
-                            Select country…
-                          </option>
-                          {DEST_COUNTRIES.map((c) => (
-                            <option key={c} value={c}>
-                              {c}
-                            </option>
-                          ))}
-                        </select>
-                        <svg
-                          className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400"
-                          width="14"
-                          height="14"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="currentColor"
-                          strokeWidth="2.5"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        >
-                          <polyline points="6 9 12 15 18 9" />
-                        </svg>
-                      </div>
-                    </div>
-
-                    {/* Vehicle Model */}
-                    <div>
-                      <label style={label}>
-                        Vehicle Model &amp; Year <span style={{ color: "#C8102E" }}>*</span>
-                      </label>
-                      <input
-                        type="text"
-                        value={form.vehicle_model}
-                        onChange={set("vehicle_model")}
-                        placeholder="e.g. Toyota RAV4 2019"
-                        style={inp}
-                        required
-                        onFocus={(e) => {
-                          e.target.style.borderColor = "#C8102E";
-                          e.target.style.boxShadow = "0 0 0 3px rgba(200,16,46,0.1)";
-                        }}
-                        onBlur={(e) => {
-                          e.target.style.borderColor = "#E2E8F0";
-                          e.target.style.boxShadow = "none";
-                        }}
-                      />
-                    </div>
-
-                    {/* Budget */}
-                    <div>
-                      <label style={label}>Target Budget (USD)</label>
-                      <input
-                        type="number"
-                        value={form.budget_usd}
-                        onChange={set("budget_usd")}
-                        placeholder="e.g. 5000"
-                        min={0}
-                        style={inp}
-                        onFocus={(e) => {
-                          e.target.style.borderColor = "#C8102E";
-                          e.target.style.boxShadow = "0 0 0 3px rgba(200,16,46,0.1)";
-                        }}
-                        onBlur={(e) => {
-                          e.target.style.borderColor = "#E2E8F0";
-                          e.target.style.boxShadow = "none";
-                        }}
-                      />
-                    </div>
-
-                    {/* Requirements — full width */}
-                    <div className="sm:col-span-2">
-                      <label style={label}>Specific Requirements</label>
-                      <textarea
-                        value={form.requirements}
-                        onChange={set("requirements")}
-                        placeholder="e.g. Right-hand drive, under 80,000 km, silver or white, auction grade 4 or above, sunroof preferred. The more detail you give us, the better we can match."
-                        rows={4}
-                        style={{ ...inp, resize: "vertical", minHeight: 100 }}
-                        onFocus={(e) => {
-                          e.target.style.borderColor = "#C8102E";
-                          e.target.style.boxShadow = "0 0 0 3px rgba(200,16,46,0.1)";
-                        }}
-                        onBlur={(e) => {
-                          e.target.style.borderColor = "#E2E8F0";
-                          e.target.style.boxShadow = "none";
-                        }}
-                      />
-                    </div>
-
-                    {/* Error message */}
-                    {error && (
-                      <div
-                        className="sm:col-span-2 flex items-start gap-2 px-4 py-3 rounded-xl text-sm"
-                        style={{
-                          background: "#FEF2F2",
-                          border: "1px solid #FECACA",
-                          color: "#DC2626",
-                        }}
-                      >
-                        <svg
-                          width="15"
-                          height="15"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="currentColor"
-                          strokeWidth="2"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          className="mt-0.5 flex-shrink-0"
-                        >
-                          <circle cx="12" cy="12" r="10" />
-                          <line x1="12" y1="8" x2="12" y2="12" />
-                          <line x1="12" y1="16" x2="12.01" y2="16" />
-                        </svg>
-                        {error}
-                      </div>
-                    )}
-
-                    {/* Submit */}
-                    <div className="sm:col-span-2">
-                      <button
-                        type="submit"
-                        disabled={submitting}
-                        className="w-full py-3.5 rounded-xl font-bold text-white text-sm cursor-pointer transition-all duration-200"
-                        style={{
-                          background: submitting
-                            ? "#999"
-                            : "linear-gradient(135deg, #C8102E 0%, #9B0D23 100%)",
-                          boxShadow: submitting ? "none" : "0 4px 20px rgba(200,16,46,0.35)",
-                          letterSpacing: "0.04em",
-                          border: "none",
-                        }}
-                        onMouseEnter={(e) => {
-                          if (!submitting)
-                            (e.currentTarget as HTMLButtonElement).style.boxShadow =
-                              "0 8px 32px rgba(200,16,46,0.45)";
-                        }}
-                        onMouseLeave={(e) => {
-                          if (!submitting)
-                            (e.currentTarget as HTMLButtonElement).style.boxShadow =
-                              "0 4px 20px rgba(200,16,46,0.35)";
-                        }}
-                      >
-                        {submitting ? "Sending Request…" : "Submit Vehicle Request"}
-                      </button>
-                    </div>
-                    <p className="sm:col-span-2 text-xs text-gray-400 text-center mt-2">
-                      By submitting, you agree that your details may be used to review and respond
-                      to this enquiry. See our{" "}
-                      <Link href="/privacy-policy" className="underline underline-offset-2">
-                        Privacy Policy
-                      </Link>
-                      .
-                    </p>
-                  </div>
-                </form>
-              )}
+        <div className="rounded-sm border border-slate-200 bg-white p-5 shadow-[0_10px_36px_rgba(13,27,62,0.08)] md:p-7">
+          <div className="mb-4 flex items-center gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-sm bg-[#C8102E]/10 text-[#C8102E]">
+              <Globe size={19} />
+            </div>
+            <div>
+              <h3 className="font-serif text-xl font-bold text-[#0D1B3E]">Set your destination</h3>
+              <p className="text-xs text-slate-500">
+                Used to prefill this and future enquiries on this device
+              </p>
             </div>
           </div>
-
-          {/* ── Sidebar (1/3 width) ── */}
-          <div className="flex flex-col gap-5">
-            {/* Why Request Through Us */}
-            <div
-              className="rounded-2xl p-6"
-              style={{
-                background: "linear-gradient(160deg, #1A0608 0%, #0F172A 100%)",
-                border: "1px solid rgba(200,16,46,0.2)",
-              }}
+          <DestinationPreferenceControl mobile />
+          <p className="mt-4 text-xs leading-5 text-slate-500">
+            Choosing a destination does not mean a route is currently available. Carrier options,
+            vehicle eligibility, costs and local import requirements are confirmed separately.
+          </p>
+          <div className="mt-5 border-t border-slate-100 pt-4">
+            <Link
+              href="/import-japanese-cars"
+              className="inline-flex items-center gap-2 text-sm font-semibold text-[#C8102E] hover:underline"
             >
-              <h3 className="font-serif font-bold text-white text-lg mb-5">
-                Why Request Through Us?
-              </h3>
-              <ul className="flex flex-col gap-3.5">
-                {CFYC_BENEFITS.map((b) => (
-                  <li key={b} className="flex items-start gap-3">
-                    <div
-                      className="w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5"
-                      style={{
-                        background: "rgba(200,16,46,0.2)",
-                        border: "1px solid rgba(200,16,46,0.4)",
-                      }}
-                    >
-                      <svg
-                        width="10"
-                        height="10"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="#C8102E"
-                        strokeWidth="3"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      >
-                        <polyline points="20 6 9 17 4 12" />
-                      </svg>
-                    </div>
-                    <span className="text-white/70 text-sm leading-relaxed">{b}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            {/* Contact directly */}
-            <div
-              className="rounded-2xl p-6"
-              style={{
-                background: "#fff",
-                border: "1px solid #E8ECF4",
-                boxShadow: "0 2px 12px rgba(0,0,0,0.05)",
-              }}
-            >
-              <h3 className="font-bold text-gray-900 text-sm mb-4 uppercase tracking-wider">
-                Contact Us Directly
-              </h3>
-              <div className="flex flex-col gap-3">
-                {/* WhatsApp */}
-                <a
-                  href={`https://wa.me/${waNumber}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center gap-3 p-3.5 rounded-xl transition-colors"
-                  style={{
-                    background: "#F0FDF4",
-                    border: "1px solid #BBF7D0",
-                    textDecoration: "none",
-                  }}
-                  onMouseEnter={(e) => (e.currentTarget.style.background = "#DCFCE7")}
-                  onMouseLeave={(e) => (e.currentTarget.style.background = "#F0FDF4")}
-                >
-                  <div
-                    className="w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0"
-                    style={{ background: "#25D366" }}
-                  >
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="white">
-                      <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" />
-                    </svg>
-                  </div>
-                  <div>
-                    <div className="text-[10px] text-gray-400 font-semibold uppercase tracking-wider">
-                      WhatsApp
-                    </div>
-                    <div className="text-sm font-bold text-gray-900">+81 80-8922-7375</div>
-                  </div>
-                </a>
-
-                {/* Email */}
-                <a
-                  href={`mailto:${email}`}
-                  className="flex items-center gap-3 p-3.5 rounded-xl transition-colors"
-                  style={{
-                    background: "#EFF6FF",
-                    border: "1px solid #BFDBFE",
-                    textDecoration: "none",
-                  }}
-                  onMouseEnter={(e) => (e.currentTarget.style.background = "#DBEAFE")}
-                  onMouseLeave={(e) => (e.currentTarget.style.background = "#EFF6FF")}
-                >
-                  <div
-                    className="w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0"
-                    style={{ background: "#3B82F6" }}
-                  >
-                    <svg
-                      width="16"
-                      height="16"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="white"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    >
-                      <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
-                      <polyline points="22,6 12,13 2,6" />
-                    </svg>
-                  </div>
-                  <div>
-                    <div className="text-[10px] text-gray-400 font-semibold uppercase tracking-wider">
-                      Email
-                    </div>
-                    <div
-                      className="text-sm font-bold text-gray-900"
-                      style={{ wordBreak: "break-all" }}
-                    >
-                      {email}
-                    </div>
-                  </div>
-                </a>
-              </div>
-            </div>
+              Read destination import guides <ArrowRight size={14} />
+            </Link>
           </div>
         </div>
       </div>
@@ -1935,6 +1412,12 @@ export default function HomePage() {
           <Link href="/cars" className="select-button">
             Browse Available Cars
             <span className="arrow">→</span>
+          </Link>
+          <Link
+            href="/request-a-quote"
+            className="mt-3 inline-flex items-center justify-center gap-2 border border-white/65 px-6 py-3 text-[11px] font-bold uppercase tracking-[0.16em] text-white transition-colors hover:bg-white/10"
+          >
+            Plan an export quote <ArrowRight size={14} />
           </Link>
         </div>
       </section>

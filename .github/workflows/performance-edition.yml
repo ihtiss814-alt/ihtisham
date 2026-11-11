@@ -5,6 +5,7 @@ on:
     branches:
       - main
       - performance-final-pass
+      - ux/destination-led-journey
   pull_request:
     branches:
       - main
@@ -30,6 +31,18 @@ jobs:
       - name: Install locked dependencies
         run: npm ci
 
+      - name: Format destination journey source and commit on branch pushes
+        if: github.event_name == 'push' && github.ref == 'refs/heads/ux/destination-led-journey'
+        run: |
+          npx prettier --write scripts/validate-destination-journey.mjs scripts/validate-performance-optimizations.mjs src/components/Navbar.tsx src/components/DestinationFields.tsx src/components/DestinationPreferenceControl.tsx src/lib/destination-links.ts src/lib/seo-bootstrap.ts src/lib/shipping.ts src/pages/car-detail.tsx src/pages/cars.tsx src/pages/contact.tsx src/pages/home.tsx src/pages/request-a-quote.tsx src/pages/vehicle-landing-pages.tsx
+          git add -- scripts/validate-destination-journey.mjs scripts/validate-performance-optimizations.mjs src/components/Navbar.tsx src/components/DestinationFields.tsx src/components/DestinationPreferenceControl.tsx src/lib/destination-links.ts src/lib/seo-bootstrap.ts src/lib/shipping.ts src/pages/car-detail.tsx src/pages/cars.tsx src/pages/contact.tsx src/pages/home.tsx src/pages/request-a-quote.tsx src/pages/vehicle-landing-pages.tsx
+          if ! git diff --cached --quiet; then
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git commit -m "Format destination-aware customer journey changes"
+            git push origin HEAD:ux/destination-led-journey
+          fi
+
       - name: Format changed performance source and commit on branch pushes
         if: github.event_name == 'push' && github.ref == 'refs/heads/performance-final-pass'
         run: |
@@ -53,6 +66,9 @@ jobs:
 
       - name: Validate vehicle landing pages
         run: npm run validate:vehicle-pages
+
+      - name: Validate destination and inquiry journey
+        run: npm run validate:destination-journey
 
       - name: Validate vehicle detail redesign
         run: node scripts/validate-vehicle-detail-redesign.mjs

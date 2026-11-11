@@ -18,6 +18,7 @@ import HowItWorksPage from "@/pages/how-it-works";
 import AutoPartsPage from "@/pages/auto-parts";
 import ShippingInformationPage from "@/pages/shipping-information";
 import ContactPage from "@/pages/contact";
+import RequestQuotePage from "@/pages/request-a-quote";
 import FaqsPage from "@/pages/faqs";
 import PaymentInformationPage from "@/pages/payment-information";
 import BuyerInformationPage from "@/pages/buyer-information";
@@ -187,6 +188,7 @@ function Router() {
       <Route path="/auto-parts" component={AutoPartsPage} />
       <Route path="/shipping-information" component={ShippingInformationPage} />
       <Route path="/contact" component={ContactPage} />
+      <Route path="/request-a-quote" component={RequestQuotePage} />
       <Route path="/faqs" component={FaqsPage} />
       <Route path="/payment-information" component={PaymentInformationPage} />
       <Route path="/buyer-information" component={BuyerInformationPage} />

@@ -1,5 +1,6 @@
 import { isSupabaseConfigured, supabase } from "@/lib/supabase";
 import { cachedRequest } from "@/lib/request-cache";
+import { GLOBAL_DESTINATION_COUNTRIES } from "./global-destination-countries";
 
 /**
  * Shipping rates and landed-cost maths.
@@ -20,7 +21,7 @@ export interface ShippingRate {
   insurance_rate: number;
 }
 
-/** Destination countries and the ports we ship to. Single source of truth. */
+/** Optional port-name suggestions only; this list does not confirm route availability. */
 export const COUNTRY_PORTS: Record<string, string[]> = {
   // ── Africa ──────────────────────────────────────────────────────
   Angola: ["Luanda"],
@@ -124,28 +125,58 @@ export const COUNTRY_PORTS: Record<string, string[]> = {
   Vanuatu: ["Port Vila"],
 };
 
-export const DEST_COUNTRIES = Object.keys(COUNTRY_PORTS);
-
 /**
  * Older links and marketing copy used a few alternate country labels. Keep
  * those links working while all new controls use the exact country keys above.
  */
 const COUNTRY_ALIASES: Record<string, string> = {
   "Antigua & Barbuda": "Antigua",
+  "Antigua and Barbuda": "Antigua",
   "St. Kitts & Nevis": "St Kitts",
+  "Saint Kitts and Nevis": "St Kitts",
   "Saint Lucia": "St Lucia",
   "St. Vincent & Grenadines": "St Vincent",
+  "Saint Vincent and the Grenadines": "St Vincent",
   "Trinidad & Tobago": "Trinidad",
+  "Trinidad and Tobago": "Trinidad",
   "Turks & Caicos": "Turks and Caicos",
+  "Turks and Caicos Islands": "Turks and Caicos",
   "United Kingdom": "UK",
+  "United States": "USA",
+  "United Arab Emirates": "UAE",
+  "Côte d'Ivoire": "Ivory Coast",
+  "The Bahamas": "Bahamas",
 };
 
 export function canonicalCountry(country: string): string {
   const value = country.trim();
-  return COUNTRY_PORTS[value] ? value : (COUNTRY_ALIASES[value] ?? value);
+  if (!value) return "";
+  if (COUNTRY_PORTS[value]) return value;
+  const exactAlias = COUNTRY_ALIASES[value];
+  if (exactAlias) return exactAlias;
+  const normalized = value.toLocaleLowerCase();
+  const alias = Object.entries(COUNTRY_ALIASES).find(
+    ([aliasName]) => aliasName.toLocaleLowerCase() === normalized,
+  )?.[1];
+  if (alias) return alias;
+  return value;
 }
 
-/** Ports for a country, or an empty list if we do not ship there. */
+const destinationOptions = new Map<string, string>();
+for (const country of GLOBAL_DESTINATION_COUNTRIES) {
+  const key = canonicalCountry(country).toLocaleLowerCase();
+  if (!destinationOptions.has(key)) destinationOptions.set(key, country);
+}
+for (const country of Object.keys(COUNTRY_PORTS)) {
+  const key = canonicalCountry(country).toLocaleLowerCase();
+  if (!destinationOptions.has(key)) destinationOptions.set(key, country);
+}
+/** Global country/territory selector; inclusion is not a promise of service or route availability. */
+export const DEST_COUNTRIES = [...destinationOptions.values()].sort((a, b) =>
+  a.localeCompare(b, undefined, { sensitivity: "base" }),
+);
+
+/** Optional common port/city suggestions. An empty list does not mean shipping is unavailable. */
 export function portsFor(country: string): string[] {
   return COUNTRY_PORTS[canonicalCountry(country)] ?? [];
 }
@@ -159,19 +190,47 @@ export async function fetchShippingRate(
   port: string,
 ): Promise<ShippingRate | null> {
   const countryKey = canonicalCountry(country);
-  if (!countryKey || !port || !portsFor(countryKey).includes(port)) return null;
-  if (!isSupabaseConfigured) return null;
+  const portKey = port.trim();
+  if (!countryKey || !portKey || !isSupabaseConfigured) return null;
   return cachedRequest(
-    `shipping-rate:${countryKey}:${port}`,
+    `shipping-rate:${countryKey}:${portKey}`,
     async () => {
       const { data, error } = await supabase
         .from("shipping_rates")
         .select("country, port, freight_usd, inspection_fee, insurance_rate")
         .eq("country", countryKey)
-        .eq("port", port)
+        .eq("port", portKey)
         .maybeSingle();
-      if (error) return null;
-      return (data as ShippingRate) ?? null;
+      if (error || !data) return null;
+      const row = data as unknown as Record<string, unknown>;
+      if (
+        row.freight_usd == null ||
+        row.freight_usd === "" ||
+        row.inspection_fee == null ||
+        row.inspection_fee === "" ||
+        row.insurance_rate == null ||
+        row.insurance_rate === ""
+      )
+        return null;
+      const freight = Number(row.freight_usd);
+      const inspection = Number(row.inspection_fee);
+      const insuranceRate = Number(row.insurance_rate);
+      if (
+        !Number.isFinite(freight) ||
+        freight < 0 ||
+        !Number.isFinite(inspection) ||
+        inspection < 0 ||
+        !Number.isFinite(insuranceRate) ||
+        insuranceRate < 0
+      )
+        return null;
+      return {
+        country: String(row.country ?? countryKey),
+        port: String(row.port ?? portKey),
+        freight_usd: freight,
+        inspection_fee: inspection,
+        insurance_rate: insuranceRate,
+      } as ShippingRate;
     },
     5 * 60_000,
   );

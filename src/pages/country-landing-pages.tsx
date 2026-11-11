@@ -1,6 +1,7 @@
 import { Link } from "wouter";
 import { ArrowRight, ExternalLink, Globe2, ShieldCheck } from "lucide-react";
 import { CountryFlag } from "@/components/VehicleIdentity";
+import { quoteRequestHref } from "@/lib/destination-links";
 import { COUNTRY_TIER_ONE_CONTENT } from "@/lib/country-tier-one-content";
 import { COUNTRY_TIER_TWO_CONTENT } from "@/lib/country-tier-two-content";
 import { COUNTRY_TIER_THREE_CONTENT } from "@/lib/country-tier-three-content";
@@ -108,7 +109,7 @@ export function CountryDirectoryPage() {
             Destination import approval and taxes must be verified separately.
           </p>
           <Link
-            href="/contact"
+            href={quoteRequestHref({ requestType: "shipping" })}
             className="inline-flex items-center gap-2 mt-5 bg-primary px-5 py-3 text-sm font-bold text-primary-foreground hover:opacity-90"
           >
             Contact Wazir Trading <ArrowRight size={16} />
@@ -208,7 +209,7 @@ function CountryPageContent({ country }: { country: CountryPageData }) {
                 {priorityContent?.enquiryNote ?? country.quoteFocus}
               </p>
               <Link
-                href="/contact"
+                href={quoteRequestHref({ country: country.name, requestType: "vehicle" })}
                 className="inline-flex items-center gap-2 mt-5 bg-primary px-5 py-3 text-sm font-bold text-primary-foreground hover:opacity-90"
               >
                 Send a vehicle enquiry <ArrowRight size={16} />
@@ -360,7 +361,7 @@ function CountryPageContent({ country }: { country: CountryPageData }) {
                   "Tell us which vehicle you are considering and which port you intend to use. We will review whether an export quotation can be prepared for your enquiry."}
               </p>
               <Link
-                href="/contact"
+                href={quoteRequestHref({ country: country.name, requestType: "vehicle" })}
                 className="inline-flex w-full items-center justify-center gap-2 mt-5 bg-primary px-4 py-3 text-sm font-bold text-primary-foreground hover:opacity-90"
               >
                 Contact our team <ArrowRight size={16} />

@@ -137,7 +137,10 @@ if (
 if (
   home.includes("useLocation") ||
   home.includes("navigate(") ||
-  !home.includes("href={`/cars?destination=${encodeURIComponent(name)}`}") ||
+  !home.includes(
+    'const href = guidePath ?? quoteRequestHref({ country: name, requestType: "shipping" })',
+  ) ||
+  !home.includes("href={href}") ||
   !home.includes("href={`/cars?make=${encodeURIComponent(name)}`}") ||
   !home.includes("href={`/cars?body=${encodeURIComponent(name)}`}") ||
   howToBuy.includes("data-wt-nav") ||

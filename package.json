@@ -12,7 +12,8 @@
     "format": "prettier --write .",
     "typecheck": "tsc --noEmit",
     "validate:country-pages": "node scripts/validate-country-pages.mjs",
-    "validate:vehicle-pages": "node scripts/validate-vehicle-pages.mjs"
+    "validate:vehicle-pages": "node scripts/validate-vehicle-pages.mjs",
+    "validate:destination-journey": "node scripts/validate-destination-journey.mjs"
   },
   "overrides": {
     "rolldown": "1.2.1"
