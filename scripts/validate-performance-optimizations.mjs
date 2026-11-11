@@ -164,7 +164,8 @@ for (const [file, content] of [
     fail(`${file} page still has a same-site link that forces a document navigation.`);
   }
 }
-if (failures.length === 0) pass(
+if (failures.length === 0)
+  pass(
     "Privacy and payment policy links use semantic internal anchors handled by the native navigation layer.",
   );
 
