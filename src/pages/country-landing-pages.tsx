@@ -3,6 +3,7 @@ import { ArrowRight, ExternalLink, Globe2, ShieldCheck } from "lucide-react";
 import { CountryFlag } from "@/components/VehicleIdentity";
 import { COUNTRY_TIER_ONE_CONTENT } from "@/lib/country-tier-one-content";
 import { COUNTRY_TIER_TWO_CONTENT } from "@/lib/country-tier-two-content";
+import { COUNTRY_TIER_THREE_CONTENT } from "@/lib/country-tier-three-content";
 import {
   COUNTRY_LANDING_PAGES,
   getCountryLandingPage,
@@ -120,7 +121,9 @@ export function CountryDirectoryPage() {
 
 function CountryPageContent({ country }: { country: CountryPageData }) {
   const priorityContent =
-    COUNTRY_TIER_ONE_CONTENT[country.slug] ?? COUNTRY_TIER_TWO_CONTENT[country.slug];
+    COUNTRY_TIER_ONE_CONTENT[country.slug] ??
+    COUNTRY_TIER_TWO_CONTENT[country.slug] ??
+    COUNTRY_TIER_THREE_CONTENT[country.slug];
 
   return (
     <div className="min-h-screen bg-background">
