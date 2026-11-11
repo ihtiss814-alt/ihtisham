@@ -32,6 +32,38 @@ if (!importPattern.test(source)) {
   process.exit(1);
 }
 source = source.replace(importPattern, "const SITE_URL = 'https://www.wazirtradingllc.com';");
+
+const tierOneContentPath = path.resolve("src/lib/vehicle-tier-one-content.ts");
+const tierOneContentSource = fs.readFileSync(tierOneContentPath, "utf8");
+const tierOneContentCompiled = ts.transpileModule(tierOneContentSource, {
+  compilerOptions: {
+    module: ts.ModuleKind.CommonJS,
+    target: ts.ScriptTarget.ES2022,
+    strict: true,
+  },
+}).outputText;
+const tierOneContentModule = { exports: {} };
+new Function("exports", "module", tierOneContentCompiled)(
+  tierOneContentModule.exports,
+  tierOneContentModule,
+);
+const tierOneContent = tierOneContentModule.exports.VEHICLE_TIER_ONE_CONTENT;
+if (!tierOneContent || typeof tierOneContent !== "object") {
+  console.error("Could not load VEHICLE_TIER_ONE_CONTENT.");
+  process.exit(1);
+}
+
+const priorityImportPattern =
+  /^import\\s+\\{\\s*VEHICLE_TIER_ONE_CONTENT\\s*\\}\\s+from\\s+['"]\\.\\/vehicle-tier-one-content['"]\\s*;?\\s*$/m;
+if (!priorityImportPattern.test(source)) {
+  console.error("Could not locate the Tier 1 content import in vehicle-landing-pages.ts.");
+  process.exit(1);
+}
+source = source.replace(
+  priorityImportPattern,
+  "const VEHICLE_TIER_ONE_CONTENT = " + JSON.stringify(tierOneContent) + ";",
+);
+
 const compiled = ts.transpileModule(source, {
   compilerOptions: {
     module: ts.ModuleKind.CommonJS,
@@ -243,6 +275,160 @@ if (directorySchema.mainEntity?.numberOfItems !== visiblePageCount) {
 }
 if (registry.vehicleLandingCarsFilterPath(modelPage) !== "/cars?make=Toyota&advModel=Prius") {
   fail("Model landing page must link to the matching inventory filters.");
+}
+
+
+const expectedTierOneMakes = new Set([
+  "toyota",
+  "nissan",
+  "honda",
+  "suzuki",
+  "mazda",
+  "lexus",
+]);
+const expectedTierOneModels = new Set([
+  "toyota/prius",
+  "toyota/aqua",
+  "toyota/sienta",
+  "toyota/voxy",
+  "toyota/alphard",
+  "toyota/land-cruiser",
+  "toyota/yaris",
+  "toyota/raize",
+  "toyota/hiace",
+  "toyota/rav4",
+  "toyota/hilux",
+  "toyota/corolla-fielder",
+  "toyota/prius-a",
+  "toyota/premio",
+  "toyota/yaris-cross",
+  "nissan/note",
+  "nissan/serena",
+  "nissan/march",
+  "honda/vezel",
+  "honda/zr-v",
+  "suzuki/swift",
+  "suzuki/wagon-r",
+  "mazda/demio",
+  "lexus/nx",
+]);
+
+const tierCounts = (items) => [1, 2, 3].map(
+  (tier) => items.filter((item) => item.seoTier === tier).length,
+);
+const makeTierCounts = tierCounts(makes);
+const modelTierCounts = tierCounts(models);
+
+if (makes.length !== 14) fail("The make registry should contain exactly 14 manufacturer pages.");
+if (models.length !== 51) fail("The model registry should contain exactly 51 model pages.");
+if (makeTierCounts.join("/") !== "6/6/2") {
+  fail("Expected make SEO tiers 6/6/2; found " + makeTierCounts.join("/"));
+}
+if (modelTierCounts.join("/") !== "24/18/9") {
+  fail("Expected model SEO tiers 24/18/9; found " + modelTierCounts.join("/"));
+}
+
+const tierOneMakeSlugs = new Set(
+  makes.filter((page) => page.seoTier === 1).map((page) => page.slug),
+);
+const tierOneModelKeys = new Set(
+  models
+    .filter((page) => page.seoTier === 1)
+    .map((page) => page.makeSlug + "/" + page.slug),
+);
+if (
+  tierOneMakeSlugs.size !== expectedTierOneMakes.size ||
+  [...expectedTierOneMakes].some((slug) => !tierOneMakeSlugs.has(slug))
+) {
+  fail("Tier 1 manufacturer assignment does not match the approved six-make shortlist.");
+}
+if (
+  tierOneModelKeys.size !== expectedTierOneModels.size ||
+  [...expectedTierOneModels].some((key) => !tierOneModelKeys.has(key))
+) {
+  fail("Tier 1 model assignment does not match the approved 24-model shortlist.");
+}
+
+const expectedContentKeys = new Set([
+  ...[...expectedTierOneMakes].map((slug) => "make:" + slug),
+  ...[...expectedTierOneModels].map((key) => "model:" + key),
+]);
+const contentKeys = Object.keys(tierOneContent);
+if (
+  contentKeys.length !== expectedContentKeys.size ||
+  [...expectedContentKeys].some((key) => !Object.hasOwn(tierOneContent, key)) ||
+  contentKeys.some((key) => !expectedContentKeys.has(key))
+) {
+  fail("Tier 1 editorial content must cover exactly six makes and 24 models with no extras.");
+}
+
+for (const [key, content] of Object.entries(tierOneContent)) {
+  const page = key.startsWith("make:")
+    ? makes.find((item) => item.slug === key.slice("make:".length))
+    : models.find((item) => key === "model:" + item.makeSlug + "/" + item.slug);
+
+  if (!page) {
+    fail("Tier 1 content has no matching registry page: " + key);
+    continue;
+  }
+  if (content.seoTier !== 1 || content.kind !== page.kind || page.seoTier !== 1) {
+    fail("Tier 1 kind/priority metadata does not match the registry page: " + key);
+  }
+  if (!content.title || content.title.length > 70) {
+    fail("Tier 1 SEO title must be present and at most 70 characters: " + key);
+  }
+  if (!content.description || content.description.length < 110 || content.description.length > 175) {
+    fail("Tier 1 meta description must be 110–175 characters: " + key);
+  }
+  if (!content.intro || content.intro.length < 180) {
+    fail("Tier 1 page introduction is too short: " + key);
+  }
+  if (!content.buyerGuide || content.buyerGuide.length < 180) {
+    fail("Tier 1 buyer guide is too short: " + key);
+  }
+  if (!Array.isArray(content.searchThemes) || content.searchThemes.length < 4) {
+    fail("Tier 1 page needs at least four editorial search-intent themes: " + key);
+  }
+  if (!Array.isArray(content.focusPoints) || content.focusPoints.length < 4) {
+    fail("Tier 1 page needs at least four distinct buyer checks: " + key);
+  }
+  if (!Array.isArray(content.faqs) || content.faqs.length < 4) {
+    fail("Tier 1 page needs at least four model/make-specific FAQs: " + key);
+  }
+  for (const faq of content.faqs ?? []) {
+    if (!faq.question?.trim() || !faq.answer?.trim()) {
+      fail("Tier 1 FAQ question/answer missing: " + key);
+    }
+  }
+  if (content.searchThemes?.some((theme) => !theme?.trim())) {
+    fail("Tier 1 search-intent theme must not be blank: " + key);
+  }
+  if (page.title !== content.title || page.description !== content.description) {
+    fail("Tier 1 SEO metadata was not applied to the generated page: " + key);
+  }
+  if (page.intro !== content.intro || page.buyerGuide !== content.buyerGuide) {
+    fail("Tier 1 editorial content was not applied to the generated page: " + key);
+  }
+  if (page.focusPoints?.length !== content.focusPoints?.length || page.faqs?.length !== content.faqs?.length) {
+    fail("Tier 1 buyer checklist/FAQ content was not applied to the generated page: " + key);
+  }
+  if (page.directoryVisible === false) {
+    fail("Tier 1 pages must not promote an intentionally retired legacy route: " + key);
+  }
+}
+
+if (
+  routePageSource.includes("searchThemes") ||
+  routePageSource.includes("searchThemes.join")
+) {
+  fail("Editorial search themes must not be rendered as hidden or visible keyword lists.");
+}
+if (
+  !routePageSource.includes("qualifiedCount < MIN_INDEXABLE_LANDING_STOCK") ||
+  !routePageSource.includes("page.directoryVisible === false") ||
+  registry.MIN_INDEXABLE_LANDING_STOCK !== 5
+) {
+  fail("Tier metadata must not bypass the five-qualifying-vehicle indexation/visibility safeguards.");
 }
 
 if (failures.length) {
