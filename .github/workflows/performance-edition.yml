@@ -34,8 +34,8 @@ jobs:
       - name: Format destination journey source and commit on branch pushes
         if: github.event_name == 'push' && github.ref == 'refs/heads/ux/destination-led-journey'
         run: |
-          npx prettier --write scripts/validate-destination-journey.mjs src/components/DestinationFields.tsx src/components/DestinationPreferenceControl.tsx src/lib/destination-links.ts src/lib/seo-bootstrap.ts src/lib/shipping.ts src/pages/car-detail.tsx src/pages/cars.tsx src/pages/contact.tsx src/pages/home.tsx src/pages/request-a-quote.tsx src/pages/vehicle-landing-pages.tsx
-          git add -- scripts/validate-destination-journey.mjs src/components/DestinationFields.tsx src/components/DestinationPreferenceControl.tsx src/lib/destination-links.ts src/lib/seo-bootstrap.ts src/lib/shipping.ts src/pages/car-detail.tsx src/pages/cars.tsx src/pages/contact.tsx src/pages/home.tsx src/pages/request-a-quote.tsx src/pages/vehicle-landing-pages.tsx
+          npx prettier --write scripts/validate-destination-journey.mjs scripts/validate-performance-optimizations.mjs src/components/Navbar.tsx src/components/DestinationFields.tsx src/components/DestinationPreferenceControl.tsx src/lib/destination-links.ts src/lib/seo-bootstrap.ts src/lib/shipping.ts src/pages/car-detail.tsx src/pages/cars.tsx src/pages/contact.tsx src/pages/home.tsx src/pages/request-a-quote.tsx src/pages/vehicle-landing-pages.tsx
+          git add -- scripts/validate-destination-journey.mjs scripts/validate-performance-optimizations.mjs src/components/Navbar.tsx src/components/DestinationFields.tsx src/components/DestinationPreferenceControl.tsx src/lib/destination-links.ts src/lib/seo-bootstrap.ts src/lib/shipping.ts src/pages/car-detail.tsx src/pages/cars.tsx src/pages/contact.tsx src/pages/home.tsx src/pages/request-a-quote.tsx src/pages/vehicle-landing-pages.tsx
           if ! git diff --cached --quiet; then
             git config user.name "github-actions[bot]"
             git config user.email "41898282+github-actions[bot]@users.noreply.github.com"

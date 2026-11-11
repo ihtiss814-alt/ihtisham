@@ -137,7 +137,7 @@ if (
 if (
   home.includes("useLocation") ||
   home.includes("navigate(") ||
-  !home.includes("const href = guidePath ?? quoteRequestHref({ country: name, requestType: \"shipping\" })") ||
+  !home.includes('const href = guidePath ?? quoteRequestHref({ country: name, requestType: "shipping" })') ||
   !home.includes("href={href}") ||
   !home.includes("href={`/cars?make=${encodeURIComponent(name)}`}") ||
   !home.includes("href={`/cars?body=${encodeURIComponent(name)}`}") ||
