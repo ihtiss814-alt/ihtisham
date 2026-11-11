@@ -143,7 +143,9 @@ check(
   "Guided quote page does not accept vehicle and request-type prefills.",
 );
 check(
-  quotePage.includes("does not reserve a vehicle") && quotePage.includes("import permit"),
+  quotePage.includes("does not reserve a vehicle") &&
+    /import\\s+permit/.test(quotePage) &&
+    quotePage.includes("does not reserve a vehicle, confirm route availability"),
   "Guided quote page lacks non-binding enquiry and eligibility disclosure.",
 );
 check(
@@ -179,7 +181,8 @@ check(
   "Inventory calculator is not connected to free-text destination and saved preference.",
 );
 check(
-  cars.includes("QUOTE REQUIRED") && cars.includes("No generic freight price"),
+  cars.includes("QUOTE REQUIRED") &&
+    /will not substitute a generic freight price/i.test(cars),
   "Inventory calculator must request a quote instead of estimating an unknown route.",
 );
 check(
@@ -210,8 +213,8 @@ check(
   "Contact form does not capture a free-text preferred port/final city.",
 );
 check(
-  countryPages.includes("quoteRequestHref({ country: country.name") &&
-    vehiclePages.includes("quoteRequestHref({ vehicleModel"),
+  /quoteRequestHref\\(\\{\\s*country:\\s*country\\.name/.test(countryPages) &&
+    /quoteRequestHref\\(\\{\\s*vehicleModel:/.test(vehiclePages),
   "Country and make/model guides do not hand their context into the quote flow.",
 );
 check(
