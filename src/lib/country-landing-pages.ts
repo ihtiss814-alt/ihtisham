@@ -221,15 +221,15 @@ export const COUNTRY_LANDING_PAGES: CountryLandingPage[] = [
     name: "Oman",
     region: "Gulf & Middle East",
     seoTier: 3,
-    title: "Japanese Car Import Guide for Oman | Wazir Trading",
+    title: "Import Japanese Cars to Oman | Wazir Trading",
     description:
-      "Review official Oman Customs guidance for second-hand vehicles and the checks to complete before buying a Japanese used car for Oman.",
+      "Check Oman's seven-year private-car limit, commercial permit route, conformity rules and customs costs before buying a Japanese vehicle.",
     intro:
-      "Oman publishes specific Customs services for second-hand vehicles, including rules that distinguish private vehicles from trucks, buses and equipment. Confirm which vehicle class your intended purchase falls into before paying a deposit.",
+      "Oman's Directorate General of Customs publishes specific age limits for used vehicles: private cars under seven years, trucks and buses under ten years, and equipment under fifteen years. The vehicle must meet Omani standards. Commercial importers also have a separate permit route. Confirm the exact category, manufacture date and importer's eligibility before purchase.",
     buyerContext:
       "The vehicle’s manufacture date, classification and conformity with Omani standards can be decisive. The importer should obtain the applicable permit or confirmation before the vehicle is loaded in Japan.",
     regulatorySnapshot:
-      "Oman Customs’ public guidance states that private vehicles must not be more than seven years from manufacture, while trucks and buses have a different stated limit. The authority also lists a permit service for importing second-hand vehicles. Verify the current interpretation, vehicle category and any later circular directly with Oman Customs.",
+      "Oman Customs states that private vehicles must be less than seven years old, trucks and buses less than ten years, and equipment less than fifteen years. Personal importers must be at least 18. A separate commercial permit may cover multiple used vehicles for one year. Classic vehicles have a distinct approval route through the General Traffic Department. Verify the live conditions and current fee before shipment.",
     checks: [
       "Confirm the current manufacture-age rule for the vehicle category: private car, truck, bus or equipment.",
       "Ask Oman Customs whether a second-hand vehicle permit or other approval is required before shipping, and verify conformity with applicable standards.",
@@ -253,8 +253,18 @@ export const COUNTRY_LANDING_PAGES: CountryLandingPage[] = [
         url: "https://www.customs.gov.om/en/business-services/",
         authority: "Directorate General of Customs",
       },
+      {
+        label: "Oman Customs — Import of used vehicles, motorcycles and classic vehicles",
+        url: "https://www.customs.gov.om/en/import-of-used-vehicles-motorcycles-and-classic-vehicles",
+        authority: "Directorate General of Customs, Oman",
+      },
+      {
+        label: "Oman Customs — Permit to import second-hand vehicles",
+        url: "https://www.customs.gov.om/en/business-services/permit/permit-to-import-second-hand-vehicles",
+        authority: "Directorate General of Customs, Oman",
+      },
     ],
-    reviewedOn: "2026-11-10",
+    reviewedOn: "2026-11-11",
     indexable: true,
   },
   {
@@ -262,15 +272,15 @@ export const COUNTRY_LANDING_PAGES: CountryLandingPage[] = [
     name: "Qatar",
     region: "Gulf & Middle East",
     seoTier: 3,
-    title: "Japanese Car Import Guide for Qatar | Wazir Trading",
+    title: "Import Japanese Cars to Qatar | Wazir Trading",
     description:
-      "Plan a Japanese vehicle import to Qatar with a checklist for customs declarations, shipping documents, conformity and destination charges.",
+      "Plan a Japan-to-Qatar vehicle import with personal-import eligibility, customs documents, Arabic translations and road-registration checks.",
     intro:
-      "When planning a Japanese used-car import to Qatar, treat customs clearance and vehicle registration as separate checks. Confirm the vehicle’s acceptability and the documents required for its exact category before dispatch.",
+      "Qatar's General Authority of Customs publishes personal-import controls, required shipping documents and electronic customs procedures. Personal imports must be non-commercial and the importer must not be a trader. Customs may request Arabic translations of foreign invoices and other documents. Road-use eligibility and inspection are separate from customs release, so check the exact Japanese-market vehicle with the competent Qatari authorities before shipping.",
     buyerContext:
       "Qatar Customs describes electronic import declarations, supporting shipment documents and assessment under the applicable customs tariff. The importer or authorised broker should confirm whether any vehicle-specific approvals or technical requirements also apply.",
     regulatorySnapshot:
-      "The General Authority of Customs’ importation guide lists documents such as the delivery order and bill of lading for sea imports, and explains that declarations are submitted electronically with applicable duties and risk-based inspection. This is a general import procedure, not a complete used-vehicle eligibility ruling.",
+      "Qatar Customs requires personal importers to present ID, passport or residence visa and says personal consignments must be non-commercial. Restricted goods need the relevant approvals; Customs may request Arabic translations of foreign invoices/documents. This general customs page is not a full vehicle-registration ruling. Confirm current age, steering, technical conformity, inspection and registration requirements for the exact vehicle with Customs and Traffic before purchase.",
     checks: [
       "Confirm the vehicle’s technical and registration eligibility with the relevant Qatari transport authority before purchase.",
       "Confirm the customs declaration process, bill of lading, delivery order, invoice, packing list and any supporting certificates.",
@@ -289,8 +299,13 @@ export const COUNTRY_LANDING_PAGES: CountryLandingPage[] = [
         url: "https://www.customs.gov.qa/",
         authority: "General Authority of Customs",
       },
+      {
+        label: "Qatar General Authority of Customs — Importation and personal-import controls",
+        url: "https://www.customs.gov.qa/English/Procedures/UnifiedGuide/Pages/Importation.aspx",
+        authority: "General Authority of Customs, State of Qatar",
+      },
     ],
-    reviewedOn: "2026-11-10",
+    reviewedOn: "2026-11-11",
     indexable: true,
   },
   {
@@ -298,15 +313,15 @@ export const COUNTRY_LANDING_PAGES: CountryLandingPage[] = [
     name: "Bahrain",
     region: "Gulf & Middle East",
     seoTier: 3,
-    title: "Japanese Car Import Guide for Bahrain | Wazir Trading",
+    title: "Import Japanese Cars to Bahrain | Wazir Trading",
     description:
-      "Understand the Bahrain checks for customs clearance and initial registration of a used vehicle imported from Japan.",
+      "Check Bahrain's imported used-car age categories, registration fee rules, customs documents and Traffic approvals before purchase.",
     intro:
-      "For Bahrain, plan the customs entry and initial vehicle registration together. The government service catalogue identifies a registration process for used vehicles imported from abroad and lists supporting documents and conditions.",
+      "Bahrain's traffic legislation sets age-related registration conditions for used vehicles imported from outside the Kingdom. The published rule concerns private cars and private passenger-transport cars more than five years old from manufacture; a 2021 amendment provides a file-opening fee route in specified cases and identifies exceptions. A separate ten-year restriction applies to certain transport vehicles, tractors, trailers and semi-trailers.",
     buyerContext:
       "A buyer should confirm that the chosen vehicle class can be registered, that the correct customs and export certificates will be available, and that insurance and any other authority approvals can be obtained.",
     regulatorySnapshot:
-      "Bahrain’s Government Services Information portal lists a service for initial registration of used vehicles imported from abroad. The listed conditions include customs-clearance evidence, civil-liability insurance and additional approvals for certain vehicle classifications. Check the live service requirements before purchase.",
+      "Bahrain's 2021 amendment to Traffic Regulation Article 98 states that registration of specified used imported private vehicles over five years old may proceed after payment of the BHD 1,000 file-opening fee, subject to listed exceptions. A separate ten-year provision applies to certain transport vehicles and trailers. Confirm the consolidated current rule, classification and fee with the General Directorate of Traffic before shipment.",
     checks: [
       "Confirm the vehicle category can be registered in Bahrain and whether additional authority approval is required.",
       "Verify the form of final export certificate or ownership/clearance documents accepted for the vehicle’s origin and transaction.",
@@ -325,8 +340,19 @@ export const COUNTRY_LANDING_PAGES: CountryLandingPage[] = [
         url: "https://www.bahrain.bh/",
         authority: "Bahrain Government",
       },
+      {
+        label:
+          "Bahrain Legislation and Legal Opinion Commission — Interior Ministry Decision 17/2021 amending Traffic Regulation Article 98",
+        url: "https://lloc.gov.bh/Legislation/HTM/RINT1721",
+        authority: "Legislation and Legal Opinion Commission, Bahrain",
+      },
+      {
+        label: "Bahrain Government — Initial registration of used vehicles imported from abroad",
+        url: "https://www.bahrain.bh/wps/portal/en/BNP/ServicesCatalogue/GSX-UI-PServiceDetails?psID=3192",
+        authority: "Government of Bahrain",
+      },
     ],
-    reviewedOn: "2026-11-10",
+    reviewedOn: "2026-11-11",
     indexable: true,
   },
   {
@@ -334,15 +360,15 @@ export const COUNTRY_LANDING_PAGES: CountryLandingPage[] = [
     name: "Saudi Arabia",
     region: "Gulf & Middle East",
     seoTier: 3,
-    title: "Japanese Car Import Guide for Saudi Arabia | Wazir Trading",
+    title: "Import Japanese Cars to Saudi Arabia | Wazir Trading",
     description:
-      "Check Saudi ZATCA vehicle-import controls, vehicle age, conformity and steering requirements before arranging a Japanese used-car shipment.",
+      "Check Saudi Arabia's five-model-year light-vehicle rule, SASO Saber conformity, energy efficiency and prohibited vehicle conditions.",
     intro:
-      "Saudi Arabia has specific vehicle-import controls covering age, conformity and vehicle condition. Confirm that a Japanese vehicle meets the requirements for the importer’s status and intended use before any purchase or shipment.",
+      "Saudi Arabia's ZATCA and SASO publish vehicle-specific import controls. Small vehicles, buses and light transport up to 3.5 tonnes generally must not exceed five model years, excluding the current year; heavy trucks have a separate five-year rule. Vehicle energy-efficiency compliance and SASO conformity are additional checks, and several categories of damaged or modified vehicles are prohibited.",
     buyerContext:
       "Vehicle eligibility can differ by importer category and vehicle classification. The importer should check the current ZATCA rules and any SASO/SABER conformity or energy-efficiency requirements that apply to the exact model.",
     regulatorySnapshot:
-      "ZATCA’s vehicle-import controls state a model-age condition for small vehicles and identify additional requirements relating to conformity and energy efficiency. Its customs instructions also address vehicle condition and steering-system modification. The published rules should be checked against any current exceptions or later circulars.",
+      "ZATCA publishes a five-model-year limit for small vehicles, buses and light transport up to 3.5 tonnes, excluding the current year, and a separate five-year manufacture-age rule for heavy trucks. Energy-efficiency certification and SASO/Saber conformity also apply. ZATCA prohibits specified salvage/damaged, taxi/police, stolen, chassis-tampered and steering-converted vehicles. Confirm importer eligibility, exact class and current fees before shipment.",
     checks: [
       "Check the current model-year eligibility and whether any importer-specific exception or fee applies.",
       "Verify conformity, energy-efficiency, steering-system, accident-history and chassis-identification requirements before buying.",
@@ -366,8 +392,18 @@ export const COUNTRY_LANDING_PAGES: CountryLandingPage[] = [
         url: "https://eservices.zatca.gov.sa/sites/sc/en/CustomsGuideNew/CustomsGuideLandPorts/Pages/Page13.aspx",
         authority: "Zakat, Tax and Customs Authority",
       },
+      {
+        label: "ZATCA — Vehicle import controls",
+        url: "https://zatca.gov.sa/en/RulesRegulations/Taxes/Pages/customs-individual/import-vehicles.aspx",
+        authority: "Zakat, Tax and Customs Authority, Saudi Arabia",
+      },
+      {
+        label: "SASO — Vehicle import shipment certificate through Saber",
+        url: "https://www.saso.gov.sa/en/eservices/Pages/MainEServicesDetails.aspx?serviceid=458",
+        authority: "Saudi Standards, Metrology and Quality Organization",
+      },
     ],
-    reviewedOn: "2026-11-10",
+    reviewedOn: "2026-11-11",
     indexable: true,
   },
   {
@@ -662,15 +698,15 @@ export const COUNTRY_LANDING_PAGES: CountryLandingPage[] = [
     name: "Botswana",
     region: "Southern Africa",
     seoTier: 3,
-    title: "Japanese Car Import Guide for Botswana | Wazir Trading",
+    title: "Import Japanese Cars to Botswana | Wazir Trading",
     description:
-      "Plan a Japanese vehicle import to Botswana with BURS motor-vehicle clearance guidance, customs documents and duty/tax checks.",
+      "Plan a Japan-to-Botswana vehicle import with BURS customs clearance, police certificates, 14-day release and inland transit checks.",
     intro:
-      "Botswana’s customs authority publishes a specific motor-vehicle clearance page. Even where a vehicle category is not subject to a general import restriction, the importer must still complete the required customs declaration and pay applicable duties and taxes.",
+      "Botswana Unified Revenue Service says there is currently no general restriction on importing motor vehicles. However, vehicles for home consumption must be customs-cleared and liable duties/VAT paid within 14 days of entry. BURS lists a SAD 500 declaration, police clearance from the export country and Botswana, export-country customs documents and an invoice or local valuation certificate among the supporting records.",
     buyerContext:
       "Botswana is landlocked. The final price and schedule therefore depend on the nominated seaport, transit country, border handling and inland delivery arrangement as well as the vehicle’s customs value.",
     regulatorySnapshot:
-      "BURS’ motor-vehicle page states that Botswana currently does not impose a general restriction on importing or exporting motor vehicles, while explaining customs and VAT obligations for vehicles entering for home consumption and listing supporting documents. It also describes a 14-day clearance period after entry for vehicles intended for home consumption; confirm the current rule and any later notice.",
+      "BURS states that Botswana currently imposes no general motor-vehicle import restriction. Vehicles entering for home consumption must be cleared for Customs purposes within 14 days. The listed documents include SAD 500, police clearance from both the export country and Botswana, export-country customs-clearance documents and an invoice or local retail valuation certificate. Confirm current duties, VAT and registration steps.",
     checks: [
       "Confirm the current BURS treatment of the vehicle and the applicable customs/VAT tariff classification.",
       "Prepare the sale invoice, export/clearance papers, police clearance or valuation evidence where required, and customs declaration documents.",
@@ -689,8 +725,13 @@ export const COUNTRY_LANDING_PAGES: CountryLandingPage[] = [
         url: "https://www.burs.org.bw/",
         authority: "Botswana Unified Revenue Service",
       },
+      {
+        label: "BURS — Clearance of motor vehicles",
+        url: "https://www.burs.org.bw/index.php/customsexcisemain/customs-clearance/clearance-of-motor-vehicles",
+        authority: "Botswana Unified Revenue Service",
+      },
     ],
-    reviewedOn: "2026-11-10",
+    reviewedOn: "2026-11-11",
     indexable: true,
   },
   {
@@ -867,15 +908,15 @@ export const COUNTRY_LANDING_PAGES: CountryLandingPage[] = [
     name: "Senegal",
     region: "West Africa",
     seoTier: 3,
-    title: "Japanese Car Import Guide for Senegal | Wazir Trading",
+    title: "Import Japanese Cars to Senegal | Wazir Trading",
     description:
-      "Prepare a Japanese used-vehicle import to Senegal with official guidance on Dakar vehicle customs clearance, documents and duty valuation.",
+      "Check Senegal's amended 2025 ten- and fifteen-year vehicle limits, technical inspection and Dakar customs-clearance procedure.",
     intro:
-      "Senegal’s government publishes a vehicle-specific customs-clearance procedure and identifies the Dakar Port Nord and Dakar Port Sud customs offices for the main vehicle-clearance process. Buyers should confirm the nominated port and documentation before shipment.",
+      "Senegal amended its used-vehicle import rules through Decree No. 2025-1752 of 24 October 2025, published in November 2025. The amended decree prohibits passenger and specified light utility vehicles over ten years old, and goods vehicles above 3.5 tonnes over fifteen years old. Vehicle customs clearance is principally handled by Dakar-Port Nord and Dakar-Port Sud.",
     buyerContext:
       "The declared customs value, freight, duties and the vehicle’s category and characteristics can affect the final amount payable. A buyer should ask for the exact document checklist from a Senegalese customs broker before the vehicle leaves Japan.",
     regulatorySnapshot:
-      "The Senegal government service page states that vehicle clearance is primarily carried out at Dakar-Port Nord and Dakar-Port Sud and lists documents such as the vehicle registration document, purchase invoice, owner identity document, bill of lading and customs declaration. It explains that cost depends on FOB value, freight, duties and vehicle category.",
+      "Decree 2025-1752 (24 October 2025) sets a ten-year limit for passenger vehicles, specified light utility vehicles up to 3.5 tonnes and people-transport utility vehicles with at least seven seats; goods vehicles over 3.5 tonnes have a fifteen-year limit. Senegal's Finance Ministry identifies Dakar-Port Nord and Dakar-Port Sud as the principal offices for vehicle customs clearance. Verify vehicle class, manufacture date and technical inspection.",
     checks: [
       "Confirm which Dakar customs office and port/terminal will handle the vehicle and whether any exceptional regional process applies.",
       "Prepare the original vehicle registration/export papers, invoice, importer ID, bill of lading and customs declaration.",
@@ -894,8 +935,18 @@ export const COUNTRY_LANDING_PAGES: CountryLandingPage[] = [
         url: "https://www.douanes.sn/",
         authority: "Direction Générale des Douanes",
       },
+      {
+        label: "Senegal Ministry of Finance — Vehicle customs clearance",
+        url: "https://finances.gouv.sn/en/services-demarches/dedouanement-des-vehicules-jd_bOWL4ofeUjKltWr3z3",
+        authority: "Ministry of Finance and Budget / Directorate General of Customs, Senegal",
+      },
+      {
+        label: "Senegal — Decree 2025-1752 amending used-vehicle import age limits",
+        url: "https://www.lexenegal.sn/code/decret-2001-72-importation-vehicules-cycles-cyclomoteurs-usages/art-3",
+        authority: "Senegal legal text repository; Official Journal no. 7863",
+      },
     ],
-    reviewedOn: "2026-11-10",
+    reviewedOn: "2026-11-11",
     indexable: true,
   },
   {
@@ -903,15 +954,15 @@ export const COUNTRY_LANDING_PAGES: CountryLandingPage[] = [
     name: "The Gambia",
     region: "West Africa",
     seoTier: 3,
-    title: "Japanese Car Import Guide for The Gambia | Wazir Trading",
+    title: "Import Japanese Cars to The Gambia | Wazir Trading",
     description:
-      "Review Gambia Revenue Authority vehicle-age and customs-clearance guidance before selecting a Japanese used car for The Gambia.",
+      "Check The Gambia's eight-year used-vehicle age rule, GRA customs assessment and ASYCUDA clearance before buying from Japan.",
     intro:
-      "The Gambia Revenue Authority publishes used-vehicle import information, including an age rule and the requirement to use a clearing agent for customs processing. Because the public FAQ includes a year-specific example that may be stale, confirm the live manufacturing-year cut-off before choosing a vehicle.",
+      "The Gambia Revenue Authority's Customs FAQ states that second-hand motor vehicles over eight years old are not allowed under the KS 1515:2000 quality standard enforced by GRA. The FAQ explains that import documents are processed electronically through ASYCUDA by a clearing agent and that customs assesses duty according to the vehicle's value and the applicable tariff.",
     buyerContext:
       "A buyer should check the date-of-manufacture rule, current quality standards and customs valuation with GRA and the Gambia Standards Bureau. Use the official sources rather than relying on old dealer lists or social-media posts.",
     regulatorySnapshot:
-      "GRA’s customs FAQ states that vehicles over eight years old are not allowed under the referenced KS 1515:2000 standard and describes electronic customs processing through ASYCUDA with a clearing agent. The same page contains an example year that appears time-sensitive, so verify the current year threshold and tax treatment directly with GRA before purchase.",
+      "GRA's Customs FAQ says second-hand motor vehicles over eight years old are not allowed under the KS 1515:2000 quality standard. GRA also states that import documentation is processed electronically through ASYCUDA by a clearing agent and duty is assessed by customs value and the applicable rate. Confirm manufacture-year calculation, tariff and documents with GRA before purchase.",
     checks: [
       "Ask GRA to confirm the latest permitted manufacture year for the actual import year; do not rely on the older example year on the FAQ page.",
       "Confirm vehicle standards, right/left-hand steering acceptance and any required inspection or import permit with the competent standards authority.",
@@ -930,8 +981,13 @@ export const COUNTRY_LANDING_PAGES: CountryLandingPage[] = [
         url: "https://www.gra.gm/",
         authority: "Gambia Revenue Authority",
       },
+      {
+        label: "GRA — Customs FAQs: used-vehicle age and import clearance",
+        url: "https://www.gra.gm/custom-faqs",
+        authority: "Gambia Revenue Authority",
+      },
     ],
-    reviewedOn: "2026-11-10",
+    reviewedOn: "2026-11-11",
     indexable: true,
   },
   {
@@ -939,15 +995,15 @@ export const COUNTRY_LANDING_PAGES: CountryLandingPage[] = [
     name: "Sierra Leone",
     region: "West Africa",
     seoTier: 3,
-    title: "Japanese Car Import Guide for Sierra Leone | Wazir Trading",
+    title: "Import Japanese Cars to Sierra Leone | Wazir Trading",
     description:
-      "Plan a Japanese vehicle import to Sierra Leone with a customs-document checklist and links to official revenue and trade authorities.",
+      "Prepare a Sierra Leone vehicle enquiry with written steering-side approval, current age checks and customs document verification.",
     intro:
-      "For Sierra Leone, the buyer should confirm the vehicle tariff classification, import documentation and any pre-shipment or standards requirement before purchase. The actual cost is determined by the vehicle’s assessed customs value and current tariff treatment.",
+      "Sierra Leone vehicle import enquiries need early confirmation of steering-side acceptance, vehicle category and current customs requirements. The public authority material reviewed for this guide does not establish a single current used-car age limit or a complete Japan-specific approval rule. Because Japanese-market vehicles are commonly right-hand drive, obtain written confirmation from the National Revenue Authority and Sierra Leone Road Safety Authority before purchasing.",
     buyerContext:
       "Use the National Revenue Authority and the relevant trade/standards authorities for current requirements. Confirm the port of discharge, customs entry process and whether a licensed customs agent must submit the declaration.",
     regulatorySnapshot:
-      "Sierra Leone’s National Revenue Authority administers customs and revenue processes. The exact rules for a specific used vehicle—including tariff classification, age/condition restrictions, standards, permits and taxes—must be checked against current official notices and the current tariff; this page does not assume a universal eligibility rule.",
+      "The current public primary-source material reviewed does not establish a definitive blanket used-vehicle age limit or a complete Japan-specific steering rule for Sierra Leone. Buyers should obtain written NRA and SLRSA confirmation of steering-side eligibility, age, condition, inspection, customs documentation and road-registration requirements for the exact chassis before shipment.",
     checks: [
       "Ask the NRA or a licensed broker to confirm the HS classification and whether the exact vehicle category is permitted for import.",
       "Check whether pre-shipment inspection, conformity evidence, import permit or other agency approval is required for a Japanese-origin vehicle.",
@@ -966,8 +1022,18 @@ export const COUNTRY_LANDING_PAGES: CountryLandingPage[] = [
         url: "https://www.sletradeportal.gov.sl/",
         authority: "Government of Sierra Leone",
       },
+      {
+        label: "National Revenue Authority — Customs and import information",
+        url: "https://nra.gov.sl/",
+        authority: "National Revenue Authority, Sierra Leone",
+      },
+      {
+        label: "Sierra Leone Road Safety Authority",
+        url: "https://slrsa.gov.sl/",
+        authority: "Sierra Leone Road Safety Authority",
+      },
     ],
-    reviewedOn: "2026-11-10",
+    reviewedOn: "2026-11-11",
     indexable: true,
   },
   {
@@ -975,15 +1041,15 @@ export const COUNTRY_LANDING_PAGES: CountryLandingPage[] = [
     name: "Liberia",
     region: "West Africa",
     seoTier: 3,
-    title: "Japanese Car Import Guide for Liberia | Wazir Trading",
+    title: "Import Japanese Cars to Liberia | Wazir Trading",
     description:
-      "Prepare a Japanese used-car import to Liberia with LRA customs documentation, used-vehicle valuation and clearance checks.",
+      "Check Liberia's ten-year used-vehicle age rule, right-hand-drive restriction and Ministry of Commerce import documents.",
     intro:
-      "Liberia’s Revenue Authority publishes customs guidance covering import declarations, supporting documents and used-vehicle valuation. Buyers should obtain current valuation and clearance advice before relying on the purchase invoice as the only basis for import costs.",
+      "Liberia's Ministry of Transport administrative regulation for vehicle dealerships states that a used vehicle imported into the commerce of Liberia must not be older than ten years and says right-hand-drive vehicles should not be imported because traffic operates on the right side of the road. Liberia's Ministry of Commerce also publishes an import process for new and used cars with business, invoice, tax-clearance and title documentation.",
     buyerContext:
       "The import declaration may require a tax identification number and supporting commercial/shipping records. Ask a licensed customs broker to confirm any title, valuation or inspection documents required for the exact vehicle.",
     regulatorySnapshot:
-      "LRA’s customs fact sheet lists a bill of lading, detailed commercial invoice, packing list and tax clearance among supporting declaration documents, and notes that product-specific certificates or title documents may be required. LRA also publishes a used-vehicles valuation regulation and customs laws/resources.",
+      "Liberia's Ministry of Transport administrative regulation states that used vehicles should not be older than ten years and directs dealers not to import right-hand-drive vehicles for road-safety reasons. The Ministry of Commerce's published process lists business registration, invoice, packing list, tax clearance, car title and an MoT dealership certificate for vehicle-selling businesses. Confirm current application of the regulation before purchase.",
     checks: [
       "Confirm the importer TIN, customs declaration process and exact set of supporting documents before shipment.",
       "Check LRA’s current used-vehicle valuation reference and any inspection or title/ownership requirements for the selected vehicle.",
@@ -1007,8 +1073,19 @@ export const COUNTRY_LANDING_PAGES: CountryLandingPage[] = [
         url: "https://revenue.lra.gov.lr/wp-content/uploads/2021/10/USED-Vehicles-Valuation-Administrative-Regulation-min.pdf",
         authority: "Liberia Revenue Authority",
       },
+      {
+        label:
+          "Liberia Ministry of Transport — Administrative regulation for vehicle dealerships and used-vehicle import conditions",
+        url: "https://mot.gov.lr/sites/default/files/documents/ADMINISTRATIVE%2520REGULATION%2520%2520AA%2520June%252017%252C%25202016%2520-%2520Copy.pdf",
+        authority: "Ministry of Transport, Liberia",
+      },
+      {
+        label: "Ministry of Commerce and Industry — Import new and used cars",
+        url: "https://www.moci.gov.lr/general/import-new-and-used-cars",
+        authority: "Ministry of Commerce and Industry, Liberia",
+      },
     ],
-    reviewedOn: "2026-11-10",
+    reviewedOn: "2026-11-11",
     indexable: true,
   },
   {
@@ -1057,15 +1134,15 @@ export const COUNTRY_LANDING_PAGES: CountryLandingPage[] = [
     name: "Seychelles",
     region: "Indian Ocean",
     seoTier: 3,
-    title: "Japanese Car Import Guide for Seychelles | Wazir Trading",
+    title: "Import Japanese Cars to Seychelles | Wazir Trading",
     description:
-      "Review Seychelles Revenue Commission guidance on right-hand-drive vehicles, import permits and vehicle documents before buying from Japan.",
+      "Check Seychelles' right-hand-drive and pre-arrival permit rules, plus the three-year resident concession conditions.",
     intro:
-      "Seychelles publishes clear vehicle import guidance that buyers should check before selecting a Japanese car. The Seychelles Revenue Commission states that imported motor vehicles must be right-hand drive and require an import permit before arrival.",
+      "Seychelles Revenue Commission says all motor vehicles imported into Seychelles must be right-hand drive and require an import permit before arrival. The Seychelles Trade Portal lists second-hand and left-hand-drive vehicles among restricted goods requiring approval through the Import and Export Permit Unit. A separate returning-graduate/resident route has a three-year vehicle-age limit, a six-month import window and a one-vehicle condition.",
     buyerContext:
       "Obtain the approved import permit before shipment and ensure that vehicle details on the invoice, export certificate and bill of lading match. Do not confuse a provisional permit with a final approved permit.",
     regulatorySnapshot:
-      "The Seychelles Revenue Commission’s customs guidance says all imported motor vehicles must be right-hand drive and require an import permit before arrival. Its notice to importers lists invoice details, auction/condition information, bill of lading, export certificate, proof of payment, freight invoice and insurance details among relevant documents.",
+      "SRC states that all imported vehicles must be right-hand drive and require an import permit before arrival. The Trade Portal lists second-hand vehicles and left-hand-drive vehicles as restricted goods. SRC describes a separate returning graduate/resident route with a vehicle no older than three years, passenger-use category, one vehicle and import within six months of taking residency; it is not a general tax exemption.",
     checks: [
       "Verify the vehicle is right-hand drive before purchase; a steering-side mismatch can prevent import or registration.",
       "Obtain the approved import permit from the responsible Ministry before the vehicle arrives; do not treat a provisional permit as final.",
@@ -1084,8 +1161,18 @@ export const COUNTRY_LANDING_PAGES: CountryLandingPage[] = [
         url: "https://src.gov.sc/customs-calls-on-importers-to-follow-the-right-documentation-procedure-upon-importation-of-vehicles-for-personal-use/",
         authority: "Seychelles Revenue Commission",
       },
+      {
+        label: "Seychelles Revenue Commission — Importation of vehicles",
+        url: "https://src.gov.sc/customs-and-excises/",
+        authority: "Seychelles Revenue Commission",
+      },
+      {
+        label: "Seychelles Trade Portal — Import guide and restricted goods permits",
+        url: "https://www.tradeportal.sc/import-guide/",
+        authority: "Seychelles Trade Portal / Ministry of Finance, Trade and Investment",
+      },
     ],
-    reviewedOn: "2026-11-10",
+    reviewedOn: "2026-11-11",
     indexable: true,
   },
   {
@@ -1093,15 +1180,15 @@ export const COUNTRY_LANDING_PAGES: CountryLandingPage[] = [
     name: "Madagascar",
     region: "Indian Ocean",
     seoTier: 3,
-    title: "Japanese Car Import Guide for Madagascar | Wazir Trading",
+    title: "Import Japanese Cars to Madagascar | Wazir Trading",
     description:
-      "Understand Madagascar Customs’ CIVIO identification process and right-hand-drive restrictions before considering a Japanese used vehicle.",
+      "Prepare a Japan vehicle import to Madagascar with BSC, CIVIO/GasyNet inspection and customs valuation checks.",
     intro:
-      "Madagascar has a specific identification and customs process for imported used passenger vehicles. The Customs portal describes the CIVIO procedure and lists original vehicle and shipping documents required for identification and clearance.",
+      "Madagascar Customs publishes a dedicated used-vehicle import procedure. For covered used passenger-vehicle categories, the process includes a BSC cargo tracking document and a CIVIO identification check through GasyNet. Customs lists the original registration document, bill of lading/air waybill, import information form and importer identity/residence evidence among the required papers.",
     buyerContext:
       "A Japanese right-hand-drive vehicle should not be assumed eligible: Madagascar Customs’ FAQ states that right-hand-drive vehicles are prohibited. Buyers must confirm the vehicle configuration and the applicable category rules before purchase.",
     regulatorySnapshot:
-      "Madagascar Customs describes a CIVIO inspection/identification request for certain used passenger vehicle categories, with an original registration card and bill of lading among the documents. Its FAQ states that right-hand-drive vehicles are prohibited and that customs clearance must be carried out by an approved customs broker/transitaire. Vehicle age rules differ by category.",
+      "Madagascar Customs says used passenger vehicles in categories B, C, D and E (except diplomatic imports) are subject to CIVIO identification control through GasyNet. The process requires the import information form, original registration card, bill of lading/air waybill and identity/residence documents. Customs says vehicles over eight years are treated as eight years for valuation; this is not itself an import-age permission or ban.",
     checks: [
       "Confirm steering configuration first; the Customs FAQ says right-hand-drive vehicles are prohibited.",
       "Check whether the vehicle falls within a category requiring CIVIO identification and prepare the original registration/ownership document and bill of lading.",
@@ -1120,8 +1207,18 @@ export const COUNTRY_LANDING_PAGES: CountryLandingPage[] = [
         url: "https://www.douanes.gov.mg/faq/",
         authority: "Direction Générale des Douanes Malagasy",
       },
+      {
+        label: "Madagascar Customs — Importation of equipment and vehicles",
+        url: "https://www.douanes.gov.mg/particulier/importation-dengins-et-vehicules/",
+        authority: "Directorate General of Customs, Madagascar",
+      },
+      {
+        label: "Madagascar Customs — Vehicle import FAQ and required documents",
+        url: "https://www.douanes.gov.mg/faq/?qt-les_actualit_s=2",
+        authority: "Directorate General of Customs, Madagascar",
+      },
     ],
-    reviewedOn: "2026-11-10",
+    reviewedOn: "2026-11-11",
     indexable: true,
   },
   {
@@ -1170,15 +1267,15 @@ export const COUNTRY_LANDING_PAGES: CountryLandingPage[] = [
     name: "Papua New Guinea",
     region: "Pacific",
     seoTier: 3,
-    title: "Japanese Car Import Guide for Papua New Guinea | Wazir Trading",
+    title: "Import Japanese Cars to Papua New Guinea | Wazir Trading",
     description:
-      "Prepare a Japanese vehicle import to Papua New Guinea with Customs guidance on brokers, classification, quarantine, clearance and wharf deadlines.",
+      "Check PNG vehicle standards, licensed customs broker, tariff specification, quarantine and 30-day clearance deadline.",
     intro:
-      "Papua New Guinea Customs publishes a dedicated used-vehicle import guide. It warns that duties, taxes and fees can materially increase the purchase cost and advises buyers to check vehicle eligibility and engage a licensed customs broker before purchase.",
+      "Papua New Guinea Customs explains a detailed used-vehicle import process and warns that duties, taxes and fees can materially increase the purchase cost. A licensed customs broker is legally required to lodge the Import Declaration/SAD. Customs classifies vehicles by tariff and detailed tariff specification code, including model, engine size and year. The Road Transport Authority says used vehicles may be imported if they meet standards, safety and emissions requirements.",
     buyerContext:
       "The vehicle’s correct tariff classification, model/year/engine details and importer information are important for customs assessment. The importer should also plan promptly for customs clearance and downstream inspection/registration.",
     regulatorySnapshot:
-      "PNG Customs states that a licensed customs broker is legally required to act for the importer, and warns that a vehicle left uncleared at a Customs wharf for over 30 days may be forfeited. Its guide also describes customs declaration, duty assessment, quarantine, safety inspection and registration steps.",
+      "PNG's Road Transport Authority says used vehicles can be imported if they meet applicable standards, safety and emissions requirements and provide acceptable proof of age, entitlement and compliance. Customs requires a licensed broker, correct tariff/TSC classification and customs declaration. It warns that a vehicle left uncleared at a wharf for over 30 days may be forfeited and lists quarantine, safety inspection/sticker and MVIL registration steps.",
     checks: [
       "Confirm the selected make/model is not a prohibited import and obtain an accurate tariff code/specification before purchase.",
       "Engage a licensed customs broker and obtain a written estimate of duties, taxes, port charges and clearance costs.",
@@ -1197,8 +1294,18 @@ export const COUNTRY_LANDING_PAGES: CountryLandingPage[] = [
         url: "https://www.customs.gov.pg/",
         authority: "Papua New Guinea Customs Service",
       },
+      {
+        label: "PNG Customs Service — Importing a used vehicle",
+        url: "https://www.customs.gov.pg/trade/importing_used_vehicles",
+        authority: "Papua New Guinea Customs Service",
+      },
+      {
+        label: "Road Transport Authority — Motor vehicle import and dealer requirements",
+        url: "https://www.rta.gov.pg/licences-approvals/motor-vehicle-dealers/",
+        authority: "Road Transport Authority, Papua New Guinea",
+      },
     ],
-    reviewedOn: "2026-11-10",
+    reviewedOn: "2026-11-11",
     indexable: true,
   },
   {
@@ -1206,15 +1313,15 @@ export const COUNTRY_LANDING_PAGES: CountryLandingPage[] = [
     name: "Solomon Islands",
     region: "Pacific",
     seoTier: 3,
-    title: "Japanese Car Import Guide for Solomon Islands | Wazir Trading",
+    title: "Import Japanese Cars to Solomon Islands | Wazir Trading",
     description:
-      "Plan a Japanese vehicle import to Solomon Islands with official Customs ASYCUDA, vehicle declaration and document resources.",
+      "Plan a Solomon Islands vehicle import with customs SAD valuation, arrival biosecurity inspection and Japan-side cleaning.",
     intro:
-      "Solomon Islands Customs and Excise Division administers import declarations, tariff valuation, assessment and release processes. The authority’s ASYCUDA portal includes a vehicle tab guide and updated customs-user resources.",
+      "Solomon Islands Customs and Excise administers the Single Administrative Document (SAD) import clearance process, document vetting, cargo examination and tariff valuation. Biosecurity Solomon Islands includes new and used vehicles in its transport/machinery category and says they are inspected on arrival for soil, plant material and other biosecurity risk material. The official material reviewed does not establish a universal vehicle-age limit.",
     buyerContext:
       "The islands’ geography makes the nominated destination and onward transport especially important. Confirm the final port, island, local handling and any inter-island delivery separately from the Japan export quotation.",
     regulatorySnapshot:
-      "The official Customs ASYCUDA portal lists a vehicle-tab guide in the Single Administrative Document workflow and customs/user materials updated in January 2026. The Customs and Excise Division states that declarations are vetted, assessed and may be referred for document verification or physical examination before release.",
+      "Solomon Islands Customs describes a SAD declaration, document checks, tariff valuation and possible physical examination. Biosecurity Solomon Islands says used and new vehicles are inspected on arrival and must be free of soil, plant material and other biosecurity risk material. No universal used-vehicle age cap is established in the official material reviewed; confirm vehicle admissibility and registration with the authorities.",
     checks: [
       "Confirm the appropriate HS code, vehicle declaration fields and required evidence through the Customs ASYCUDA guidance.",
       "Check for current import restrictions, standards, permits, duty and tax measures that apply to the exact vehicle category.",
@@ -1238,8 +1345,18 @@ export const COUNTRY_LANDING_PAGES: CountryLandingPage[] = [
         url: "https://solomon-islands.tradeportal.org/",
         authority: "Solomon Islands Government",
       },
+      {
+        label: "Solomon Islands Customs and Excise Division — Customs clearance and SAD process",
+        url: "https://solomons.gov.sb/ministry-of-finance-and-treasury/customs-and-excise-division/",
+        authority: "Ministry of Finance and Treasury, Solomon Islands",
+      },
+      {
+        label: "Biosecurity Solomon Islands — Importers and arrivals FAQ for used vehicles",
+        url: "https://www.biosecurity.gov.sb/Importers/faq-importers-and-arrivals",
+        authority: "Biosecurity Solomon Islands",
+      },
     ],
-    reviewedOn: "2026-11-10",
+    reviewedOn: "2026-11-11",
     indexable: true,
   },
   {
@@ -1247,15 +1364,15 @@ export const COUNTRY_LANDING_PAGES: CountryLandingPage[] = [
     name: "Vanuatu",
     region: "Pacific",
     seoTier: 3,
-    title: "Japanese Car Import Guide for Vanuatu | Wazir Trading",
+    title: "Import Japanese Cars to Vanuatu | Wazir Trading",
     description:
-      "Review Vanuatu Customs and Inland Revenue vehicle-registration steps, customs release documents and destination-fee checks before shipping from Japan.",
+      "Check Vanuatu's right-hand-drive vehicle permit under CAP 221 and one-month registration deadline before shipping.",
     intro:
-      "For Vanuatu, plan customs release and vehicle registration as connected but distinct steps. Vanuatu Customs and Inland Revenue explains that imported vehicles must be released from customs control and then registered through the Inland Revenue process.",
+      "Vanuatu's Customs (Prohibited Import) Regulations list right-hand-drive motor vehicles as restricted goods under the Import of Motor Vehicles (Control) Act, with a permit or licence required from the responsible authority. The Vanuatu Trade Portal describes an approval-letter process for a right-hand-drive vehicle under the Act. Customs also states that imported vehicles must be registered no later than one month after importation.",
     buyerContext:
       "Vanuatu is an island country, so confirm the exact island and final delivery point. A quote to a main port does not automatically include onward transport or local registration costs.",
     regulatorySnapshot:
-      "Vanuatu Customs and Inland Revenue states that imported vehicles must be registered no later than one month after importation. Its published process refers to a sales invoice and customs declaration form as supporting documents and explains the Customs Trade, Tariff and Compliance release step.",
+      "Vanuatu's prohibited-import regulations classify right-hand-drive motor vehicles as restricted under the Import of Motor Vehicles (Control) Act CAP 221. The Trade Portal describes an approval-letter process handled through the Ministry of Infrastructure and Public Utilities. Vanuatu Customs says all imported vehicles must be registered within one month after importation. Confirm the responsible authority and exact permit conditions before loading.",
     checks: [
       "Confirm current import restrictions, tariff classification and customs duty/tax for the selected vehicle with Customs before shipment.",
       "Check the release process, registration forms, invoice and customs declaration requirements, including the one-month registration timing.",
@@ -1274,8 +1391,23 @@ export const COUNTRY_LANDING_PAGES: CountryLandingPage[] = [
         url: "https://singlewindow.gov.vu/services/simulation",
         authority: "Vanuatu Single Window",
       },
+      {
+        label: "Vanuatu Customs — Prohibited Import Regulations: right-hand-drive vehicles",
+        url: "https://customsinlandrevenue.gov.vu/index.php/customs/border-control/prohibited-imports",
+        authority: "Customs and Inland Revenue, Vanuatu",
+      },
+      {
+        label: "Vanuatu Trade Portal — Permit to import a right-hand-drive vehicle",
+        url: "https://tradeportal.gov.vu/procedure/995/step/699?embed=true&includeSearch=false&l=en",
+        authority: "Vanuatu Trade Portal / Ministry of Infrastructure and Public Utilities",
+      },
+      {
+        label: "Vanuatu Customs — Registration of newly imported vehicles",
+        url: "https://customsinlandrevenue.gov.vu/taxes-and-licensing/licensing/vehicle-and-driver-licencing/information-for-newly-registered-vehicles.html",
+        authority: "Customs and Inland Revenue, Vanuatu",
+      },
     ],
-    reviewedOn: "2026-11-10",
+    reviewedOn: "2026-11-11",
     indexable: true,
   },
   {
@@ -1498,15 +1630,15 @@ export const COUNTRY_LANDING_PAGES: CountryLandingPage[] = [
     name: "Barbados",
     region: "Caribbean",
     seoTier: 3,
-    title: "Japanese Car Import Guide for Barbados | Wazir Trading",
+    title: "Import Japanese Cars to Barbados | Wazir Trading",
     description:
-      "Plan a Japanese used-car import to Barbados with official vehicle registration documents and customs clearance checks.",
+      "Check Barbados' published four-year and 50000-km used-car criteria, RHD rule and import licence requirements.",
     intro:
-      "For Barbados, the import and registration file should be planned together. The Barbados Licensing Authority lists the documents needed to register new or used imports, including a customs declaration and vehicle examination evidence.",
+      "Barbados Government Information Service has published vehicle-import guidance stating that used or reconditioned motor cars must be right-hand drive, no more than four years old and have an odometer reading below 50,000 kilometres to qualify for an import licence. The notice also describes a roadworthiness certificate from an authorised origin-country agent. As the detailed guidance is older, obtain current written confirmation from Commerce before relying on the conditions.",
     buyerContext:
       "The buyer should confirm the current import process with Barbados Revenue Authority and the Licensing Authority, including the right document set, insurance requirements, inspection and vehicle registration category.",
     regulatorySnapshot:
-      "The Barbados Licensing Authority’s vehicle-registration page lists Customs Declaration Form C63, insurance certificate or cover note, weight certificate, examiner’s certificate and registration/renewal form among the documentation for new or used imports. Check whether further import permits or customs approvals apply to the vehicle.",
+      "A Barbados Government Information Service advisory states that used/reconditioned cars should be right-hand drive, no more than four years old and below 50,000 km, and accompanied by an origin-country roadworthiness certificate. The Barbados Licensing Authority separately lists C63 customs declaration, insurance, weight and examiner certificates and a Good Vehicle Permit for registration. Confirm that the historic licence/age conditions remain operative.",
     checks: [
       "Confirm the current import approval and customs declaration process with Barbados Revenue Authority before purchase.",
       "Check required examination, weight, insurance and registration documents for the vehicle class.",
@@ -1525,8 +1657,19 @@ export const COUNTRY_LANDING_PAGES: CountryLandingPage[] = [
         url: "https://bra.gov.bb/",
         authority: "Barbados Revenue Authority",
       },
+      {
+        label:
+          "Barbados Government Information Service — Changes to used-vehicle importation policy",
+        url: "https://gisbarbados.gov.bb/blog/changes-to-used-vehicle-importation-policy/",
+        authority: "Government Information Service, Barbados",
+      },
+      {
+        label: "Barbados Licensing Authority — Vehicle registration for new and used imports",
+        url: "https://bla.gov.bb/servicedetails/VmVoaWNsZSBSZWdpc3RyYXRpb24%3D",
+        authority: "Barbados Licensing Authority",
+      },
     ],
-    reviewedOn: "2026-11-10",
+    reviewedOn: "2026-11-11",
     indexable: true,
   },
   {
@@ -1534,15 +1677,15 @@ export const COUNTRY_LANDING_PAGES: CountryLandingPage[] = [
     name: "Cameroon",
     region: "Central Africa",
     seoTier: 3,
-    title: "Japanese Car Import Guide for Cameroon | Wazir Trading",
+    title: "Import Japanese Cars to Cameroon | Wazir Trading",
     description:
-      "Plan a Japanese used-vehicle enquiry for Cameroon with official customs guidance on import declarations, used-vehicle identification and destination clearance.",
+      "Check Cameroon's 2026 used-car process: importer registration, prior DI, BESC, CIVIC and CAMCIS customs declaration.",
     intro:
-      "A Japanese used vehicle intended for Cameroon needs a destination-side compliance plan before purchase. The importer should confirm the current declaration, vehicle-identification and customs-clearance process with Cameroon Customs and the relevant trade single-window authorities.",
+      "Cameroon's Single Window for Foreign Trade (GUCE) published a March 2026 notice explaining that the former PIVO procedure for used-vehicle imports has been abolished following Finance Law No. 2024/013 of 23 December 2024. The revised process requires importer registration, an Authorised Customs Broker, a prior Import Declaration through e-GUCE/e-FORCE, a BESC cargo tracking note, vehicle shipping details and CIVIC identification before customs declaration in CAMCIS.",
     buyerContext:
       "Cameroon’s official customs guidance describes pre-import formalities for goods and has specific steps for used vehicles. Procedures and systems can change, so confirm the current workflow with an authorised customs broker before the vehicle is booked for shipment.",
     regulatorySnapshot:
-      "Cameroon Customs publishes prior import formalities, including importer registration and an import declaration process for used vehicles. The Guichet Unique du Commerce Extérieur published a March 2026 notice about changes to the former PIVO process and the current e-GUCE/CAMCIS workflow. Confirm the live procedure and any applicable fees directly with the authorities; do not rely on older third-party summaries.",
+      "GUCE's March 2026 notice says PIVO is abolished and describes a revised procedure: register the importer, appoint an Authorised Customs Broker, file a prior DI through e-FORCE/e-GUCE, obtain BESC from CNCC, submit vehicle shipping details and CIVIC identification, then proceed to customs declaration in CAMCIS. The notice also describes a vehicle verification tax and 2026 age-based excise; confirm current charge/rates with the broker.",
     checks: [
       "Confirm importer registration and the current Import Declaration process through the official e-GUCE channel before shipment.",
       "Ask Cameroon Customs or an authorised broker which used-vehicle identification/inspection process and documents apply to the selected vehicle and port.",
@@ -1566,8 +1709,18 @@ export const COUNTRY_LANDING_PAGES: CountryLandingPage[] = [
         url: "https://www.cncc.cm/fr/article/importation-de-vehicules-doccasion-camcis-la-nouvelle-plate-forme-denregistrement-et-de-paiement-655?page=1",
         authority: "Conseil National des Chargeurs du Cameroun",
       },
+      {
+        label: "GUCE — Used vehicle importers: PIVO procedure abolished and revised 2026 process",
+        url: "https://www.guichetunique.cm/en/used-vehicle-importers-the-pivo-procedure-has-been-abolished-here-is-what-changes/",
+        authority: "Single Window for Foreign Trade, Cameroon",
+      },
+      {
+        label: "Cameroon Customs — Prior import formalities",
+        url: "https://www.douanes.cm/douanes-cameroun/en/formalites-prealables-2/",
+        authority: "Directorate General of Customs, Cameroon",
+      },
     ],
-    reviewedOn: "2026-11-10",
+    reviewedOn: "2026-11-11",
     indexable: true,
   },
   {
@@ -1575,15 +1728,15 @@ export const COUNTRY_LANDING_PAGES: CountryLandingPage[] = [
     name: "Lesotho",
     region: "Southern Africa",
     seoTier: 3,
-    title: "Japanese Car Import Guide for Lesotho | Wazir Trading",
+    title: "Import Japanese Cars to Lesotho | Wazir Trading",
     description:
-      "Prepare a Japanese used-car import enquiry for Lesotho with official guidance on vehicle import permits, customs clearance and registration documents.",
+      "Plan a Japan-to-Lesotho vehicle import with LNSW permit, RSL customs/VAT, police clearance and regional transit checks.",
     intro:
-      "Before selecting a Japanese vehicle for Lesotho, confirm the import-permit route, importer eligibility and the documents required for customs release and registration. Requirements can differ depending on whether the vehicle is imported by a trader or an individual.",
+      "Lesotho's Trade Information Portal describes a vehicle import permit from the Ministry of Trade and Industry through the Lesotho National Single Window (LNSW). The listed documents include a proforma invoice, importer/trader registration and an affidavit for used goods; non-Lesotho citizens also need a resident or work permit. The Government of Lesotho separately lists export, bill-of-entry, customs, Interpol/CID and Revenue Services Lesotho tax clearance documents.",
     buyerContext:
       "Lesotho’s government services and trade information portals publish vehicle-related import and registration requirements. The buyer should confirm the permit route and destination-side clearance steps with the responsible authority and a qualified clearing agent before arranging shipment from Japan.",
     regulatorySnapshot:
-      "The Government of Lesotho lists documents for imported motor vehicles, while the Lesotho Trade Information Portal describes an import permit procedure for vehicles and identifies the Ministry of Trade and Industry as the responsible agency. Check the current electronic single-window process, permit eligibility, customs valuation and registration requirements for the exact importer and vehicle.",
+      "The Lesotho Trade Portal describes an LNSW import permit for vehicles with a proforma invoice, vehicle-importer registration and affidavit for used goods; non-citizens are asked for a resident/work permit. The Government of Lesotho lists original export/cancellation certificate, certified bill of lading and bill of entry, state-warehouse customs letter, Interpol/CID clearance and RSL VAT/customs-duty clearance. Confirm vehicle age/steering eligibility separately; no single current age cap is established in the reviewed official material.",
     checks: [
       "Confirm whether an import permit is required for the buyer’s status and whether registration as a vehicle importer or trader applies.",
       "Verify the required original export/cancellation certificate, bill of lading, invoice, customs entry and any police/vehicle-clearance documents.",
@@ -1607,8 +1760,18 @@ export const COUNTRY_LANDING_PAGES: CountryLandingPage[] = [
         url: "https://www.rsl.org.ls/",
         authority: "Revenue Services Lesotho",
       },
+      {
+        label: "Government of Lesotho — Imported motor vehicle service and documents",
+        url: "https://www.gov.ls/eservice/imported-motor-vehicles/",
+        authority: "Government of Lesotho",
+      },
+      {
+        label: "Lesotho Trade Information Portal — Vehicle import permit through LNSW",
+        url: "https://www.lesothotradeportal.com/index.php?id=82&r=searchProcedure%2Fview1",
+        authority: "Lesotho Trade Information Portal / Ministry of Trade and Industry",
+      },
     ],
-    reviewedOn: "2026-11-10",
+    reviewedOn: "2026-11-11",
     indexable: true,
   },
   {
