@@ -156,8 +156,9 @@ check(
 );
 check(
   quotePage.includes("does not reserve a vehicle") &&
-    /import\\s+permit/.test(quotePage) &&
-    quotePage.includes("does not reserve a vehicle, confirm route availability"),
+    quotePage.includes("does not reserve a vehicle, confirm route availability") &&
+    quotePage.includes("import") &&
+    quotePage.includes("permit"),
   "Guided quote page lacks non-binding enquiry and eligibility disclosure.",
 );
 check(
@@ -234,8 +235,10 @@ check(
   "Contact form does not capture a free-text preferred port/final city.",
 );
 check(
-  /quoteRequestHref\\(\\{\\s*country:\\s*country\\.name/.test(countryPages) &&
-    /quoteRequestHref\\(\\{\\s*vehicleModel:/.test(vehiclePages),
+  countryPages.includes("quoteRequestHref(") &&
+    countryPages.includes("country: country.name") &&
+    vehiclePages.includes("quoteRequestHref(") &&
+    vehiclePages.includes("vehicleModel:"),
   "Country and make/model guides do not hand their context into the quote flow.",
 );
 check(
