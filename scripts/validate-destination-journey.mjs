@@ -136,7 +136,7 @@ check(
 check(
   quotePage.includes("destination_port: form.port.trim()") &&
     quotePage.includes("destination_country: form.country") &&
-    quotePage.includes('const changeCountry = (country: string) => {') &&
+    quotePage.includes("const changeCountry = (country: string) => {") &&
     quotePage.includes('setField("port", "");'),
   "Guided quote submission is missing destination context or stale-port reset behavior.",
 );
