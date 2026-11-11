@@ -4,8 +4,8 @@ This edition preserves the existing TanStack Start + Wouter + Supabase architect
 
 ## Navigation and data
 
-- Internal navigation remains client-side; inventory and vehicle-detail data prefetch on pointer hover or keyboard focus.
-- Browser Back/Forward restores the prior scroll position.
+- Internal page links use normal same-origin document navigation, with the browser providing its native loading/progress UI and loading the server-rendered destination page.
+- New page visits begin at the top. Browser-managed Back/Forward behavior restores prior scroll positions when the browser supports it.
 - Successful read requests share an in-tab cache and concurrent callers share the same in-flight request.
 - Vehicle detail, related vehicles, inventory pages, filter metadata, tab counts, model options, homepage stock/category counts, featured vehicles, and published shipping rates are cached for short, explicit periods.
 - The inventory list uses a public field allowlist instead of selecting every database column; chassis numbers are not fetched into public listing cards.

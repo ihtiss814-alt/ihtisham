@@ -15,6 +15,8 @@ const card = read("src/components/CarCard.tsx");
 const gallery = read("src/components/VehiclePhotoGallery.tsx");
 const imageDelivery = read("src/lib/image-delivery.ts");
 const app = read("src/App.tsx");
+const howToBuy = read("src/components/HowToBuy.tsx");
+const rootRoute = read("src/routes/__root.tsx");
 const homeRoute = read("src/routes/index.tsx");
 const contact = read("src/pages/contact.tsx");
 const payment = read("src/pages/payment-information.tsx");
@@ -116,13 +118,37 @@ if (
 }
 
 if (
-  !app.includes("pendingPopRestore") ||
-  !app.includes("NavigationPrefetcher") ||
-  !app.includes("prefetchVehicleDetail")
+  !app.includes("function NativeDocumentNavigation()") ||
+  !app.includes('document.addEventListener("click", handleDocumentNavigation, true)') ||
+  !app.includes("window.location.assign(destination.href)") ||
+  app.includes("function ScrollToTop()") ||
+  app.includes("function NavigationPrefetcher()") ||
+  app.includes('history.scrollRestoration = "manual"')
 ) {
-  fail("Client navigation must keep scroll restoration and high-intent route prefetching.");
+  fail(
+    "Internal page links must use native document navigation and browser-managed scroll restoration.",
+  );
 } else {
-  pass("Client navigation retains scroll restoration and inventory/vehicle prefetching.");
+  pass(
+    "Internal page links use native browser document navigation and browser-managed scroll restoration.",
+  );
+}
+
+if (
+  home.includes("useLocation") ||
+  home.includes("navigate(") ||
+  !home.includes("href={`/cars?destination=${encodeURIComponent(name)}`}") ||
+  !home.includes("href={`/cars?make=${encodeURIComponent(name)}`}") ||
+  !home.includes("href={`/cars?body=${encodeURIComponent(name)}`}") ||
+  howToBuy.includes("data-wt-nav") ||
+  howToBuy.includes("navigate(") ||
+  rootRoute.includes("<Link")
+) {
+  fail(
+    "Homepage destination/make/body cards and How To Buy links must use normal anchor navigation.",
+  );
+} else {
+  pass("Homepage destination/make/body cards and How To Buy links use normal anchors.");
 }
 
 for (const [file, content] of [
@@ -138,7 +164,10 @@ for (const [file, content] of [
     fail(`${file} page still has a same-site link that forces a document navigation.`);
   }
 }
-if (failures.length === 0) pass("Internal privacy/payment links stay inside the client router.");
+if (failures.length === 0)
+  pass(
+    "Privacy and payment policy links use semantic internal anchors handled by the native navigation layer.",
+  );
 
 if (
   !vercel.includes("/assets/(.*)") ||

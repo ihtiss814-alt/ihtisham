@@ -25,8 +25,6 @@ import TermsAndConditionsPage from "@/pages/terms-and-conditions";
 import PrivacyPolicyPage from "@/pages/privacy-policy";
 import NotFound from "@/pages/not-found";
 import AdminBulkUpload from "@/pages/admin/bulk-upload";
-import { prefetchCarsPage } from "@/pages/cars";
-import { prefetchVehicleDetail } from "@/lib/vehicle-request-cache";
 import { CountryDirectoryPage, CountryLandingPageRoute } from "@/pages/country-landing-pages";
 import {
   VehicleBodyTypeLandingRoute,
@@ -35,139 +33,59 @@ import {
   VehicleModelLandingRoute,
 } from "@/pages/vehicle-landing-pages";
 
-function ScrollToTop() {
-  const [location] = useLocation();
-  const [popRevision, setPopRevision] = React.useState(0);
-  const positions = React.useRef(new Map<string, number>());
-  const pendingPopRestore = React.useRef<number | null>(null);
-
+function NativeDocumentNavigation() {
   useEffect(() => {
-    const keyName = "__wazirScrollEntry";
-    const nativePush = window.history.pushState;
-    const nativeReplace = window.history.replaceState;
-    const previousRestoration = window.history.scrollRestoration;
-    const stateOf = (value: unknown): Record<string, unknown> =>
-      value && typeof value === "object" ? (value as Record<string, unknown>) : {};
-    const newKey = () => `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}`;
-    const initial = stateOf(window.history.state);
-    let activeKey = typeof initial[keyName] === "string" ? (initial[keyName] as string) : newKey();
+    const handleDocumentNavigation = (event: MouseEvent) => {
+      if (
+        event.defaultPrevented ||
+        event.button !== 0 ||
+        event.metaKey ||
+        event.ctrlKey ||
+        event.shiftKey ||
+        event.altKey
+      ) {
+        return;
+      }
 
-    if (typeof initial[keyName] !== "string") {
-      nativeReplace.call(
-        window.history,
-        { ...initial, [keyName]: activeKey },
-        "",
-        window.location.href,
-      );
-    }
-
-    const save = () => positions.current.set(activeKey, window.scrollY);
-
-    window.history.pushState = function (state, unused, url) {
-      save();
-      const nextKey = newKey();
-      const result = nativePush.call(
-        window.history,
-        { ...stateOf(state), [keyName]: nextKey },
-        unused,
-        url,
-      );
-      activeKey = nextKey;
-      return result;
-    };
-
-    window.history.replaceState = function (state, unused, url) {
-      const next = stateOf(state);
-      const nextKey = typeof next[keyName] === "string" ? (next[keyName] as string) : activeKey;
-      const result = nativeReplace.call(
-        window.history,
-        { ...next, [keyName]: nextKey },
-        unused,
-        url,
-      );
-      activeKey = nextKey;
-      return result;
-    };
-
-    const restoreOnPop = (event: PopStateEvent) => {
-      const state = stateOf(event.state);
-      if (typeof state[keyName] === "string") activeKey = state[keyName] as string;
-      pendingPopRestore.current = positions.current.get(activeKey) ?? 0;
-      setPopRevision((revision) => revision + 1);
-    };
-
-    window.history.scrollRestoration = "manual";
-    window.addEventListener("scroll", save, { passive: true });
-    window.addEventListener("popstate", restoreOnPop);
-
-    return () => {
-      window.removeEventListener("scroll", save);
-      window.removeEventListener("popstate", restoreOnPop);
-      window.history.pushState = nativePush;
-      window.history.replaceState = nativeReplace;
-      window.history.scrollRestoration = previousRestoration;
-    };
-  }, []);
-
-  useEffect(() => {
-    const savedPosition = pendingPopRestore.current;
-    if (savedPosition !== null) {
-      pendingPopRestore.current = null;
-      window.requestAnimationFrame(() => {
-        window.scrollTo({ top: savedPosition, left: 0, behavior: "instant" });
-      });
-      return;
-    }
-
-    window.scrollTo({ top: 0, left: 0, behavior: "instant" });
-  }, [location, popRevision]);
-
-  return null;
-}
-function NavigationPrefetcher() {
-  useEffect(() => {
-    const seen = new Map<string, number>();
-    const prefetch = (event: Event) => {
       if (!(event.target instanceof Element)) return;
       const anchor = event.target.closest<HTMLAnchorElement>("a[href]");
-      if (!anchor || anchor.target === "_blank" || anchor.hasAttribute("download")) return;
-      let url: URL;
+      if (!anchor || anchor.hasAttribute("download") || anchor.relList.contains("external")) {
+        return;
+      }
+
+      const target = anchor.getAttribute("target");
+      if (target && target.toLowerCase() !== "_self") return;
+
+      let destination: URL;
       try {
-        url = new URL(anchor.href, window.location.href);
+        destination = new URL(anchor.href, window.location.href);
       } catch {
         return;
       }
-      if (url.origin !== window.location.origin) return;
-      let run: (() => void) | null = null;
-      if (url.pathname === "/cars" && !url.search) run = prefetchCarsPage;
-      else {
-        const match = url.pathname.match(/^\/cars\/([^/]+)\/?$/);
-        if (match) {
-          try {
-            const ref = decodeURIComponent(match[1]);
-            run = () => prefetchVehicleDetail(ref);
-          } catch {
-            return;
-          }
-        }
+
+      if (destination.origin !== window.location.origin) return;
+
+      // Keep intentional same-document section links native.
+      const isSameDocumentFragment =
+        destination.pathname === window.location.pathname &&
+        destination.search === window.location.search &&
+        destination.hash.length > 0;
+      if (isSameDocumentFragment) {
+        event.stopImmediatePropagation();
+        return;
       }
-      if (!run) return;
-      const key = url.pathname + url.search;
-      if (Date.now() - (seen.get(key) ?? 0) < 15000) return;
-      seen.set(key, Date.now());
-      const idle = window as Window & {
-        requestIdleCallback?: (cb: () => void, options?: { timeout: number }) => number;
-      };
-      if (idle.requestIdleCallback) idle.requestIdleCallback(run, { timeout: 900 });
-      else window.setTimeout(run, 100);
+
+      // Use a real document request for internal page links. The browser owns
+      // its loading indicator, document lifecycle, and history scroll restore.
+      event.preventDefault();
+      event.stopImmediatePropagation();
+      window.location.assign(destination.href);
     };
-    document.addEventListener("pointerover", prefetch, { passive: true });
-    document.addEventListener("focusin", prefetch);
-    return () => {
-      document.removeEventListener("pointerover", prefetch);
-      document.removeEventListener("focusin", prefetch);
-    };
+
+    document.addEventListener("click", handleDocumentNavigation, true);
+    return () => document.removeEventListener("click", handleDocumentNavigation, true);
   }, []);
+
   return null;
 }
 
@@ -284,27 +202,20 @@ function AppShell() {
   const [location] = useLocation();
   const isAdmin = location.startsWith("/admin");
 
-  if (isAdmin) {
-    return (
-      <>
-        <ScrollToTop />
-        <NavigationPrefetcher />
-        <Router />
-      </>
-    );
-  }
-
   return (
     <>
-      <ScrollToTop />
-      <NavigationPrefetcher />
-      <div className="flex flex-col min-h-[100dvh]">
-        <Navbar />
-        <main className="flex-1">
-          <Router />
-        </main>
-        <Footer />
-      </div>
+      <NativeDocumentNavigation />
+      {isAdmin ? (
+        <Router />
+      ) : (
+        <div className="flex flex-col min-h-[100dvh]">
+          <Navbar />
+          <main className="flex-1">
+            <Router />
+          </main>
+          <Footer />
+        </div>
+      )}
     </>
   );
 }

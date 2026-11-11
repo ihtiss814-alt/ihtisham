@@ -6,7 +6,7 @@ import {
   vehicleLandingAliasOrFilter,
   vehicleLandingModelAliases,
 } from "@/lib/vehicle-landing-pages";
-import { Link, useLocation } from "wouter";
+import { Link } from "wouter";
 import {
   Search,
   ChevronDown,
@@ -1891,7 +1891,6 @@ export default function CarsPage() {
   const initialInventoryCars = initialInventoryLoaded
     ? ((bootstrap.inventoryCars ?? []) as unknown as CarWithImage[])
     : [];
-  const [, navigate] = useLocation();
   const hasInventoryQuery =
     bootstrap?.pathname === "/cars"
       ? new URLSearchParams(bootstrap.search).toString().length > 0
