@@ -390,7 +390,6 @@ export default function Navbar() {
                     className="opacity-75 group-hover:translate-x-0.5 transition-transform duration-150"
                   />
                 </Link>
-
               </div>
 
               {/* Mobile hamburger — CSS-only icon swap, no JS animation library */}
