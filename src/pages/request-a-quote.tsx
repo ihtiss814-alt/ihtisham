@@ -179,7 +179,6 @@ export default function RequestQuotePage() {
             : "general";
     const payload = {
       name: form.name.trim(),
-      full_name: form.name.trim(),
       email: form.email.trim(),
       phone: form.phone.trim(),
       country: form.country,
@@ -187,9 +186,6 @@ export default function RequestQuotePage() {
       destination_port: form.port.trim(),
       car_ref: form.vehicleRef.trim(),
       car_name: form.vehicleModel.trim(),
-      vehicle_model: form.vehicleModel.trim(),
-      budget_usd: budgetValue,
-      requirements: form.requirements.trim(),
       message,
       inquiry_type: inquiryType,
     };

@@ -137,6 +137,18 @@ check(
   "Guided quote submission is missing country/port context.",
 );
 check(
+  !quotePage.includes("full_name:") &&
+    !quotePage.includes("vehicle_model:") &&
+    !quotePage.includes("budget_usd:") &&
+    !quotePage.includes("requirements: form.requirements"),
+  "Guided quote submission must not write unverified optional columns to the inquiries table.",
+);
+check(
+  quotePage.includes("const message = [destinationText, detailText]") &&
+    quotePage.includes("Target budget (USD):"),
+  "Vehicle, budget and requirement details must be retained in the supported inquiry message field.",
+);
+check(
   quotePage.includes("vehicleRef") &&
     quotePage.includes("vehicleModel") &&
     quotePage.includes('params.get("type")'),
@@ -181,7 +193,8 @@ check(
   "Inventory calculator is not connected to free-text destination and saved preference.",
 );
 check(
-  cars.includes("QUOTE REQUIRED") && /will not substitute a generic freight price/i.test(cars),
+  cars.includes("QUOTE REQUIRED") &&
+    /will not substitute a generic freight price/i.test(cars),
   "Inventory calculator must request a quote instead of estimating an unknown route.",
 );
 check(
