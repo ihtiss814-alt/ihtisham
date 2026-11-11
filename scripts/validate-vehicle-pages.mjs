@@ -54,7 +54,7 @@ if (!tierOneContent || typeof tierOneContent !== "object") {
 }
 
 const priorityImportPattern =
-  /^import\\s+\\{\\s*VEHICLE_TIER_ONE_CONTENT\\s*\\}\\s+from\\s+['"]\\.\\/vehicle-tier-one-content['"]\\s*;?\\s*$/m;
+  /^import\s+\{\s*VEHICLE_TIER_ONE_CONTENT\s*\}\s+from\s+['"]\.\/vehicle-tier-one-content['"]\s*;?\s*$/m;
 if (!priorityImportPattern.test(source)) {
   console.error("Could not locate the Tier 1 content import in vehicle-landing-pages.ts.");
   process.exit(1);
