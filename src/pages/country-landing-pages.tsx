@@ -2,6 +2,7 @@ import { Link } from "wouter";
 import { ArrowRight, ExternalLink, Globe2, ShieldCheck } from "lucide-react";
 import { CountryFlag } from "@/components/VehicleIdentity";
 import { COUNTRY_TIER_ONE_CONTENT } from "@/lib/country-tier-one-content";
+import { COUNTRY_TIER_TWO_CONTENT } from "@/lib/country-tier-two-content";
 import {
   COUNTRY_LANDING_PAGES,
   getCountryLandingPage,
@@ -118,7 +119,8 @@ export function CountryDirectoryPage() {
 }
 
 function CountryPageContent({ country }: { country: CountryPageData }) {
-  const tierOneContent = COUNTRY_TIER_ONE_CONTENT[country.slug];
+  const priorityContent =
+    COUNTRY_TIER_ONE_CONTENT[country.slug] ?? COUNTRY_TIER_TWO_CONTENT[country.slug];
 
   return (
     <div className="min-h-screen bg-background">
@@ -142,7 +144,7 @@ function CountryPageContent({ country }: { country: CountryPageData }) {
             </p>
           </div>
           <h1 className="max-w-4xl text-3xl md:text-5xl font-serif font-bold leading-tight">
-            {tierOneContent?.pageHeading ?? `${country.name}: Japanese Used Vehicle Import Guide`}
+            {priorityContent?.pageHeading ?? `${country.name}: Japanese Used Vehicle Import Guide`}
           </h1>
           <p className="max-w-3xl mt-5 text-base md:text-lg leading-relaxed text-white/75">
             {country.intro}
@@ -200,7 +202,7 @@ function CountryPageContent({ country }: { country: CountryPageData }) {
                 What to include in your enquiry
               </h2>
               <p className="text-muted-foreground leading-7">
-                {tierOneContent?.enquiryNote ?? country.quoteFocus}
+                {priorityContent?.enquiryNote ?? country.quoteFocus}
               </p>
               <Link
                 href="/contact"
@@ -209,7 +211,7 @@ function CountryPageContent({ country }: { country: CountryPageData }) {
                 Send a vehicle enquiry <ArrowRight size={16} />
               </Link>
             </section>
-            {tierOneContent ? (
+            {priorityContent ? (
               <>
                 <section aria-labelledby={"tier-one-plan-" + country.slug}>
                   <h2
@@ -219,10 +221,10 @@ function CountryPageContent({ country }: { country: CountryPageData }) {
                     A practical import plan for {country.name}
                   </h2>
                   <p className="text-muted-foreground leading-7 mb-5">
-                    {tierOneContent.marketOverview}
+                    {priorityContent.marketOverview}
                   </p>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {tierOneContent.planningSteps.map((step, index) => (
+                    {priorityContent.planningSteps.map((step, index) => (
                       <div key={step.title} className="h-full border border-border bg-card p-5">
                         <div className="flex items-start gap-3">
                           <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary text-sm font-bold">
@@ -248,13 +250,13 @@ function CountryPageContent({ country }: { country: CountryPageData }) {
                     Shipping and destination planning for {country.name}
                   </h2>
                   <p className="text-muted-foreground leading-7">
-                    {tierOneContent.logisticsSummary}
+                    {priorityContent.logisticsSummary}
                   </p>
                   <h3 className="mt-6 text-lg font-semibold text-foreground">
                     Country-specific checks
                   </h3>
                   <ul className="mt-3 space-y-3">
-                    {tierOneContent.localChecks.map((check) => (
+                    {priorityContent.localChecks.map((check) => (
                       <li key={check} className="flex items-start gap-3">
                         <ShieldCheck size={18} className="mt-1 shrink-0 text-primary" />
                         <p className="text-sm text-muted-foreground leading-6">{check}</p>
@@ -276,7 +278,7 @@ function CountryPageContent({ country }: { country: CountryPageData }) {
                     planning checklist, not a customs calculation or fixed quotation.
                   </p>
                   <ul className="space-y-3">
-                    {tierOneContent.costFactors.map((factor) => (
+                    {priorityContent.costFactors.map((factor) => (
                       <li key={factor} className="flex items-start gap-3">
                         <span className="mt-2 h-2 w-2 shrink-0 rounded-full bg-primary" />
                         <p className="text-sm text-muted-foreground leading-6">{factor}</p>
@@ -293,7 +295,7 @@ function CountryPageContent({ country }: { country: CountryPageData }) {
                     Common questions about importing to {country.name}
                   </h2>
                   <div className="space-y-3">
-                    {tierOneContent.faqs.map((faq) => (
+                    {priorityContent.faqs.map((faq) => (
                       <details
                         key={faq.question}
                         className="group border border-border bg-card p-4"
@@ -351,7 +353,7 @@ function CountryPageContent({ country }: { country: CountryPageData }) {
                 Request a destination-specific review
               </h2>
               <p className="mt-3 text-sm text-muted-foreground leading-6">
-                {tierOneContent?.enquiryNote ??
+                {priorityContent?.enquiryNote ??
                   "Tell us which vehicle you are considering and which port you intend to use. We will review whether an export quotation can be prepared for your enquiry."}
               </p>
               <Link

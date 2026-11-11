@@ -1643,6 +1643,17 @@ export const COUNTRY_LANDING_PAGES: CountryLandingPage[] = [
         url: "https://www.bahamas.gov.bs/",
         authority: "Government of The Bahamas",
       },
+      {
+        label:
+          "International Trade Administration — Bahamas import tariff and restricted vehicle guidance (2026)",
+        url: "https://www.trade.gov/country-commercial-guides/bahamas-import-tariffs",
+        authority: "U.S. Department of Commerce, International Trade Administration",
+      },
+      {
+        label: "Bahamas Road Traffic Department — Vehicle registration and inspection FAQs",
+        url: "https://www.roadtraffic.gov.bs/faqs/",
+        authority: "Road Traffic Department, Government of The Bahamas",
+      },
     ],
     reviewedOn: "2026-11-10",
     indexable: true,
