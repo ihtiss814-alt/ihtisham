@@ -23,7 +23,17 @@ function page(
   searchThemes: string[],
   faqs: VehicleLandingFaq[],
 ): VehicleTierThreeContent {
-  return { kind, seoTier: 3, title, description, intro, buyerGuide, focusPoints, searchThemes, faqs };
+  return {
+    kind,
+    seoTier: 3,
+    title,
+    description,
+    intro,
+    buyerGuide,
+    focusPoints,
+    searchThemes,
+    faqs,
+  };
 }
 
 export const VEHICLE_TIER_THREE_CONTENT: Record<string, VehicleTierThreeContent> = {
@@ -41,10 +51,26 @@ export const VEHICLE_TIER_THREE_CONTENT: Record<string, VehicleTierThreeContent>
     ],
     ["Mitsubishi Fuso trucks from Japan", "used Fuso Canter export", "Japanese Fuso commercial vehicles", "Fuso truck chassis and payload checks"],
     [
-      { question: "Is Mitsubishi Fuso the same make as Mitsubishi?", answer: "The catalogue keeps Mitsubishi Fuso as a separate manufacturer record. Select the correct make and verify the actual manufacturer and chassis details in the vehicle documents." },
-      { question: "How do I choose a Fuso Canter for work?", answer: "Compare chassis, wheelbase, cab, axle layout, body dimensions and documented weight ratings against the job. A flatbed, carrier or specialist body can change dimensions and operating suitability." },
-      { question: "Can I estimate a Canter's payload from its model name?", answer: "No. Use the manufacturer's plate and official vehicle documents for the exact chassis and body. Gross weight and payload must not be inferred from appearance or a broad model family." },
-      { question: "What should I check before importing a Fuso truck?", answer: "Confirm commercial registration class, age and emissions rules, permits, axle and road-weight limits, dimensions, duties and shipping restrictions with the destination authority and carrier." },
+      {
+        question: "Is Mitsubishi Fuso the same make as Mitsubishi?",
+        answer:
+          "The catalogue keeps Mitsubishi Fuso as a separate manufacturer record. Select the correct make and verify the actual manufacturer and chassis details in the vehicle documents.",
+      },
+      {
+        question: "How do I choose a Fuso Canter for work?",
+        answer:
+          "Compare chassis, wheelbase, cab, axle layout, body dimensions and documented weight ratings against the job. A flatbed, carrier or specialist body can change dimensions and operating suitability.",
+      },
+      {
+        question: "Can I estimate a Canter's payload from its model name?",
+        answer:
+          "No. Use the manufacturer's plate and official vehicle documents for the exact chassis and body. Gross weight and payload must not be inferred from appearance or a broad model family.",
+      },
+      {
+        question: "What should I check before importing a Fuso truck?",
+        answer:
+          "Confirm commercial registration class, age and emissions rules, permits, axle and road-weight limits, dimensions, duties and shipping restrictions with the destination authority and carrier.",
+      },
     ],
   ),
   "make:hino": page(
@@ -61,10 +87,26 @@ export const VEHICLE_TIER_THREE_CONTENT: Record<string, VehicleTierThreeContent>
     ],
     ["Hino trucks from Japan", "Japanese Hino commercial vehicle export", "used Hino truck chassis details", "Hino truck weight and body comparison"],
     [
-      { question: "Which Hino truck should I choose?", answer: "Choose by the documented chassis, cab, wheelbase, axle layout, body and weight rating required for the intended work, not by the Hino badge alone." },
-      { question: "Where can I confirm a Hino truck's payload?", answer: "Request the manufacturer's plate and official vehicle documents for the exact chassis/body combination. Payload varies with vehicle configuration and fitted equipment." },
-      { question: "What condition checks matter on a used Hino?", answer: "Review frame and underbody corrosion, suspension, brakes, tyres, cab, cargo body, warning indicators and available service or inspection evidence." },
-      { question: "What import rules apply to Hino commercial vehicles?", answer: "Check destination commercial-vehicle classification, age and emissions limits, permits, axle and road-weight rules, dimensions, duties and registration with the relevant authorities." },
+      {
+        question: "Which Hino truck should I choose?",
+        answer:
+          "Choose by the documented chassis, cab, wheelbase, axle layout, body and weight rating required for the intended work, not by the Hino badge alone.",
+      },
+      {
+        question: "Where can I confirm a Hino truck's payload?",
+        answer:
+          "Request the manufacturer's plate and official vehicle documents for the exact chassis/body combination. Payload varies with vehicle configuration and fitted equipment.",
+      },
+      {
+        question: "What condition checks matter on a used Hino?",
+        answer:
+          "Review frame and underbody corrosion, suspension, brakes, tyres, cab, cargo body, warning indicators and available service or inspection evidence.",
+      },
+      {
+        question: "What import rules apply to Hino commercial vehicles?",
+        answer:
+          "Check destination commercial-vehicle classification, age and emissions limits, permits, axle and road-weight rules, dimensions, duties and registration with the relevant authorities.",
+      },
     ],
   ),
   "model:daihatsu/tanto": page(
@@ -81,10 +123,26 @@ export const VEHICLE_TIER_THREE_CONTENT: Record<string, VehicleTierThreeContent>
     ],
     ["Daihatsu Tanto from Japan", "used Daihatsu Tanto kei car export", "Tanto Custom 660cc Japan", "Japanese Tanto grade and model-code comparison"],
     [
-      { question: "What is the difference between Tanto and Tanto Custom?", answer: "The grade and generation determine styling and equipment. Confirm the exact model code and listed features for the individual vehicle instead of assuming all Custom versions share identical options." },
-      { question: "What engine does the listed Tanto use?", answer: "The current catalogue describes 660 cc examples, but confirm engine and model code against the exact vehicle record and export documents." },
-      { question: "What should I inspect on a Tanto?", answer: "Check door mechanisms, cabin access, seats, safety equipment, tyres, body condition, mileage and the photographs for the selected unit." },
-      { question: "Can every country register a Japanese kei car?", answer: "No universal eligibility should be assumed. Ask the destination authority to confirm engine-size, dimension, age, classification and registration rules for the exact vehicle." },
+      {
+        question: "What is the difference between Tanto and Tanto Custom?",
+        answer:
+          "The grade and generation determine styling and equipment. Confirm the exact model code and listed features for the individual vehicle instead of assuming all Custom versions share identical options.",
+      },
+      {
+        question: "What engine does the listed Tanto use?",
+        answer:
+          "The current catalogue describes 660 cc examples, but confirm engine and model code against the exact vehicle record and export documents.",
+      },
+      {
+        question: "What should I inspect on a Tanto?",
+        answer:
+          "Check door mechanisms, cabin access, seats, safety equipment, tyres, body condition, mileage and the photographs for the selected unit.",
+      },
+      {
+        question: "Can every country register a Japanese kei car?",
+        answer:
+          "No universal eligibility should be assumed. Ask the destination authority to confirm engine-size, dimension, age, classification and registration rules for the exact vehicle.",
+      },
     ],
   ),
   "model:toyota/dyna": page(
@@ -101,10 +159,26 @@ export const VEHICLE_TIER_THREE_CONTENT: Record<string, VehicleTierThreeContent>
     ],
     ["Toyota Dyna trucks from Japan", "used Toyota Dyna Truck export", "Japanese Dyna flatbed and carrier", "Toyota Dyna chassis and payload"],
     [
-      { question: "Are Toyota Dyna and Dyna Truck separate model pages?", answer: "They are grouped under one canonical model-family page because the catalogue uses both labels for Dyna-family records. The original listing designation remains important and should be checked." },
-      { question: "Which Dyna body types are available?", answer: "The inventory descriptions may include different work bodies. Check the current matching listings and photographs; the page does not guarantee that a particular body is in stock." },
-      { question: "How do I confirm a Dyna's load capacity?", answer: "Use the vehicle plate and official papers for the exact chassis and body. Confirm gross vehicle weight and rated payload rather than estimating from model name or appearance." },
-      { question: "What should I check before importing a Dyna?", answer: "Verify commercial registration, weight and dimension limits, permits, age and emissions rules, duties and carrier restrictions for the destination." },
+      {
+        question: "Are Toyota Dyna and Dyna Truck separate model pages?",
+        answer:
+          "They are grouped under one canonical model-family page because the catalogue uses both labels for Dyna-family records. The original listing designation remains important and should be checked.",
+      },
+      {
+        question: "Which Dyna body types are available?",
+        answer:
+          "The inventory descriptions may include different work bodies. Check the current matching listings and photographs; the page does not guarantee that a particular body is in stock.",
+      },
+      {
+        question: "How do I confirm a Dyna's load capacity?",
+        answer:
+          "Use the vehicle plate and official papers for the exact chassis and body. Confirm gross vehicle weight and rated payload rather than estimating from model name or appearance.",
+      },
+      {
+        question: "What should I check before importing a Dyna?",
+        answer:
+          "Verify commercial registration, weight and dimension limits, permits, age and emissions rules, duties and carrier restrictions for the destination.",
+      },
     ],
   ),
   "model:subaru/xv": page(
@@ -121,10 +195,26 @@ export const VEHICLE_TIER_THREE_CONTENT: Record<string, VehicleTierThreeContent>
     ],
     ["Subaru XV from Japan", "used Subaru XV export", "Japanese Subaru XV AWD specification", "Subaru XV EyeSight grade comparison"],
     [
-      { question: "Are all Subaru XV vehicles equipped with identical AWD systems?", answer: "Do not assume so. Confirm the drivetrain and specification from the selected vehicle's year, model code and documentation." },
-      { question: "How can I verify EyeSight equipment?", answer: "Check the exact grade and vehicle equipment record, then request photographs or documentation if the feature is important. Model-family descriptions are not proof that a specific unit has it." },
-      { question: "What should I inspect on a used XV?", answer: "Review tyres, suspension, underbody, warning indicators, mileage, condition photographs and service or inspection information available for that vehicle." },
-      { question: "Can I import a Subaru XV into my country?", answer: "Eligibility depends on the destination and exact vehicle. Confirm age, emissions, steering, safety and registration requirements with the relevant local authority." },
+      {
+        question: "Are all Subaru XV vehicles equipped with identical AWD systems?",
+        answer:
+          "Do not assume so. Confirm the drivetrain and specification from the selected vehicle's year, model code and documentation.",
+      },
+      {
+        question: "How can I verify EyeSight equipment?",
+        answer:
+          "Check the exact grade and vehicle equipment record, then request photographs or documentation if the feature is important. Model-family descriptions are not proof that a specific unit has it.",
+      },
+      {
+        question: "What should I inspect on a used XV?",
+        answer:
+          "Review tyres, suspension, underbody, warning indicators, mileage, condition photographs and service or inspection information available for that vehicle.",
+      },
+      {
+        question: "Can I import a Subaru XV into my country?",
+        answer:
+          "Eligibility depends on the destination and exact vehicle. Confirm age, emissions, steering, safety and registration requirements with the relevant local authority.",
+      },
     ],
   ),
   "model:audi/tt": page(
@@ -141,10 +231,26 @@ export const VEHICLE_TIER_THREE_CONTENT: Record<string, VehicleTierThreeContent>
     ],
     ["Audi TT from Japan", "used Audi TT Coupe export", "Japanese Audi TT generation comparison", "Audi TT engine and grade checks"],
     [
-      { question: "Are Audi TT and TT Coupe different pages?", answer: "The catalogue groups both labels on one canonical TT family page to avoid near-duplicate URLs. Check the original listing label and vehicle documents for the exact car." },
-      { question: "Which Audi TT generation should I choose?", answer: "Compare model year, generation, engine, transmission, equipment and condition against your requirements. The page does not imply that every generation is currently available." },
-      { question: "What should I inspect on a used TT?", answer: "Review body and roof panels, wheels and tyres, suspension, interior electronics, warning indicators, mileage and the available condition or inspection evidence." },
-      { question: "Does the TT price include import and delivery costs?", answer: "Not unless a written quotation says so. Ask for separate vehicle, export, freight, insurance, duty, tax, clearance, port and registration costs." },
+      {
+        question: "Are Audi TT and TT Coupe different pages?",
+        answer:
+          "The catalogue groups both labels on one canonical TT family page to avoid near-duplicate URLs. Check the original listing label and vehicle documents for the exact car.",
+      },
+      {
+        question: "Which Audi TT generation should I choose?",
+        answer:
+          "Compare model year, generation, engine, transmission, equipment and condition against your requirements. The page does not imply that every generation is currently available.",
+      },
+      {
+        question: "What should I inspect on a used TT?",
+        answer:
+          "Review body and roof panels, wheels and tyres, suspension, interior electronics, warning indicators, mileage and the available condition or inspection evidence.",
+      },
+      {
+        question: "Does the TT price include import and delivery costs?",
+        answer:
+          "Not unless a written quotation says so. Ask for separate vehicle, export, freight, insurance, duty, tax, clearance, port and registration costs.",
+      },
     ],
   ),
   "model:mercedes-benz/c-class": page(
@@ -161,10 +267,26 @@ export const VEHICLE_TIER_THREE_CONTENT: Record<string, VehicleTierThreeContent>
     ],
     ["Mercedes-Benz C-Class from Japan", "used C-Class estate export", "Japanese Mercedes C-Class AMG Line", "C-Class generation and engine comparison"],
     [
-      { question: "Does every C-Class listing represent an AMG model?", answer: "No. AMG Line may describe styling or equipment, while performance models are different derivatives. Verify the exact designation and factory specification in the vehicle documents." },
-      { question: "Are saloon and station-wagon C-Class listings grouped?", answer: "Yes, they share the C-Class model-family page, but body style remains a vehicle-specific attribute and should be checked in each listing." },
-      { question: "What should I check on a used C-Class?", answer: "Confirm engine and transmission, inspect electronics and warning indicators, review tyres and suspension, check body/interior condition and request available service evidence." },
-      { question: "What determines C-Class import eligibility?", answer: "Destination rules for vehicle age, emissions, steering, safety and registration apply to the exact derivative. Obtain confirmation from the relevant authority before purchase." },
+      {
+        question: "Does every C-Class listing represent an AMG model?",
+        answer:
+          "No. AMG Line may describe styling or equipment, while performance models are different derivatives. Verify the exact designation and factory specification in the vehicle documents.",
+      },
+      {
+        question: "Are saloon and station-wagon C-Class listings grouped?",
+        answer:
+          "Yes, they share the C-Class model-family page, but body style remains a vehicle-specific attribute and should be checked in each listing.",
+      },
+      {
+        question: "What should I check on a used C-Class?",
+        answer:
+          "Confirm engine and transmission, inspect electronics and warning indicators, review tyres and suspension, check body/interior condition and request available service evidence.",
+      },
+      {
+        question: "What determines C-Class import eligibility?",
+        answer:
+          "Destination rules for vehicle age, emissions, steering, safety and registration apply to the exact derivative. Obtain confirmation from the relevant authority before purchase.",
+      },
     ],
   ),
   "model:mitsubishi/canter": page(
@@ -181,10 +303,26 @@ export const VEHICLE_TIER_THREE_CONTENT: Record<string, VehicleTierThreeContent>
     ],
     ["Mitsubishi Canter from Japan", "used Mitsubishi Canter truck export", "Japanese Canter flatbed and carrier", "Mitsubishi Canter chassis and payload"],
     [
-      { question: "Is Mitsubishi Canter the same as Mitsubishi Fuso Canter?", answer: "The catalogue keeps Mitsubishi Canter and Mitsubishi Fuso Canter under separate make records. Select the correct manufacturer record and verify the exact vehicle identity from its documents." },
-      { question: "Which Canter body configurations can I compare?", answer: "Current listing descriptions may include standard cab, carrier, flat body and specialist work bodies. Confirm actual availability and fitted equipment from the matching vehicle record and photographs." },
-      { question: "Can I rely on the transmission label in every listing?", answer: "If a specification looks unusual or conflicts with the documents, ask for written verification from the vehicle record or source paperwork before making a purchase decision." },
-      { question: "What import checks apply to a Canter?", answer: "Confirm commercial registration class, vehicle age, emissions, permits, weight and dimension limits, duties and carrier restrictions with the destination authority." },
+      {
+        question: "Is Mitsubishi Canter the same as Mitsubishi Fuso Canter?",
+        answer:
+          "The catalogue keeps Mitsubishi Canter and Mitsubishi Fuso Canter under separate make records. Select the correct manufacturer record and verify the exact vehicle identity from its documents.",
+      },
+      {
+        question: "Which Canter body configurations can I compare?",
+        answer:
+          "Current listing descriptions may include standard cab, carrier, flat body and specialist work bodies. Confirm actual availability and fitted equipment from the matching vehicle record and photographs.",
+      },
+      {
+        question: "Can I rely on the transmission label in every listing?",
+        answer:
+          "If a specification looks unusual or conflicts with the documents, ask for written verification from the vehicle record or source paperwork before making a purchase decision.",
+      },
+      {
+        question: "What import checks apply to a Canter?",
+        answer:
+          "Confirm commercial registration class, vehicle age, emissions, permits, weight and dimension limits, duties and carrier restrictions with the destination authority.",
+      },
     ],
   ),
   "model:mitsubishi/minicab-truck": page(
@@ -201,10 +339,26 @@ export const VEHICLE_TIER_THREE_CONTENT: Record<string, VehicleTierThreeContent>
     ],
     ["Mitsubishi Minicab Truck from Japan", "used Minicab kei truck export", "Japanese 660cc Minicab pickup", "Mitsubishi Minicab 4WD truck checks"],
     [
-      { question: "Are all Minicab Truck listings 4WD?", answer: "No. The catalogue contains different drive descriptions. Confirm the actual 2WD or 4WD configuration from the selected vehicle's model code and documents." },
-      { question: "What is important about the 660 cc engine?", answer: "It identifies the kei-class engine specification in the current inventory descriptions. Confirm the exact engine and ask the destination authority how its vehicle classification treats that unit." },
-      { question: "What should I inspect on a used Minicab?", answer: "Check bed and frame condition, underbody corrosion, suspension, tyres, brakes, loading wear, mileage and the vehicle photographs." },
-      { question: "Can a Minicab Truck be registered as a commercial vehicle overseas?", answer: "Rules differ by destination. Confirm kei classification, dimensions, age, engine-size, commercial registration and permit requirements with the local authority." },
+      {
+        question: "Are all Minicab Truck listings 4WD?",
+        answer:
+          "No. The catalogue contains different drive descriptions. Confirm the actual 2WD or 4WD configuration from the selected vehicle's model code and documents.",
+      },
+      {
+        question: "What is important about the 660 cc engine?",
+        answer:
+          "It identifies the kei-class engine specification in the current inventory descriptions. Confirm the exact engine and ask the destination authority how its vehicle classification treats that unit.",
+      },
+      {
+        question: "What should I inspect on a used Minicab?",
+        answer:
+          "Check bed and frame condition, underbody corrosion, suspension, tyres, brakes, loading wear, mileage and the vehicle photographs.",
+      },
+      {
+        question: "Can a Minicab Truck be registered as a commercial vehicle overseas?",
+        answer:
+          "Rules differ by destination. Confirm kei classification, dimensions, age, engine-size, commercial registration and permit requirements with the local authority.",
+      },
     ],
   ),
   "model:daihatsu/move-canbus": page(
@@ -221,10 +375,26 @@ export const VEHICLE_TIER_THREE_CONTENT: Record<string, VehicleTierThreeContent>
     ],
     ["Daihatsu Move Canbus from Japan", "used Move Canbus kei car export", "Move Canbus Stripes and Theory grades", "Japanese 660cc Move Canbus CVT"],
     [
-      { question: "What do Stripes and Theory mean on a Move Canbus listing?", answer: "They are grade/designation details used in the catalogue. Confirm the exact model code and equipment package for the selected year; do not assume all examples have the same options." },
-      { question: "Are Move Canbus vehicles listed with a CVT?", answer: "The current inventory description identifies CVT examples, but the exact transmission should always be verified against the individual vehicle record and documents." },
-      { question: "What features should I inspect?", answer: "Check sliding-door operation, cabin access, seating, safety systems, tyres, mileage and condition photographs, then confirm any option that matters to you." },
-      { question: "Are kei-class Move Canbus cars accepted in every destination?", answer: "No universal rule applies. Confirm vehicle class, engine size, dimensions, age, import permission and registration with the destination authority." },
+      {
+        question: "What do Stripes and Theory mean on a Move Canbus listing?",
+        answer:
+          "They are grade/designation details used in the catalogue. Confirm the exact model code and equipment package for the selected year; do not assume all examples have the same options.",
+      },
+      {
+        question: "Are Move Canbus vehicles listed with a CVT?",
+        answer:
+          "The current inventory description identifies CVT examples, but the exact transmission should always be verified against the individual vehicle record and documents.",
+      },
+      {
+        question: "What features should I inspect?",
+        answer:
+          "Check sliding-door operation, cabin access, seating, safety systems, tyres, mileage and condition photographs, then confirm any option that matters to you.",
+      },
+      {
+        question: "Are kei-class Move Canbus cars accepted in every destination?",
+        answer:
+          "No universal rule applies. Confirm vehicle class, engine size, dimensions, age, import permission and registration with the destination authority.",
+      },
     ],
   ),
   "model:lexus/ls": page(
@@ -241,10 +411,26 @@ export const VEHICLE_TIER_THREE_CONTENT: Record<string, VehicleTierThreeContent>
     ],
     ["Lexus LS from Japan", "used Lexus LS hybrid export", "Japanese Lexus LS F Sport", "Lexus LS engine and grade comparison"],
     [
-      { question: "Are all Lexus LS listings hybrids?", answer: "No. The inventory includes different engine and fuel-system descriptions. Confirm the exact displacement and gasoline or hybrid designation from the vehicle documents." },
-      { question: "How do I compare LS grades?", answer: "Check the generation, year and exact grade, then verify safety, comfort, interior and multimedia equipment on the individual vehicle. Package contents can vary." },
-      { question: "What should I request for a Lexus LS hybrid?", answer: "Ask for the battery and hybrid-system diagnostic information available for that unit, along with service or inspection evidence and any warning status." },
-      { question: "Does an LS listing include overseas taxes and delivery?", answer: "Not automatically. Obtain a written breakdown for vehicle price, export costs, freight, insurance, duties, taxes, clearance, port charges and local registration." },
+      {
+        question: "Are all Lexus LS listings hybrids?",
+        answer:
+          "No. The inventory includes different engine and fuel-system descriptions. Confirm the exact displacement and gasoline or hybrid designation from the vehicle documents.",
+      },
+      {
+        question: "How do I compare LS grades?",
+        answer:
+          "Check the generation, year and exact grade, then verify safety, comfort, interior and multimedia equipment on the individual vehicle. Package contents can vary.",
+      },
+      {
+        question: "What should I request for a Lexus LS hybrid?",
+        answer:
+          "Ask for the battery and hybrid-system diagnostic information available for that unit, along with service or inspection evidence and any warning status.",
+      },
+      {
+        question: "Does an LS listing include overseas taxes and delivery?",
+        answer:
+          "Not automatically. Obtain a written breakdown for vehicle price, export costs, freight, insurance, duties, taxes, clearance, port charges and local registration.",
+      },
     ],
   ),
 };

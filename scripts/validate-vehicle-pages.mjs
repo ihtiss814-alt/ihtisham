@@ -671,11 +671,19 @@ for (const [key, content] of Object.entries(tierThreeContent)) {
   if (!content.title || content.title.length > 70) {
     fail("Tier 3 SEO title must be present and at most 70 characters: " + key);
   }
-  if (!content.description || content.description.length < 110 || content.description.length > 175) {
+  if (
+    !content.description ||
+    content.description.length < 110 ||
+    content.description.length > 175
+  ) {
     fail("Tier 3 meta description must be 110–175 characters: " + key);
   }
-  if (!content.intro || content.intro.length < 180) fail("Tier 3 page introduction is too short: " + key);
-  if (!content.buyerGuide || content.buyerGuide.length < 180) fail("Tier 3 buyer guide is too short: " + key);
+  if (!content.intro || content.intro.length < 180) {
+    fail("Tier 3 page introduction is too short: " + key);
+  }
+  if (!content.buyerGuide || content.buyerGuide.length < 180) {
+    fail("Tier 3 buyer guide is too short: " + key);
+  }
   if (!Array.isArray(content.searchThemes) || content.searchThemes.length < 4) {
     fail("Tier 3 page needs at least four editorial search-intent themes: " + key);
   }
@@ -686,19 +694,28 @@ for (const [key, content] of Object.entries(tierThreeContent)) {
     fail("Tier 3 page needs at least four make/model-specific FAQs: " + key);
   }
   for (const faq of content.faqs ?? []) {
-    if (!faq.question?.trim() || !faq.answer?.trim()) fail("Tier 3 FAQ question/answer missing: " + key);
+    if (!faq.question?.trim() || !faq.answer?.trim()) {
+      fail("Tier 3 FAQ question/answer missing: " + key);
+    }
   }
-  if (content.searchThemes?.some((theme) => !theme?.trim())) fail("Tier 3 search theme is blank: " + key);
+  if (content.searchThemes?.some((theme) => !theme?.trim())) {
+    fail("Tier 3 search theme is blank: " + key);
+  }
   if (page.title !== content.title || page.description !== content.description) {
     fail("Tier 3 SEO metadata was not applied to the generated page: " + key);
   }
   if (page.intro !== content.intro || page.buyerGuide !== content.buyerGuide) {
     fail("Tier 3 editorial content was not applied to the generated page: " + key);
   }
-  if (page.focusPoints?.length !== content.focusPoints?.length || page.faqs?.length !== content.faqs?.length) {
+  if (
+    page.focusPoints?.length !== content.focusPoints?.length ||
+    page.faqs?.length !== content.faqs?.length
+  ) {
     fail("Tier 3 buyer checklist/FAQ content was not applied to the generated page: " + key);
   }
-  if (page.directoryVisible === false) fail("Tier 3 pages must not promote an intentionally retired legacy route: " + key);
+  if (page.directoryVisible === false) {
+    fail("Tier 3 pages must not promote an intentionally retired legacy route: " + key);
+  }
 }
 
 if (makeTierCounts.join("/") !== "6/6/2" || modelTierCounts.join("/") !== "24/18/9") {
