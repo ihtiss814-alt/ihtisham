@@ -8,6 +8,7 @@ This workflow connects inventory discovery, manufacturer/model research, destina
 
 - The country selector contains a global country and territory list. Inclusion means only that a visitor can describe their intended destination; it is not a list of Wazir Trading service locations.
 - A preferred seaport, border crossing or final city is free text. Static port suggestions are convenience hints, not a shipping network or confirmation of carrier service.
+- Changing the destination country clears the previously entered port or city so a location from the old country cannot be carried into a new route enquiry.
 - The optional country/port preference is stored locally on the visitor's device only. It is not customer identity data and is not submitted until the visitor sends an enquiry.
 - Country aliases normalize known naming differences to the database keys used by existing route-rate records.
 
