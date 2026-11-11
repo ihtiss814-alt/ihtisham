@@ -5,6 +5,7 @@ on:
     branches:
       - main
       - performance-final-pass
+      - seo/tier-2-make-model-landing-pages
   pull_request:
     branches:
       - main
@@ -29,6 +30,18 @@ jobs:
 
       - name: Install locked dependencies
         run: npm ci
+
+      - name: Format Tier 2 make/model SEO sources and commit on branch pushes
+        if: github.event_name == 'push' && github.ref == 'refs/heads/seo/tier-2-make-model-landing-pages'
+        run: |
+          npx prettier --write src/lib/vehicle-landing-pages.ts src/lib/vehicle-tier-two-content.ts scripts/validate-vehicle-pages.mjs VEHICLE_LANDING_PAGE_WORKFLOW.md
+          git add -- src/lib/vehicle-landing-pages.ts src/lib/vehicle-tier-two-content.ts scripts/validate-vehicle-pages.mjs VEHICLE_LANDING_PAGE_WORKFLOW.md
+          if ! git diff --cached --quiet; then
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git commit -m "Format Tier 2 make and model SEO sources"
+            git push origin HEAD:seo/tier-2-make-model-landing-pages
+          fi
 
       - name: Format changed performance source and commit on branch pushes
         if: github.event_name == 'push' && github.ref == 'refs/heads/performance-final-pass'
