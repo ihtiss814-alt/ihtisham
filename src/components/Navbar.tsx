@@ -277,7 +277,7 @@ export default function Navbar() {
               </Link>
 
               {/* Desktop nav */}
-              <nav className="hidden lg:flex items-center" aria-label="Main navigation">
+              <nav className="hidden xl:flex items-center" aria-label="Main navigation">
                 {NAV_LINKS.map((link) => {
                   const active = isActive(link.href);
                   return (
@@ -367,7 +367,7 @@ export default function Navbar() {
               </nav>
 
               {/* Desktop CTAs */}
-              <div className="hidden lg:flex items-center gap-2.5">
+              <div className="hidden xl:flex items-center gap-2.5">
                 <DestinationPreferenceControl />
                 <Link
                   href="/request-a-quote"
@@ -391,27 +391,12 @@ export default function Navbar() {
                   />
                 </Link>
 
-                {/* WhatsApp — outlined */}
-                <a
-                  href={waLink}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="group flex items-center gap-2 px-5 py-2.5 border border-gray-300 hover:border-[#25D366] text-gray-700 hover:text-gray-900 text-[10.5px] tracking-[0.18em] uppercase font-semibold transition-all duration-150 rounded-[2px] hover:bg-[#F0FDF4]"
-                  data-testid="nav-whatsapp-btn"
-                >
-                  <span className="relative flex-shrink-0 w-2 h-2">
-                    <span className="absolute inset-0 rounded-full bg-[#25D366] animate-ping opacity-60" />
-                    <span className="relative block w-2 h-2 rounded-full bg-[#25D366]" />
-                  </span>
-                  <WhatsAppIcon size={13} className="text-[#25D366]" />
-                  <span>WhatsApp</span>
-                </a>
               </div>
 
               {/* Mobile hamburger — CSS-only icon swap, no JS animation library */}
               <button
                 onClick={() => setMobileOpen((v) => !v)}
-                className="lg:hidden w-10 h-10 flex items-center justify-center rounded-[2px] text-gray-700 border border-gray-200 hover:border-gray-400 hover:bg-gray-50 transition-all duration-150"
+                className="xl:hidden w-10 h-10 flex items-center justify-center rounded-[2px] text-gray-700 border border-gray-200 hover:border-gray-400 hover:bg-gray-50 transition-all duration-150"
                 aria-label="Toggle menu"
                 aria-expanded={mobileOpen}
                 aria-controls="mobile-navigation-drawer"
