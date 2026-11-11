@@ -632,7 +632,7 @@ function DetailPageContent({ page }: { page: VehicleLandingPage }) {
                 </li>
                 <li>
                   <Link
-                    href={VEHICLE_LANDING_DIRECTORY_PATH
+                    href={VEHICLE_LANDING_DIRECTORY_PATH}
                     className="text-muted-foreground hover:text-primary"
                   >
                     All make, model and body-style guides

@@ -562,6 +562,7 @@ export default function Navbar() {
                 })}
               </div>
             )}
+          </div>
           <div className="mt-4 border-t border-gray-100 pt-4">
             <DestinationPreferenceControl mobile />
           </div>
