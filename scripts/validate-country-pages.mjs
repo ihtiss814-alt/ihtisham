@@ -371,13 +371,13 @@ const tierThreeFile = ts.createSourceFile(
   ts.ScriptKind.TS,
 );
 let tierThreeInitializer;
-function visitTierTwo(node) {
+function visitTierThree(node) {
   if (ts.isVariableDeclaration(node) && propertyName(node.name) === "COUNTRY_TIER_THREE_CONTENT") {
     tierThreeInitializer = node.initializer;
   }
-  ts.forEachChild(node, visitTierTwo);
+  ts.forEachChild(node, visitTierThree);
 }
-visitTierTwo(tierThreeFile);
+visitTierThree(tierThreeFile);
 
 const tierThreeCountries = new Set(
   countries.filter((country) => country.seoTier === 3).map((country) => country.slug),
