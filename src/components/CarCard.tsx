@@ -265,7 +265,13 @@ function CarCard({
           )}
           <span className="inventory-card-ref">Ref. {car.ref_number}</span>
           {(isNewArrival || isClearance) && !isSold && (
-            <span className={isClearance ? "inventory-card-badge inventory-card-badge-clearance" : "inventory-card-badge"}>
+            <span
+              className={
+                isClearance
+                  ? "inventory-card-badge inventory-card-badge-clearance"
+                  : "inventory-card-badge"
+              }
+            >
               {isClearance ? "Clearance" : "Recently listed"}
             </span>
           )}
