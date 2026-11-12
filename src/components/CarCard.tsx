@@ -287,7 +287,7 @@ function CarCard({
                 </h3>
               </Link>
             </div>
-            <span className="inventory-card-available">{isSold ? "Sold" : "Listed"}</span>
+            <span className="inventory-card-available">{isSold ? "Sold" : "Available"}</span>
           </div>
 
           {specs.length > 0 && (
