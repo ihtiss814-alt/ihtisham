@@ -50,6 +50,13 @@ check(
   cars.includes("aria-hidden={!mobileFiltersOpen}"),
   "A closed mobile filter sheet must be hidden from assistive technology.",
 );
+
+check(
+  cars.includes("mobileFilterPanelRef.current") &&
+    cars.includes("mobileFilterTriggerRef.current?.focus") &&
+    cars.includes("last.focus()"),
+  "The mobile filter dialog must trap keyboard focus and restore it to the trigger when closed.",
+);
 check(
   cars.includes("cars-confidence-strip") && cars.includes("FOB price shown where recorded"),
   "Inventory must explain listing references and displayed price basis.",
