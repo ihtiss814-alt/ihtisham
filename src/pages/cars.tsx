@@ -651,7 +651,12 @@ function AccordionSection({
   const [open, setOpen] = useState(defaultOpen);
   return (
     <div className={`cars-filter-section ${open ? "is-open" : ""}`}>
-      <button type="button" aria-expanded={open} onClick={() => setOpen((o) => !o)} className="cars-filter-head">
+      <button
+        type="button"
+        aria-expanded={open}
+        onClick={() => setOpen((o) => !o)}
+        className="cars-filter-head"
+      >
         <span>{title}</span>
         {open ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
       </button>
@@ -677,7 +682,12 @@ function FilterItem({
   icon?: React.ReactNode;
 }) {
   return (
-    <button type="button" aria-pressed={Boolean(active)} onClick={onClick} className={`cars-filter-option ${active ? "is-active" : ""}`}>
+    <button
+      type="button"
+      aria-pressed={Boolean(active)}
+      onClick={onClick}
+      className={`cars-filter-option ${active ? "is-active" : ""}`}
+    >
       <span className="cars-filter-option-label">
         <span className="cars-filter-option-icon">
           {icon ?? (active ? <span className="text-[9px]">●</span> : null)}
@@ -790,7 +800,11 @@ function Sidebar({
             aria-label="Search manufacturers"
           />
           {makeSearch && (
-            <button type="button" onClick={() => setMakeSearch("")} aria-label="Clear manufacturer search">
+            <button
+              type="button"
+              onClick={() => setMakeSearch("")}
+              aria-label="Clear manufacturer search"
+            >
               <X size={13} />
             </button>
           )}
@@ -806,7 +820,9 @@ function Sidebar({
                 count={count}
                 active={isActive}
                 onClick={() => setActiveMake(isActive ? "" : name)}
-                icon={brand ? <MakeSidebarIcon name={name} slug={brand.slug} /> : <CarIcon size={13} />}
+                icon={
+                  brand ? <MakeSidebarIcon name={name} slug={brand.slug} /> : <CarIcon size={13} />
+                }
               />
             );
           })
@@ -2750,7 +2766,9 @@ export default function CarsPage() {
     <div className="cars-page" style={{ paddingTop: "var(--header-h, 100px)" }}>
       <section className="cars-hero">
         <div className="cars-hero-inner">
-          <p className="cars-hero-kicker"><span /> Wazir Trading · Japan vehicle inventory</p>
+          <p className="cars-hero-kicker">
+            <span /> Wazir Trading · Japan vehicle inventory
+          </p>
           <h1>
             Find the right vehicle
             <br />
@@ -2758,8 +2776,8 @@ export default function CarsPage() {
           </h1>
           <p className="cars-hero-description">
             Explore current vehicle listings, compare the details that matter and ask about a
-            specific reference. Destination shipping and import costs are confirmed separately in
-            a written quotation.
+            specific reference. Destination shipping and import costs are confirmed separately in a
+            written quotation.
           </p>
           <div className="cars-hero-search">
             <Search size={17} aria-hidden="true" />
@@ -2772,7 +2790,14 @@ export default function CarsPage() {
               aria-label="Search vehicles by make, model, variant, colour or reference"
             />
             {searchInput && (
-              <button type="button" className="cars-search-clear" onClick={() => (filters.searchText || filters.q ? clearChip("q") : setSearchInput(""))} aria-label="Clear vehicle search">
+              <button
+                type="button"
+                className="cars-search-clear"
+                onClick={() =>
+                  filters.searchText || filters.q ? clearChip("q") : setSearchInput("")
+                }
+                aria-label="Clear vehicle search"
+              >
                 <X size={15} />
               </button>
             )}
@@ -2798,15 +2823,24 @@ export default function CarsPage() {
       <div className="cars-confidence-strip" aria-label="Inventory information">
         <div>
           <ShieldCheck size={19} aria-hidden="true" />
-          <span><strong>Vehicle references</strong><small>Each listing has its own stock reference</small></span>
+          <span>
+            <strong>Vehicle references</strong>
+            <small>Each listing has its own stock reference</small>
+          </span>
         </div>
         <div>
           <FileText size={19} aria-hidden="true" />
-          <span><strong>Clear price basis</strong><small>FOB price shown where recorded</small></span>
+          <span>
+            <strong>Clear price basis</strong>
+            <small>FOB price shown where recorded</small>
+          </span>
         </div>
         <div>
           <MessageCircle size={19} aria-hidden="true" />
-          <span><strong>Direct vehicle enquiries</strong><small>Ask about the exact vehicle you found</small></span>
+          <span>
+            <strong>Direct vehicle enquiries</strong>
+            <small>Ask about the exact vehicle you found</small>
+          </span>
         </div>
       </div>
 
@@ -2976,21 +3010,49 @@ export default function CarsPage() {
               </div>
               <div className="cars-toolbar-right">
                 <div className="cars-view-switch" role="group" aria-label="Inventory layout">
-                  <button type="button" className={viewMode === "grid" ? "is-active" : ""} aria-pressed={viewMode === "grid"} onClick={() => setViewMode("grid")} title="Grid view">
-                    <LayoutGrid size={15} /><span>Grid</span>
+                  <button
+                    type="button"
+                    className={viewMode === "grid" ? "is-active" : ""}
+                    aria-pressed={viewMode === "grid"}
+                    onClick={() => setViewMode("grid")}
+                    title="Grid view"
+                  >
+                    <LayoutGrid size={15} />
+                    <span>Grid</span>
                   </button>
-                  <button type="button" className={viewMode === "list" ? "is-active" : ""} aria-pressed={viewMode === "list"} onClick={() => setViewMode("list")} title="List view">
-                    <List size={15} /><span>List</span>
+                  <button
+                    type="button"
+                    className={viewMode === "list" ? "is-active" : ""}
+                    aria-pressed={viewMode === "list"}
+                    onClick={() => setViewMode("list")}
+                    title="List view"
+                  >
+                    <List size={15} />
+                    <span>List</span>
                   </button>
                 </div>
                 <label className="cars-sort-control">
                   <span>Sort by</span>
-                  <select value={sortBy} onChange={(e) => handleSortChange(e.target.value)} aria-label="Sort vehicles">
-                    {SORT_OPTIONS.map((o) => <option key={o}>{o}</option>)}
+                  <select
+                    value={sortBy}
+                    onChange={(e) => handleSortChange(e.target.value)}
+                    aria-label="Sort vehicles"
+                  >
+                    {SORT_OPTIONS.map((o) => (
+                      <option key={o}>{o}</option>
+                    ))}
                   </select>
                 </label>
-                <button type="button" className={showAdvanced ? "cars-advanced-toggle is-active" : "cars-advanced-toggle"} onClick={() => setShowAdvanced((value) => !value)} aria-expanded={showAdvanced}>
-                  <SlidersHorizontal size={14} /> More filters {advActiveCount > 0 && <b>{advActiveCount}</b>}
+                <button
+                  type="button"
+                  className={
+                    showAdvanced ? "cars-advanced-toggle is-active" : "cars-advanced-toggle"
+                  }
+                  onClick={() => setShowAdvanced((value) => !value)}
+                  aria-expanded={showAdvanced}
+                >
+                  <SlidersHorizontal size={14} /> More filters{" "}
+                  {advActiveCount > 0 && <b>{advActiveCount}</b>}
                 </button>
               </div>
             </div>
