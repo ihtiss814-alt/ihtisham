@@ -2056,6 +2056,8 @@ export default function CarsPage() {
   const resultsRef = useRef<HTMLDivElement>(null);
   const calcRef = useRef<HTMLDivElement>(null);
   const stockListRef = useRef<HTMLDivElement>(null);
+  const mobileFilterTriggerRef = useRef<HTMLButtonElement>(null);
+  const mobileFilterPanelRef = useRef<HTMLElement>(null);
   const smartAppliedKeys = useRef<string[]>([]);
 
   // Keep the collection visible after an interaction that changes the result
@@ -2151,14 +2153,44 @@ export default function CarsPage() {
   useEffect(() => {
     if (!mobileFiltersOpen) return;
     const previousOverflow = document.body.style.overflow;
-    const closeOnEscape = (event: KeyboardEvent) => {
-      if (event.key === "Escape") setMobileFiltersOpen(false);
+    const panel = mobileFilterPanelRef.current;
+    const getFocusable = () =>
+      Array.from(
+        panel?.querySelectorAll<HTMLElement>(
+          'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])',
+        ) ?? [],
+      ).filter((element) => element.getAttribute("aria-hidden") !== "true");
+    const focusFirst = () => getFocusable()[0]?.focus({ preventScroll: true });
+    const handleKeys = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        event.preventDefault();
+        setMobileFiltersOpen(false);
+        return;
+      }
+      if (event.key !== "Tab") return;
+      const focusable = getFocusable();
+      if (focusable.length === 0) {
+        event.preventDefault();
+        panel?.focus();
+        return;
+      }
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+      }
     };
     document.body.style.overflow = "hidden";
-    window.addEventListener("keydown", closeOnEscape);
+    focusFirst();
+    window.addEventListener("keydown", handleKeys);
     return () => {
       document.body.style.overflow = previousOverflow;
-      window.removeEventListener("keydown", closeOnEscape);
+      window.removeEventListener("keydown", handleKeys);
+      mobileFilterTriggerRef.current?.focus({ preventScroll: true });
     };
   }, [mobileFiltersOpen]);
 
@@ -2881,6 +2913,7 @@ export default function CarsPage() {
                 <button
                   type="button"
                   className="cars-mobile-filter-trigger"
+                  ref={mobileFilterTriggerRef}
                   onClick={() => setMobileFiltersOpen(true)}
                   aria-expanded={mobileFiltersOpen}
                   aria-controls="mobile-filters"
@@ -3121,6 +3154,8 @@ export default function CarsPage() {
       )}
       <aside
         id="mobile-filters"
+        ref={mobileFilterPanelRef}
+        tabIndex={-1}
         className={`cars-mobile-filter-sheet ${mobileFiltersOpen ? "is-open" : ""}`}
         role="dialog"
         aria-modal={mobileFiltersOpen ? true : undefined}
