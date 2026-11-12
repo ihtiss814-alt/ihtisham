@@ -264,9 +264,10 @@ function CarCard({
             <PhotoPlaceholder label="Vehicle photo unavailable" />
           )}
           <span className="inventory-card-ref">Ref. {car.ref_number}</span>
-          {isNewArrival && !isSold && <span className="inventory-card-badge">Recently listed</span>}
-          {isClearance && (
-            <span className="inventory-card-badge inventory-card-badge-clearance">Clearance</span>
+          {(isNewArrival || isClearance) && !isSold && (
+            <span className={isClearance ? "inventory-card-badge inventory-card-badge-clearance" : "inventory-card-badge"}>
+              {isClearance ? "Clearance" : "Recently listed"}
+            </span>
           )}
           {showImage && isThirdPartyListing(car.ref_number) && (
             <ThirdPartyImageBadge className="bottom-3 left-3" />
