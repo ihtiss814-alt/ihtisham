@@ -2772,7 +2772,7 @@ export default function CarsPage() {
               aria-label="Search vehicles by make, model, variant, colour or reference"
             />
             {searchInput && (
-              <button type="button" className="cars-search-clear" onClick={() => setSearchInput("")} aria-label="Clear vehicle search">
+              <button type="button" className="cars-search-clear" onClick={() => (filters.searchText || filters.q ? clearChip("q") : setSearchInput(""))} aria-label="Clear vehicle search">
                 <X size={15} />
               </button>
             )}
