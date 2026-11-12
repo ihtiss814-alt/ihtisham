@@ -4,6 +4,7 @@ import { Heart, ImageOff, Eye } from "lucide-react";
 import { isThirdPartyListing, ThirdPartyImageBadge } from "@/components/ThirdPartyImageBadge";
 import { isRecentInventoryListing, vehicleImageAlt } from "@/lib/vehicle-seo";
 import { getResponsiveImageSrcSet, getResponsiveImageUrl } from "@/lib/image-delivery";
+import { quoteRequestHref } from "@/lib/destination-links";
 
 export interface Car {
   id: string;
@@ -45,7 +46,7 @@ export interface Car {
   }>;
 }
 
-export type CarCardVariant = "row" | "grid" | "compact";
+export type CarCardVariant = "row" | "grid" | "compact" | "catalog";
 
 /** Prefer the DB-flagged primary image, falling back to the first image seen. */
 export function resolvePrimaryImage(
@@ -214,6 +215,125 @@ function CarCard({
           </div>
         </div>
       </div>
+    );
+  }
+
+
+  /* ── Catalog — dedicated inventory grid card ────────────────────── */
+  if (variant === "catalog") {
+    const specs = [
+      car.year != null ? { label: "Year", value: String(car.year) } : null,
+      car.mileage_km != null
+        ? { label: "Mileage", value: car.mileage_km.toLocaleString() + " km" }
+        : null,
+      car.engine_cc != null
+        ? { label: "Engine", value: car.engine_cc.toLocaleString() + " cc" }
+        : null,
+      car.fuel_type ? { label: "Fuel", value: car.fuel_type } : null,
+      car.transmission ? { label: "Transmission", value: car.transmission } : null,
+      car.body_type ? { label: "Body", value: car.body_type } : null,
+      car.steering ? { label: "Steering", value: car.steering } : null,
+      car.drive ? { label: "Drive", value: car.drive } : null,
+    ].filter(Boolean) as Array<{ label: string; value: string }>;
+    const modelTitle = [car.make, car.model, car.variant].filter(Boolean).join(" ");
+    const quoteHref = quoteRequestHref({
+      vehicleRef: car.ref_number,
+      vehicleModel: modelTitle,
+      requestType: "vehicle",
+    });
+    const hasPrice =
+      typeof car.fob_price_usd === "number" &&
+      Number.isFinite(car.fob_price_usd) &&
+      car.fob_price_usd > 0;
+
+    return (
+      <article className="inventory-card">
+        <Link href={href} className="inventory-card-media" aria-label={waTitle(car)}>
+          {showImage ? (
+            <img
+              src={getResponsiveImageUrl(primaryImage!, 720)}
+              srcSet={getResponsiveImageSrcSet(primaryImage!, [320, 480, 720, 960])}
+              sizes="(max-width: 560px) 100vw, (max-width: 1024px) 50vw, 33vw"
+              alt={vehicleImageAlt(car, 0)}
+              onError={() => setImgError(true)}
+              width={720}
+              height={540}
+              loading="lazy"
+              decoding="async"
+            />
+          ) : (
+            <PhotoPlaceholder label="Vehicle photo unavailable" />
+          )}
+          <span className="inventory-card-ref">Ref. {car.ref_number}</span>
+          {isNewArrival && !isSold && (
+            <span className="inventory-card-badge">Recently listed</span>
+          )}
+          {isClearance && (
+            <span className="inventory-card-badge inventory-card-badge-clearance">Clearance</span>
+          )}
+          {showImage && isThirdPartyListing(car.ref_number) && (
+            <ThirdPartyImageBadge className="bottom-3 left-3" />
+          )}
+        </Link>
+
+        <div className="inventory-card-content">
+          <div className="inventory-card-heading">
+            <div>
+              <p className="inventory-card-origin">
+                <span aria-hidden="true" />
+                {car.stock_location || "Japan"}
+              </p>
+              <Link href={href} className="inventory-card-title-link">
+                <h3>{car.make} {car.model}{car.variant ? " " + car.variant : ""}</h3>
+              </Link>
+            </div>
+            <span className="inventory-card-available">
+              {isSold ? "Sold" : "Listed"}
+            </span>
+          </div>
+
+          {specs.length > 0 && (
+            <dl className="inventory-card-specs">
+              {specs.slice(0, 6).map((spec) => (
+                <div key={spec.label}>
+                  <dt>{spec.label}</dt>
+                  <dd>{spec.value}</dd>
+                </div>
+              ))}
+            </dl>
+          )}
+
+          <div className="inventory-card-price">
+            <div>
+              <span>FOB price · USD</span>
+              <strong>{hasPrice ? fmtUSD(car.fob_price_usd) : "Price on request"}</strong>
+            </div>
+            <span className="inventory-card-price-note">
+              Destination costs are quoted separately
+            </span>
+          </div>
+
+          <div className="inventory-card-actions">
+            <Link href={href} className="inventory-card-view">
+              <Eye size={15} />
+              View vehicle
+            </Link>
+            <a
+              href={waLink}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inventory-card-whatsapp"
+              aria-label="Ask about this vehicle on WhatsApp"
+            >
+              <WhatsAppIcon size={16} />
+              WhatsApp
+            </a>
+            <Link href={quoteHref} className="inventory-card-quote">
+              Request quote
+            </Link>
+          </div>
+        </div>
+      </article>
     );
   }
 
