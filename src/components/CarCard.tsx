@@ -218,7 +218,6 @@ function CarCard({
     );
   }
 
-
   /* ── Catalog — dedicated inventory grid card ────────────────────── */
   if (variant === "catalog") {
     const specs = [
@@ -265,9 +264,7 @@ function CarCard({
             <PhotoPlaceholder label="Vehicle photo unavailable" />
           )}
           <span className="inventory-card-ref">Ref. {car.ref_number}</span>
-          {isNewArrival && !isSold && (
-            <span className="inventory-card-badge">Recently listed</span>
-          )}
+          {isNewArrival && !isSold && <span className="inventory-card-badge">Recently listed</span>}
           {isClearance && (
             <span className="inventory-card-badge inventory-card-badge-clearance">Clearance</span>
           )}
@@ -284,12 +281,13 @@ function CarCard({
                 {car.stock_location || "Japan"}
               </p>
               <Link href={href} className="inventory-card-title-link">
-                <h3>{car.make} {car.model}{car.variant ? " " + car.variant : ""}</h3>
+                <h3>
+                  {car.make} {car.model}
+                  {car.variant ? " " + car.variant : ""}
+                </h3>
               </Link>
             </div>
-            <span className="inventory-card-available">
-              {isSold ? "Sold" : "Listed"}
-            </span>
+            <span className="inventory-card-available">{isSold ? "Sold" : "Listed"}</span>
           </div>
 
           {specs.length > 0 && (
