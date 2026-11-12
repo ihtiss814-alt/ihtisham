@@ -35,6 +35,11 @@ import {
   SlidersHorizontal,
   Eye,
   CircleDot,
+  LayoutGrid,
+  List,
+  ShieldCheck,
+  FileText,
+  MessageCircle,
 } from "lucide-react";
 import { isSupabaseConfigured, supabase } from "@/lib/supabase";
 import { cachedRequest } from "@/lib/request-cache";
@@ -646,7 +651,7 @@ function AccordionSection({
   const [open, setOpen] = useState(defaultOpen);
   return (
     <div className={`cars-filter-section ${open ? "is-open" : ""}`}>
-      <button onClick={() => setOpen((o) => !o)} className="cars-filter-head">
+      <button type="button" aria-expanded={open} onClick={() => setOpen((o) => !o)} className="cars-filter-head">
         <span>{title}</span>
         {open ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
       </button>
@@ -672,7 +677,7 @@ function FilterItem({
   icon?: React.ReactNode;
 }) {
   return (
-    <button onClick={onClick} className={`cars-filter-option ${active ? "is-active" : ""}`}>
+    <button type="button" aria-pressed={Boolean(active)} onClick={onClick} className={`cars-filter-option ${active ? "is-active" : ""}`}>
       <span className="cars-filter-option-label">
         <span className="cars-filter-option-icon">
           {icon ?? (active ? <span className="text-[9px]">●</span> : null)}
@@ -747,6 +752,10 @@ function Sidebar({
   setActiveMileage: (v: string) => void;
 }) {
   const base = import.meta.env.BASE_URL.replace(/\/$/, "");
+  const [makeSearch, setMakeSearch] = useState("");
+  const filteredMakeOptions = makeOptions.filter((option) =>
+    option.value.toLocaleLowerCase().includes(makeSearch.trim().toLocaleLowerCase()),
+  );
 
   const FUEL_ICONS: Record<string, React.ReactNode> = {
     Diesel: <Droplets size={13} />,
@@ -770,26 +779,41 @@ function Sidebar({
 
   return (
     <div className="cars-filter-groups">
-      {/* Make — sorted by count, logos shown when brand is known */}
       <AccordionSection title="Shop By Make" defaultOpen>
-        {makeOptions.map(({ value: name, count }) => {
-          const brand = MAKE_BRANDS.find((b) => b.name.toLowerCase() === name.toLowerCase());
-          const isActive = activeMake.toLowerCase() === name.toLowerCase();
-          return (
-            <FilterItem
-              key={name}
-              label={name}
-              count={count}
-              active={isActive}
-              onClick={() => setActiveMake(isActive ? "" : name)}
-              icon={
-                brand ? <MakeSidebarIcon name={name} slug={brand.slug} /> : <CarIcon size={13} />
-              }
-            />
-          );
-        })}
+        <div className="cars-filter-search">
+          <Search size={14} aria-hidden="true" />
+          <input
+            type="search"
+            value={makeSearch}
+            onChange={(event) => setMakeSearch(event.target.value)}
+            placeholder="Search manufacturers"
+            aria-label="Search manufacturers"
+          />
+          {makeSearch && (
+            <button type="button" onClick={() => setMakeSearch("")} aria-label="Clear manufacturer search">
+              <X size={13} />
+            </button>
+          )}
+        </div>
+        {filteredMakeOptions.length > 0 ? (
+          filteredMakeOptions.map(({ value: name, count }) => {
+            const brand = MAKE_BRANDS.find((b) => b.name.toLowerCase() === name.toLowerCase());
+            const isActive = activeMake.toLowerCase() === name.toLowerCase();
+            return (
+              <FilterItem
+                key={name}
+                label={name}
+                count={count}
+                active={isActive}
+                onClick={() => setActiveMake(isActive ? "" : name)}
+                icon={brand ? <MakeSidebarIcon name={name} slug={brand.slug} /> : <CarIcon size={13} />}
+              />
+            );
+          })
+        ) : (
+          <p className="cars-filter-empty">No manufacturers match that search.</p>
+        )}
       </AccordionSection>
-
       {/* Price — ranges stay hardcoded */}
       <AccordionSection title="Shop By Price" defaultOpen>
         {PRICE_RANGES.map((p) => (
@@ -1996,6 +2020,7 @@ export default function CarsPage() {
   const [loading, setLoading] = useState(!initialInventoryLoaded);
   const [page, setPage] = useState(() => parseInt(getParams(serverSearch).get("page") || "1"));
   const [sortBy, setSortBy] = useState("Newest First");
+  const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [activeTab, setActiveTab] = useState(() => getParams(serverSearch).get("tab") || "");
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
   const [makeCounts, setMakeCounts] = useState<Record<string, number>>({});
@@ -2722,27 +2747,41 @@ export default function CarsPage() {
   );
 
   return (
-    <div className="cars-page" style={{ paddingTop: "100px" }}>
+    <div className="cars-page" style={{ paddingTop: "var(--header-h, 100px)" }}>
       <section className="cars-hero">
         <div className="cars-hero-inner">
+          <p className="cars-hero-kicker"><span /> Wazir Trading · Japan vehicle inventory</p>
           <h1>
-            Find Your Perfect
+            Find the right vehicle
             <br />
-            <span>Japanese Vehicle</span>
+            <span>from Japan.</span>
           </h1>
+          <p className="cars-hero-description">
+            Explore current vehicle listings, compare the details that matter and ask about a
+            specific reference. Destination shipping and import costs are confirmed separately in
+            a written quotation.
+          </p>
           <div className="cars-hero-search">
             <Search size={17} aria-hidden="true" />
             <input
-              type="text"
+              type="search"
               value={searchInput}
               onChange={(e) => setSearchInput(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && runSearch()}
-              placeholder="Search make, model, variant, color, or ref #..."
-              aria-label="Search vehicles"
+              placeholder="Search make, model, variant, colour or vehicle reference"
+              aria-label="Search vehicles by make, model, variant, colour or reference"
             />
-            <button onClick={runSearch}>
+            {searchInput && (
+              <button type="button" className="cars-search-clear" onClick={() => setSearchInput("")} aria-label="Clear vehicle search">
+                <X size={15} />
+              </button>
+            )}
+            <button type="button" onClick={runSearch}>
               <Search size={13} /> Search
             </button>
+          </div>
+          <div className="cars-hero-search-hint">
+            Search by manufacturer, model name or the reference printed on a vehicle listing.
           </div>
           {searchFeedback?.hasIntent && (
             <div className="cars-smart-search-note" role="status">
@@ -2756,6 +2795,20 @@ export default function CarsPage() {
           )}
         </div>
       </section>
+      <div className="cars-confidence-strip" aria-label="Inventory information">
+        <div>
+          <ShieldCheck size={19} aria-hidden="true" />
+          <span><strong>Vehicle references</strong><small>Each listing has its own stock reference</small></span>
+        </div>
+        <div>
+          <FileText size={19} aria-hidden="true" />
+          <span><strong>Clear price basis</strong><small>FOB price shown where recorded</small></span>
+        </div>
+        <div>
+          <MessageCircle size={19} aria-hidden="true" />
+          <span><strong>Direct vehicle enquiries</strong><small>Ask about the exact vehicle you found</small></span>
+        </div>
+      </div>
 
       <div className="cars-page-wrap">
         <aside className="cars-sidebar cars-desktop-sidebar">
@@ -2775,6 +2828,16 @@ export default function CarsPage() {
 
         <main className="cars-main">
           <div ref={resultsRef}>
+            <div className="cars-results-heading">
+              <div>
+                <p className="cars-section-kicker">Browse inventory</p>
+                <h2>Vehicles currently listed</h2>
+                <p>Refine by make, body type, fuel, year, mileage, price and more.</p>
+              </div>
+              <span className="cars-results-total" aria-live="polite">
+                {loading ? "Updating inventory…" : totalDisplay + " listings"}
+              </span>
+            </div>
             <div className="cars-mobile-controls">
               <div className="cars-mobile-summary">
                 <span className="cars-mobile-summary-kicker">Live inventory</span>
@@ -2912,24 +2975,22 @@ export default function CarsPage() {
                 <em>{loading ? "…" : totalDisplay}</em> Cars Found
               </div>
               <div className="cars-toolbar-right">
-                <select
-                  value={sortBy}
-                  onChange={(e) => handleSortChange(e.target.value)}
-                  aria-label="Sort vehicles"
-                >
-                  {SORT_OPTIONS.map((o) => (
-                    <option key={o}>{o}</option>
-                  ))}
-                </select>
-                <button
-                  type="button"
-                  className={`cars-advanced-toggle ${showAdvanced ? "is-active" : ""}`}
-                  onClick={() => setShowAdvanced((value) => !value)}
-                  aria-expanded={showAdvanced}
-                >
-                  <SlidersHorizontal size={14} />
-                  More filters
-                  {advActiveCount > 0 && <b>{advActiveCount}</b>}
+                <div className="cars-view-switch" role="group" aria-label="Inventory layout">
+                  <button type="button" className={viewMode === "grid" ? "is-active" : ""} aria-pressed={viewMode === "grid"} onClick={() => setViewMode("grid")} title="Grid view">
+                    <LayoutGrid size={15} /><span>Grid</span>
+                  </button>
+                  <button type="button" className={viewMode === "list" ? "is-active" : ""} aria-pressed={viewMode === "list"} onClick={() => setViewMode("list")} title="List view">
+                    <List size={15} /><span>List</span>
+                  </button>
+                </div>
+                <label className="cars-sort-control">
+                  <span>Sort by</span>
+                  <select value={sortBy} onChange={(e) => handleSortChange(e.target.value)} aria-label="Sort vehicles">
+                    {SORT_OPTIONS.map((o) => <option key={o}>{o}</option>)}
+                  </select>
+                </label>
+                <button type="button" className={showAdvanced ? "cars-advanced-toggle is-active" : "cars-advanced-toggle"} onClick={() => setShowAdvanced((value) => !value)} aria-expanded={showAdvanced}>
+                  <SlidersHorizontal size={14} /> More filters {advActiveCount > 0 && <b>{advActiveCount}</b>}
                 </button>
               </div>
             </div>
@@ -2943,12 +3004,12 @@ export default function CarsPage() {
                 <Loader2 size={36} className="animate-spin" />
               </div>
             ) : cars.length > 0 ? (
-              <div className="car-list">
+              <div className={viewMode === "grid" ? "cars-catalog-grid" : "car-list"}>
                 {cars.map((car) => (
                   <CarCard
                     key={car.id}
                     car={car}
-                    variant="row"
+                    variant={viewMode === "grid" ? "catalog" : "row"}
                     primaryImage={resolvePrimaryImage(car.car_images)}
                     onOfferPrice={setOfferCar}
                   />
@@ -3000,7 +3061,8 @@ export default function CarsPage() {
         id="mobile-filters"
         className={`cars-mobile-filter-sheet ${mobileFiltersOpen ? "is-open" : ""}`}
         role="dialog"
-        aria-modal="true"
+        aria-modal={mobileFiltersOpen ? true : undefined}
+        aria-hidden={!mobileFiltersOpen}
         aria-labelledby="mobile-filters-title"
       >
         <div className="cars-mobile-sheet-head">
