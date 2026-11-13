@@ -68,8 +68,15 @@ check(
   about.includes("buildWhatsAppHref(") && about.includes("Open address in Maps"),
   "Company information must provide direct contact and an actionable office location.",
 );
-for (const [label, source] of [["quote", quote], ["contact", contact], ["vehicle detail", detail]]) {
-  check(!source.includes("savePublicInquiry("), `${label} form must not depend on a database insert for its primary submission.`);
+for (const [label, source] of [
+  ["quote", quote],
+  ["contact", contact],
+  ["vehicle detail", detail],
+]) {
+  check(
+    !source.includes("savePublicInquiry("),
+    `${label} form must not depend on a database insert for its primary submission.`,
+  );
 }
 
 if (failures.length) {

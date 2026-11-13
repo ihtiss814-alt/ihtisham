@@ -137,14 +137,20 @@ export default function RequestQuotePage() {
     form.email.trim() ? `Email: ${form.email.trim()}` : "",
     form.phone.trim() ? `WhatsApp / phone: ${form.phone.trim()}` : "",
     form.country.trim() ? `Destination country: ${form.country.trim()}` : "",
-    form.port.trim() ? `Preferred port / city: ${form.port.trim()}` : "Preferred port / city: to be confirmed",
+    form.port.trim()
+      ? `Preferred port / city: ${form.port.trim()}`
+      : "Preferred port / city: to be confirmed",
     form.vehicleRef.trim() ? `Vehicle reference: ${form.vehicleRef.trim()}` : "",
     form.vehicleModel.trim() ? `Vehicle / model: ${form.vehicleModel.trim()}` : "",
-    budgetValue !== null && Number.isFinite(budgetValue) ? `Target budget (USD): ${budgetValue}` : "",
+    budgetValue !== null && Number.isFinite(budgetValue)
+      ? `Target budget (USD): ${budgetValue}`
+      : "",
     form.requirements.trim() ? `Requirements: ${form.requirements.trim()}` : "",
     "Please confirm current availability, the written price basis, export documents, shipping options and destination-side costs for this specific request.",
     "Website: https://www.wazirtradingllc.com/request-a-quote",
-  ].filter(Boolean).join("\n");
+  ]
+    .filter(Boolean)
+    .join("\n");
   const whatsappHref = buildWhatsAppHref(whatsappMessage);
 
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {

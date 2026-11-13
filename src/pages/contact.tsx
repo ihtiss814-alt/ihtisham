@@ -1,7 +1,17 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "wouter";
 import { buildWhatsAppHref, openWhatsAppEnquiry } from "@/lib/whatsapp-enquiries";
-import { Mail, MapPin, Phone, Check, MessageCircle, CarFront, Ship, CreditCard, CircleHelp } from "lucide-react";
+import {
+  Mail,
+  MapPin,
+  Phone,
+  Check,
+  MessageCircle,
+  CarFront,
+  Ship,
+  CreditCard,
+  CircleHelp,
+} from "lucide-react";
 import { useMeta } from "@/lib/use-meta";
 import DestinationFields from "@/components/DestinationFields";
 import { useDestinationPreference } from "@/hooks/useDestinationPreference";
@@ -59,7 +69,9 @@ export default function ContactPage() {
       port.trim() ? `Preferred port / final city: ${port.trim()}` : "",
       messageText,
       "Website: https://www.wazirtradingllc.com/contact",
-    ].filter(Boolean).join("\n\n");
+    ]
+      .filter(Boolean)
+      .join("\n\n");
     setPreparedWhatsAppHref(buildWhatsAppHref(message));
     openWhatsAppEnquiry(message);
     setStatus("success");
@@ -141,7 +153,9 @@ export default function ContactPage() {
                   destination-specific shipping questions.
                 </p>
                 <a
-                  href={buildWhatsAppHref("Hello Wazir Trading LLC. I would like to speak with your team.")}
+                  href={buildWhatsAppHref(
+                    "Hello Wazir Trading LLC. I would like to speak with your team.",
+                  )}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="w-full bg-[#25D366] text-white py-3 font-medium flex items-center justify-center gap-2 hover:bg-[#20bd5a] transition-colors"
@@ -174,15 +188,23 @@ export default function ContactPage() {
                   </div>
                   <h3 className="text-xl font-bold mb-2">WhatsApp message prepared</h3>
                   <p className="text-muted-foreground mb-3">
-                    WhatsApp has opened with your details prefilled. Please review the
-                    message and press Send in WhatsApp to deliver it to our team. The website does
-                    not receive an automatic copy through this route.
+                    WhatsApp has opened with your details prefilled. Please review the message and
+                    press Send in WhatsApp to deliver it to our team. The website does not receive
+                    an automatic copy through this route.
                   </p>
                   <div className="mt-3 flex flex-col gap-2">
-                    <a href={preparedWhatsAppHref} target="_blank" rel="noopener noreferrer" className="text-sm font-semibold text-primary underline underline-offset-2">
+                    <a
+                      href={preparedWhatsAppHref}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-sm font-semibold text-primary underline underline-offset-2"
+                    >
                       Open the prepared WhatsApp message again
                     </a>
-                    <a href="mailto:wazirtrading-pc@outlook.jp" className="text-sm font-semibold text-primary underline underline-offset-2">
+                    <a
+                      href="mailto:wazirtrading-pc@outlook.jp"
+                      className="text-sm font-semibold text-primary underline underline-offset-2"
+                    >
                       wazirtrading-pc@outlook.jp
                     </a>
                   </div>
@@ -292,20 +314,32 @@ export default function ContactPage() {
                     />
                   </div>
                   <label className="flex items-start gap-3 text-xs text-muted-foreground leading-relaxed">
-                    <input required type="checkbox" name="whatsapp-consent" value="yes" className="mt-0.5 accent-[#C8102E]" />
+                    <input
+                      required
+                      type="checkbox"
+                      name="whatsapp-consent"
+                      value="yes"
+                      className="mt-0.5 accent-[#C8102E]"
+                    />
                     <span>
-                      I agree to continue to WhatsApp with the details above prefilled. I will review
-                      the message and press Send to share it with Wazir Trading LLC. See our{" "}
-                      <Link href="/privacy-policy" className="text-primary underline underline-offset-2">
+                      I agree to continue to WhatsApp with the details above prefilled. I will
+                      review the message and press Send to share it with Wazir Trading LLC. See our{" "}
+                      <Link
+                        href="/privacy-policy"
+                        className="text-primary underline underline-offset-2"
+                      >
                         Privacy Policy
-                      </Link>.
+                      </Link>
+                      .
                     </span>
                   </label>
                   <button
                     type="submit"
                     className="w-full bg-primary text-primary-foreground py-4 font-medium uppercase tracking-widest text-sm disabled:opacity-70 transition-colors"
                   >
-                    <><MessageCircle size={17} /> Continue to WhatsApp</>
+                    <>
+                      <MessageCircle size={17} /> Continue to WhatsApp
+                    </>
                   </button>
                   {status === "error" && (
                     <p role="alert" className="text-destructive text-sm text-center">

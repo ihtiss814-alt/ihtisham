@@ -339,7 +339,9 @@ export default function AboutPage() {
               </div>
               <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row">
                 <a
-                  href={buildWhatsAppHref("Hello Wazir Trading LLC. I would like to contact your Japan office.")}
+                  href={buildWhatsAppHref(
+                    "Hello Wazir Trading LLC. I would like to contact your Japan office.",
+                  )}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="inline-flex items-center justify-center gap-2 bg-[#25D366] px-5 py-3 text-sm font-bold text-white hover:opacity-90"

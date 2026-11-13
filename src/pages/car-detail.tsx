@@ -497,7 +497,9 @@ export default function CarDetailPage() {
     setFormError("");
     if (!car) {
       setFormStatus("error");
-      setFormError("This vehicle record is not available to prepare an enquiry. Please refresh the page or contact us.");
+      setFormError(
+        "This vehicle record is not available to prepare an enquiry. Please refresh the page or contact us.",
+      );
       return;
     }
     const form = new FormData(event.currentTarget);
@@ -524,11 +526,15 @@ export default function CarDetailPage() {
       `Vehicle: ${vehicleName}`,
       `Vehicle reference: ${car.ref_number}`,
       `Destination country: ${country.trim()}`,
-      port.trim() ? `Preferred port / city: ${port.trim()}` : "Preferred port / city: to be confirmed",
+      port.trim()
+        ? `Preferred port / city: ${port.trim()}`
+        : "Preferred port / city: to be confirmed",
       requestDetails ? `Request: ${requestDetails}` : "",
       `Vehicle listing: https://www.wazirtradingllc.com/cars/${car.ref_number}`,
       "Please confirm current availability, the vehicle record and condition documents, the FOB price basis, shipping options and destination-side costs in writing.",
-    ].filter(Boolean).join("\n\n");
+    ]
+      .filter(Boolean)
+      .join("\n\n");
     destinationPreference.setDestination({ country, port });
     openWhatsAppEnquiry(message);
     setFormStatus("success");
@@ -1091,17 +1097,18 @@ export default function CarDetailPage() {
                     />
                     <label className="vehicle-form-privacy flex items-start gap-2">
                       <input type="checkbox" name="whatsapp-consent" required />
-                      <span>I agree to continue to WhatsApp with these details prefilled. I will review and press Send to share them with Wazir Trading LLC. See our <Link href="/privacy-policy">Privacy Policy</Link>.</span>
+                      <span>
+                        I agree to continue to WhatsApp with these details prefilled. I will review
+                        and press Send to share them with Wazir Trading LLC. See our{" "}
+                        <Link href="/privacy-policy">Privacy Policy</Link>.
+                      </span>
                     </label>
                     {formStatus === "error" && (
                       <p className="vehicle-form-error" role="alert">
                         {formError}
                       </p>
                     )}
-                    <button
-                      className="vehicle-primary-button"
-                      type="submit"
-                    >
+                    <button className="vehicle-primary-button" type="submit">
                       <>
                         <Send size={16} /> Continue to WhatsApp
                       </>

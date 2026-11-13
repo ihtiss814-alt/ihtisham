@@ -134,7 +134,9 @@ function CarCard({
       `Vehicle: ${waTitle(car)}`,
       `Vehicle reference: ${car.ref_number}`,
       `Listing status shown: ${availabilityLabel}`,
-      car.fob_price_usd && car.fob_price_usd > 0 ? `FOB price shown: ${fmtUSD(car.fob_price_usd)} USD` : "FOB price: please advise",
+      car.fob_price_usd && car.fob_price_usd > 0
+        ? `FOB price shown: ${fmtUSD(car.fob_price_usd)} USD`
+        : "FOB price: please advise",
       `Vehicle listing: https://www.wazirtradingllc.com${href}`,
       "Please confirm current availability, vehicle condition information, exact price basis and destination shipping options.",
     ].join("\n"),
