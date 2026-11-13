@@ -13,7 +13,7 @@ const contact = read("src/pages/contact.tsx");
 check(
   about.includes("Heights Mizutani 1C, 158-1 Jizou") &&
     about.includes("Kuwana-City, Mie-Pref, Japan") &&
-    about.includes("Office visits are by appointment only"),
+    about.replace(/\\s+/g, " ").includes("Office visits are by appointment only"),
   "About page must show the published Japan business address and appointment-only visit note.",
 );
 check(
