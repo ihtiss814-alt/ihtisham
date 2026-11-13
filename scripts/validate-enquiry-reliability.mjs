@@ -57,7 +57,7 @@ check(
   "Quote page must not claim delivery before the customer presses Send in WhatsApp.",
 );
 check(
-  quote.includes("Continue to WhatsApp") && !quote.includes('>"Continue to WhatsApp"</button>'),
+  quote.includes("Continue to WhatsApp") && !quote.includes('"Continue to WhatsApp"'),
   "Quote action must show the WhatsApp label without literal quotation marks.",
 );
 check(
@@ -87,9 +87,7 @@ check(
 check(
   privacy.includes("press Send in WhatsApp") &&
     privacy.includes("does not automatically receive or store a copy") &&
-    !privacy.includes(
-      "The website code sends contact, vehicle and custom-sourcing form submissions to the site’s Supabase",
-    ),
+    !privacy.includes("form submissions to the site’s Supabase database service"),
   "Privacy policy must accurately describe the WhatsApp hand-off and not claim that public enquiries are automatically stored in Supabase.",
 );
 for (const [label, source] of [
