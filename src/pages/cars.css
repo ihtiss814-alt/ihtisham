@@ -2201,3 +2201,10 @@
     transform: none;
   }
 }
+
+/* Availability that is not explicitly confirmed must never look like a live-stock badge. */
+.inventory-card-available-muted {
+  border-color: #cbd5e1;
+  background: #f1f5f9;
+  color: #475569;
+}

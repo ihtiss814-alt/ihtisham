@@ -112,7 +112,21 @@ function CarCard({
     `Hi, I am interested in ${waTitle(car)}\nReference: ${car.ref_number}\nPlease share more details.`,
   );
   const waLink = `https://wa.me/${waNumber}?text=${waMsg}`;
-  const isSold = car.status === "sold";
+  const normalizedStatus = String(car.status ?? "")
+    .trim()
+    .toLowerCase();
+  const isSold = normalizedStatus === "sold";
+  const availabilityLabel =
+    normalizedStatus === "available"
+      ? "Available"
+      : normalizedStatus === "sold"
+        ? "Sold"
+        : normalizedStatus === "reserved"
+          ? "Reserved"
+          : normalizedStatus === "unavailable"
+            ? "Unavailable"
+            : "Confirm availability";
+  const stockLocationLabel = car.stock_location?.trim() || "Stock location not listed";
   const isClearance = car.collection?.toLowerCase() === "clearance";
   const isNewArrival = isRecentInventoryListing(car.created_at);
   const showImage = primaryImage && !imgError;
@@ -178,7 +192,7 @@ function CarCard({
             </Link>
             <div className="car-meta">
               <span className="origin-dot" />
-              <span className="car-origin">{car.stock_location || "Japan"}</span>
+              <span className="car-origin">{stockLocationLabel}</span>
             </div>
           </div>
 
@@ -285,7 +299,7 @@ function CarCard({
             <div>
               <p className="inventory-card-origin">
                 <span aria-hidden="true" />
-                {car.stock_location || "Japan"}
+                {stockLocationLabel}
               </p>
               <Link href={href} className="inventory-card-title-link">
                 <h3>
@@ -294,7 +308,11 @@ function CarCard({
                 </h3>
               </Link>
             </div>
-            <span className="inventory-card-available">{isSold ? "Sold" : "Available"}</span>
+            <span
+              className={`inventory-card-available ${normalizedStatus === "available" ? "" : "inventory-card-available-muted"}`}
+            >
+              {availabilityLabel}
+            </span>
           </div>
 
           {specs.length > 0 && (

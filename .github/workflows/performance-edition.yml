@@ -7,6 +7,7 @@ on:
       - performance-final-pass
       - ux/destination-led-journey
       - ux/professional-inventory-experience
+      - quality/trust-and-enquiry-reliability
   pull_request:
     branches:
       - main
@@ -68,6 +69,18 @@ jobs:
             git push origin HEAD:ux/professional-inventory-experience
           fi
 
+      - name: Format and commit reliability hardening source
+        if: github.event_name == 'push' && github.ref == 'refs/heads/quality/trust-and-enquiry-reliability'
+        run: |
+          npx prettier --write src/lib/public-inquiries.ts src/pages/request-a-quote.tsx src/pages/contact.tsx src/pages/car-detail.tsx src/pages/cars.tsx src/pages/cars.css src/components/CarCard.tsx src/pages/about.tsx src/components/ShippingRouteCanvas.tsx scripts/validate-enquiry-reliability.mjs scripts/validate-inventory-reliability.mjs scripts/validate-business-credibility.mjs scripts/validate-inventory-experience.mjs package.json
+          git add -- src/lib/public-inquiries.ts src/pages/request-a-quote.tsx src/pages/contact.tsx src/pages/car-detail.tsx src/pages/cars.tsx src/pages/cars.css src/components/CarCard.tsx src/pages/about.tsx src/components/ShippingRouteCanvas.tsx scripts/validate-enquiry-reliability.mjs scripts/validate-inventory-reliability.mjs scripts/validate-business-credibility.mjs scripts/validate-inventory-experience.mjs package.json
+          if ! git diff --cached --quiet; then
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git commit -m "Format enquiry and trust reliability changes"
+            git push origin HEAD:quality/trust-and-enquiry-reliability
+          fi
+
       - name: TypeScript validation
         run: npm run typecheck
 
@@ -85,6 +98,15 @@ jobs:
 
       - name: Validate professional inventory experience
         run: npm run validate:inventory-experience
+
+      - name: Validate enquiry reliability
+        run: npm run validate:enquiry-reliability
+
+      - name: Validate inventory reliability
+        run: npm run validate:inventory-reliability
+
+      - name: Validate business credibility
+        run: npm run validate:business-credibility
 
       - name: Validate vehicle detail redesign
         run: node scripts/validate-vehicle-detail-redesign.mjs

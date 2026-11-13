@@ -1,9 +1,10 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useLocation } from "wouter";
 import { ArrowRight, CheckCircle2, MessageCircle, ShieldCheck } from "lucide-react";
 import DestinationFields from "@/components/DestinationFields";
 import { useDestinationPreference } from "@/hooks/useDestinationPreference";
-import { isSupabaseConfigured, supabase } from "@/lib/supabase";
+import { isSupabaseConfigured } from "@/lib/supabase";
+import { publicInquiryErrorMessage, savePublicInquiry } from "@/lib/public-inquiries";
 import { useMeta } from "@/lib/use-meta";
 import { useSeoBootstrap } from "@/lib/seo-bootstrap-context";
 import { canonicalCountry } from "@/lib/shipping";
@@ -81,6 +82,7 @@ export default function RequestQuotePage() {
   const [form, setForm] = useState<QuoteForm>(EMPTY_FORM);
   const [status, setStatus] = useState<SubmissionStatus>("idle");
   const [errorMessage, setErrorMessage] = useState("");
+  const submissionInFlight = useRef(false);
   const search =
     bootstrap?.pathname === "/request-a-quote"
       ? bootstrap.search
@@ -132,16 +134,25 @@ export default function RequestQuotePage() {
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    if (submissionInFlight.current || status === "submitting") return;
     if (!isSupabaseConfigured) {
       setStatus("error");
-      setErrorMessage(
-        "The enquiry service is not currently available. Please use WhatsApp or email.",
-      );
+      setErrorMessage(publicInquiryErrorMessage(new Error("INQUIRY_NOT_CONFIGURED")));
+      return;
+    }
+    if (!form.name.trim() || !form.email.trim()) {
+      setStatus("error");
+      setErrorMessage("Please enter your name and a valid email address.");
       return;
     }
     if (!form.country.trim()) {
       setStatus("error");
       setErrorMessage("Please choose the country or territory where the vehicle will be used.");
+      return;
+    }
+    if (!form.consent) {
+      setStatus("error");
+      setErrorMessage("Please confirm the privacy notice before sending your enquiry.");
       return;
     }
     if (
@@ -182,28 +193,26 @@ export default function RequestQuotePage() {
       name: form.name.trim(),
       email: form.email.trim(),
       phone: form.phone.trim(),
-      country: form.country,
-      destination_country: form.country,
+      country: form.country.trim(),
       destination_port: form.port.trim(),
-      car_ref: form.vehicleRef.trim(),
-      car_name: form.vehicleModel.trim(),
       message,
       inquiry_type: inquiryType,
     };
 
+    submissionInFlight.current = true;
     setStatus("submitting");
     setErrorMessage("");
     try {
-      const { error } = await supabase.from("inquiries").insert([payload]);
-      if (error) throw error;
+      // Use the same proven public-table columns as the Contact form. Vehicle
+      // identity and optional budget/requirements are retained in message.
+      await savePublicInquiry(payload, "quote");
       preference.setDestination({ country: form.country, port: form.port });
       setStatus("success");
     } catch (error) {
-      console.warn("Quote request submission failed:", error);
       setStatus("error");
-      setErrorMessage(
-        "We could not save this request. Please try again or contact us directly using the details below.",
-      );
+      setErrorMessage(publicInquiryErrorMessage(error));
+    } finally {
+      submissionInFlight.current = false;
     }
   };
 

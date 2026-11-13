@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useParams } from "wouter";
 import {
   ArrowLeft,
@@ -21,6 +21,7 @@ import CarCard, { type Car } from "@/components/CarCard";
 import { MakeLogo as ManufacturerLogo } from "@/components/VehicleIdentity";
 import VehiclePhotoGallery from "@/components/VehiclePhotoGallery";
 import { isSupabaseConfigured, supabase } from "@/lib/supabase";
+import { publicInquiryErrorMessage, savePublicInquiry } from "@/lib/public-inquiries";
 import DestinationFields from "@/components/DestinationFields";
 import { useDestinationPreference } from "@/hooks/useDestinationPreference";
 import { quoteRequestHref } from "@/lib/destination-links";
@@ -241,6 +242,8 @@ export default function CarDetailPage() {
   const [shippingRate, setShippingRate] = useState<ShippingRate | null>(null);
   const [rateLoading, setRateLoading] = useState(false);
   const [formStatus, setFormStatus] = useState<FormStatus>("idle");
+  const [formError, setFormError] = useState("");
+  const submissionInFlight = useRef(false);
 
   useMeta({
     title: car ? vehicleTitle(car) : "Vehicle details | Wazir Trading LLC",
@@ -493,30 +496,50 @@ export default function CarDetailPage() {
 
   const handleInquirySubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    if (submissionInFlight.current || formStatus === "submitting") return;
     if (!car || !isSupabaseConfigured) {
       setFormStatus("error");
+      setFormError(publicInquiryErrorMessage(new Error("INQUIRY_NOT_CONFIGURED")));
       return;
     }
-    setFormStatus("submitting");
     const form = new FormData(event.currentTarget);
+    const name = String(form.get("name") ?? "").trim();
+    const email = String(form.get("email") ?? "").trim();
+    const phone = String(form.get("phone") ?? "").trim();
+    if (!name || !email || !phone) {
+      setFormStatus("error");
+      setFormError("Please enter your name, email address and phone number.");
+      return;
+    }
+    const vehicleName = `${car.make} ${car.model}${car.year ? ` ${car.year}` : ""}`;
     const payload = {
-      car_ref: car.ref_number,
-      car_name: `${car.make} ${car.model}${car.year ? ` ${car.year}` : ""}`,
-      destination_country: country,
-      destination_port: port,
-      name: String(form.get("name") ?? "").trim(),
-      email: String(form.get("email") ?? "").trim(),
-      phone: String(form.get("phone") ?? "").trim(),
-      message: String(form.get("message") ?? "").trim(),
+      name,
+      email,
+      phone,
+      country: country.trim(),
+      destination_port: port.trim(),
+      message: [
+        `Vehicle reference: ${car.ref_number}`,
+        `Vehicle: ${vehicleName}`,
+        `Destination: ${country.trim() || "To be confirmed"}`,
+        port.trim() ? `Preferred port / city: ${port.trim()}` : "",
+        String(form.get("message") ?? "").trim(),
+      ]
+        .filter(Boolean)
+        .join("\n\n"),
       inquiry_type: "car-inquiry",
     };
+    submissionInFlight.current = true;
+    setFormStatus("submitting");
+    setFormError("");
     try {
-      const { error } = await supabase.from("inquiries").insert([payload]);
-      if (error) throw error;
+      await savePublicInquiry(payload, "vehicle");
       setFormStatus("success");
     } catch (error) {
-      console.warn("Vehicle enquiry submission failed:", error);
       setFormStatus("error");
+      setFormError(publicInquiryErrorMessage(error));
+    } finally {
+      submissionInFlight.current = false;
     }
   };
 
@@ -1077,9 +1100,8 @@ export default function CarDetailPage() {
                       defaultValue={`Please confirm current availability, specification, condition documents and a written export quotation for ${carName}${car.year ? ` ${car.year}` : ""} (Ref: ${car.ref_number}) to ${country}.`}
                     />
                     {formStatus === "error" && (
-                      <p className="vehicle-form-error">
-                        We could not save this enquiry. Please try again or contact us directly
-                        using WhatsApp.
+                      <p className="vehicle-form-error" role="alert">
+                        {formError}
                       </p>
                     )}
                     <button

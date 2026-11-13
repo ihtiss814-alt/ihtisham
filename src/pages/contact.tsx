@@ -1,6 +1,7 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Link } from "wouter";
-import { isSupabaseConfigured, supabase } from "@/lib/supabase";
+import { isSupabaseConfigured } from "@/lib/supabase";
+import { publicInquiryErrorMessage, savePublicInquiry } from "@/lib/public-inquiries";
 import { Mail, MapPin, Phone, Check, CarFront, Ship, CreditCard, CircleHelp } from "lucide-react";
 import { useMeta } from "@/lib/use-meta";
 import DestinationFields from "@/components/DestinationFields";
@@ -22,6 +23,8 @@ export default function ContactPage() {
     canonical: "https://www.wazirtradingllc.com/contact",
   });
   const [status, setStatus] = useState<"idle" | "submitting" | "success" | "error">("idle");
+  const [errorMessage, setErrorMessage] = useState("");
+  const submissionInFlight = useRef(false);
   const [inquiryType, setInquiryType] = useState("general");
   const destination = useDestinationPreference();
   const [country, setCountry] = useState("");
@@ -36,17 +39,30 @@ export default function ContactPage() {
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setStatus("submitting");
+    if (submissionInFlight.current || status === "submitting") return;
+    if (!isSupabaseConfigured) {
+      setStatus("error");
+      setErrorMessage(publicInquiryErrorMessage(new Error("INQUIRY_NOT_CONFIGURED")));
+      return;
+    }
 
     const formData = new FormData(e.currentTarget);
+    const name = String(formData.get("name") ?? "").trim();
+    const email = String(formData.get("email") ?? "").trim();
+    const messageText = String(formData.get("message") ?? "").trim();
+    if (!name || !email || !messageText) {
+      setStatus("error");
+      setErrorMessage("Please complete your name, email address and message.");
+      return;
+    }
     const data = {
-      name: formData.get("name") as string,
-      email: formData.get("email") as string,
-      phone: formData.get("phone") as string,
-      country,
+      name,
+      email,
+      phone: String(formData.get("phone") ?? "").trim(),
+      country: country.trim(),
       destination_port: port.trim(),
       message: [
-        String(formData.get("message") ?? "").trim(),
+        messageText,
         port.trim()
           ? `Preferred port / final city: ${port.trim()}`
           : "Preferred port or final city to be confirmed.",
@@ -56,18 +72,19 @@ export default function ContactPage() {
       inquiry_type: inquiryType,
     };
 
+    submissionInFlight.current = true;
+    setStatus("submitting");
+    setErrorMessage("");
     try {
-      if (!isSupabaseConfigured) {
-        throw new Error("Inquiry service is not configured");
-      }
-      const { error } = await supabase.from("inquiries").insert([data]);
-      if (error) throw error;
+      await savePublicInquiry(data, "contact");
       setStatus("success");
       (e.target as HTMLFormElement).reset();
       setInquiryType("general");
-    } catch (err) {
-      console.error(err);
+    } catch (error) {
       setStatus("error");
+      setErrorMessage(publicInquiryErrorMessage(error));
+    } finally {
+      submissionInFlight.current = false;
     }
   };
 
@@ -311,9 +328,8 @@ export default function ContactPage() {
                     {status === "submitting" ? "Sending…" : "Send My Inquiry"}
                   </button>
                   {status === "error" && (
-                    <p className="text-destructive text-sm text-center">
-                      We could not submit your enquiry. You can try WhatsApp or email using the
-                      contact details shown on this page.
+                    <p role="alert" className="text-destructive text-sm text-center">
+                      {errorMessage}
                     </p>
                   )}
                 </form>
