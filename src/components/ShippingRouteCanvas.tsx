@@ -6,7 +6,7 @@ import { useEffect, useRef } from "react";
  * Deliberately a navigational chart rather than a world map: drawing real
  * coastlines would mean shipping a geometry file, and a hand-faked continent
  * outline would just be wrong. A graticule plus real port coordinates is
- * honest about what it is and reads correctly at hero size.
+ * clearly illustrative while remaining readable at hero size.
  *
  * The projection is centred on Yokohama and uses geographic reference points
  * for visual illustration only. It does not describe Wazir Trading service
