@@ -26,6 +26,10 @@ check(
   "WhatsApp hand-off must fall back when a new tab is blocked and protect the opener relationship.",
 );
 check(
+  helper.includes("const number = /^\\d{8,15}$/.test(candidate) ? candidate : DEFAULT_WHATSAPP_NUMBER"),
+  "WhatsApp helper must fall back to the known business number when configuration is malformed.",
+);
+check(
   quote.includes("openWhatsAppEnquiry(whatsappMessage)") &&
     quote.includes("buildWhatsAppHref(whatsappMessage)") &&
     quote.includes("Continue to WhatsApp"),
@@ -43,6 +47,11 @@ check(
     !quote.includes("Your enquiry was recorded") &&
     !quote.includes("await savePublicInquiry"),
   "Quote page must not claim delivery before the customer presses Send in WhatsApp.",
+);
+check(
+  quote.includes("Continue to WhatsApp") &&
+    !quote.includes('>"Continue to WhatsApp"</button>'),
+  "Quote action must show the WhatsApp label without literal quotation marks.",
 );
 check(
   contact.includes("openWhatsAppEnquiry(message)") &&
