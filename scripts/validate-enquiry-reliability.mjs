@@ -7,71 +7,73 @@ const check = (condition, message) => {
   if (!condition) failures.push(message);
 };
 
-const helper = read("src/lib/public-inquiries.ts");
+const helper = read("src/lib/whatsapp-enquiries.ts");
 const quote = read("src/pages/request-a-quote.tsx");
 const contact = read("src/pages/contact.tsx");
 const detail = read("src/pages/car-detail.tsx");
+const card = read("src/components/CarCard.tsx");
+const about = read("src/pages/about.tsx");
 
-for (const field of [
-  "name",
-  "email",
-  "phone",
-  "country",
-  "destination_port",
-  "message",
-  "inquiry_type",
-]) {
-  check(helper.includes(field), `Shared inquiry contract is missing the ${field} field.`);
+check(
+  helper.includes("https://wa.me/") &&
+    helper.includes("encodeURIComponent(message)") &&
+    helper.includes('window.open(href, "_blank")'),
+  "WhatsApp helper must create a correctly encoded click-to-chat URL and open it from the user's action.",
+);
+check(
+  helper.includes("window.location.assign(href)") && helper.includes("opened.opener = null"),
+  "WhatsApp hand-off must fall back when a new tab is blocked and protect the opener relationship.",
+);
+check(
+  quote.includes("openWhatsAppEnquiry(whatsappMessage)") &&
+    quote.includes("buildWhatsAppHref(whatsappMessage)") &&
+    quote.includes("Continue to WhatsApp"),
+  "Guided quote form must use WhatsApp as its primary enquiry destination.",
+);
+check(
+  quote.includes("Destination country:") &&
+    quote.includes("Vehicle reference:") &&
+    quote.includes("Target budget (USD):") &&
+    quote.includes("Requirements:"),
+  "Quote hand-off must preserve vehicle, destination, budget and requirements.",
+);
+check(
+  quote.includes("press Send in WhatsApp") &&
+    !quote.includes("Your enquiry was recorded") &&
+    !quote.includes("await savePublicInquiry"),
+  "Quote page must not claim delivery before the customer presses Send in WhatsApp.",
+);
+check(
+  contact.includes("openWhatsAppEnquiry(message)") &&
+    contact.includes("Enquiry type:") &&
+    contact.includes("preparedWhatsAppHref") &&
+    contact.includes("press Send in WhatsApp"),
+  "Contact form must prepare a WhatsApp message with customer and enquiry details.",
+);
+check(
+  detail.includes("openWhatsAppEnquiry(message)") &&
+    detail.includes("Vehicle reference:") &&
+    detail.includes("Destination country:") &&
+    detail.includes("press Send in WhatsApp"),
+  "Vehicle detail enquiry must include listing reference and destination in WhatsApp.",
+);
+check(
+  card.includes("buildWhatsAppHref(") &&
+    card.includes("Vehicle listing: https://www.wazirtradingllc.com") &&
+    card.includes("Ask on WhatsApp"),
+  "Inventory cards must open a vehicle-specific WhatsApp enquiry.",
+);
+check(
+  about.includes("buildWhatsAppHref(") && about.includes("Open address in Maps"),
+  "Company information must provide direct contact and an actionable office location.",
+);
+for (const [label, source] of [["quote", quote], ["contact", contact], ["vehicle detail", detail]]) {
+  check(!source.includes("savePublicInquiry("), `${label} form must not depend on a database insert for its primary submission.`);
 }
-check(
-  helper.includes('supabase.from("inquiries").insert([payload])') &&
-    helper.includes("publicInquiryErrorMessage"),
-  "Public inquiry writes must share the common insert and actionable error classifier.",
-);
-check(
-  helper.includes("42501") && helper.includes("PGRST204") && helper.includes("PGRST205"),
-  "Database permission and schema errors must be diagnosable without exposing customer data.",
-);
-for (const [name, source, label] of [
-  ["quote", quote, "guided quote"],
-  ["contact", contact, "contact"],
-  ["vehicle", detail, "vehicle detail"],
-]) {
-  check(
-    source.includes("savePublicInquiry("),
-    `${label} page must use the shared inquiry submission helper.`,
-  );
-  check(
-    source.includes("submissionInFlight.current") && source.includes("finally"),
-    `${label} page must prevent duplicate submissions and release its submission lock.`,
-  );
-  check(
-    source.includes("publicInquiryErrorMessage(error)"),
-    `${label} page must show actionable submission failure guidance.`,
-  );
-}
-check(
-  quote.includes("form.consent") &&
-    quote.includes("form.name.trim()") &&
-    quote.includes("form.country.trim()"),
-  "Guided quote form must enforce consent and non-empty required values.",
-);
-check(
-  quote.includes("Vehicle reference:") &&
-    quote.includes("Requirements:") &&
-    quote.includes("Target budget (USD):"),
-  "Vehicle, budget and requirement details must remain part of the stored enquiry message.",
-);
-check(
-  !quote.includes("destination_country: form.country") &&
-    !quote.includes("car_ref: form.vehicleRef") &&
-    !quote.includes("car_name: form.vehicleModel"),
-  "The public quote insert must not depend on extra inquiry columns that the live table schema has not been verified to support.",
-);
 
 if (failures.length) {
-  console.error("Enquiry reliability validation failed:");
+  console.error("WhatsApp-first enquiry validation failed:");
   for (const failure of failures) console.error(" - " + failure);
   process.exit(1);
 }
-console.log("Enquiry reliability validation passed.");
+console.log("WhatsApp-first enquiry validation passed.");
