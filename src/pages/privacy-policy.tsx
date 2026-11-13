@@ -59,7 +59,7 @@ export default function PrivacyPolicyPage() {
           ],
           [
             "3. Website forms and storage",
-            "The website code sends contact, vehicle and custom-sourcing form submissions to the site’s Supabase database service. Access to submitted information should be limited to people who need it to handle the enquiry or operate the service. The exact database hosting region and retention period are not stated on this website; contact us if you need those details before submitting information.",
+            "The quote, contact and vehicle enquiry forms prepare a message in WhatsApp with the details you choose to provide. You must review that draft and press Send in WhatsApp; opening the draft alone does not deliver an enquiry. The website does not automatically receive or store a copy of a WhatsApp conversation through this hand-off. WhatsApp messages are sent through your WhatsApp account and may be processed by WhatsApp/Meta under their terms and privacy policy. The website uses Supabase for site data such as public inventory and related site features. Destination preferences may also be saved in browser storage on your device.",
           ],
           [
             "4. Service providers and external services",
@@ -71,7 +71,7 @@ export default function PrivacyPolicyPage() {
           ],
           [
             "6. Sharing and disclosure",
-            "We do not publish enquiry form details as public content. Information may be accessible to authorized personnel and service providers involved in receiving, storing, protecting or responding to the enquiry, or disclosed where required by law or to protect the service and its users.",
+            "We do not publish enquiry form details as public content. When you choose to send a prepared message, the details you include are shared with Wazir Trading only after you press Send in WhatsApp. WhatsApp and your email provider process information according to their own terms and privacy policies. Information may also be accessible to authorized personnel involved in responding to your request, or disclosed where required by law.",
           ],
           [
             "7. Retention",
