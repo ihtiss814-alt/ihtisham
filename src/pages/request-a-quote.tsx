@@ -436,7 +436,7 @@ export default function RequestQuotePage() {
                 type="submit"
                 className="inline-flex w-full items-center justify-center gap-2 rounded-sm bg-[#C8102E] px-6 py-4 text-sm font-bold uppercase tracking-wide text-white transition-colors hover:bg-[#A50D25] disabled:cursor-not-allowed disabled:opacity-60"
               >
-                "Continue to WhatsApp"
+                Continue to WhatsApp
                 <ArrowRight size={16} />
               </button>
               <p className="text-center text-[11px] leading-5 text-muted-foreground">
