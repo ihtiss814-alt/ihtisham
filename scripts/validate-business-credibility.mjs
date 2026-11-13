@@ -36,8 +36,9 @@ check(
 check(
   contact.includes("wazirtrading-pc@outlook.jp") &&
     contact.includes("050-3740-8980") &&
-    contact.includes("050-3588-6588"),
-  "Published direct contact details must remain present on the contact page.",
+    contact.includes("050-3588-6588") &&
+    contact.includes('href="mailto:wazirtrading-pc@outlook.jp"'),
+  "Published direct contact details must remain present and email must be actionable.",
 );
 
 if (failures.length) {
