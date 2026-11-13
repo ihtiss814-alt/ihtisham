@@ -1,10 +1,11 @@
-const DEFAULT_WHATSAPP_NUMBER = (import.meta.env.VITE_WHATSAPP_NUMBER || "818089227375").replace(/\D/g, "");
+const CONFIGURED_WHATSAPP_NUMBER = (import.meta.env.VITE_WHATSAPP_NUMBER || "").replace(/\D/g, "");
+const DEFAULT_WHATSAPP_NUMBER = /^\d{8,15}$/.test(CONFIGURED_WHATSAPP_NUMBER)
+  ? CONFIGURED_WHATSAPP_NUMBER
+  : "818089227375";
 
 export function buildWhatsAppHref(message: string, phoneNumber = DEFAULT_WHATSAPP_NUMBER): string {
-  const number = phoneNumber.replace(/\D/g, "");
-  if (!/^\d{8,15}$/.test(number)) {
-    throw new Error("WhatsApp business number is not configured with a valid international number.");
-  }
+  const candidate = phoneNumber.replace(/\D/g, "");
+  const number = /^\d{8,15}$/.test(candidate) ? candidate : DEFAULT_WHATSAPP_NUMBER;
   return `https://wa.me/${number}?text=${encodeURIComponent(message)}`;
 }
 
