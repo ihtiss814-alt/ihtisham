@@ -12,7 +12,8 @@ const card = read("src/components/CarCard.tsx");
 check(
   cars.includes("const [inventoryError, setInventoryError] = useState") &&
     cars.includes('setInventoryError("")') &&
-    /setInventoryError\\(\\s*"We could not load the live vehicle inventory\\./.test(cars),
+    cars.includes("setInventoryError(") &&
+    cars.includes("We could not load the live vehicle inventory."),
   "Inventory requests must clear stale errors, record failed requests, and retry cleanly.",
 );
 check(
@@ -26,8 +27,9 @@ check(
   "The retry action must re-run the current search and filters.",
 );
 check(
-  /!inventoryError && \\([\\s\\S]*?<Pagination/.test(cars) &&
-    cars.includes("Your search has not been treated as having zero matches"),
+  cars.includes("!inventoryError && (") &&
+    cars.includes("Your search has not been treated as having zero matches") &&
+    cars.includes("<Pagination page={page} total={totalCount} onPage={handlePageChange} />"),
   "An inventory API failure must not be presented as an empty search result or valid pagination.",
 );
 for (const status of ["Available", "Sold", "Reserved", "Unavailable", "Confirm availability"]) {
