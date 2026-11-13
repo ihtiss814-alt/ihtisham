@@ -299,7 +299,7 @@ function CarCard({
             <div>
               <p className="inventory-card-origin">
                 <span aria-hidden="true" />
-                {car.stock_location || "Japan"}
+                {stockLocationLabel}
               </p>
               <Link href={href} className="inventory-card-title-link">
                 <h3>
