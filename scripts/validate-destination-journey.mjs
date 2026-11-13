@@ -130,12 +130,13 @@ check(
   "Guided quote page does not declare its clean canonical URL.",
 );
 check(
-  quotePage.includes('supabase.from("inquiries").insert([payload])'),
-  "Guided quote form is not connected to the existing inquiry table.",
+  quotePage.includes('savePublicInquiry(payload, "quote")') &&
+    quotePage.includes('from "@/lib/public-inquiries"'),
+  "Guided quote form is not connected to the shared public inquiry service.",
 );
 check(
-  quotePage.includes("destination_port: form.port.trim()") &&
-    quotePage.includes("destination_country: form.country") &&
+  quotePage.includes("country: form.country.trim()") &&
+    quotePage.includes("destination_port: form.port.trim()") &&
     quotePage.includes("const changeCountry = (country: string) => {") &&
     quotePage.includes('setField("port", "");'),
   "Guided quote submission is missing destination context or stale-port reset behavior.",
