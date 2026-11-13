@@ -3,14 +3,14 @@ import WazirApp from "../components/WazirApp";
 import { buildSeoHead, loadSeoBootstrap } from "../lib/seo-bootstrap";
 
 export const Route = createFileRoute("/$")({
-  headers: ({ loaderData }) =>
-    loaderData?.pathname === "/cars"
+  headers: ({ match }) =>
+    match.pathname === "/cars"
       ? {
           // Inventory is live database content. Never let a transient bootstrap
           // failure (including its noindex fallback) become a cached catalogue.
           "Cache-Control": "private, no-store, max-age=0, must-revalidate",
         }
-      : {},
+      : undefined,
   loader: async ({ location }) => {
     const bootstrap = await loadSeoBootstrap(location.pathname, location.searchStr);
     if (bootstrap.notFound) throw notFound();
