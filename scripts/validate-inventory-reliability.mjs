@@ -11,8 +11,8 @@ const cars = read("src/pages/cars.tsx");
 const card = read("src/components/CarCard.tsx");
 check(
   cars.includes("const [inventoryError, setInventoryError] = useState") &&
-    cars.includes("setInventoryError("")") &&
-    cars.includes("setInventoryError("We could not load the live vehicle inventory."),
+    cars.includes('setInventoryError("")') &&
+    cars.includes('setInventoryError("We could not load the live vehicle inventory.'),
   "Inventory requests must clear stale errors, record failed requests, and retry cleanly.",
 );
 check(
