@@ -1,17 +1,16 @@
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { Link, useLocation } from "wouter";
-import { ArrowRight, CheckCircle2, MessageCircle, ShieldCheck } from "lucide-react";
+import { ArrowRight, MessageCircle, ShieldCheck } from "lucide-react";
 import DestinationFields from "@/components/DestinationFields";
 import { useDestinationPreference } from "@/hooks/useDestinationPreference";
-import { isSupabaseConfigured } from "@/lib/supabase";
-import { publicInquiryErrorMessage, savePublicInquiry } from "@/lib/public-inquiries";
+import { buildWhatsAppHref, openWhatsAppEnquiry } from "@/lib/whatsapp-enquiries";
 import { useMeta } from "@/lib/use-meta";
 import { useSeoBootstrap } from "@/lib/seo-bootstrap-context";
 import { canonicalCountry } from "@/lib/shipping";
 import { COUNTRY_LANDING_PAGES, countryLandingPath } from "@/lib/country-landing-pages";
 
 type RequestType = "vehicle" | "sourcing" | "shipping" | "general";
-type SubmissionStatus = "idle" | "submitting" | "success" | "error";
+type SubmissionStatus = "idle" | "success" | "error";
 
 interface QuoteForm {
   requestType: RequestType;
@@ -64,7 +63,6 @@ const REQUEST_TYPES: Array<{ value: RequestType; label: string; detail: string }
   },
 ];
 
-const WA_NUMBER = (import.meta.env.VITE_WHATSAPP_NUMBER || "818089227375").replace(/\D/g, "");
 const CONTACT_EMAIL = "wazirtrading-pc@outlook.jp";
 
 function guideForCountry(country: string) {
@@ -82,7 +80,6 @@ export default function RequestQuotePage() {
   const [form, setForm] = useState<QuoteForm>(EMPTY_FORM);
   const [status, setStatus] = useState<SubmissionStatus>("idle");
   const [errorMessage, setErrorMessage] = useState("");
-  const submissionInFlight = useRef(false);
   const search =
     bootstrap?.pathname === "/request-a-quote"
       ? bootstrap.search
@@ -132,12 +129,30 @@ export default function RequestQuotePage() {
     preference.setDestination({ country: form.country, port });
   };
 
-  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+  const budgetValue = form.budget.trim() ? Number(form.budget) : null;
+  const whatsappMessage = [
+    "Hello Wazir Trading LLC. I would like to discuss an export enquiry.",
+    `Request type: ${REQUEST_TYPES.find((item) => item.value === form.requestType)?.label ?? form.requestType}`,
+    form.name.trim() ? `Name: ${form.name.trim()}` : "",
+    form.email.trim() ? `Email: ${form.email.trim()}` : "",
+    form.phone.trim() ? `WhatsApp / phone: ${form.phone.trim()}` : "",
+    form.country.trim() ? `Destination country: ${form.country.trim()}` : "",
+    form.port.trim() ? `Preferred port / city: ${form.port.trim()}` : "Preferred port / city: to be confirmed",
+    form.vehicleRef.trim() ? `Vehicle reference: ${form.vehicleRef.trim()}` : "",
+    form.vehicleModel.trim() ? `Vehicle / model: ${form.vehicleModel.trim()}` : "",
+    budgetValue !== null && Number.isFinite(budgetValue) ? `Target budget (USD): ${budgetValue}` : "",
+    form.requirements.trim() ? `Requirements: ${form.requirements.trim()}` : "",
+    "Please confirm current availability, the written price basis, export documents, shipping options and destination-side costs for this specific request.",
+    "Website: https://www.wazirtradingllc.com/request-a-quote",
+  ].filter(Boolean).join("\n");
+  const whatsappHref = buildWhatsAppHref(whatsappMessage);
+
+  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    if (submissionInFlight.current || status === "submitting") return;
-    if (!isSupabaseConfigured) {
+    setErrorMessage("");
+    if (!form.country.trim()) {
       setStatus("error");
-      setErrorMessage(publicInquiryErrorMessage(new Error("INQUIRY_NOT_CONFIGURED")));
+      setErrorMessage("Please choose the country or territory where the vehicle will be used.");
       return;
     }
     if (!form.name.trim() || !form.email.trim()) {
@@ -145,14 +160,9 @@ export default function RequestQuotePage() {
       setErrorMessage("Please enter your name and a valid email address.");
       return;
     }
-    if (!form.country.trim()) {
-      setStatus("error");
-      setErrorMessage("Please choose the country or territory where the vehicle will be used.");
-      return;
-    }
     if (!form.consent) {
       setStatus("error");
-      setErrorMessage("Please confirm the privacy notice before sending your enquiry.");
+      setErrorMessage("Please confirm that you want to continue to WhatsApp with these details.");
       return;
     }
     if (
@@ -164,72 +174,16 @@ export default function RequestQuotePage() {
       setErrorMessage("Please enter a vehicle make/model or a listing reference.");
       return;
     }
-    const budgetValue = form.budget.trim() ? Number(form.budget) : null;
-    if (budgetValue !== null && (!Number.isFinite(budgetValue) || budgetValue < 0)) {
+    if (form.budget.trim() && (!Number.isFinite(Number(form.budget)) || Number(form.budget) < 0)) {
       setStatus("error");
       setErrorMessage("Please enter a valid non-negative budget in USD, or leave it blank.");
       return;
     }
 
-    const destinationText = `Destination: ${form.country}${form.port.trim() ? ` · Preferred port / city: ${form.port.trim()}` : " · Port or final city to be confirmed"}`;
-    const detailText = [
-      form.vehicleRef.trim() ? `Vehicle reference: ${form.vehicleRef.trim()}` : "",
-      form.vehicleModel.trim() ? `Vehicle / model: ${form.vehicleModel.trim()}` : "",
-      budgetValue !== null ? `Target budget (USD): ${budgetValue}` : "",
-      form.requirements.trim() ? `Requirements: ${form.requirements.trim()}` : "",
-    ]
-      .filter(Boolean)
-      .join("\n");
-    const message = [destinationText, detailText].filter(Boolean).join("\n\n");
-    const inquiryType =
-      form.requestType === "vehicle"
-        ? "car-inquiry"
-        : form.requestType === "sourcing"
-          ? "custom-request"
-          : form.requestType === "shipping"
-            ? "shipping"
-            : "general";
-    const payload = {
-      name: form.name.trim(),
-      email: form.email.trim(),
-      phone: form.phone.trim(),
-      country: form.country.trim(),
-      destination_port: form.port.trim(),
-      message,
-      inquiry_type: inquiryType,
-    };
-
-    submissionInFlight.current = true;
-    setStatus("submitting");
-    setErrorMessage("");
-    try {
-      // Use the same proven public-table columns as the Contact form. Vehicle
-      // identity and optional budget/requirements are retained in message.
-      await savePublicInquiry(payload, "quote");
-      preference.setDestination({ country: form.country, port: form.port });
-      setStatus("success");
-    } catch (error) {
-      setStatus("error");
-      setErrorMessage(publicInquiryErrorMessage(error));
-    } finally {
-      submissionInFlight.current = false;
-    }
+    preference.setDestination({ country: form.country, port: form.port });
+    openWhatsAppEnquiry(whatsappMessage);
+    setStatus("success");
   };
-
-  const whatsappText = encodeURIComponent(
-    [
-      "Hello Wazir Trading, I would like to discuss an export enquiry.",
-      `Request: ${form.requestType}`,
-      `Destination: ${form.country}`,
-      form.port ? `Preferred port / city: ${form.port}` : "",
-      form.vehicleRef ? `Vehicle reference: ${form.vehicleRef}` : "",
-      form.vehicleModel ? `Vehicle: ${form.vehicleModel}` : "",
-      form.requirements ? `Requirements: ${form.requirements}` : "",
-    ]
-      .filter(Boolean)
-      .join("\n"),
-  );
-  const whatsappHref = `https://wa.me/${WA_NUMBER}?text=${whatsappText}`;
 
   return (
     <div className="min-h-screen bg-background pb-16" style={{ paddingTop: "var(--header-h)" }}>
@@ -252,14 +206,14 @@ export default function RequestQuotePage() {
         <section className="border border-border bg-card p-5 shadow-sm md:p-8">
           {status === "success" ? (
             <div className="py-8 text-center" role="status">
-              <CheckCircle2 size={42} className="mx-auto mb-4 text-emerald-600" />
+              <MessageCircle size={42} className="mx-auto mb-4 text-[#25D366]" />
               <h2 className="font-serif text-2xl font-bold text-foreground">
-                Your enquiry was recorded
+                WhatsApp message prepared
               </h2>
               <p className="mx-auto mt-3 max-w-xl text-sm leading-6 text-muted-foreground">
-                The information has been sent to the website enquiry service. Our team can now
-                review the vehicle and destination details you supplied. Response times and
-                available routes depend on the specific request.
+                WhatsApp has opened with your enquiry details prefilled. Review the message and
+                press Send in WhatsApp to deliver it to Wazir Trading. This website does not receive
+                an automatic copy through this WhatsApp hand-off.
               </p>
               <div className="mt-6 flex flex-col justify-center gap-3 sm:flex-row">
                 <a
@@ -268,7 +222,7 @@ export default function RequestQuotePage() {
                   rel="noopener noreferrer"
                   className="inline-flex items-center justify-center gap-2 rounded-sm bg-[#25D366] px-5 py-3 text-sm font-bold text-white hover:opacity-90"
                 >
-                  <MessageCircle size={16} /> Continue on WhatsApp
+                  <MessageCircle size={16} /> Open WhatsApp again
                 </a>
                 <button
                   type="button"
@@ -458,8 +412,8 @@ export default function RequestQuotePage() {
                   className="mt-1 accent-[#C8102E]"
                 />
                 <span>
-                  I agree that Wazir Trading LLC may use the information above to review and respond
-                  to this enquiry. See the{" "}
+                  I agree to continue to WhatsApp with the information above prefilled. I will
+                  review it and press Send to share it with Wazir Trading LLC. See the{" "}
                   <Link
                     href="/privacy-policy"
                     className="text-primary underline underline-offset-2"
@@ -478,26 +432,17 @@ export default function RequestQuotePage() {
                   {errorMessage}
                 </p>
               )}
-              {!isSupabaseConfigured && (
-                <p
-                  role="status"
-                  className="rounded-sm border border-amber-300 bg-amber-50 p-3 text-sm text-amber-900"
-                >
-                  The online enquiry form is currently unavailable. Please contact us using WhatsApp
-                  or email.
-                </p>
-              )}
               <button
                 type="submit"
-                disabled={status === "submitting" || !isSupabaseConfigured}
                 className="inline-flex w-full items-center justify-center gap-2 rounded-sm bg-[#C8102E] px-6 py-4 text-sm font-bold uppercase tracking-wide text-white transition-colors hover:bg-[#A50D25] disabled:cursor-not-allowed disabled:opacity-60"
               >
-                {status === "submitting" ? "Sending your enquiry…" : "Send my quote request"}
+                "Continue to WhatsApp"
                 <ArrowRight size={16} />
               </button>
               <p className="text-center text-[11px] leading-5 text-muted-foreground">
-                No payment is taken through this form. A written quotation, route confirmation and
-                destination-side cost assessment are separate steps.
+                WhatsApp opens with your details prefilled. You must press Send in WhatsApp for the
+                enquiry to reach us. No payment is taken here, and a written quotation, route
+                confirmation and destination-side cost assessment are separate steps.
               </p>
             </form>
           )}
@@ -520,7 +465,7 @@ export default function RequestQuotePage() {
               You can contact our team without sending the form.
             </p>
             <a
-              href={`https://wa.me/${WA_NUMBER}`}
+              href={whatsappHref}
               target="_blank"
               rel="noopener noreferrer"
               className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-sm bg-[#25D366] px-4 py-3 text-sm font-bold text-white hover:opacity-90"
