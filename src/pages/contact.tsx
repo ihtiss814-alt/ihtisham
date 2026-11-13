@@ -1,8 +1,17 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Link } from "wouter";
-import { isSupabaseConfigured } from "@/lib/supabase";
-import { publicInquiryErrorMessage, savePublicInquiry } from "@/lib/public-inquiries";
-import { Mail, MapPin, Phone, Check, CarFront, Ship, CreditCard, CircleHelp } from "lucide-react";
+import { buildWhatsAppHref, openWhatsAppEnquiry } from "@/lib/whatsapp-enquiries";
+import {
+  Mail,
+  MapPin,
+  Phone,
+  Check,
+  MessageCircle,
+  CarFront,
+  Ship,
+  CreditCard,
+  CircleHelp,
+} from "lucide-react";
 import { useMeta } from "@/lib/use-meta";
 import DestinationFields from "@/components/DestinationFields";
 import { useDestinationPreference } from "@/hooks/useDestinationPreference";
@@ -22,9 +31,9 @@ export default function ContactPage() {
       "Contact Wazir Trading LLC by WhatsApp, email, or inquiry form about Japanese used car exports, vehicle pricing, and shipping.",
     canonical: "https://www.wazirtradingllc.com/contact",
   });
-  const [status, setStatus] = useState<"idle" | "submitting" | "success" | "error">("idle");
+  const [status, setStatus] = useState<"idle" | "success" | "error">("idle");
   const [errorMessage, setErrorMessage] = useState("");
-  const submissionInFlight = useRef(false);
+  const [preparedWhatsAppHref, setPreparedWhatsAppHref] = useState("");
   const [inquiryType, setInquiryType] = useState("general");
   const destination = useDestinationPreference();
   const [country, setCountry] = useState("");
@@ -37,55 +46,35 @@ export default function ContactPage() {
   }, [destination.loaded, destination.country, destination.port]);
   const waNumber = import.meta.env.VITE_WHATSAPP_NUMBER || "818089227375";
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (submissionInFlight.current || status === "submitting") return;
-    if (!isSupabaseConfigured) {
-      setStatus("error");
-      setErrorMessage(publicInquiryErrorMessage(new Error("INQUIRY_NOT_CONFIGURED")));
-      return;
-    }
-
+    setErrorMessage("");
     const formData = new FormData(e.currentTarget);
     const name = String(formData.get("name") ?? "").trim();
     const email = String(formData.get("email") ?? "").trim();
+    const phone = String(formData.get("phone") ?? "").trim();
     const messageText = String(formData.get("message") ?? "").trim();
     if (!name || !email || !messageText) {
       setStatus("error");
       setErrorMessage("Please complete your name, email address and message.");
       return;
     }
-    const data = {
-      name,
-      email,
-      phone: String(formData.get("phone") ?? "").trim(),
-      country: country.trim(),
-      destination_port: port.trim(),
-      message: [
-        messageText,
-        port.trim()
-          ? `Preferred port / final city: ${port.trim()}`
-          : "Preferred port or final city to be confirmed.",
-      ]
-        .filter(Boolean)
-        .join("\n\n"),
-      inquiry_type: inquiryType,
-    };
-
-    submissionInFlight.current = true;
-    setStatus("submitting");
-    setErrorMessage("");
-    try {
-      await savePublicInquiry(data, "contact");
-      setStatus("success");
-      (e.target as HTMLFormElement).reset();
-      setInquiryType("general");
-    } catch (error) {
-      setStatus("error");
-      setErrorMessage(publicInquiryErrorMessage(error));
-    } finally {
-      submissionInFlight.current = false;
-    }
+    const message = [
+      "Hello Wazir Trading LLC. I would like to make an enquiry.",
+      `Enquiry type: ${inquiryType}`,
+      `Name: ${name}`,
+      `Email: ${email}`,
+      phone ? `WhatsApp / phone: ${phone}` : "",
+      country.trim() ? `Destination country: ${country.trim()}` : "",
+      port.trim() ? `Preferred port / final city: ${port.trim()}` : "",
+      messageText,
+      "Website: https://www.wazirtradingllc.com/contact",
+    ]
+      .filter(Boolean)
+      .join("\n\n");
+    setPreparedWhatsAppHref(buildWhatsAppHref(message));
+    openWhatsAppEnquiry(message);
+    setStatus("success");
   };
 
   return (
@@ -146,9 +135,12 @@ export default function ContactPage() {
                     </div>
                     <div>
                       <h4 className="font-bold text-sm uppercase tracking-wider mb-1">Email</h4>
-                      <p className="text-muted-foreground text-sm leading-relaxed">
+                      <a
+                        href="mailto:wazirtrading-pc@outlook.jp"
+                        className="text-muted-foreground text-sm leading-relaxed underline underline-offset-2 hover:text-primary"
+                      >
                         wazirtrading-pc@outlook.jp
-                      </p>
+                      </a>
                     </div>
                   </div>
                 </div>
@@ -161,7 +153,9 @@ export default function ContactPage() {
                   destination-specific shipping questions.
                 </p>
                 <a
-                  href={`https://wa.me/${waNumber}`}
+                  href={buildWhatsAppHref(
+                    "Hello Wazir Trading LLC. I would like to speak with your team.",
+                  )}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="w-full bg-[#25D366] text-white py-3 font-medium flex items-center justify-center gap-2 hover:bg-[#20bd5a] transition-colors"
@@ -175,8 +169,9 @@ export default function ContactPage() {
             <div className="bg-card border border-border p-8 md:p-10 shadow-sm">
               <h2 className="text-2xl font-serif font-bold mb-2">Send a Message</h2>
               <p className="mb-6 text-sm leading-6 text-muted-foreground">
-                Choose the destination so our team can understand the context of your question. For
-                a vehicle-specific or shipping request, use the{" "}
+                Share the details below and continue to WhatsApp. Your message is only delivered
+                after you review it and press Send in WhatsApp. For a vehicle-specific or shipping
+                request, you can also use the{" "}
                 <Link
                   href="/request-a-quote"
                   className="font-semibold text-primary underline underline-offset-2"
@@ -191,19 +186,28 @@ export default function ContactPage() {
                   <div className="w-16 h-16 bg-primary/20 text-primary rounded-full flex items-center justify-center mb-6">
                     <Check size={32} />
                   </div>
-                  <h3 className="text-xl font-bold mb-2">Message Received</h3>
+                  <h3 className="text-xl font-bold mb-2">WhatsApp message prepared</h3>
                   <p className="text-muted-foreground mb-3">
-                    Your enquiry has been received by the website. Our team will review the
-                    information and use the contact details you supplied to respond. Response times
-                    can vary.
+                    WhatsApp has opened with your details prefilled. Please review the message and
+                    press Send in WhatsApp to deliver it to our team. The website does not receive
+                    an automatic copy through this route.
                   </p>
-                  <p className="text-xs text-muted-foreground/60">
-                    You can also reach us at
-                    <br />
-                    <span className="font-semibold text-foreground/80">
+                  <div className="mt-3 flex flex-col gap-2">
+                    <a
+                      href={preparedWhatsAppHref}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-sm font-semibold text-primary underline underline-offset-2"
+                    >
+                      Open the prepared WhatsApp message again
+                    </a>
+                    <a
+                      href="mailto:wazirtrading-pc@outlook.jp"
+                      className="text-sm font-semibold text-primary underline underline-offset-2"
+                    >
                       wazirtrading-pc@outlook.jp
-                    </span>
-                  </p>
+                    </a>
+                  </div>
                 </div>
               ) : (
                 <form onSubmit={handleSubmit} className="space-y-5">
@@ -309,23 +313,33 @@ export default function ContactPage() {
                       className="w-full border border-border bg-background p-3 focus:border-primary outline-none resize-none transition-colors"
                     />
                   </div>
-                  <p className="text-xs text-muted-foreground leading-relaxed">
-                    By sending this form, you agree that Wazir Trading LLC may use the information
-                    you provide to review and respond to your enquiry. See our{" "}
-                    <Link
-                      href="/privacy-policy"
-                      className="text-primary underline underline-offset-2"
-                    >
-                      Privacy Policy
-                    </Link>
-                    .
-                  </p>
+                  <label className="flex items-start gap-3 text-xs text-muted-foreground leading-relaxed">
+                    <input
+                      required
+                      type="checkbox"
+                      name="whatsapp-consent"
+                      value="yes"
+                      className="mt-0.5 accent-[#C8102E]"
+                    />
+                    <span>
+                      I agree to continue to WhatsApp with the details above prefilled. I will
+                      review the message and press Send to share it with Wazir Trading LLC. See our{" "}
+                      <Link
+                        href="/privacy-policy"
+                        className="text-primary underline underline-offset-2"
+                      >
+                        Privacy Policy
+                      </Link>
+                      .
+                    </span>
+                  </label>
                   <button
                     type="submit"
-                    disabled={status === "submitting"}
                     className="w-full bg-primary text-primary-foreground py-4 font-medium uppercase tracking-widest text-sm disabled:opacity-70 transition-colors"
                   >
-                    {status === "submitting" ? "Sending…" : "Send My Inquiry"}
+                    <>
+                      <MessageCircle size={17} /> Continue to WhatsApp
+                    </>
                   </button>
                   {status === "error" && (
                     <p role="alert" className="text-destructive text-sm text-center">

@@ -5,6 +5,7 @@ import { isThirdPartyListing, ThirdPartyImageBadge } from "@/components/ThirdPar
 import { isRecentInventoryListing, vehicleImageAlt } from "@/lib/vehicle-seo";
 import { getResponsiveImageSrcSet, getResponsiveImageUrl } from "@/lib/image-delivery";
 import { quoteRequestHref } from "@/lib/destination-links";
+import { buildWhatsAppHref } from "@/lib/whatsapp-enquiries";
 
 export interface Car {
   id: string;
@@ -108,10 +109,7 @@ function CarCard({
 }: CarCardProps) {
   const [imgError, setImgError] = useState(false);
   const href = `/cars/${car.ref_number}`;
-  const waMsg = encodeURIComponent(
-    `Hi, I am interested in ${waTitle(car)}\nReference: ${car.ref_number}\nPlease share more details.`,
-  );
-  const waLink = `https://wa.me/${waNumber}?text=${waMsg}`;
+
   const normalizedStatus = String(car.status ?? "")
     .trim()
     .toLowerCase();
@@ -130,6 +128,20 @@ function CarCard({
   const isClearance = car.collection?.toLowerCase() === "clearance";
   const isNewArrival = isRecentInventoryListing(car.created_at);
   const showImage = primaryImage && !imgError;
+  const waLink = buildWhatsAppHref(
+    [
+      "Hello Wazir Trading LLC. I would like to enquire about this vehicle.",
+      `Vehicle: ${waTitle(car)}`,
+      `Vehicle reference: ${car.ref_number}`,
+      `Listing status shown: ${availabilityLabel}`,
+      car.fob_price_usd && car.fob_price_usd > 0
+        ? `FOB price shown: ${fmtUSD(car.fob_price_usd)} USD`
+        : "FOB price: please advise",
+      `Vehicle listing: https://www.wazirtradingllc.com${href}`,
+      "Please confirm current availability, vehicle condition information, exact price basis and destination shipping options.",
+    ].join("\n"),
+    waNumber,
+  );
 
   /* ── Row — used on the /cars listing ─────────────────────────────── */
   if (variant === "row") {
@@ -346,10 +358,10 @@ function CarCard({
               target="_blank"
               rel="noopener noreferrer"
               className="inventory-card-whatsapp"
-              aria-label="Ask about this vehicle on WhatsApp"
+              aria-label={`Prepare a WhatsApp enquiry about ${waTitle(car)}`}
             >
               <WhatsAppIcon size={16} />
-              WhatsApp
+              Ask on WhatsApp
             </a>
             <Link href={quoteHref} className="inventory-card-quote">
               Request quote

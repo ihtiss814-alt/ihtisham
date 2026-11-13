@@ -4,6 +4,7 @@ import { Shield, Award, Clock, Globe, Building2, MapPin } from "lucide-react";
 import { useMeta } from "@/lib/use-meta";
 import ShippingRouteCanvas from "@/components/ShippingRouteCanvas";
 import { useReveal } from "@/hooks/useReveal";
+import { buildWhatsAppHref } from "@/lib/whatsapp-enquiries";
 
 const operatingInformation = [
   {
@@ -329,6 +330,34 @@ export default function AboutPage() {
               referrerPolicy="strict-origin-when-cross-origin"
               title="Wazir Trading LLC — Japan Office Location"
             />
+            <div className="mt-6 flex flex-col items-center justify-between gap-4 border border-border bg-card p-5 sm:flex-row">
+              <div>
+                <h3 className="font-semibold text-foreground">Contact the Japan office</h3>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  WhatsApp is the direct enquiry route. Office visits are by appointment only.
+                </p>
+              </div>
+              <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row">
+                <a
+                  href={buildWhatsAppHref(
+                    "Hello Wazir Trading LLC. I would like to contact your Japan office.",
+                  )}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center justify-center gap-2 bg-[#25D366] px-5 py-3 text-sm font-bold text-white hover:opacity-90"
+                >
+                  WhatsApp the team
+                </a>
+                <a
+                  href="https://www.google.com/maps/search/?api=1&query=Heights%20Mizutani%201C%2C%20158-1%20Jizou%2C%20Kuwana-City%2C%20Mie-Pref%2C%20Japan"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center justify-center border border-border px-5 py-3 text-sm font-semibold text-foreground hover:bg-muted"
+                >
+                  Open address in Maps
+                </a>
+              </div>
+            </div>
           </div>
         </div>
       </section>

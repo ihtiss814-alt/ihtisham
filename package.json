@@ -17,7 +17,8 @@
     "validate:inventory-experience": "node scripts/validate-inventory-experience.mjs",
     "validate:enquiry-reliability": "node scripts/validate-enquiry-reliability.mjs",
     "validate:inventory-reliability": "node scripts/validate-inventory-reliability.mjs",
-    "validate:business-credibility": "node scripts/validate-business-credibility.mjs"
+    "validate:business-credibility": "node scripts/validate-business-credibility.mjs",
+    "validate:whatsapp-enquiries": "node scripts/validate-enquiry-reliability.mjs"
   },
   "overrides": {
     "rolldown": "1.2.1"
