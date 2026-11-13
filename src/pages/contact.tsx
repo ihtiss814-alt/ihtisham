@@ -123,9 +123,12 @@ export default function ContactPage() {
                     </div>
                     <div>
                       <h4 className="font-bold text-sm uppercase tracking-wider mb-1">Email</h4>
-                      <p className="text-muted-foreground text-sm leading-relaxed">
+                      <a
+                        href="mailto:wazirtrading-pc@outlook.jp"
+                        className="text-muted-foreground text-sm leading-relaxed underline underline-offset-2 hover:text-primary"
+                      >
                         wazirtrading-pc@outlook.jp
-                      </p>
+                      </a>
                     </div>
                   </div>
                 </div>
