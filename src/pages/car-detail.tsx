@@ -20,7 +20,7 @@ import {
 import CarCard, { type Car } from "@/components/CarCard";
 import { MakeLogo as ManufacturerLogo } from "@/components/VehicleIdentity";
 import VehiclePhotoGallery from "@/components/VehiclePhotoGallery";
-import { isSupabaseConfigured } from "@/lib/supabase";
+import { isSupabaseConfigured, supabase } from "@/lib/supabase";
 import { publicInquiryErrorMessage, savePublicInquiry } from "@/lib/public-inquiries";
 import DestinationFields from "@/components/DestinationFields";
 import { useDestinationPreference } from "@/hooks/useDestinationPreference";
