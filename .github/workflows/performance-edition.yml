@@ -99,8 +99,8 @@ jobs:
       - name: Validate professional inventory experience
         run: npm run validate:inventory-experience
 
-      - name: Validate enquiry reliability
-        run: npm run validate:enquiry-reliability
+      - name: Validate WhatsApp-first enquiry flow
+        run: npm run validate:whatsapp-enquiries
 
       - name: Validate inventory reliability
         run: npm run validate:inventory-reliability
