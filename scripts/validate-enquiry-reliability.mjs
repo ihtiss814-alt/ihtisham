@@ -13,6 +13,7 @@ const contact = read("src/pages/contact.tsx");
 const detail = read("src/pages/car-detail.tsx");
 const card = read("src/components/CarCard.tsx");
 const about = read("src/pages/about.tsx");
+const privacy = read("src/pages/privacy-policy.tsx");
 
 check(
   helper.includes("https://wa.me/") &&
@@ -35,6 +36,11 @@ check(
     quote.includes("buildWhatsAppHref(whatsappMessage)") &&
     quote.includes("Continue to WhatsApp"),
   "Guided quote form must use WhatsApp as its primary enquiry destination.",
+);
+check(
+  quote.includes("const directWhatsAppHref = buildWhatsAppHref(") &&
+    quote.includes("href={directWhatsAppHref}"),
+  "The quote page's separate direct-contact link must not bypass the form's personal-data consent.",
 );
 check(
   quote.includes("Destination country:") &&
@@ -77,6 +83,12 @@ check(
 check(
   about.includes("buildWhatsAppHref(") && about.includes("Open address in Maps"),
   "Company information must provide direct contact and an actionable office location.",
+);
+check(
+  privacy.includes("press Send in WhatsApp") &&
+    privacy.includes("does not automatically receive or store a copy") &&
+    !privacy.includes("The website code sends contact, vehicle and custom-sourcing form submissions to the site’s Supabase"),
+  "Privacy policy must accurately describe the WhatsApp hand-off and not claim that public enquiries are automatically stored in Supabase.",
 );
 for (const [label, source] of [
   ["quote", quote],
