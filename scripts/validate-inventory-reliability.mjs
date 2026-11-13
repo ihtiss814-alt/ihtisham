@@ -9,6 +9,14 @@ const check = (condition, message) => {
 
 const cars = read("src/pages/cars.tsx");
 const card = read("src/components/CarCard.tsx");
+const catchAllRoute = read("src/routes/$.tsx");
+
+check(
+  catchAllRoute.includes('match.pathname === "/cars"') &&
+    catchAllRoute.includes('"Cache-Control": "private, no-store, max-age=0, must-revalidate"'),
+  "Live inventory HTML must not be cached after a transient database/bootstrap failure.",
+);
+
 check(
   cars.includes("const [inventoryError, setInventoryError] = useState") &&
     cars.includes('setInventoryError("")') &&

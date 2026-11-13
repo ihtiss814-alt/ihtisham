@@ -8,6 +8,14 @@ export const Route = createFileRoute("/$")({
     if (bootstrap.notFound) throw notFound();
     return bootstrap;
   },
+  headers: ({ match }) =>
+    match.pathname === "/cars"
+      ? {
+          // Inventory is live database content. Never let a transient bootstrap
+          // failure (including its noindex fallback) become a cached catalogue.
+          "Cache-Control": "private, no-store, max-age=0, must-revalidate",
+        }
+      : undefined,
   head: ({ loaderData }) => buildSeoHead(loaderData),
   component: CatchAll,
 });
