@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { Link, useParams } from "wouter";
 import {
   ArrowLeft,
@@ -63,7 +63,6 @@ type SimilarCar = Car & { primaryImage?: string };
 type FormStatus = "idle" | "success" | "error";
 type SpecRow = { label: string; value: string | number | null | undefined };
 
-const WA_NUMBER = (import.meta.env.VITE_WHATSAPP_NUMBER || "818089227375").replace(/\D/g, "");
 const FEATURE_LABELS = [
   "360 Camera",
   "Air Bag",
@@ -564,9 +563,7 @@ export default function CarDetailPage() {
   }
 
   const carName = `${car.make} ${car.model}`;
-  const requestText = encodeURIComponent(
-    `Hello Wazir Trading, please confirm the current status and written quotation for ${carName}${car.year ? ` ${car.year}` : ""}, reference ${car.ref_number}.`,
-  );
+  const requestText = `Hello Wazir Trading, please confirm the current status and written quotation for ${carName}${car.year ? ` ${car.year}` : ""}, reference ${car.ref_number}.`;
   const whatsappUrl = buildWhatsAppHref(requestText);
 
   const groups: { title: string; rows: SpecRow[] }[] = [
@@ -1105,13 +1102,9 @@ export default function CarDetailPage() {
                       className="vehicle-primary-button"
                       type="submit"
                     >
-                      {false ? (
-                        "Sending enquiry…"
-                      ) : (
-                        <>
-                          <Send size={16} /> Continue to WhatsApp
-                        </>
-                      )}
+                      <>
+                        <Send size={16} /> Continue to WhatsApp
+                      </>
                     </button>
                     <p className="vehicle-form-privacy">
                       An enquiry does not reserve a vehicle or create a purchase contract. See our{" "}
