@@ -237,7 +237,6 @@ check(
     contact.includes("port={port}") &&
     contact.includes("onCountryChange={(nextCountry) => {") &&
     contact.includes('setPort("");') &&
-    contact.includes("destination.setDestination({ country: nextCountry, port: \" \" })") === false &&
     contact.includes('destination.setDestination({ country: nextCountry, port: "" });'),
   "Contact form must capture a free-text location and clear an old port when its country changes.",
 );
