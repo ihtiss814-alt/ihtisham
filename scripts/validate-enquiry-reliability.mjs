@@ -16,6 +16,7 @@ const about = read("src/pages/about.tsx");
 
 check(
   helper.includes("https://wa.me/") &&
+    helper.includes("DEFAULT_WHATSAPP_NUMBER") &&
     helper.includes("encodeURIComponent(message)") &&
     helper.includes('window.open(href, "_blank")'),
   "WhatsApp helper must create a correctly encoded click-to-chat URL and open it from the user's action.",
