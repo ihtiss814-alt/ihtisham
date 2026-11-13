@@ -130,28 +130,24 @@ check(
   "Guided quote page does not declare its clean canonical URL.",
 );
 check(
-  quotePage.includes('savePublicInquiry(payload, "quote")') &&
-    quotePage.includes('from "@/lib/public-inquiries"'),
-  "Guided quote form is not connected to the shared public inquiry service.",
+  quotePage.includes('from "@/lib/whatsapp-enquiries"') &&
+    quotePage.includes("openWhatsAppEnquiry(whatsappMessage)"),
+  "Guided quote form must use the WhatsApp-first enquiry hand-off.",
 );
 check(
-  quotePage.includes("country: form.country.trim()") &&
-    quotePage.includes("destination_port: form.port.trim()") &&
-    quotePage.includes("const changeCountry = (country: string) => {") &&
-    quotePage.includes('setField("port", "");'),
-  "Guided quote submission is missing destination context or stale-port reset behavior.",
+  quotePage.includes("const changeCountry = (country: string) => {") &&
+    quotePage.includes('setField("port", "");') &&
+    quotePage.includes("preference.setDestination({ country: form.country, port: form.port })"),
+  "Guided quote flow must retain destination preference and clear a stale port when the country changes.",
 );
 check(
-  !quotePage.includes("full_name:") &&
-    !quotePage.includes("vehicle_model:") &&
-    !quotePage.includes("budget_usd:") &&
-    !quotePage.includes("requirements: form.requirements"),
-  "Guided quote submission must not write unverified optional columns to the inquiries table.",
-);
-check(
-  quotePage.includes("const message = [destinationText, detailText]") &&
-    quotePage.includes("Target budget (USD):"),
-  "Vehicle, budget and requirement details must be retained in the supported inquiry message field.",
+  quotePage.includes("Destination country:") &&
+    quotePage.includes("Preferred port / city:") &&
+    quotePage.includes("Target budget (USD):") &&
+    quotePage.includes("Requirements:") &&
+    quotePage.includes("Vehicle reference:") &&
+    quotePage.includes("Vehicle / model:"),
+  "WhatsApp quote message must preserve vehicle, destination, budget and requirements.",
 );
 check(
   quotePage.includes("vehicleRef") &&
@@ -237,9 +233,12 @@ check(
 );
 check(
   contact.includes("DestinationFields") &&
-    contact.includes("destination_port") &&
+    contact.includes("country={country}") &&
+    contact.includes("port={port}") &&
     contact.includes("onCountryChange={(nextCountry) => {") &&
-    contact.includes('setPort("");'),
+    contact.includes('setPort("");') &&
+    contact.includes("destination.setDestination({ country: nextCountry, port: \" \" })") === false &&
+    contact.includes('destination.setDestination({ country: nextCountry, port: "" });'),
   "Contact form must capture a free-text location and clear an old port when its country changes.",
 );
 check(
