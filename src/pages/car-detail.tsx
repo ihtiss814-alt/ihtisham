@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { Link, useParams } from "wouter";
 import {
   ArrowLeft,
@@ -21,7 +21,7 @@ import CarCard, { type Car } from "@/components/CarCard";
 import { MakeLogo as ManufacturerLogo } from "@/components/VehicleIdentity";
 import VehiclePhotoGallery from "@/components/VehiclePhotoGallery";
 import { isSupabaseConfigured, supabase } from "@/lib/supabase";
-import { publicInquiryErrorMessage, savePublicInquiry } from "@/lib/public-inquiries";
+import { buildWhatsAppHref, openWhatsAppEnquiry } from "@/lib/whatsapp-enquiries";
 import DestinationFields from "@/components/DestinationFields";
 import { useDestinationPreference } from "@/hooks/useDestinationPreference";
 import { quoteRequestHref } from "@/lib/destination-links";
@@ -60,10 +60,9 @@ type DetailCar = Omit<Car, "car_images" | "chassis_number"> &
   };
 
 type SimilarCar = Car & { primaryImage?: string };
-type FormStatus = "idle" | "submitting" | "success" | "error";
+type FormStatus = "idle" | "success" | "error";
 type SpecRow = { label: string; value: string | number | null | undefined };
 
-const WA_NUMBER = (import.meta.env.VITE_WHATSAPP_NUMBER || "818089227375").replace(/\D/g, "");
 const FEATURE_LABELS = [
   "360 Camera",
   "Air Bag",
@@ -243,7 +242,6 @@ export default function CarDetailPage() {
   const [rateLoading, setRateLoading] = useState(false);
   const [formStatus, setFormStatus] = useState<FormStatus>("idle");
   const [formError, setFormError] = useState("");
-  const submissionInFlight = useRef(false);
 
   useMeta({
     title: car ? vehicleTitle(car) : "Vehicle details | Wazir Trading LLC",
@@ -494,53 +492,46 @@ export default function CarDetailPage() {
     destinationPreference.setDestination({ country, port: nextPort });
   };
 
-  const handleInquirySubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+  const handleInquirySubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    if (submissionInFlight.current || formStatus === "submitting") return;
-    if (!car || !isSupabaseConfigured) {
+    setFormError("");
+    if (!car) {
       setFormStatus("error");
-      setFormError(publicInquiryErrorMessage(new Error("INQUIRY_NOT_CONFIGURED")));
+      setFormError("This vehicle record is not available to prepare an enquiry. Please refresh the page or contact us.");
       return;
     }
     const form = new FormData(event.currentTarget);
     const name = String(form.get("name") ?? "").trim();
     const email = String(form.get("email") ?? "").trim();
     const phone = String(form.get("phone") ?? "").trim();
+    const requestDetails = String(form.get("message") ?? "").trim();
     if (!name || !email || !phone) {
       setFormStatus("error");
-      setFormError("Please enter your name, email address and phone number.");
+      setFormError("Please enter your name, email address and WhatsApp / phone number.");
       return;
     }
-    const vehicleName = `${car.make} ${car.model}${car.year ? ` ${car.year}` : ""}`;
-    const payload = {
-      name,
-      email,
-      phone,
-      country: country.trim(),
-      destination_port: port.trim(),
-      message: [
-        `Vehicle reference: ${car.ref_number}`,
-        `Vehicle: ${vehicleName}`,
-        `Destination: ${country.trim() || "To be confirmed"}`,
-        port.trim() ? `Preferred port / city: ${port.trim()}` : "",
-        String(form.get("message") ?? "").trim(),
-      ]
-        .filter(Boolean)
-        .join("\n\n"),
-      inquiry_type: "car-inquiry",
-    };
-    submissionInFlight.current = true;
-    setFormStatus("submitting");
-    setFormError("");
-    try {
-      await savePublicInquiry(payload, "vehicle");
-      setFormStatus("success");
-    } catch (error) {
+    if (!country.trim()) {
       setFormStatus("error");
-      setFormError(publicInquiryErrorMessage(error));
-    } finally {
-      submissionInFlight.current = false;
+      setFormError("Please choose your destination country before continuing.");
+      return;
     }
+    const vehicleName = `${car.make} ${car.model}${car.variant ? ` ${car.variant}` : ""}${car.year ? ` ${car.year}` : ""}`;
+    const message = [
+      "Hello Wazir Trading LLC. I would like to enquire about this vehicle.",
+      `Name: ${name}`,
+      `Email: ${email}`,
+      `WhatsApp / phone: ${phone}`,
+      `Vehicle: ${vehicleName}`,
+      `Vehicle reference: ${car.ref_number}`,
+      `Destination country: ${country.trim()}`,
+      port.trim() ? `Preferred port / city: ${port.trim()}` : "Preferred port / city: to be confirmed",
+      requestDetails ? `Request: ${requestDetails}` : "",
+      `Vehicle listing: https://www.wazirtradingllc.com/cars/${car.ref_number}`,
+      "Please confirm current availability, the vehicle record and condition documents, the FOB price basis, shipping options and destination-side costs in writing.",
+    ].filter(Boolean).join("\n\n");
+    destinationPreference.setDestination({ country, port });
+    openWhatsAppEnquiry(message);
+    setFormStatus("success");
   };
 
   if (loading) {
@@ -572,10 +563,8 @@ export default function CarDetailPage() {
   }
 
   const carName = `${car.make} ${car.model}`;
-  const requestText = encodeURIComponent(
-    `Hello Wazir Trading, please confirm the current status and written quotation for ${carName}${car.year ? ` ${car.year}` : ""}, reference ${car.ref_number}.`,
-  );
-  const whatsappUrl = `https://wa.me/${WA_NUMBER}?text=${requestText}`;
+  const requestText = `Hello Wazir Trading, please confirm the current status and written quotation for ${carName}${car.year ? ` ${car.year}` : ""}, reference ${car.ref_number}.`;
+  const whatsappUrl = buildWhatsAppHref(requestText);
 
   const groups: { title: string; rows: SpecRow[] }[] = [
     {
@@ -1036,13 +1025,14 @@ export default function CarDetailPage() {
                     <span>
                       <Check size={22} />
                     </span>
-                    <h3>Enquiry received</h3>
+                    <h3>WhatsApp message prepared</h3>
                     <p>
-                      Your request was saved. You can also message our team directly with the
-                      vehicle reference.
+                      WhatsApp has opened with this vehicle and destination enquiry prefilled.
+                      Review the message and press Send in WhatsApp to deliver it. The website does
+                      not receive an automatic copy through this route.
                     </p>
                     <a href={whatsappUrl} target="_blank" rel="noopener noreferrer">
-                      Continue on WhatsApp <ArrowRight size={14} />
+                      Open WhatsApp again <ArrowRight size={14} />
                     </a>
                   </div>
                 ) : (
@@ -1099,6 +1089,10 @@ export default function CarDetailPage() {
                       rows={4}
                       defaultValue={`Please confirm current availability, specification, condition documents and a written export quotation for ${carName}${car.year ? ` ${car.year}` : ""} (Ref: ${car.ref_number}) to ${country}.`}
                     />
+                    <label className="vehicle-form-privacy flex items-start gap-2">
+                      <input type="checkbox" name="whatsapp-consent" required />
+                      <span>I agree to continue to WhatsApp with these details prefilled. I will review and press Send to share them with Wazir Trading LLC. See our <Link href="/privacy-policy">Privacy Policy</Link>.</span>
+                    </label>
                     {formStatus === "error" && (
                       <p className="vehicle-form-error" role="alert">
                         {formError}
@@ -1107,21 +1101,11 @@ export default function CarDetailPage() {
                     <button
                       className="vehicle-primary-button"
                       type="submit"
-                      disabled={formStatus === "submitting" || !isSupabaseConfigured}
                     >
-                      {formStatus === "submitting" ? (
-                        "Sending enquiry…"
-                      ) : (
-                        <>
-                          <Send size={16} /> Send vehicle enquiry
-                        </>
-                      )}
+                      <>
+                        <Send size={16} /> Continue to WhatsApp
+                      </>
                     </button>
-                    {!isSupabaseConfigured && (
-                      <p className="vehicle-form-error">
-                        The enquiry service is not configured. Please contact us through WhatsApp.
-                      </p>
-                    )}
                     <p className="vehicle-form-privacy">
                       An enquiry does not reserve a vehicle or create a purchase contract. See our{" "}
                       <Link href="/privacy-policy">Privacy Policy</Link>.
