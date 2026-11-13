@@ -12,7 +12,7 @@ const card = read("src/components/CarCard.tsx");
 const catchAllRoute = read("src/routes/$.tsx");
 
 check(
-  catchAllRoute.includes('loaderData?.pathname === "/cars"') &&
+  catchAllRoute.includes('match.pathname === "/cars"') &&
     catchAllRoute.includes('"Cache-Control": "private, no-store, max-age=0, must-revalidate"'),
   "Live inventory HTML must not be cached after a transient database/bootstrap failure.",
 );
