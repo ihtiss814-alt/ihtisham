@@ -34,8 +34,7 @@ for (const status of ["Available", "Sold", "Reserved", "Unavailable", "Confirm a
   check(card.includes(`"${status}"`), `Vehicle card status mapping is missing ${status}.`);
 }
 check(
-  card.includes("Stock location not listed") &&
-    !card.includes('car.stock_location || "Japan"'),
+  card.includes("Stock location not listed") && !card.includes('car.stock_location || "Japan"'),
   "Cards must not invent Japan as the stock location when the record has no location.",
 );
 

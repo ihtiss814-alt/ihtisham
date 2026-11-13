@@ -61,7 +61,8 @@ export default function AboutPage() {
         </div>
         <div className="container mx-auto px-4 md:px-8 relative z-10">
           <div className="mb-5 inline-flex max-w-xl border border-white/20 bg-black/20 px-3 py-2 text-[11px] leading-5 text-white/65">
-            Illustrative route graphic only — not a live service-area map, confirmed carrier route or sailing schedule.
+            Illustrative route graphic only — not a live service-area map, confirmed carrier route
+            or sailing schedule.
           </div>
           <div className="max-w-3xl">
             <h1 className="text-4xl md:text-6xl font-serif font-bold mb-6 leading-tight">
@@ -84,28 +85,45 @@ export default function AboutPage() {
           >
             <div className="md:w-1/2 w-full">
               <div className="relative flex min-h-[420px] h-full flex-col justify-between overflow-hidden border border-border bg-[#0D1B3E] p-8 text-white shadow-2xl md:p-10">
-                <div className="absolute -right-16 -top-16 h-64 w-64 rounded-full border border-white/10" aria-hidden="true" />
-                <div className="absolute -right-4 -top-4 h-40 w-40 rounded-full border border-white/10" aria-hidden="true" />
+                <div
+                  className="absolute -right-16 -top-16 h-64 w-64 rounded-full border border-white/10"
+                  aria-hidden="true"
+                />
+                <div
+                  className="absolute -right-4 -top-4 h-40 w-40 rounded-full border border-white/10"
+                  aria-hidden="true"
+                />
                 <div className="relative z-10 flex items-center gap-3">
                   <span className="flex h-12 w-12 items-center justify-center rounded-full bg-white/10 text-white">
                     <MapPin size={23} />
                   </span>
                   <div>
-                    <p className="text-xs font-bold uppercase tracking-[0.2em] text-white/60">Published business contact address</p>
+                    <p className="text-xs font-bold uppercase tracking-[0.2em] text-white/60">
+                      Published business contact address
+                    </p>
                     <p className="font-semibold text-white">Kuwana, Mie, Japan</p>
                   </div>
                 </div>
                 <div className="relative z-10 my-12">
-                  <p className="mb-3 text-xs font-bold uppercase tracking-[0.2em] text-[#F2A8B5]">Japan business base</p>
-                  <h3 className="max-w-md font-serif text-3xl font-bold leading-tight md:text-4xl">A real point of contact, with clear next steps.</h3>
+                  <p className="mb-3 text-xs font-bold uppercase tracking-[0.2em] text-[#F2A8B5]">
+                    Japan business base
+                  </p>
+                  <h3 className="max-w-md font-serif text-3xl font-bold leading-tight md:text-4xl">
+                    A real point of contact, with clear next steps.
+                  </h3>
                   <p className="mt-5 max-w-md text-sm leading-6 text-white/75">
-                    Heights Mizutani 1C, 158-1 Jizou, Kuwana-City, Mie-Pref, Japan.
-                    Office visits are by appointment only.
+                    Heights Mizutani 1C, 158-1 Jizou, Kuwana-City, Mie-Pref, Japan. Office visits
+                    are by appointment only.
                   </p>
                 </div>
                 <div className="relative z-10 flex flex-col gap-3 border-t border-white/15 pt-6 sm:flex-row sm:items-center sm:justify-between">
-                  <span className="text-xs text-white/60">Vehicle and destination details are confirmed per enquiry.</span>
-                  <Link href="/contact" className="inline-flex items-center justify-center border border-white/40 px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-white/10">
+                  <span className="text-xs text-white/60">
+                    Vehicle and destination details are confirmed per enquiry.
+                  </span>
+                  <Link
+                    href="/contact"
+                    className="inline-flex items-center justify-center border border-white/40 px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-white/10"
+                  >
                     View contact details
                   </Link>
                 </div>

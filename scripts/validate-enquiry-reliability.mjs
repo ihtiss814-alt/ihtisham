@@ -12,7 +12,15 @@ const quote = read("src/pages/request-a-quote.tsx");
 const contact = read("src/pages/contact.tsx");
 const detail = read("src/pages/car-detail.tsx");
 
-for (const field of ["name", "email", "phone", "country", "destination_port", "message", "inquiry_type"]) {
+for (const field of [
+  "name",
+  "email",
+  "phone",
+  "country",
+  "destination_port",
+  "message",
+  "inquiry_type",
+]) {
   check(helper.includes(field), `Shared inquiry contract is missing the ${field} field.`);
 }
 check(

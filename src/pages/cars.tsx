@@ -2247,7 +2247,9 @@ export default function CarsPage() {
         console.error("Failed to fetch cars:", err);
         setCars([]);
         setTotalCount(0);
-        setInventoryError("We could not load the live vehicle inventory. Your search has not been treated as having zero matches. Please retry or contact us.");
+        setInventoryError(
+          "We could not load the live vehicle inventory. Your search has not been treated as having zero matches. Please retry or contact us.",
+        );
       } finally {
         setLoading(false);
       }
@@ -3157,7 +3159,9 @@ export default function CarsPage() {
               </div>
             )}
 
-            {!inventoryError && <Pagination page={page} total={totalCount} onPage={handlePageChange} />}
+            {!inventoryError && (
+              <Pagination page={page} total={totalCount} onPage={handlePageChange} />
+            )}
 
             <div ref={calcRef} className="cars-calculator-wrap">
               <TotalPriceCalculator initialCountry={filters.destination} />

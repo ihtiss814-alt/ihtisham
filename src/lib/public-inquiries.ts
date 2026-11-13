@@ -36,8 +36,7 @@ export async function savePublicInquiry(
       typeof candidate?.status === "number" || typeof candidate?.status === "string"
         ? candidate.status
         : undefined;
-    const message =
-      typeof candidate?.message === "string" ? candidate.message : String(error);
+    const message = typeof candidate?.message === "string" ? candidate.message : String(error);
 
     // Record the database reason without logging the customer's submitted data.
     console.error("[public-inquiry] Save failed", { source, code, status, message });
@@ -64,10 +63,7 @@ export function publicInquiryErrorMessage(error: unknown): string {
   if (code === "PGRST204" || code === "PGRST205" || code === "42703") {
     return "The online enquiry service needs a database configuration check. Please contact us directly while this is being resolved.";
   }
-  if (
-    error instanceof TypeError ||
-    /failed to fetch|network|load failed|timeout/i.test(message)
-  ) {
+  if (error instanceof TypeError || /failed to fetch|network|load failed|timeout/i.test(message)) {
     return "We could not connect to the enquiry service. Please check your connection and try again, or contact us directly.";
   }
 

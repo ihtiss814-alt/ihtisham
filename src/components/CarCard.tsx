@@ -112,7 +112,9 @@ function CarCard({
     `Hi, I am interested in ${waTitle(car)}\nReference: ${car.ref_number}\nPlease share more details.`,
   );
   const waLink = `https://wa.me/${waNumber}?text=${waMsg}`;
-  const normalizedStatus = String(car.status ?? "").trim().toLowerCase();
+  const normalizedStatus = String(car.status ?? "")
+    .trim()
+    .toLowerCase();
   const isSold = normalizedStatus === "sold";
   const availabilityLabel =
     normalizedStatus === "available"
@@ -306,7 +308,11 @@ function CarCard({
                 </h3>
               </Link>
             </div>
-            <span className={`inventory-card-available ${normalizedStatus === "available" ? "" : "inventory-card-available-muted"}`}>{availabilityLabel}</span>
+            <span
+              className={`inventory-card-available ${normalizedStatus === "available" ? "" : "inventory-card-available-muted"}`}
+            >
+              {availabilityLabel}
+            </span>
           </div>
 
           {specs.length > 0 && (
