@@ -2034,6 +2034,7 @@ export default function CarsPage() {
     initialInventoryLoaded ? (bootstrap.inventoryCount ?? 0) : 0,
   );
   const [loading, setLoading] = useState(!initialInventoryLoaded);
+  const [inventoryError, setInventoryError] = useState("");
   const [page, setPage] = useState(() => parseInt(getParams(serverSearch).get("page") || "1"));
   const [sortBy, setSortBy] = useState("Newest First");
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
@@ -2214,9 +2215,11 @@ export default function CarsPage() {
       currentPage: number,
     ) => {
       setLoading(true);
+      setInventoryError("");
       if (!isSupabaseConfigured) {
         setCars([]);
         setTotalCount(0);
+        setInventoryError("Live vehicle inventory is not configured on this deployment.");
         setLoading(false);
         return;
       }
@@ -2244,6 +2247,7 @@ export default function CarsPage() {
         console.error("Failed to fetch cars:", err);
         setCars([]);
         setTotalCount(0);
+        setInventoryError("We could not load the live vehicle inventory. Your search has not been treated as having zero matches. Please retry or contact us.");
       } finally {
         setLoading(false);
       }
@@ -3090,12 +3094,30 @@ export default function CarsPage() {
               </div>
             </div>
 
-            <div className="cars-list-spacer">
-              <Pagination page={page} total={totalCount} onPage={handlePageChange} />
-            </div>
+            {!inventoryError && (
+              <div className="cars-list-spacer">
+                <Pagination page={page} total={totalCount} onPage={handlePageChange} />
+              </div>
+            )}
 
-            {loading ? (
-              <div className="cars-empty">
+            {inventoryError ? (
+              <div className="cars-empty cars-empty-state" role="alert">
+                <ShieldCheck size={40} />
+                <h3>Live inventory could not be loaded</h3>
+                <p>{inventoryError}</p>
+                <div>
+                  <button
+                    type="button"
+                    onClick={() => void fetchCars(filters, activeTab, sortBy, page)}
+                    disabled={loading}
+                  >
+                    {loading ? "Retrying…" : "Retry inventory"}
+                  </button>
+                  <a href="/contact">Contact Wazir Trading</a>
+                </div>
+              </div>
+            ) : loading ? (
+              <div className="cars-empty" role="status" aria-label="Loading inventory">
                 <Loader2 size={36} className="animate-spin" />
               </div>
             ) : cars.length > 0 ? (
@@ -3135,7 +3157,7 @@ export default function CarsPage() {
               </div>
             )}
 
-            <Pagination page={page} total={totalCount} onPage={handlePageChange} />
+            {!inventoryError && <Pagination page={page} total={totalCount} onPage={handlePageChange} />}
 
             <div ref={calcRef} className="cars-calculator-wrap">
               <TotalPriceCalculator initialCountry={filters.destination} />
