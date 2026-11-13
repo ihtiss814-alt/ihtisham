@@ -8,6 +8,7 @@ on:
       - ux/destination-led-journey
       - ux/professional-inventory-experience
       - quality/trust-and-enquiry-reliability
+      - ux/whatsapp-first-enquiries-main
   pull_request:
     branches:
       - main
@@ -70,15 +71,19 @@ jobs:
           fi
 
       - name: Format and commit reliability hardening source
-        if: github.event_name == 'push' && github.ref == 'refs/heads/quality/trust-and-enquiry-reliability'
+        if: github.event_name == 'push' && (github.ref == 'refs/heads/quality/trust-and-enquiry-reliability' || github.ref == 'refs/heads/ux/whatsapp-first-enquiries-main')
         run: |
-          npx prettier --write src/lib/public-inquiries.ts src/pages/request-a-quote.tsx src/pages/contact.tsx src/pages/car-detail.tsx src/pages/cars.tsx src/pages/cars.css src/components/CarCard.tsx src/pages/about.tsx src/components/ShippingRouteCanvas.tsx scripts/validate-enquiry-reliability.mjs scripts/validate-inventory-reliability.mjs scripts/validate-business-credibility.mjs scripts/validate-inventory-experience.mjs package.json
-          git add -- src/lib/public-inquiries.ts src/pages/request-a-quote.tsx src/pages/contact.tsx src/pages/car-detail.tsx src/pages/cars.tsx src/pages/cars.css src/components/CarCard.tsx src/pages/about.tsx src/components/ShippingRouteCanvas.tsx scripts/validate-enquiry-reliability.mjs scripts/validate-inventory-reliability.mjs scripts/validate-business-credibility.mjs scripts/validate-inventory-experience.mjs package.json
+          npx prettier --write src/lib/public-inquiries.ts src/lib/whatsapp-enquiries.ts src/pages/request-a-quote.tsx src/pages/contact.tsx src/pages/car-detail.tsx src/pages/cars.tsx src/pages/cars.css src/components/CarCard.tsx src/pages/about.tsx src/components/ShippingRouteCanvas.tsx scripts/validate-enquiry-reliability.mjs scripts/validate-inventory-reliability.mjs scripts/validate-business-credibility.mjs scripts/validate-inventory-experience.mjs package.json
+          git add -- src/lib/public-inquiries.ts src/lib/whatsapp-enquiries.ts src/pages/request-a-quote.tsx src/pages/contact.tsx src/pages/car-detail.tsx src/pages/cars.tsx src/pages/cars.css src/components/CarCard.tsx src/pages/about.tsx src/components/ShippingRouteCanvas.tsx scripts/validate-enquiry-reliability.mjs scripts/validate-inventory-reliability.mjs scripts/validate-business-credibility.mjs scripts/validate-inventory-experience.mjs package.json
           if ! git diff --cached --quiet; then
             git config user.name "github-actions[bot]"
             git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
             git commit -m "Format enquiry and trust reliability changes"
-            git push origin HEAD:quality/trust-and-enquiry-reliability
+            if [[ "${GITHUB_REF_NAME}" == "ux/whatsapp-first-enquiries-main" ]]; then
+              git push origin HEAD:ux/whatsapp-first-enquiries-main
+            else
+              git push origin HEAD:quality/trust-and-enquiry-reliability
+            fi
           fi
 
       - name: TypeScript validation
