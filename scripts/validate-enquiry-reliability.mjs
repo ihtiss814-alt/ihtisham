@@ -26,7 +26,8 @@ check(
   helper.includes("window.location.assign(href)") && helper.includes("opened.opener = null"),
   "WhatsApp hand-off must fall back when a new tab is blocked and protect the opener relationship.",
 );
-const numberFallback = "const number = /^\\d{8,15}$/.test(candidate) ? candidate : DEFAULT_WHATSAPP_NUMBER";
+const numberFallback =
+  "const number = /^\\d{8,15}$/.test(candidate) ? candidate : DEFAULT_WHATSAPP_NUMBER";
 check(
   helper.includes(numberFallback),
   "WhatsApp helper must fall back to the known business number when configuration is malformed.",
@@ -56,8 +57,7 @@ check(
   "Quote page must not claim delivery before the customer presses Send in WhatsApp.",
 );
 check(
-  quote.includes("Continue to WhatsApp") &&
-    !quote.includes('>"Continue to WhatsApp"</button>'),
+  quote.includes("Continue to WhatsApp") && !quote.includes('>"Continue to WhatsApp"</button>'),
   "Quote action must show the WhatsApp label without literal quotation marks.",
 );
 check(
@@ -87,7 +87,9 @@ check(
 check(
   privacy.includes("press Send in WhatsApp") &&
     privacy.includes("does not automatically receive or store a copy") &&
-    !privacy.includes("The website code sends contact, vehicle and custom-sourcing form submissions to the site’s Supabase"),
+    !privacy.includes(
+      "The website code sends contact, vehicle and custom-sourcing form submissions to the site’s Supabase",
+    ),
   "Privacy policy must accurately describe the WhatsApp hand-off and not claim that public enquiries are automatically stored in Supabase.",
 );
 for (const [label, source] of [
