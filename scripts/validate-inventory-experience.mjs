@@ -73,6 +73,14 @@ check(
   card.includes("quoteRequestHref") && card.includes("vehicleRef: car.ref_number"),
   "Each catalog card must offer a vehicle-specific quote route.",
 );
+
+check(
+  card.includes('normalizedStatus === "available"') &&
+    card.includes('"Confirm availability"') &&
+    card.includes('"Stock location not listed"'),
+  "Vehicle cards must not label unknown statuses or missing stock locations as confirmed.",
+);
+
 check(
   styles.includes(".cars-catalog-grid") && styles.includes("@media (max-width: 600px)"),
   "The catalogue grid must have a responsive mobile layout.",
