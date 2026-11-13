@@ -1,16 +1,16 @@
 import { useEffect, useRef } from "react";
 
 /**
- * Animated chart of the export routes out of Japan.
+ * Illustrative route graphic centred on Japan.
  *
  * Deliberately a navigational chart rather than a world map: drawing real
  * coastlines would mean shipping a geometry file, and a hand-faked continent
  * outline would just be wrong. A graticule plus real port coordinates is
  * honest about what it is and reads correctly at hero size.
  *
- * The projection is centred on Yokohama, so routes leave the origin the way
- * ships actually do — Africa and Europe to the west, the Americas east across
- * the Pacific — with no antimeridian seam to work around.
+ * The projection is centred on Yokohama and uses geographic reference points
+ * for visual illustration only. It does not describe Wazir Trading service
+ * coverage, confirmed carrier routes, active bookings or sailing schedules.
  *
  * Canvas 2D only, no dependencies. Pauses when off-screen or when the tab is
  * hidden, and renders a single static frame when the visitor asks for reduced
@@ -19,7 +19,7 @@ import { useEffect, useRef } from "react";
 
 const ORIGIN = { name: "Yokohama", lat: 35.44, lng: 139.64 };
 
-/** Real ports we ship to — coordinates are the actual harbours. */
+/** Illustrative geographic markers only; not a list of confirmed service ports. */
 const PORTS = [
   { name: "Vladivostok", lat: 43.12, lng: 131.89 },
   { name: "Chittagong", lat: 22.33, lng: 91.81 },
