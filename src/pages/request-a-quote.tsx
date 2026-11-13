@@ -152,6 +152,9 @@ export default function RequestQuotePage() {
     .filter(Boolean)
     .join("\n");
   const whatsappHref = buildWhatsAppHref(whatsappMessage);
+  const directWhatsAppHref = buildWhatsAppHref(
+    "Hello Wazir Trading LLC. I have a question about requesting an export quote. Please let me know what information you need.",
+  );
 
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -471,7 +474,7 @@ export default function RequestQuotePage() {
               You can contact our team without sending the form.
             </p>
             <a
-              href={whatsappHref}
+              href={directWhatsAppHref}
               target="_blank"
               rel="noopener noreferrer"
               className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-sm bg-[#25D366] px-4 py-3 text-sm font-bold text-white hover:opacity-90"
