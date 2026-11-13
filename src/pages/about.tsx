@@ -22,9 +22,9 @@ const operatingInformation = [
     role: "Price basis, included items, exclusions and payment milestones",
   },
   {
-    name: "Shipping Coordination",
-    location: "Method, route and port confirmed for each quotation",
-    role: "Carrier schedule and document scope confirmed before booking",
+    name: "Shipping Enquiry",
+    location: "Discuss route, method and destination details for a specific vehicle",
+    role: "Confirm the current carrier schedule and document scope in writing before booking",
   },
 ];
 
@@ -45,8 +45,7 @@ export default function AboutPage() {
         className="text-white py-24 relative overflow-hidden"
         style={{ background: "var(--brand-navy)" }}
       >
-        {/* Live chart of our export routes out of Japan — replaces a stock photo
-            of a city we do not operate from. */}
+        {/* Illustrative navigation graphic; no active route or shipping coverage is implied. */}
         <div className="absolute inset-0 z-0">
           <ShippingRouteCanvas className="w-full h-full" />
           {/* Scrim over the left half only, where the headline sits. The route
